@@ -43,7 +43,7 @@ export function existentialPlan(plan: PhrasePlan, language: string, mood?: Mood)
   const { existential: _existential, ...rest } = plan;
   return {
     ...rest,
-    subject: { concept: 'THIRD_PERSON', gender: language === 'de' ? 'neut' : 'masc' },
+    subject: { concept: 'THIRD_PERSON', gender: language === 'de' || language === 'gsw' ? 'neut' : 'masc' },
     verbPhrase: {
       ...verbPhrase,
       verb: EXISTENTIAL_VERBS[language] ?? 'BE',

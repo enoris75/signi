@@ -5,6 +5,7 @@ import { frenchEngine } from '../languages/fr/index.js';
 import { italianEngine } from '../languages/it/index.js';
 import { japaneseEngine } from '../languages/ja/index.js';
 import { portugueseEngine } from '../languages/pt/index.js';
+import { swissGermanEngine } from '../languages/gsw/index.js';
 import type { LanguageEngine } from '../types.js';
 import type { SubordinatingConjunction } from '@signi/shared';
 
@@ -16,6 +17,7 @@ export const engines: LanguageEngine[] = [
   spanishEngine,
   japaneseEngine,
   portugueseEngine,
+  swissGermanEngine,
 ];
 
 /** Determiners that are inherently plural, so they render the plural noun surface. */
@@ -31,6 +33,7 @@ export const APPROXIMATOR_WORDS: Readonly<Record<string, { about: (fem: boolean)
   it: { about: () => 'circa ', almost: 'quasi ' },
   fr: { about: () => 'environ ', almost: 'presque ' },
   de: { about: () => 'etwa ', almost: 'fast ' },
+  gsw: { about: () => 'öppe ', almost: 'fascht ' },
   es: { about: (fem) => (fem ? 'unas ' : 'unos '), almost: 'casi ' },
   pt: { about: () => 'cerca de ', almost: 'quase ' },
   ja: { about: () => '約', almost: 'ほとんど' },
@@ -143,7 +146,7 @@ export const POSSESSOR_OWN_ADJECTIVE = 'OWN_ADJECTIVE';
  * there is no auxiliary to name, and its engine reads the lexeme's own `passive` form instead.
  */
 export const PASSIVE_AUXILIARY: Record<string, string> = {
-  en: 'BE', it: 'BE', fr: 'BE', es: 'BE', pt: 'BE', de: 'BECOME',
+  en: 'BE', it: 'BE', fr: 'BE', es: 'BE', pt: 'BE', de: 'BECOME', gsw: 'BECOME',
 };
 
 /**
@@ -155,7 +158,7 @@ export const PASSIVE_AUXILIARY: Record<string, string> = {
  * with its に-agent simply missing (本が書かれる子供) no longer says that the head is the one who acts —
  * it reads as a child a book is written *about* or *for*. There the relative stays active.
  */
-export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt']);
+export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt', 'gsw']);
 
 /** Verb transitivities that have a patient to promote, and can therefore be passivized. */
 export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditransitive']);
@@ -212,7 +215,7 @@ export const TEMPORAL_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new 
  * laufen, wenn der Kater **frisst**". Italian and French keep the future ("quando il gatto mangerà",
  * "quand le chat mangera"), and Japanese has none to drop.
  */
-export const FUTURE_AS_PRESENT_LANGUAGES: ReadonlySet<string> = new Set(['en', 'de']);
+export const FUTURE_AS_PRESENT_LANGUAGES: ReadonlySet<string> = new Set(['en', 'de', 'gsw']);
 
 /**
  * The temporal conjunctions under which a `FUTURE_AS_PRESENT_LANGUAGES` language says the future
@@ -222,6 +225,7 @@ export const FUTURE_AS_PRESENT_LANGUAGES: ReadonlySet<string> = new Set(['en', '
  */
 export const FUTURE_AS_PERFECT: Readonly<Record<string, ReadonlySet<SubordinatingConjunction>>> = {
   de: new Set(['after']),
+  gsw: new Set(['after']),
 };
 
 /**
@@ -252,7 +256,7 @@ export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'e
  * Japanese keeps BE, which its engine already says as いる / ある by animacy.
  */
 export const EXISTENTIAL_VERBS: Readonly<Record<string, string>> = {
-  en: 'BE', it: 'BE', fr: 'HAVE', de: 'GIVE', es: 'HAVE', pt: 'HAVE', ja: 'BE',
+  en: 'BE', it: 'BE', fr: 'HAVE', de: 'GIVE', es: 'HAVE', pt: 'HAVE', ja: 'BE', gsw: 'GIVE',
 };
 
 /**

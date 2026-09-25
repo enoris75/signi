@@ -28,7 +28,7 @@ const text = (translations: Translation[], language: LanguageCode) => translatio
 
 describe('translatePossessive', () => {
   test('names the possessive in every language, in engine order', () => {
-    expect(translatePossessive(feats(), LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt']);
+    expect(translatePossessive(feats(), LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw']);
   });
 
   test('cites the possessive with the noun NOUN unless given another', () => {
@@ -42,9 +42,9 @@ describe('translatePossessive', () => {
 
   test('spells the antecedent’s person and number', () => {
     expect(translatePossessive(feats({ person: '1' }), LOOKUP).map((t) => t.text))
-      .toEqual(['my', 'mio', 'mon', 'mein', 'mi', '私の', 'meu']);
+      .toEqual(['my', 'mio', 'mon', 'mein', 'mi', '私の', 'meu', 'mis']);
     expect(translatePossessive(feats({ person: '1', number: 'plural' }), LOOKUP).map((t) => t.text))
-      .toEqual(['our', 'nostro', 'notre', 'unser', 'nuestro', '私たちの', 'nosso']);
+      .toEqual(['our', 'nostro', 'notre', 'unser', 'nuestro', '私たちの', 'nosso', 'euses']);
   });
 
   test('the antecedent’s gender splits only the languages that spell it', () => {

@@ -11,7 +11,7 @@ import {
   translateExamples,
   translateWord,
 } from '@signi/engine';
-import { LANGUAGES, UI_STRINGS } from '@signi/shared';
+import { LANGUAGES, READY_LANGUAGES, UI_STRINGS, isPreviewLanguage } from '@signi/shared';
 import type {
   LanguageCode,
   UiStringApproximatorDef,
@@ -27,6 +27,8 @@ import type {
   UiStringSubordinatorDef,
   UiStringExamplesDef,
   UiStringWordDef,
+  UiStringKey,
+  UiStrings,
 } from '@signi/shared';
 import { lookupLexicalEntry } from './lexicon.js';
 import { buildUiStrings } from './uiStrings.js';
@@ -112,12 +114,23 @@ afterEach(() => {
   for (const fn of fns) vi.mocked(fn).mockReset();
 });
 
+/**
+ * The catalog as the ready languages render it (P10-E1). A preview language's line is not pinned
+ * here: it has its own suite, and every entry gains it when the language is promoted.
+ */
+function readyOnly(strings: UiStrings): UiStrings {
+  return Object.fromEntries(Object.entries(strings).map(([key, byLanguage]) => [
+    key,
+    Object.fromEntries(Object.entries(byLanguage).filter(([language]) => !isPreviewLanguage(language))),
+  ])) as UiStrings;
+}
+
 describe('buildUiStrings', () => {
   test('renders every catalog entry into every language', () => {
     const strings = buildUiStrings();
     expect(Object.keys(strings)).toEqual(CATALOG.map(([key]) => key));
     const blank = Object.entries(strings).flatMap(([key, byLanguage]) =>
-      LANGUAGE_CODES.filter((l) => !(byLanguage as Record<string, string>)[l]).map((l) => `${key}:${l}`),
+      READY_LANGUAGES.filter((l) => !(byLanguage as Record<string, string>)[l]).map((l) => `${key}:${l}`),
     );
     expect(blank).toEqual([]);
   });
@@ -171,7 +184,7 @@ describe('buildUiStrings', () => {
   });
 
   test('renders a word label capitalized when its format asks', () => {
-    expect(buildUiStrings()['gender.value.masc']).toEqual({
+    expect(readyOnly(buildUiStrings())['gender.value.masc']).toEqual({
       en: 'Male',
       it: 'Maschile',
       fr: 'Masculin',
@@ -186,7 +199,7 @@ describe('buildUiStrings', () => {
   // (NOUN: it "nome", masc) rather than with the antecedent, which is why "his" and "her" come out
   // as one word there; en/de/ja read the antecedent's own gender and keep them apart.
   test('names the possessive pronoun a coreference link spells', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['pronoun.possessive.3sg.masc']).toEqual({
       en: 'his', it: 'suo', fr: 'son', de: 'sein', es: 'su', ja: '彼の', pt: 'seu',
     });
@@ -204,7 +217,7 @@ describe('buildUiStrings', () => {
   // Romance past is CAN's imperfect, and Japanese says the whole thing as the potential on the
   // active verb, which is what the language uses in place of a passive under 〜ことができる.
   test('reports a failure as an agentless passive, naming no one who tried', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['failure.phraseNotSaved']).toEqual({
       en: 'The phrase could not be saved.',
       it: 'La frase non poteva essere salvata.',
@@ -233,7 +246,7 @@ describe('buildUiStrings', () => {
   // A language name is a proper noun, which the Romance languages article in a sentence
   // ("l'italiano è una lingua", A133). The selector's label is the word alone.
   test('names a language without the article a sentence would give it', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['language.it']).toEqual({
       en: 'Italian',
       it: 'Italiano',
@@ -252,7 +265,7 @@ describe('buildUiStrings', () => {
       translateDeterminer, translatePossessive, translateSpecifier, translateApproximator];
     for (const fn of fns) vi.mocked(fn).mockReturnValue(rendered);
 
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
 
     for (const [key, d] of CATALOG) {
       const byLanguage = strings[key as keyof typeof strings];
@@ -270,12 +283,12 @@ describe('buildUiStrings', () => {
   // A Spanish question opens on "¿", which has no case, so the letter after it is the one capitalized.
   test('capitalizes the first letter, past a mark that opens the string', () => {
     vi.mocked(translate).mockReturnValue(rendering(() => '¿el gato come?'));
-    expect(buildUiStrings()['status.isServerActive']).toMatchObject({ es: '¿El gato come?' });
+    expect(readyOnly(buildUiStrings())['status.isServerActive']).toMatchObject({ es: '¿El gato come?' });
   });
 
   // The engine closes a question on each language's question mark, which the format keeps (C10).
   test('asks whether the server is active, each language in its own way', () => {
-    expect(buildUiStrings()['status.isServerActive']).toEqual({
+    expect(readyOnly(buildUiStrings())['status.isServerActive']).toEqual({
       en: 'Is the server active?',
       it: 'Il server è attivo?',
       fr: 'Est-ce que le serveur est actif ?',
@@ -301,10 +314,28 @@ describe('buildUiStrings', () => {
     );
   });
 
+  // P10-E1 D1: a preview language is rendered, not trusted. A hole in it is counted and warned about
+  // at boot, not thrown — the client falls back to the entry's English — and is never filled with
+  // another language's text.
+  test('lets a preview language leave an entry unrendered, and says how many it left', () => {
+    const [firstKey] = CATALOG[0]!;
+    const fn = byKind.determiner[0]?.[0] === firstKey ? translateDeterminer
+      : byKind.possessive[0]?.[0] === firstKey ? translatePossessive
+      : byKind.word[0]?.[0] === firstKey ? translateWord
+      : translate;
+    vi.mocked(fn).mockReturnValueOnce(rendering((language) => (language === 'gsw' ? '' : 'label')));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const strings = buildUiStrings();
+    expect(strings[firstKey as UiStringKey]).not.toHaveProperty('gsw');
+    expect(strings[firstKey as UiStringKey]).toHaveProperty('de', 'label');
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/preview language "gsw": 1 of \d+ UI strings do not render yet/));
+    warn.mockRestore();
+  });
+
   // REMOVE takes a thing off the canvas, where undo brings it back. DELETE erases a stored record.
   // The languages keep these apart, and CLEAR, which empties a thing in place, is a third verb (B20).
   test('names the remove and delete controls with verbs of their own', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['action.removePeriod']).toEqual({
       en: 'Remove this period',
       it: 'Rimuovi questo periodo',
@@ -342,11 +373,11 @@ describe('buildUiStrings', () => {
   // The complements that got a box of their own (P09-E44, P09-E45): each ring's controls name it by
   // the grammar noun that titles it, built as the topic's are.
   test('names the controls of the role and opponent boxes', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     const family = (part: string) =>
       Object.fromEntries(['clear', 'show', 'hide', 'expand', 'compact', 'remove'].map((verb) => [verb, strings[`action.${verb}.${part}` as keyof typeof strings]]));
     const role = family('role');
-    for (const verb of Object.keys(role)) expect(Object.keys(role[verb] ?? {}).sort()).toEqual([...LANGUAGE_CODES].sort());
+    for (const verb of Object.keys(role)) expect(Object.keys(role[verb] ?? {}).sort()).toEqual([...READY_LANGUAGES].sort());
     expect(role.remove).toEqual({
       en: 'Remove the role',
       it: 'Rimuovi il complemento di ruolo',
@@ -358,7 +389,7 @@ describe('buildUiStrings', () => {
     });
     expect(role.clear).toMatchObject({ en: 'Clear the role', it: 'Cancella il complemento di ruolo', de: 'Die adverbiale Bestimmung der Rolle löschen' });
     const opponent = family('opponent');
-    for (const verb of Object.keys(opponent)) expect(Object.keys(opponent[verb] ?? {}).sort()).toEqual([...LANGUAGE_CODES].sort());
+    for (const verb of Object.keys(opponent)) expect(Object.keys(opponent[verb] ?? {}).sort()).toEqual([...READY_LANGUAGES].sort());
     expect(opponent.remove).toEqual({
       en: 'Remove the opponent',
       it: 'Rimuovi il complemento di svantaggio',
@@ -373,7 +404,7 @@ describe('buildUiStrings', () => {
   // A period's part in a link is a clause, named as each tradition names it (B21). Japanese compounds
   // the name on 節, and OTHER takes the indefinite article's place in Spanish and Portuguese.
   test('names the clauses, conditions and conjuncts of linked periods', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['clause.main']).toEqual({
       en: 'Main clause',
       it: 'Proposizione principale',
@@ -439,7 +470,7 @@ describe('buildUiStrings', () => {
   // The verb's feature controls (B22): a tense is a noun standing alone, as German names it, and an
   // aspect or a polarity an adjective agreeing with its row's noun.
   test('names the tense, aspect, polarity and modal controls', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['tense.value.past']).toEqual({
       en: 'Past',
       it: 'Passato',
@@ -465,7 +496,7 @@ describe('buildUiStrings', () => {
 
   // Every complement is named now, each by its tradition's term (B23), so every ring control is too.
   test('names every complement and the verb phrase, and the controls that act on them', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['slot.terminus']).toEqual({
       en: 'Terminus',
       it: 'Complemento di termine',
@@ -506,7 +537,7 @@ describe('buildUiStrings', () => {
   // the families. AGENT_GRAMMAR is neuter in German (das Agens); VOICE is feminine in the Romance
   // languages and German, and Japanese takes the shipped 見せ / 隠し stems (A126).
   test('names the passive’s agent and the voice box in the controls that act on them', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['action.clear.agent']).toEqual({
       en: 'Clear the agent',
       it: "Cancella l'agente",
@@ -533,7 +564,7 @@ describe('buildUiStrings', () => {
   // P11-E6 — the humble register's toggle and `/humble`: HUMBLE_GRAMMAR named as the passive is (de
   // *bescheiden*, ja 謙譲), and what the command is for, the verb's REGISTER set as its tense is.
   test('names the humble register, and what setting it is for', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['register.humble']).toEqual({ en: 'Humble', it: 'Umile', fr: 'Humble', de: 'Bescheiden', es: 'Humilde', ja: '謙譲', pt: 'Humilde' });
     expect(strings['purpose.register']).toEqual({
       en: "to set a verb's register",
@@ -549,7 +580,7 @@ describe('buildUiStrings', () => {
   // C12 — the four constructs the catalog gained: a clause of purpose, the two readings of the
   // object complement, the comitative, and the genitive relative.
   test('says what a click is for, in the final clause each language writes', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['hint.clickToChange']).toEqual({
       en: 'click to change',
       it: 'clicca per cambiare',
@@ -579,7 +610,7 @@ describe('buildUiStrings', () => {
   });
 
   test('turns a period into a command, or takes it as a condition', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     // The factitive: the link is the verb's own word, and it fuses with the article.
     expect(strings['action.makeCommand']).toEqual({
       en: 'Transform this period into a command',
@@ -613,7 +644,7 @@ describe('buildUiStrings', () => {
   });
 
   test('names the period to pick, by the clause it joins or the noun it owns', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     // The comitative companion of the act, under a purpose clause.
     expect(strings['pick.coordinated']).toMatchObject({
       en: 'Click the period in another period container to coordinate with this clause.',
@@ -633,7 +664,7 @@ describe('buildUiStrings', () => {
   });
 
   test('says the map is drawing nothing, and how to make it draw', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['wordMap.noRelationships']).toEqual({
       en: 'The map shows no relationships.',
       it: 'La mappa non mostra nessuna relazione.',
@@ -650,7 +681,7 @@ describe('buildUiStrings', () => {
 
   // The chips under an attributive noun (B24): the relation is spelled out by two nouns joined by "or".
   test('names the chips of a noun used as a modifier', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['modifier.relation.purpose.gloss']).toEqual({
       en: 'Purpose or use',
       it: 'Scopo o uso',
@@ -675,7 +706,7 @@ describe('buildUiStrings', () => {
   // The dialogs' own chrome and the saved-item feedback (B25, B26). An empty list says `no` in the
   // plural English and German use, the Romance singular, and Japanese どの…もない.
   test('names the dialog controls and says what happened to a saved item', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['action.cancel']).toEqual({
       en: 'Cancel', it: 'Annulla', fr: 'Annuler', de: 'Annullieren', es: 'Cancelar', ja: 'キャンセル', pt: 'Cancelar',
     });
@@ -733,7 +764,7 @@ describe('buildUiStrings', () => {
 
   // The phrase console's own strings whose words are seeded (A21).
   test('names the console’s frame, its lists, its topics and its usage words', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     // The header keeps the number outside the phrase; German capitalizes the noun, so no CSS lowers it.
     expect(strings['period.name']).toEqual({
       en: 'Period', it: 'Periodo', fr: 'Période', de: 'Satzgefüge', es: 'Período', ja: '文', pt: 'Período',
@@ -781,7 +812,7 @@ describe('buildUiStrings', () => {
   // What each console command is for, on its help page (B47): an infinitive citation, lower-case and
   // without its full stop, as a gloss is.
   test('says what each console command is for, as a verb is glossed', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
     expect(purposes).toHaveLength(37);
     const stopped = purposes.flatMap(([key, byLanguage]) =>
@@ -871,7 +902,7 @@ describe('buildUiStrings', () => {
 
   // The console's lines, history and pins (B45).
   test('names the console’s pins, its history, its lines and its keys', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     // `this` line, the one the pin sits on. Japanese labels with the verbal noun.
     expect(strings['action.pinLine']).toEqual({
       en: 'Pin this line', it: 'Fissa questa riga', fr: 'Épingler cette ligne', de: 'Diese Zeile anheften',
@@ -924,7 +955,7 @@ describe('buildUiStrings', () => {
 
   // The console's topics, its moods and degrees, and its list and help page's labels (B46).
   test('names the console’s remaining topics, /statement, /plain and the list and help page’s labels', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['console.topic.place']).toEqual({
       en: 'spatial relationship', it: 'relazione spaziale', fr: 'relation spatiale', de: 'räumliche Beziehung',
       es: 'relación espacial', ja: '空間的な関係', pt: 'relação espacial',
@@ -953,7 +984,7 @@ describe('buildUiStrings', () => {
 
   // The copy, reorder, resize and mood controls (B27, B28).
   test('names the copy, reorder, resize and mood controls', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['action.copyTranslation']).toMatchObject({ en: 'Copy the translation', ja: '翻訳をコピー' });
     expect(strings['status.copied']).toMatchObject({ it: 'Copiata', fr: 'Copiée', ja: 'コピー済み' });
     // LINKED agrees with the noun the satellite rides, as COPIED does with the translation.
@@ -987,7 +1018,7 @@ describe('buildUiStrings', () => {
   // The keymap's commands and the help sheet's headings and rows (A20). A key on a box names what it
   // acts on; the picker's bare commands are lower-case, as its key strip reads them.
   test('names the keys, and the help sheet that lists them', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     // REPLACE, not CHANGE: German "ändern" would alter the word rather than put another in its place.
     expect(strings['action.replaceWord']).toEqual({
       en: 'Replace the word', it: 'Sostituisci la parola', fr: 'Remplacer le mot', de: 'Das Wort ersetzen',
@@ -1030,7 +1061,7 @@ describe('buildUiStrings', () => {
 
   // The keys that move about the page, leave a level, fold a group and cycle a value backwards (B44).
   test('names the keys that move the cursor, and the ways it moves', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     // GO takes the cursor somewhere; Japanese labels it 移動, GO's instruction label.
     expect(strings['action.go.left']).toEqual({
       en: 'Go left', it: "Va' a sinistra", fr: 'Aller à gauche', de: 'Nach links gehen',
@@ -1091,7 +1122,7 @@ describe('buildUiStrings', () => {
 
   // The picker's and the console's key strips, and the caption a keyboard user reads (B44).
   test('says what ⇥ does in a picker and a prompt, and how a keyboard user fills a slot', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['hint.chooseAndNext']).toEqual({
       en: 'choose, and then go to the next slot', it: "scegli, e poi va' allo slot successivo",
       fr: 'choisir, et puis aller au slot suivant', de: 'wählen, und dann zum nächsten Slot gehen',
@@ -1111,7 +1142,7 @@ describe('buildUiStrings', () => {
 
   // The help overlay's name, its keyboard section and that section's headings and rows (B41).
   test('names the help, and the parts of its keyboard section', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['help.heading']).toEqual({
       en: 'Help', it: 'Aiuto', fr: 'Aide', de: 'Hilfe', es: 'Ayuda', ja: 'ヘルプ', pt: 'Ajuda',
     });
@@ -1150,7 +1181,7 @@ describe('buildUiStrings', () => {
   // The keyboard section's paragraph and its levels' notes, and the word list's rows for the tabs and
   // esc (C22). A statement a key follows drops its full stop; one that stands alone keeps it.
   test('says where the keys work, and what the sheet’s notes and the word list’s rows are', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['help.keyWorks']).toEqual({
       en: 'A key works in the slot that has the cursor.', it: 'Un tasto funziona nello slot che ha il cursore.',
       fr: 'Une touche fonctionne dans le slot qui a le curseur.',
@@ -1224,7 +1255,7 @@ describe('buildUiStrings', () => {
   // The console's part of the overlay: its paragraph, the role commands' note, the prompt's keys and the
   // last line (C22). The syntax after each colon is the call site's.
   test('says how the console’s language is written, and what its prompt’s keys do', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['help.console.typeWord']).toEqual({
       en: 'Type a word', it: 'Digita una parola', fr: 'Taper un mot', de: 'Ein Wort tippen',
       es: 'Teclear una palabra', ja: '単語を入力', pt: 'Digitar uma palavra',
@@ -1318,7 +1349,7 @@ describe('buildUiStrings', () => {
   // The way back (B40): the Edit menu's pair, in the words each language's editors use, and the toast
   // that offers it, shaped like `toast.periodAdded`.
   test('names undo and redo, and the period a removal took away', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     // Italian and French Undo is their Cancel; German keeps "rückgängig" apart from its verb.
     expect(strings['action.undo']).toEqual({
       en: 'Undo', it: 'Annulla', fr: 'Annuler', de: 'Rückgängig machen', es: 'Deshacer', ja: '元に戻す', pt: 'Desfazer',
@@ -1335,7 +1366,7 @@ describe('buildUiStrings', () => {
 
   // The console's name, and what its controls do to it (B42).
   test('names the console, and what its controls and keys do to it', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['console.name']).toEqual({
       en: 'Console', it: 'Console', fr: 'Console', de: 'Konsole', es: 'Consola', ja: 'コンソール', pt: 'Console',
     });
@@ -1360,7 +1391,7 @@ describe('buildUiStrings', () => {
 
   // The canvas, a preview, editing and the toolbar (B43).
   test('names the canvas and what the keys do to it, the preview, editing and the toolbar', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     expect(strings['status.preview']).toEqual({
       en: 'Preview', it: 'Anteprima', fr: 'Aperçu', de: 'Vorschau', es: 'Vista previa', ja: 'プレビュー', pt: 'Pré-visualização',
     });
@@ -1456,7 +1487,7 @@ describe('known bugs: a boot render serves the hole an unseeded concept leaves (
 // P09-E47: the interjection's box, palette, toggle and command, composed from the seeded INTERJECTION.
 describe('the interjection’s strings', () => {
   test('render in all seven', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     const keys = [
       'slot.interjection',
       'slot.interjection.placeholder',
@@ -1498,7 +1529,7 @@ describe('the interjection’s strings', () => {
 // German *Anrede*, Japanese 呼びかけ.
 describe('the vocative’s strings', () => {
   test('render in all seven', () => {
-    const strings = buildUiStrings();
+    const strings = readyOnly(buildUiStrings());
     const keys = [
       'slot.vocative',
       'action.addVocative',

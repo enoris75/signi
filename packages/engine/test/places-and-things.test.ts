@@ -1,26 +1,27 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode } from '@signi/shared';
+import type { LanguageCode, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09-E24's places and things (docs/localization/done/B78): CITY, ROOM, OFFICE, DOOR, CAR, AREA,
 // CENTER, SIDE and LINE_MARK. LINE_MARK's gloss stands on B87's LONG and its French longue.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const seed = (id: string) => concepts.find((c) => c.id === id);
 
 describe('the glosses, in every language', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // A `many` subject inside a locative relative, on HOME's LIVE.
     ['CITY', {
       en: 'a big place where many people live.', it: 'un grande luogo dove molte persone abitano.',
@@ -80,7 +81,7 @@ describe('the glosses, in every language', () => {
 });
 
 describe('the nouns: a singular, a plural and the gender', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // Italian città is invariable; German Stadt umlauts.
     ['CITY',
       { en: 'a big city.', it: 'una grande città.', fr: 'une grande ville.', de: 'eine große Stadt.', es: 'una ciudad grande.', ja: '大きい都市。',

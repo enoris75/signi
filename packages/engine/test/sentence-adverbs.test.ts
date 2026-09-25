@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { ContentClause, LanguageCode, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
+import type { ContentClause, LanguageCode, NounPhrase, PhrasePlan, VerbPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09-E39: the sentence adverbs MAYBE, PROBABLY, ACTUALLY and OF_COURSE (`subtype: 'sentence'`). They
 // comment on the whole clause and stand outside its negation: clause-initial in a main statement in
@@ -87,7 +88,7 @@ describe('P09-E39: clitics and the existential', () => {
 });
 
 describe('P09-E39: the other three, negated and in the past', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // French sets off a fronted *probablement* with a comma.
     ['PROBABLY', {
       en: 'probably the cat did not eat the food.', it: 'probabilmente il gatto non mangiò il cibo.',
@@ -110,7 +111,7 @@ describe('P09-E39: the other three, negated and in the past', () => {
     expect(sayAll(eats(adverb, { negative: true, tense: 'past' }))).toEqual(rendered);
   });
 
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['PROBABLY', {
       en: 'probably the cat eats the food.', it: 'probabilmente il gatto mangia il cibo.', fr: 'probablement, le chat mange la nourriture.',
       de: 'wahrscheinlich frisst der Kater das Essen.', es: 'probablemente el gato come la comida.', ja: '猫はたぶん食べ物を食べます。',
@@ -212,7 +213,7 @@ describe('P09-E39: where the adverb cannot open the sentence', () => {
 describe('P09-E39: the seeds', () => {
   test('PROBABLY is glossed on PROBABILITY; MAYBE and ACTUALLY stay on the literal', () => {
     const def = concepts.find((c) => c.id === 'PROBABLY')?.definition;
-    expect(Object.fromEntries(translate(def!, lookupLexicalEntry).map((t) => [t.language, t.text]))).toEqual({
+    expect(Object.fromEntries(translate(def!, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]))).toEqual({
       en: 'with high probability.', it: 'con probabilità alta.', fr: 'avec probabilité haute.', de: 'mit hoher Wahrscheinlichkeit.',
       es: 'con probabilidad alta.', ja: '高い確率で。', pt: 'com probabilidade alta.',
     });
@@ -228,7 +229,7 @@ describe('P09-E39: the seeds', () => {
   // supuesto, もちろん, claro).
   test('OF_COURSE is glossed "as one expects"', () => {
     const def = concepts.find((c) => c.id === 'OF_COURSE')?.definition;
-    expect(Object.fromEntries(translate(def!, lookupLexicalEntry).map((t) => [t.language, t.text]))).toEqual({
+    expect(Object.fromEntries(translate(def!, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]))).toEqual({
       en: 'as one expects.', it: 'come si prevede.', fr: "comme on s'y attend.", de: 'wie man erwartet.',
       es: 'como se espera.', ja: '予想するように。', pt: 'como se espera.',
     });

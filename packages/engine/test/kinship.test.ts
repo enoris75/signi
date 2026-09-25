@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PronominalPossessor } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PronominalPossessor, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P11's corpus: the 38 kin nouns of its §4 with the two adjectives ELDER and YOUNGER and the verb
 // MARRY, 41 concepts seeded by localization B68–B74. This file pins what the words do that no
@@ -15,12 +16,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // in adjectives.test.ts's EVERY_ADJECTIVE, where those exhaustive tables already live.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
@@ -31,7 +32,7 @@ const of = (person: '1' | '2' | '3', number: 'singular' | 'plural' = 'singular')
 // ── The words ─────────────────────────────────────────────────────────
 
 describe('the kin terms: a definite singular and plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     ['RELATIVE',
       { en: 'the relative.', it: 'il parente.', fr: 'le parent.', de: 'der Verwandte.', es: 'el pariente.', ja: '親戚。', pt: 'o parente.' },
       { en: 'the relatives.', it: 'i parenti.', fr: 'les parents.', de: 'die Verwandten.', es: 'los parientes.', ja: '親戚。', pt: 'os parentes.' }],
@@ -156,7 +157,7 @@ describe('the kin terms: a definite singular and plural in every language', () =
 // ── The glosses (B68–B74) ─────────────────────────────────────────────
 
 describe('the glosses the P11 seeding shipped', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['RELATIVE', { en: 'a person of the same family.', it: 'una persona della stessa famiglia.', fr: 'une personne de la même famille.', de: 'eine Person der gleichen Familie.', es: 'una persona de la misma familia.', ja: '同じ家族の人。', pt: 'uma pessoa da mesma família.' }],
     ['FAMILY', { en: 'a group of relatives.', it: 'un gruppo di parenti.', fr: 'un groupe de parents.', de: 'eine Gruppe von Verwandten.', es: 'un grupo de parientes.', ja: '親戚のグループ。', pt: 'um grupo de parentes.' }],
     ['PARENT', { en: 'a person who has children.', it: 'una persona che ha figli.', fr: 'une personne qui a des enfants.', de: 'eine Person, die Kinder hat.', es: 'una persona que tiene hijos.', ja: '子供を持つ人。', pt: 'uma pessoa que tem filhos.' }],

@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // B62's seven P09 words — DO, WORK_LABOUR, WORK_NOUN, PLAY_GAME, PLAY_INSTRUMENT, TRY and NEED —
 // their paradigms, the six glosses the ticket ships, and the engine change NEED's multiword Romance
@@ -12,12 +13,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // P09 lanes seeded words the same day and would collide on those rows.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
@@ -27,7 +28,7 @@ const seed = (id: string) => concepts.find((c) => c.id === id);
 // ── The glosses ───────────────────────────────────────────────────────
 
 describe('the six glosses B62 ships', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // START's causative shape with HAPPEN for BEGIN. No Romance tooltip says fare / faire / hacer /
     // fazer, which is the trap the DO ruling set: the causative genus is indurre / induire.
     ['DO', {

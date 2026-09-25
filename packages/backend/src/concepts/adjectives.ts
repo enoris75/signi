@@ -3198,6 +3198,23 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // Set as the norm a community holds to (P10-E2: "no standard spelling"). Invariable in it, fr
+    // and pt ("un'ortografia standard", "ortografia padrão"); German says a norm is laid down.
+    id: 'STANDARD',
+    role: 'adjective',
+    description: 'established as the accepted norm',
+    emoji: '📏',
+    forms: {
+      en: { base: 'standard' },
+      it: { base: 'standard' },
+      fr: { base: 'standard' },
+      de: { base: 'normiert' },
+      es: { base: 'estándar' },
+      ja: { base: '標準の', reading: 'ひょうじゅんの', relational: '1' },
+      pt: { base: 'padrão' },
+    },
+  },
+  {
     id: 'MANIFOLD',
     role: 'adjective',
     description: 'being more than one',

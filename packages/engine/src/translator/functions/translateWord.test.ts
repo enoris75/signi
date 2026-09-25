@@ -28,7 +28,7 @@ const text = (translations: Translation[], language: LanguageCode) => translatio
 
 describe('translateWord', () => {
   test('renders the word into every language, in engine order', () => {
-    expect(translateWord('FIRST', LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt']);
+    expect(translateWord('FIRST', LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw']);
   });
 
   test("a word with nothing to agree with takes the engine's citation form", () => {

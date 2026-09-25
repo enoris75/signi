@@ -20,7 +20,7 @@ const text = (translations: Translation[], language: LanguageCode) => translatio
 
 describe('translateDeterminer', () => {
   test('names the determiner in every language, in engine order', () => {
-    expect(translateDeterminer('definite', LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt']);
+    expect(translateDeterminer('definite', LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw']);
   });
 
   test('cites the determiner with the noun NOUN unless given another', () => {
@@ -45,7 +45,7 @@ describe('translateDeterminer', () => {
   });
 
   test('a determiner the language spells nothing for shows as an em-dash', () => {
-    expect(translateDeterminer('bare', LOOKUP).map((t) => t.text)).toEqual(Array(7).fill('—'));
+    expect(translateDeterminer('bare', LOOKUP).map((t) => t.text)).toEqual(Array(8).fill('—'));
     expect(text(translateDeterminer('definite', LOOKUP), 'ja')).toBe('—');
     expect(text(translateDeterminer('this', LOOKUP), 'ja')).toBe('この');
   });

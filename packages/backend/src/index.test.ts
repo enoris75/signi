@@ -125,11 +125,12 @@ describe('GET /api/concepts', () => {
         es: 'un mamífero pequeño',
         ja: '小さい哺乳類',
         pt: 'um mamífero pequeno',
+        gsw: 'es chliines Süügetier',
       },
       // The line it is written in (P13), which the console's /define opens.
       definitionText: '/subj ( MAMMAL /adj SMALL /a )',
       label: 'cat',
-      labels: { en: 'cat', it: 'gatto', fr: 'chat', de: 'Kater', es: 'gato', ja: '猫', pt: 'gato' },
+      labels: { en: 'cat', it: 'gatto', fr: 'chat', de: 'Kater', es: 'gato', ja: '猫', pt: 'gato', gsw: 'Chater' },
       readings: { ja: 'ねこ' },
       emoji: '🐱',
       gendered: true,
@@ -172,7 +173,7 @@ describe('GET /api/concepts', () => {
   test('carries a concept\'s aliases in every language, and labels it by its primary still', async () => {
     const begin = await find('BEGIN');
     expect(begin.aliases).toEqual({ it: ['cominciare'], de: ['anfangen'], es: ['comenzar'] });
-    expect(begin.labels).toEqual({ en: 'begin', it: 'iniziare', fr: 'commencer', de: 'beginnen', es: 'empezar', pt: 'começar', ja: '始まる' });
+    expect(begin.labels).toEqual({ en: 'begin', it: 'iniziare', fr: 'commencer', de: 'beginnen', es: 'empezar', pt: 'começar', ja: '始まる', gsw: 'aafange' });
     expect(begin.label).toBe('begin');
     expect(await find('SPEAK')).toMatchObject({ label: 'speak', labels: { en: 'speak' }, aliases: { en: ['talk'] } });
     expect(await find('RETURN')).toMatchObject({ label: 'return', aliases: { en: ['come back'] } });

@@ -1,3 +1,4 @@
+import type { ReadyLanguageCode } from '@signi/shared';
 import { describe, expect, test } from 'vitest';
 import { ASPECTS, TENSES, type LanguageCode, type NounElement } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
@@ -45,7 +46,7 @@ const SUBJECTS: [label: string, subject: NounElement][] = [
 describe.each(VERBS)('conjugation: %s', (verb) => {
   test.each(SUBJECTS)('%s', (_label, subject) => {
     // One subject's whole tense × aspect matrix, keyed "tense · aspect" → every language.
-    const matrix: Record<string, Record<LanguageCode, string>> = {};
+    const matrix: Record<string, Record<ReadyLanguageCode, string>> = {};
     for (const tense of TENSES) {
       for (const aspect of ASPECTS) {
         matrix[`${tense} · ${aspect}`] = sayAll(clause(subject, verb, { verbPhrase: { tense, aspect } }));

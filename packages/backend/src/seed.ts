@@ -1,3 +1,4 @@
+import { LANGUAGES } from '@signi/shared';
 import { getDb } from './db.js';
 import { clearLexiconCache } from './lexicon.js';
 import { concepts, NONFINITE } from './concepts/index.js';
@@ -66,6 +67,19 @@ function assertValidAliases(seeds: typeof concepts): void {
         if (seen.has(word)) throw new Error(`${c.id}: the ${lang} alias "${word}" repeats a word it already has`);
         seen.add(word);
       }
+    }
+  }
+}
+
+/**
+ * Refuse a form keyed by a language the app does not have. The schema no longer enumerates the
+ * languages (P10-E1), so this is where a typo'd key (`ch` for `gsw`) is caught — against the one
+ * list in @signi/shared.
+ */
+function assertKnownLanguages(seeds: typeof concepts): void {
+  for (const c of seeds) {
+    for (const lang of [...Object.keys(c.forms), ...Object.keys(c.aliases ?? {})]) {
+      if (!(lang in LANGUAGES)) throw new Error(`${c.id}: forms for unknown language "${lang}"`);
     }
   }
 }
@@ -176,10 +190,11 @@ function seed() {
   // one would hang the ancestor walk at request time instead of failing here.
   assertValidHierarchy(concepts);
   assertValidAliases(concepts);
+  assertKnownLanguages(concepts);
 
   run();
   clearLexiconCache();
-  console.log(`Seeded ${concepts.length} concepts across ${Object.keys(concepts[0]?.forms ?? {}).length} languages.`);
+  console.log(`Seeded ${concepts.length} concepts across ${new Set(concepts.flatMap((c) => Object.keys(c.forms))).size} languages.`);
 }
 
 seed();

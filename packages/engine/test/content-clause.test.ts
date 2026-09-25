@@ -1,21 +1,22 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C30: a content clause standing where the subject would — what an evaluative predicate
 // is said *of*. MUST, CAN, WILL and MAY are glossed "to be obliged / able / to desire / allowed to
 // act", where the adjective is said of the one who acts; *right* and *possible* are said of the act,
 // and until this construct no plan could make an act a subject.
 
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const evaluative = (adjective: string, clause?: PhrasePlan['contentSubject']): PhrasePlan => ({
@@ -94,7 +95,7 @@ describe('a content clause as the subject', () => {
 });
 
 describe('the two modals it unblocks', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['SHOULD', {
       en: 'it is right that one acts.', it: 'è giusto che si agisca.', fr: "il est juste qu'on agisse.",
       de: 'es ist richtig, dass man handelt.', es: 'es correcto que se actúe.',
@@ -129,7 +130,7 @@ const reports = (verb: string, extra: Partial<PhrasePlan> = {}): PhrasePlan => (
 });
 
 describe('a content clause as the object', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['SAY', {
       en: 'the man says that the cat runs.', it: "l'uomo dice che il gatto corre.",
       fr: "l'homme dit que le chat court.", de: 'der Mann sagt, dass der Kater läuft.',
@@ -250,7 +251,7 @@ describe('the indirect question', () => {
   const asks = (contentObject: NonNullable<PhrasePlan['contentObject']>, extra: Omit<Partial<PhrasePlan>, 'subject' | 'verbPhrase'> = {}) =>
     sayAll(clause(man, 'ASK', { contentObject, ...extra }));
 
-  test.each<[string, PhrasePlan, Record<LanguageCode, string>]>([
+  test.each<[string, PhrasePlan, Record<ReadyLanguageCode, string>]>([
     ['the man asks whether the cat runs', clause(man, 'ASK', { contentObject: whether }), {
       en: 'the man asks whether the cat runs.', it: "l'uomo chiede se il gatto corre.",
       fr: "l'homme demande si le chat court.", de: 'der Mann fragt, ob der Kater läuft.',
@@ -449,7 +450,7 @@ describe('the indirect question over the possessor, a marked relation and the pa
   const man = np('MAN');
   const eatsFood = { subject: np('CAT'), verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') };
 
-  test.each<[string, PhrasePlan, Record<LanguageCode, string>]>([
+  test.each<[string, PhrasePlan, Record<ReadyLanguageCode, string>]>([
     ['the man asks whose food the cat eats', clause(man, 'ASK', { contentObject: { ...eatsFood, questionRole: 'possessor', questionPossessed: 'directObject' } }), {
       en: 'the man asks whose food the cat eats.', it: "l'uomo chiede di chi mangia il cibo il gatto.",
       fr: "l'homme demande de qui le chat mange la nourriture.", de: 'der Mann fragt, wessen Essen der Kater frisst.',

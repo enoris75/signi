@@ -65,8 +65,8 @@ export function fuseGovernedVerb(phrase: ResolvedPhrase, language: string): Reso
   const governed = phrase.infinitiveComplement;
   const governor = phrase.verbPhrase?.verb;
   if (!governed?.verbPhrase || !governor || governed.control === 'object') return phrase;
-  if (governed.verbPhrase.negative) return language === 'de' ? negatedContinuation(phrase) : phrase;
-  const particle = language === 'de' ? governor.forms['complement_particle'] : undefined;
+  if (governed.verbPhrase.negative) return language === 'de' || language === 'gsw' ? negatedContinuation(phrase) : phrase;
+  const particle = language === 'de' || language === 'gsw' ? governor.forms['complement_particle'] : undefined;
   const stem = language === 'ja' && governor.forms['ja_complement'] === 'stem';
   // A copular complement has no verb stem to compound on: Japanese compounds on the copula's own ある,
   // with the predicate before it in its connective form — 幸せであり続けます, 大きくあり続けます (A315).

@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, PhrasePlan } from '@signi/shared';
-import { LANGUAGES } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
+import { READY_LANGUAGES } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C23: the participial state adjectives, glossed by the headless relative clause
 // (NounPhrase.relativeGloss) — SAVED is "that one has saved", EMPTY "that does not have content",
@@ -19,13 +20,13 @@ function definitionOf(id: string): PhrasePlan {
 }
 
 /** Render a plan into every language. */
-const renderAll = (plan: PhrasePlan): Record<LanguageCode, string> =>
-  Object.fromEntries(translate(plan, lookupLexicalEntry).map((t) => [t.language, t.text])) as Record<LanguageCode, string>;
+const renderAll = (plan: PhrasePlan): Record<ReadyLanguageCode, string> =>
+  Object.fromEntries(translate(plan, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text])) as Record<ReadyLanguageCode, string>;
 
 /** A rendering with its full stop taken off, to find it inside a longer one. */
 const bare = (text: string): string => text.replace(/[.。]$/, '');
 
-const GLOSSED: [string, Record<LanguageCode, string>][] = [
+const GLOSSED: [string, Record<ReadyLanguageCode, string>][] = [
   // What an event leaves: the object gap, the generic "one", the resultative.
   ['WRITTEN', { en: 'that one has written.', it: 'che si è scritto.', fr: "qu'on a écrit.", de: 'den man geschrieben hat.', es: 'que se ha escrito.', ja: '書いた。', pt: 'que se escreveu.' }],
   ['LOADED', { en: 'that one has loaded.', it: 'che si è caricato.', fr: "qu'on a chargé.", de: 'den man geladen hat.', es: 'que se ha cargado.', ja: '読み込んだ。', pt: 'que se carregou.' }],
@@ -76,7 +77,7 @@ describe('each gloss is the relative its antecedent would take, said alone', () 
     const { relativeGloss: _headless, ...head } = plan.subject as NonNullable<PhrasePlan['subject']> & { relativeGloss?: boolean };
     const headed = renderAll({ ...plan, subject: head });
     const gloss = renderAll(plan);
-    for (const lang of Object.keys(LANGUAGES) as LanguageCode[]) {
+    for (const lang of READY_LANGUAGES) {
       expect(headed[lang]).toContain(bare(gloss[lang]));
       expect(headed[lang]).not.toBe(gloss[lang]);
     }

@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, VerbPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization B63, P09's three modals: MAY (permission, glossed on ALLOWED as MUST is on OBLIGED and
 // CAN on ABLE), and the two conditionals SHOULD and MIGHT, whose own glosses wait on a content clause
@@ -20,12 +21,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 //   ja — a copula-kind modal (走るべきです) and one that governs the plain finite form, so the verb
 //        before it carries tense and polarity (走らないかもしれません).
 
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { definiteness: 'definite', ...extra });

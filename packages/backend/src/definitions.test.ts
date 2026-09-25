@@ -67,6 +67,8 @@ describe('buildConceptDefinitions', () => {
       es: 'un mamífero pequeño',
       ja: '小さい哺乳類',
       pt: 'um mamífero pequeno',
+      // P10: Swiss German renders too, as a preview row (verify at P10-E14).
+      gsw: 'es chliines Süügetier',
     });
   });
 

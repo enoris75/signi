@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { InfinitiveComplement, LanguageCode, NounElement, PhrasePlan } from '@signi/shared';
+import type { InfinitiveComplement, LanguageCode, NounElement, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // The CAUSATIVE (localization C08): an infinitive complement whose unspoken subject is the governing
 // clause's **direct object**, not its subject — "to cause a person TO SEE objects" is the person
@@ -28,12 +29,12 @@ const predicate = (adjective: string, headDegree?: 'more') => ({
 });
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 describe('the causative definitions (localization C08)', () => {

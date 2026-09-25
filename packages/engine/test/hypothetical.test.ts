@@ -1,3 +1,4 @@
+import type { ReadyLanguageCode } from '@signi/shared';
 import { describe, expect, test } from 'vitest';
 import { ASPECTS, TENSES, type Aspect, type LanguageCode, type Tense } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
@@ -41,7 +42,7 @@ function hypothetical(
   mainAspect: Aspect,
   ifTense: Tense,
   ifAspect: Aspect,
-): Record<LanguageCode, string> {
+): Record<ReadyLanguageCode, string> {
   return sayAll({
     ...clause(DOG, 'RUN', { verbPhrase: { tense: mainTense, aspect: mainAspect } }),
     condition: clause(CAT, 'EAT', { verbPhrase: { tense: ifTense, aspect: ifAspect } }),
@@ -52,7 +53,7 @@ function hypothetical(
 // surfaces as a one-line diff inside the block named by the main clause's tense·aspect.
 describe.each(CELLS)('main: %s', (_mainLabel, mainTense, mainAspect) => {
   test('over every tense × aspect of the if clause', () => {
-    const matrix: Record<string, Record<LanguageCode, string>> = {};
+    const matrix: Record<string, Record<ReadyLanguageCode, string>> = {};
     for (const [ifLabel, ifTense, ifAspect] of CELLS) {
       matrix[ifLabel] = hypothetical(mainTense, mainAspect, ifTense, ifAspect);
     }

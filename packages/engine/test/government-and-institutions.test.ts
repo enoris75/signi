@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
 import { ancestors, conceptIndex } from '../../backend/src/concepts/hierarchy.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09-E24's government and the law (docs/localization B76: POWER, GOVERNMENT, PARTY_POLITICAL, LAW,
 // COURT_LAW, RIGHT_NOUN, WAR), its teams, institutions and business (B77: TEAM, COMMUNITY,
@@ -12,12 +13,12 @@ import { ancestors, conceptIndex } from '../../backend/src/concepts/hierarchy.js
 // SOCIAL, POLITICAL, PUBLIC): each word's paradigm, and each one's gloss in all seven languages.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
@@ -26,7 +27,7 @@ const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { 
 // ── The words ─────────────────────────────────────────────────────────
 
 describe('the nouns: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // B76. German Macht umlauts in the plural.
     ['POWER',
       { en: 'the power.', it: 'il potere.', fr: 'le pouvoir.', de: 'die Macht.', es: 'el poder.', ja: '権力。', pt: 'o poder.' },
@@ -144,7 +145,7 @@ describe('the nouns: a singular and a plural in every language', () => {
 });
 
 describe('the relational adjectives: position and agreement', () => {
-  test.each<[string, string, Record<LanguageCode, string>]>([
+  test.each<[string, string, Record<ReadyLanguageCode, string>]>([
     // All four follow the noun in the Romance languages and precede it in German and Japanese.
     ['NATIONAL', 'LAW', { en: 'a national law.', it: 'una legge nazionale.', fr: 'une loi nationale.', de: 'ein nationales Gesetz.', es: 'una ley nacional.', ja: '国の法律。', pt: 'uma lei nacional.' }],
     ['SOCIAL', 'GROUP', { en: 'a social group.', it: 'un gruppo sociale.', fr: 'un groupe social.', de: 'eine soziale Gruppe.', es: 'un grupo social.', ja: '社会的なグループ。', pt: 'um grupo social.' }],
@@ -200,7 +201,7 @@ describe('the relational adjectives: position and agreement', () => {
 // ── The glosses ───────────────────────────────────────────────────────
 
 describe('the glosses render in every language', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // B76. The instrument gap with no object.
     ['POWER', { en: 'an ability with which one governs.', it: 'una capacità con la quale si governa.', fr: 'une capacité avec laquelle on gouverne.', de: 'eine Fähigkeit, mit der man regiert.', es: 'una capacidad con la que se gobierna.', ja: '統治する能力。', pt: 'uma capacidade com a qual se governa.' }],
     // The group governs the state; STATE_NATION is the system that governs a country.

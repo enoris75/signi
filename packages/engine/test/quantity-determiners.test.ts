@@ -1,16 +1,17 @@
 import { describe, expect, test } from 'vitest';
-import type { Definiteness, LanguageCode, PronominalPossessor } from '@signi/shared';
+import type { Definiteness, LanguageCode, PronominalPossessor, ReadyLanguageCode } from '@signi/shared';
 import { DETERMINER_CATEGORY_VALUES } from '@signi/shared';
 import { clause, determinerAll, np, sayAll, wordAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09-E25: seven more quantity determiners — each, every, both, most, several, enough, such. Each
 // row is one value in all seven languages. every merges with each in it/fr/de/es/pt (ogni, chaque,
 // jeder, cada) and with all in Japanese (すべての); several merges with some in Japanese (いくつかの).
 
-type Row = [Definiteness, Record<LanguageCode, string>];
+type Row = [Definiteness, Record<ReadyLanguageCode, string>];
 
 const catRuns = (definiteness: Definiteness) => sayAll(clause(np('CAT', { definiteness }), 'RUN'));
 const houseBurns = (definiteness: Definiteness) => sayAll(clause(np('HOUSE', { definiteness }), 'BURN'));
@@ -189,7 +190,7 @@ describe('P09-E25: the determiner menu', () => {
     ['such', { en: 'such a', it: 'un tale', fr: 'un tel', de: 'so ein', es: 'tal', ja: 'そんな', pt: 'tal' }],
   ])('%s — the word it spells', (d, want) => expect(determinerAll(d)).toEqual(want));
 
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['DISTRIBUTIVE', { en: 'distributive', it: 'distributivo', fr: 'distributif', de: 'distributiv', es: 'distributivo', ja: '配分', pt: 'distributivo' }],
     ['EXHAUSTIVE', { en: 'exhaustive', it: 'esaustivo', fr: 'exhaustif', de: 'exhaustiv', es: 'exhaustivo', ja: '網羅的', pt: 'exaustivo' }],
     ['DUAL', { en: 'dual', it: 'duale', fr: 'duel', de: 'dual', es: 'dual', ja: '双数', pt: 'dual' }],
@@ -200,9 +201,9 @@ describe('P09-E25: the determiner menu', () => {
   ])('%s — the name it is listed by', (id, want) => expect(wordAll(id, 'QUANTIFIER')).toEqual(want));
 
   const definitionAll = (id: string) => Object.fromEntries(
-    translate(concepts.find((c) => c.id === id)!.definition!, lookupLexicalEntry).map((t) => [t.language, t.text]),
+    translate(concepts.find((c) => c.id === id)!.definition!, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
   );
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['DISTRIBUTIVE', { en: 'that indicates each object.', it: 'che indica ogni oggetto.', fr: 'qui indique chaque objet.', de: 'das jeden Gegenstand bezeichnet.', es: 'que indica cada objeto.', ja: 'それぞれの物体を示す。', pt: 'que indica cada objeto.' }],
     ['EXHAUSTIVE', { en: 'that indicates all objects.', it: 'che indica tutti gli oggetti.', fr: 'qui indique tous les objets.', de: 'das alle Gegenstände bezeichnet.', es: 'que indica todos los objetos.', ja: 'すべての物体を示す。', pt: 'que indica todos os objetos.' }],
     ['DUAL', { en: 'that indicates both objects.', it: 'che indica entrambi gli oggetti.', fr: 'qui indique les deux objets.', de: 'das beide Gegenstände bezeichnet.', es: 'que indica ambos objetos.', ja: '両方の物体を示す。', pt: 'que indica ambos os objetos.' }],

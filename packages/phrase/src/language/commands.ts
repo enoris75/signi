@@ -16,6 +16,7 @@ import {
   type UiStringKey,
   type Voice,
 } from "@signi/shared";
+import { READY_LANGUAGES } from "@signi/shared";
 import type { ImperativePerson, NounGloss, PossessorRole, SlotConfig, SlotKey, SubordinateKind } from "../model/interfaces.ts";
 import type { Gender } from "../model/phraseReducers.ts";
 import { MODAL_NEGATIVE_FIELDS } from "../model/slots.ts";
@@ -407,9 +408,8 @@ export const LEVEL_VALUES: readonly ValueDef[] = [
   { name: "object", value: "object", description: "the thing", descriptionKey: "instrumental.level.object" },
 ];
 
-export const LANGUAGE_VALUES: readonly ValueDef[] = (
-  ["en", "it", "fr", "de", "es", "ja", "pt"] as const
-).map((code) => ({
+// The interface languages: `/lang` offers only the ready ones, as the header's selector does (P10-E1).
+export const LANGUAGE_VALUES: readonly ValueDef[] = READY_LANGUAGES.map((code) => ({
   name: code,
   value: code,
   description: code,

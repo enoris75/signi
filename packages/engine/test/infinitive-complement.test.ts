@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { InfinitiveComplement, LanguageCode, PhrasePlan, VerbPhrase } from '@signi/shared';
+import type { InfinitiveComplement, LanguageCode, PhrasePlan, VerbPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // An infinitive complement (PhrasePlan.infinitiveComplement) is a clause another clause's predicate
 // governs: "the cat is able TO EAT", "to desire TO ACT". Its subject is the governing clause's own, so
@@ -20,12 +21,12 @@ const acts = (verb = 'ACT', extra: Partial<InfinitiveComplement> = {}): Infiniti
 const predicate = (adjective: string) => ({ predicative: { phrase: np(adjective) } });
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 describe('the modal definitions (localization C09)', () => {

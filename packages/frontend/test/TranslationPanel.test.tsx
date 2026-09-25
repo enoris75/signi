@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, screen, within } from '@testing-library/react';
 import type { LanguageCode, Translation } from '@signi/shared';
+import { LANGUAGE_CODES } from '@signi/shared';
 import TranslationPanel from '../src/components/TranslationPanel.tsx';
 import type { SentenceResult } from '../src/hooks/useTranslation.ts';
 import { renderWithProviders, type SeededStrings } from './render.tsx';
 
-const LANGUAGE_ORDER: LanguageCode[] = ['en', 'it', 'fr', 'de', 'es', 'ja', 'pt'];
+// The row order is LANGUAGES' key order (P10-E1), the preview languages included.
+const LANGUAGE_ORDER: LanguageCode[] = LANGUAGE_CODES;
 
 // A translated sentence: the same text in every language, tagged with the language, except
 // where `overrides` gives a language its own translation.
@@ -72,6 +74,19 @@ describe('TranslationPanel', () => {
     expect(languageRow('it')).toHaveTextContent(/^🇮🇹Italian/);
     expect(languageRow('ja')).toHaveTextContent(/^🇯🇵Japanese/);
     expect(screen.queryByTestId('translations-empty')).not.toBeInTheDocument();
+  });
+
+  // P10-E1, E2: Swiss German is a preview row, and says on the row which dialect it writes, under the
+  // arms of Zürich rather than a country flag; its tooltip says how it is spelled.
+  it('labels the Swiss German row with its dialect, the arms of Zürich and a preview chip', () => {
+    renderPanel([translated('The cat sleeps')]);
+
+    const row = languageRow('gsw');
+    expect(within(row).getByTestId('row-name-gsw')).toHaveTextContent('Swiss German (Zürich)');
+    expect(within(row).getByTestId('flag-zurich')).toBeInTheDocument();
+    expect(within(row).getByTestId('row-language-preview')).toHaveTextContent('Preview');
+    expect(within(languageRow('de')).queryByTestId('row-language-preview')).not.toBeInTheDocument();
+    expect(lines('gsw')).toEqual(['The cat sleeps (gsw)']);
   });
 
   it("lists each language's translation of every sentence, in period order", () => {
@@ -142,7 +157,7 @@ describe('TranslationPanel', () => {
     const rules = LANGUAGE_ORDER.map(
       (language) => getComputedStyle(languageRow(language)).borderBottomStyle,
     );
-    expect(rules).toEqual(['solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'none']);
+    expect(rules).toEqual([...LANGUAGE_ORDER.slice(1).map(() => 'solid'), 'none']);
   });
 
   describe('copying', () => {

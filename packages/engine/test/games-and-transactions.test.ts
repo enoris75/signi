@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // docs/localization B82 and B85, from P09-E24's ranks 201–400. B82: the nouns KIND_SORT, CHANGE_NOUN,
 // GAME, PERCENT and PARTY_CELEBRATION. B85: the verbs PAY, PROVIDE, SPEND_MONEY, SPEND_TIME, LOSE,
@@ -11,12 +12,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // word's paradigm and every gloss the two tickets shipped.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { definiteness: 'definite', ...extra });
@@ -27,7 +28,7 @@ const seed = (id: string) => concepts.find((c) => c.id === id);
 // ── B82: the glosses ──────────────────────────────────────────────────
 
 describe('B82: the glosses', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // SYSTEM's shape: the relative agrees with GROUP in all seven.
     ['KIND_SORT', { en: 'a group of things that has the same features.', it: 'un gruppo di cose che ha le stesse caratteristiche.', fr: 'un groupe de choses qui a les mêmes caractéristiques.', de: 'eine Gruppe von Dingen, die die gleichen Merkmale hat.', es: 'un grupo de cosas que tiene las mismas características.', ja: '同じ特徴があるもののグループ。', pt: 'um grupo de coisas que tem as mesmas características.' }],
     ['CHANGE_NOUN', { en: 'a process that changes objects.', it: 'un processo che cambia oggetti.', fr: 'un processus qui change des objets.', de: 'ein Prozess, der Gegenstände ändert.', es: 'un proceso que cambia objetos.', ja: '物体を変える過程。', pt: 'um processo que muda objetos.' }],
@@ -53,7 +54,7 @@ describe('B82: the glosses', () => {
 
 describe('B82: the nouns, singular and plural, with an agreeing adjective', () => {
   const sees = (object: NounPhrase) => sayAll(clause(the('CAT'), 'SEE', { directObject: object }));
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // Italian and Spanish tipo is GUY's word too (B75); French sorte and German Art are feminine.
     ['KIND_SORT',
       { en: 'the cat sees a kind.', it: 'il gatto vede un tipo.', fr: 'le chat voit une sorte.', de: 'der Kater sieht eine Art.', es: 'el gato ve un tipo.', ja: '猫は種類を見ます。', pt: 'o gato vê um tipo.' },
@@ -95,7 +96,7 @@ describe('B82: the nouns, singular and plural, with an agreeing adjective', () =
 // ── B85: the glosses ──────────────────────────────────────────────────
 
 describe('B85: the glosses', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // GIVE with money, as SELL is GIVE for money; GIVE's dative recipient.
     ['PAY', { en: 'to give money to a person.', it: 'dare denaro a una persona.', fr: "donner de l'argent à une personne.", de: 'einer Person Geld geben.', es: 'dar dinero a una persona.', ja: '人にお金をあげる。', pt: 'dar dinheiro a uma pessoa.' }],
     // The causative of HAVE, as PUT is of BE.
@@ -119,7 +120,7 @@ describe('B85: the glosses', () => {
     for (const [a, b] of [['LOSE', 'LOSE_GAME'], ['SPEND_MONEY', 'SPEND_TIME']]) {
       const x = definitionAll(a!);
       const y = definitionAll(b!);
-      for (const language of Object.keys(x) as LanguageCode[]) expect(x[language]).not.toBe(y[language]);
+      for (const language of Object.keys(x) as ReadyLanguageCode[]) expect(x[language]).not.toBe(y[language]);
     }
   });
 
@@ -134,7 +135,7 @@ describe('B85: the glosses', () => {
 // Present, simple past, resultative (a feminine subject, for the Romance agreement), future and
 // negation, for every new verb with an object.
 describe('B85: the verbs with an object: persons, tenses and aspects', () => {
-  test.each<[string, string, Record<LanguageCode, string>[]]>([
+  test.each<[string, string, Record<ReadyLanguageCode, string>[]]>([
     // pagare keeps its h (pagheranno); payer's mute ai (paie, paieront); bezahlen has no ge-.
     ['PAY', 'MONEY', [
       { en: 'the woman pays the money.', it: 'la donna paga il denaro.', fr: "la femme paie l'argent.", de: 'die Frau bezahlt das Geld.', es: 'la mujer paga el dinero.', ja: '女はお金を払います。', pt: 'a mulher paga o dinheiro.' },
@@ -201,7 +202,7 @@ describe('B85: the verbs with an object: persons, tenses and aspects', () => {
 });
 
 describe('B85: without an object — LOSE_GAME, and WIN', () => {
-  test.each<[string, Record<LanguageCode, string>[]]>([
+  test.each<[string, Record<ReadyLanguageCode, string>[]]>([
     // LOSE's word in six languages, 負ける in Japanese.
     ['LOSE_GAME', [
       { en: 'the woman loses.', it: 'la donna perde.', fr: 'la femme perd.', de: 'die Frau verliert.', es: 'la mujer pierde.', ja: '女は負けます。', pt: 'a mulher perde.' },

@@ -1,11 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { compileDefinition, definitionVocabulary } from '@signi/phrase';
 import { sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
 import { seedConcept } from '../../backend/src/concepts/definitionText.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P11-E7: a noun's possessor pointed at its clause's own subject is E2's link, built the way the
 // builder builds it — a console line (`/poss #1.subj`, the canvas's pointer) applied to a workspace,
@@ -16,7 +17,7 @@ const VOCAB = definitionVocabulary(concepts.map((c) => seedConcept(c)));
 const said = (line: string) => sayAll(compileDefinition(line, VOCAB));
 
 describe('a pointer at the subject is the link (P11-E7)', () => {
-  test.each<[string, string, Partial<Record<LanguageCode, string>>]>([
+  test.each<[string, string, Partial<Record<ReadyLanguageCode, string>>]>([
     // The cat's gender is the builder's masculine pick, which the link reads (E7's lead): "his".
     ['the cat sees its book', '/subj ( CAT ) /verb ( SEE ) /obj ( BOOK /poss #1.subj )', {
       en: 'the cat sees his book.', de: 'der Kater sieht sein Buch.', ja: '猫は自分の本を見ます。',
@@ -57,7 +58,7 @@ describe('a pointer at the subject is the link (P11-E7)', () => {
 
   // D5: the chip on the link's line says the possessed phrase the sentence says — bound in its clause,
   // which a bare noun phrase cannot be — through `translate`'s `phrase` option.
-  test.each<[string, string, Partial<Record<LanguageCode, string>>]>([
+  test.each<[string, string, Partial<Record<ReadyLanguageCode, string>>]>([
     ['her book', '/subj ( WOMAN ) /verb ( SEE ) /obj ( BOOK /poss #1.subj )', { en: 'her book', de: 'ihr Buch', it: 'il suo libro', ja: '自分の本' }],
     ['their book', '/subj ( CAT /and DOG ) /verb ( SEE ) /obj ( BOOK /poss #1.subj )', { en: 'their book', fr: 'leur livre', ja: '自分の本' }],
     ['your book', '/command /verb ( SEE ) /obj ( BOOK /poss #1.subj )', { en: 'your book', de: 'dein Buch', ja: '自分の本' }],
@@ -66,20 +67,20 @@ describe('a pointer at the subject is the link (P11-E7)', () => {
     ['his dog, a copy', '/subj ( BOY ) /verb ( SEE ) /obj ( DOG /poss [ 3rd ] )', { en: 'his dog', de: 'sein Hund', ja: '彼の犬' }],
   ])('renders the object alone, bound in its clause: %s', (_, line, rendered) => {
     const phrase = Object.fromEntries(
-      translate(compileDefinition(line, VOCAB), lookupLexicalEntry, { phrase: 'directObject' }).map((t) => [t.language, t.text]),
+      translate(compileDefinition(line, VOCAB), lookupLexicalEntry, { phrase: 'directObject' }).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
     );
     expect(phrase).toMatchObject(rendered);
   });
 
   // The canvas asks with the period's subject and mood alone, and no verb: the object still binds.
-  test.each<[string, PhrasePlan, Partial<Record<LanguageCode, string>>]>([
+  test.each<[string, PhrasePlan, Partial<Record<ReadyLanguageCode, string>>]>([
     ['a subject', { subject: { concept: 'WOMAN' } } as PhrasePlan, { en: 'her book', de: 'ihr Buch', ja: '自分の本' }],
     ['a group', { subject: { conjuncts: [{ concept: 'CAT' }, { concept: 'DOG' }], conjunction: 'and' } } as PhrasePlan, { en: 'their book' }],
     ['a command’s addressee', { subject: { concept: 'SECOND_PERSON', number: 'plural' }, imperative: true } as PhrasePlan, { en: 'your book', de: 'euer Buch', ja: '自分の本' }],
     ['a citation’s one', { subject: { concept: 'GENERIC_PERSON' }, infinitive: true } as PhrasePlan, { en: "one's book", it: 'il proprio libro' }],
   ])('binds a verbless clause’s object to %s', (_, clause, rendered) => {
     const plan = { ...clause, directObject: { concept: 'BOOK', possessor: { kind: 'coreferent', slot: 'subject' } } } as PhrasePlan;
-    const phrase = Object.fromEntries(translate(plan, lookupLexicalEntry, { phrase: 'directObject' }).map((t) => [t.language, t.text]));
+    const phrase = Object.fromEntries(translate(plan, lookupLexicalEntry, { phrase: 'directObject' }).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]));
     expect(phrase).toMatchObject(rendered);
   });
 

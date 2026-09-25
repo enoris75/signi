@@ -1,10 +1,8 @@
 import { translate } from '@signi/engine';
-import { LANGUAGES } from '@signi/shared';
+import { READY_LANGUAGES, isPreviewLanguage } from '@signi/shared';
 import type { LanguageCode } from '@signi/shared';
 import { concepts } from './concepts/index.js';
 import { notingLookup } from './lexicon.js';
-
-const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 
 // A definition renders as a fragment (a bare noun phrase), so the trailing full stop the engine
 // puts on a period is dropped — ASCII "." or Japanese "。" — the same trim usePayoff applies.
@@ -25,6 +23,7 @@ function stripPeriod(text: string): string {
  */
 export function buildConceptDefinitions(): Map<string, Partial<Record<LanguageCode, string>>> {
   const out = new Map<string, Partial<Record<LanguageCode, string>>>();
+  const previewHoles = new Map<LanguageCode, number>();
 
   for (const c of concepts) {
     if (!c.definition) continue;
@@ -45,7 +44,7 @@ export function buildConceptDefinitions(): Map<string, Partial<Record<LanguageCo
       if (t.text) byLanguage[t.language] = stripPeriod(t.text);
     }
 
-    const missing = LANGUAGE_CODES.filter((code) => !byLanguage[code]);
+    const missing = READY_LANGUAGES.filter((code) => !byLanguage[code]);
     if (missing.length > 0) {
       throw new Error(
         `Definition for "${c.id}" did not render in: ${missing.join(', ')}. ` +
@@ -53,8 +52,17 @@ export function buildConceptDefinitions(): Map<string, Partial<Record<LanguageCo
       );
     }
 
+    // A preview language (P10-E1) may leave a definition unrendered: counted, not thrown, and the
+    // picker falls back to the English literal for it.
+    for (const t of rendered) {
+      if (!t.text && isPreviewLanguage(t.language)) previewHoles.set(t.language, (previewHoles.get(t.language) ?? 0) + 1);
+    }
+
     out.set(c.id, byLanguage);
   }
 
+  for (const [language, count] of previewHoles) {
+    console.warn(`[definitions] preview language "${language}": ${count} engine-composed definitions do not render yet.`);
+  }
   return out;
 }

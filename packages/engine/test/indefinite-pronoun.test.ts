@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, furigana, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C32: SOMETHING, the pronoun that stands for a thing and turns into another word
 // under negation. The seeded persons have one form each; this one has two, and the negative half
@@ -11,12 +12,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 
 const seed = (id: string) => concepts.find((c) => c.id === id);
 
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = seed(id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 describe('the positive pronoun', () => {

@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, PhrasePlan, VerbPhrase } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, VerbPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C17: the Italian pronominal verb and the German reflexive verb, which the genus MOVE_ONESELF
 // needs (it muoversi, de sich bewegen). French, Spanish and Portuguese already placed their clitic.
@@ -15,12 +16,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 //     agreeing pronoun in the Mittelfeld's unstressed-pronoun slot.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const moves = (subject = np('CAT'), verbPhrase: Partial<VerbPhrase> = {}, extra: Partial<PhrasePlan> = {}) =>

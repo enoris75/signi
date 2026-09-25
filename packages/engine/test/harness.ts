@@ -9,8 +9,8 @@ import type {
   PronominalPossessor,
   Specifier,
   Translation,
-  VerbPhrase,
-} from '@signi/shared';
+  VerbPhrase, ReadyLanguageCode } from '@signi/shared';
+import { isPreviewLanguage } from '@signi/shared';
 import {
   translate,
   translateConjunction,
@@ -47,11 +47,20 @@ export function say(plan: PhrasePlan, language: LanguageCode): string {
   return translation.text;
 }
 
-/** Every language at once, keyed — the shape the table-driven specs assert against. */
-export function sayAll(plan: PhrasePlan): Record<LanguageCode, string> {
+/**
+ * Keyed by language, the **ready** languages only (P10-E1): a preview language (Swiss German) is
+ * covered by its own suite until it is promoted, so the exhaustive tables below neither pin its
+ * unreviewed text nor break when it changes. Promotion adds its line to every table they assert.
+ */
+function keyed(translations: Translation[]): Record<ReadyLanguageCode, string> {
   return Object.fromEntries(
-    translateAll(plan).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translations.filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
+}
+
+/** Every ready language at once, keyed — the shape the table-driven specs assert against. */
+export function sayAll(plan: PhrasePlan): Record<ReadyLanguageCode, string> {
+  return keyed(translateAll(plan));
 }
 
 /**
@@ -63,20 +72,16 @@ export function sayAll(plan: PhrasePlan): Record<LanguageCode, string> {
 export function wordAll(
   conceptIds: string | string[],
   agreesWith?: string,
-): Record<LanguageCode, string> {
-  return Object.fromEntries(
-    translateWord(conceptIds, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+): Record<ReadyLanguageCode, string> {
+  return keyed(translateWord(conceptIds, lookupLexicalEntry, agreesWith));
 }
 
 /** Render one determiner value (agreeing with `agreesWith`, default NOUN) into every language. */
 export function determinerAll(
   value: Definiteness,
   agreesWith?: string,
-): Record<LanguageCode, string> {
-  return Object.fromEntries(
-    translateDeterminer(value, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+): Record<ReadyLanguageCode, string> {
+  return keyed(translateDeterminer(value, lookupLexicalEntry, agreesWith));
 }
 
 /**
@@ -86,10 +91,8 @@ export function determinerAll(
 export function possessiveAll(
   possessor: PronominalPossessor,
   agreesWith?: string,
-): Record<LanguageCode, string> {
-  return Object.fromEntries(
-    translatePossessive(possessor, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+): Record<ReadyLanguageCode, string> {
+  return keyed(translatePossessive(possessor, lookupLexicalEntry, agreesWith));
 }
 
 /**
@@ -97,10 +100,8 @@ export function possessiveAll(
  * the conjunction menu. It is cited between two clauses and agrees with nothing, so unlike the
  * three above it takes no noun. `correlative` cites the pair an "and" group may take instead (P09-E46).
  */
-export function conjunctionAll(conjunction: CoordConjunction, correlative?: boolean): Record<LanguageCode, string> {
-  return Object.fromEntries(
-    translateConjunction(conjunction, correlative).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+export function conjunctionAll(conjunction: CoordConjunction, correlative?: boolean): Record<ReadyLanguageCode, string> {
+  return keyed(translateConjunction(conjunction, correlative));
 }
 
 /**
@@ -108,10 +109,8 @@ export function conjunctionAll(conjunction: CoordConjunction, correlative?: bool
  * spatial-relation and cause-sentiment toolbars. The noun it is cited on (default NOUN) is held
  * bare, so what comes back is the adposition alone.
  */
-export function specifierAll(specifier: Specifier, agreesWith?: string): Record<LanguageCode, string> {
-  return Object.fromEntries(
-    translateSpecifier(specifier, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+export function specifierAll(specifier: Specifier, agreesWith?: string): Record<ReadyLanguageCode, string> {
+  return keyed(translateSpecifier(specifier, lookupLexicalEntry, agreesWith));
 }
 
 /**
@@ -119,10 +118,8 @@ export function specifierAll(specifier: Specifier, agreesWith?: string): Record<
  * chip. Cited on an adjective (default BIG), because whether a degree is a word of its own or a
  * remaking of the adjective depends on which adjective it is.
  */
-export function degreeAll(degree: Degree, agreesWith?: string): Record<LanguageCode, string> {
-  return Object.fromEntries(
-    translateDegree(degree, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+export function degreeAll(degree: Degree, agreesWith?: string): Record<ReadyLanguageCode, string> {
+  return keyed(translateDegree(degree, lookupLexicalEntry, agreesWith));
 }
 
 /** The furigana readings Japanese renders over its kanji, in order. */

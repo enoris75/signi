@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization B60, P09's saying and thinking verbs: SAY, TELL, ASK, CALL, CALL_PHONE, MEAN, THINK
 // and BELIEVE, the noun QUESTION, and the two differentia words TELEPHONE and MIND; with the glosses
@@ -11,14 +12,14 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // exhaustive tables (verb.test.ts's Italian table), so the lanes that seeded P09's words the same day
 // do not edit the same rows.
 
-type Rendered = Record<LanguageCode, string>;
+type Rendered = Record<ReadyLanguageCode, string>;
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
 function definitionAll(id: string): Rendered {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
   ) as Rendered;
 }
 

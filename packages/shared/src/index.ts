@@ -5,7 +5,7 @@
  */
 export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb' | 'interjection';
 
-export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt';
+export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt' | 'gsw';
 
 export type Transitivity = 'intransitive' | 'transitive' | 'ditransitive';
 
@@ -665,7 +665,53 @@ export const LANGUAGES: Record<LanguageCode, string> = {
   es: 'Spanish',
   ja: 'Japanese',
   pt: 'Portuguese',
+  // Zürichdeutsch in Dieth spelling (P10): appended, so every existing row keeps its place (P10 D13).
+  gsw: 'Swiss German',
 };
+
+/** Every language code, in row order — the one list the rest of the code derives from (P10-E1). */
+export const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
+
+/**
+ * How far a language is trusted (P10-E1, after P03 §0.3). A `ready` language is tested and
+ * selectable as the interface language; a `preview` one is rendered as a row of the translations
+ * panel, labelled *preview*, and nowhere else:
+ *
+ * | surface | `preview` | `ready` |
+ * |---|---|---|
+ * | translations panel row | shown, labelled *preview* | shown |
+ * | UI-language selector, `/lang` | hidden | shown |
+ * | backend boot completeness check | warns | fails |
+ * | exhaustive engine tests, snapshots | excluded | included |
+ * | `/seed`, `/localize`, `/localize-seed` | form optional | form required |
+ *
+ * A preview language's missing form renders as nothing, never as another language's form: a
+ * Swiss German cell that fell back to German would be exactly the regression P10 §6 warns about.
+ */
+export type LanguageStatus = 'ready' | 'preview';
+
+export const LANGUAGE_STATUS = {
+  en: 'ready',
+  it: 'ready',
+  fr: 'ready',
+  de: 'ready',
+  es: 'ready',
+  ja: 'ready',
+  pt: 'ready',
+  gsw: 'preview',
+} as const satisfies Record<LanguageCode, LanguageStatus>;
+
+/**
+ * The codes of the ready languages, as a type: the keys an exhaustive table is written with, so
+ * promoting a language (flipping its status) is also what makes the compiler ask for its line.
+ */
+export type ReadyLanguageCode = { [K in LanguageCode]: (typeof LANGUAGE_STATUS)[K] extends 'ready' ? K : never }[LanguageCode];
+
+/** The `ready` languages, in row order: the interface languages, and the ones exhaustive tests cover. */
+export const READY_LANGUAGES = LANGUAGE_CODES.filter((code): code is ReadyLanguageCode => LANGUAGE_STATUS[code] === 'ready');
+
+/** Whether `code` is a language still in preview (see `LANGUAGE_STATUS`). */
+export const isPreviewLanguage = (code: string): boolean => (LANGUAGE_STATUS as Record<string, LanguageStatus>)[code] === 'preview';
 
 export interface Concept {
   id: string;

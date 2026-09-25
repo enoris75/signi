@@ -1,14 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { LanguageCode } from '@signi/shared';
-import { LANGUAGES } from '@signi/shared';
+import { READY_LANGUAGES } from '@signi/shared';
 
 const STORAGE_KEY = 'signi:uiLanguage';
 const DEFAULT_LANGUAGE: LanguageCode = 'en';
 
 function readStored(): LanguageCode {
   const saved = localStorage.getItem(STORAGE_KEY);
-  return saved && saved in LANGUAGES ? (saved as LanguageCode) : DEFAULT_LANGUAGE;
+  // Only a ready language is an interface language (P10-E1): a stored preview one falls back.
+  return saved && (READY_LANGUAGES as string[]).includes(saved) ? (saved as LanguageCode) : DEFAULT_LANGUAGE;
 }
 
 interface LanguageContextValue {

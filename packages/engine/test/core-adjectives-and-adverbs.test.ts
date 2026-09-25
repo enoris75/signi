@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, VerbPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09's core adjectives and its adverbs of place and focus (docs/localization/done/B66, B67): the two
 // LASTs, NEXT_COMING, SAME, AMERICAN and the two RIGHTs; HERE, THERE, JUST, ALSO, ONLY and REALLY;
@@ -13,12 +14,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // article, and the copula and particle an adverb of place takes with BE and LIVE.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const seed = (id: string) => concepts.find((c) => c.id === id);
@@ -30,7 +31,7 @@ const eats = (modifier: string, verbPhrase: Partial<VerbPhrase> = {}, subject = 
   clause(subject, 'EAT', { directObject: the('FOOD'), verbPhrase: { modifier, ...verbPhrase } });
 
 describe('the glosses, in every language', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // FIRST read the other way: FIRST is what all other objects follow, this what follows them all.
     // FOLLOW's object is German auf, Spanish a and Japanese に, as in SECOND.
     ['LAST_FINAL', {
@@ -117,7 +118,7 @@ describe('the glosses, in every language', () => {
 });
 
 describe('the nouns: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // German Fehler is the same in the plural; French erreur is feminine.
     ['ERROR',
       { en: 'the error.', it: "l'errore.", fr: "l'erreur.", de: 'der Fehler.', es: 'el error.', ja: '誤り。', pt: 'o erro.' },
@@ -278,7 +279,7 @@ describe('the adjectives: where they stand, how they agree, and as a predicate',
 
 describe('the adverbs: where they stand', () => {
   // Adverbs of place stand after the object, where a locative complement stands (A189).
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['HERE', {
       en: 'the cat eats the food here.', it: 'il gatto mangia il cibo qui.', fr: 'le chat mange la nourriture ici.',
       de: 'der Kater frisst das Essen hier.', es: 'el gato come la comida aquí.', ja: '猫は食べ物をここで食べます。', pt: 'o gato come a comida aqui.',
@@ -293,7 +294,7 @@ describe('the adverbs: where they stand', () => {
 
   // The focus adverbs take ALREADY's `frequency` position: before the verb in English, after it in
   // the others, and between the auxiliary and the participle in a compound tense.
-  test.each<[string, Record<LanguageCode, string>, Partial<Record<LanguageCode, string>>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Partial<Record<ReadyLanguageCode, string>>]>([
     ['ALSO',
       { en: 'the cat also eats the food.', it: 'il gatto mangia anche il cibo.', fr: 'le chat mange aussi la nourriture.',
         de: 'der Kater frisst auch das Essen.', es: 'el gato come también la comida.', ja: '猫は食べ物を同じく食べます。',
@@ -347,7 +348,7 @@ describe('the adverbs: where they stand', () => {
 // where. Spanish and Portuguese BE is estar with one as with the other, and Japanese says the place
 // with the に its verb gives a place — the existential いる / ある and 住む — where an act takes で.
 describe('an adverb of place with BE and LIVE', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     ['HERE',
       { en: 'the cat is here.', it: 'il gatto è qui.', fr: 'le chat est ici.', de: 'der Kater ist hier.', es: 'el gato está aquí.',
         ja: '猫はここにいます。', pt: 'o gato está aqui.' },

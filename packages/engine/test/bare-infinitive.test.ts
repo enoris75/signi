@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode } from '@signi/shared';
+import type { LanguageCode, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C36: LET. It governs the object-controlled infinitive C08 built for CAUSE_VERB, and
 // adds the two things that construct had no room for — the **bare** infinitive of English and
@@ -12,12 +13,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 
 const seed = (id: string) => concepts.find((c) => c.id === id);
 
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = seed(id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const lets = (governed: Parameters<typeof clause>[2]) => clause(np('CAT'), 'LET', {

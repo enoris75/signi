@@ -291,6 +291,54 @@ export function dativePronounDe(feats: PronominalPossessor): string {
   return table[pn(feats)];
 }
 
+// ── Swiss German (P10) ───────────────────────────────────────────────────────
+// Zürichdeutsch declines the possessive for the possessed head in two cases only — nominative and
+// accusative are one (P10 D7), and there is no genitive: a genitive slot takes the dative.
+// *min Hund, mini Chatz, mis Huus, mini Hünd*; dative *mim Hund, minere Chatz, mim Huus, mine Hünd*.
+// The 3sg feminine and the 3pl are *ire*; the 1pl *euse*, the 2pl *eue*. Dieth spelling.
+const GSW_STEM: Record<PN, string> = {
+  '1sg': 'mi', '2sg': 'di', '3sg': 'si', // 3sg fem overridden to "ir" below
+  '1pl': 'eus', '2pl': 'eu', '3pl': 'ir',
+};
+
+// The ending on each stem, by merged case × (masc/fem/neut/plural). The long stems (mi-, di-, si-)
+// take -n in the masculine and -s in the neuter; the others (ir-, eus-, eu-) -e and -es.
+const GSW_ENDING: Record<'short' | 'long', Record<'nom' | 'dat', { masc: string; fem: string; neut: string; plural: string }>> = {
+  short: {
+    nom: { masc: 'n', fem: 'ni', neut: 's', plural: 'ni' },
+    dat: { masc: 'm', fem: 'nere', neut: 'm', plural: 'ne' },
+  },
+  long: {
+    nom: { masc: 'e', fem: 'i', neut: 'es', plural: 'i' },
+    dat: { masc: 'em', fem: 'ere', neut: 'em', plural: 'e' },
+  },
+};
+
+export function possessiveGsw(
+  feats: PronominalPossessor,
+  _case: Case,
+  agree: PossessedAgreement,
+): string {
+  let stem = GSW_STEM[pn(feats)];
+  if (pn(feats) === '3sg' && feats.gender === 'fem') stem = 'ir';
+  const table = GSW_ENDING[stem.length === 2 && stem !== 'eu' && stem !== 'ir' ? 'short' : 'long'][_case === 'dat' || _case === 'gen' ? 'dat' : 'nom'];
+  return stem + (agree.number === 'plural' ? table.plural : table[agree.gender]);
+}
+
+/**
+ * The dative personal pronoun after *vo* where the possessive cannot take the determiner slot:
+ * "das Buech **vo ire**", "es paar Büecher **vo mir**" — `dativePronounDe`'s Swiss German.
+ */
+export function dativePronounGsw(feats: PronominalPossessor): string {
+  if (isGenericBound(feats)) return 'sich';
+  if (pn(feats) === '3sg') return feats.gender === 'fem' ? 'ire' : 'im';
+  const table: Record<PN, string> = {
+    '1sg': 'mir', '2sg': 'dir', '3sg': 'im',
+    '1pl': 'eus', '2pl': 'eu', '3pl': 'ine',
+  };
+  return table[pn(feats)];
+}
+
 // ── Japanese ─────────────────────────────────────────────────────────────────
 // The antecedent pronoun (with its furigana) + の, for the nine cells that have a regular genitive.
 // Invariant of the possessed. The tenth, the 3rd-singular neuter, is suppletive: それ's adnominal is

@@ -51,7 +51,17 @@ describe('LanguageSelector', () => {
     expect(selector()).toHaveTextContent(/^🇯🇵Japanese$/);
   });
 
-  it('offers every language, in order, each with its flag and name', () => {
+  // P10-E1: a preview language is a row of the translations panel, not an interface language.
+  it('does not offer a language still in preview', () => {
+    renderSelector();
+
+    const options = openSelector().getAllByRole('option');
+
+    expect(options.map((o) => o.textContent)).not.toContain('Swiss German');
+    expect(options).toHaveLength(7);
+  });
+
+  it('offers every ready language, in order, each with its flag and name', () => {
     renderSelector();
 
     const options = openSelector().getAllByRole('option');

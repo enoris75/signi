@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // docs/localization B83, B84 and B86: the E24 body verbs (SIT_DOWN, STAND_UP, WALK, RUN_AWAY, LEAD,
 // HOLD_GRASP), the verbs of ending and going on (STOP, STOP_ONESELF, WAIT, DIE, CONTINUE) and the
@@ -11,12 +12,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // gloss the three tickets shipped, and the NO_LONGER fix B84 needed first.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 const seed = (id: string) => concepts.find((c) => c.id === id);
 
@@ -64,7 +65,7 @@ describe('NO_LONGER leads the negator it carries (es, pt)', () => {
 // ── The glosses ───────────────────────────────────────────────────────
 
 describe('the glosses', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // B83. LEAVE_DEPART with FAST, as RUN is "to move fast".
     ['RUN_AWAY', { en: 'to leave fast.', it: 'partire velocemente.', fr: 'partir vite.', de: 'schnell weggehen.', es: 'partir rápido.', ja: '速く出発する。', pt: 'partir rapidamente.' }],
     // C08's causative on GO, with the goal inside the caused clause.
@@ -113,7 +114,7 @@ describe('where the words hang, and what the picker says beside them', () => {
 // Present, simple past, resultative (a feminine subject, for the Romance agreement), future and
 // negation, for every new verb.
 describe('persons, tenses and aspects', () => {
-  test.each<[string, string | undefined, Record<LanguageCode, string>[]]>([
+  test.each<[string, string | undefined, Record<ReadyLanguageCode, string>[]]>([
     ['SIT_DOWN', undefined, [
       { en: 'the woman sits down.', it: 'la donna si siede.', fr: "la femme s'assied.", de: 'die Frau setzt sich.', es: 'la mujer se sienta.', ja: '女は座ります。', pt: 'a mulher se senta.' },
       { en: 'the woman sat down.', it: 'la donna si sedette.', fr: "la femme s'assit.", de: 'die Frau setzte sich.', es: 'la mujer se sentó.', ja: '女は座りました。', pt: 'a mulher se sentou.' },
@@ -224,7 +225,7 @@ describe('persons, tenses and aspects', () => {
 
 // The first person and the tú / du command, where the Romance reflexives and the strong verbs show.
 describe('the first person and the command', () => {
-  test.each<[string, string | undefined, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, string | undefined, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     ['SIT_DOWN', undefined,
       { en: 'I sit down.', it: 'mi siedo.', fr: "je m'assieds.", de: 'ich setze mich.', es: 'me siento.', ja: '私は座ります。', pt: 'me sento.' },
       { en: 'sit down.', it: 'siediti.', fr: 'assieds-toi.', de: 'setz dich.', es: 'siéntate.', ja: '座ってください。', pt: 'sente-se.' }],

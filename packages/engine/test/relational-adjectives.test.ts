@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase } from '@signi/shared';
-import { LANGUAGES } from '@signi/shared';
+import type { LanguageCode, NounPhrase, ReadyLanguageCode } from '@signi/shared';
+import { READY_LANGUAGES } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C24's relational, order and time adjectives and B54's relational nine: the glosses
 // they ship on the headless relative (`relativeGloss.ts`) and on `dimGloss`, and the fifteen words
@@ -12,12 +13,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // three lanes that seeded words the same day do not edit the same rows.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
@@ -26,7 +27,7 @@ const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { 
 // ── The glosses ───────────────────────────────────────────────────────
 
 describe('the relational adjectives are glossed in every language', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // The distance scale, `measure` as TEMPERATURE's is. SMALL is its low pole: LOW would say a
     // height ("at low distance", it "a distanza bassa").
     ['NEAR', { en: 'at small distance.', it: 'a piccola distanza.', fr: 'à petite distance.', de: 'bei kleiner Entfernung.', es: 'a distancia pequeña.', ja: '距離が小さい。', pt: 'a distância pequena.' }],
@@ -48,7 +49,7 @@ describe('the relational adjectives are glossed in every language', () => {
 });
 
 describe('the creature adjectives are said of a BEING: German "das", no animal-only verb', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['WILD', { en: 'that has not been tamed.', it: 'che non è stato domato.', fr: "qui n'a pas été apprivoisé.", de: 'das nicht gezähmt worden ist.', es: 'que no ha sido domado.', ja: '飼い慣らされていない。', pt: 'que não foi domado.' }],
     ['DOMESTIC', { en: 'that lives with people.', it: 'che abita con persone.', fr: 'qui habite avec des personnes.', de: 'das mit Personen wohnt.', es: 'que vive con personas.', ja: '人と住む。', pt: 'que mora com pessoas.' }],
     ['MALE', { en: 'that has testicles.', it: 'che ha testicoli.', fr: 'qui a des testicules.', de: 'das Hoden hat.', es: 'que tiene testículos.', ja: '精巣がある。', pt: 'que tem testículos.' }],
@@ -65,7 +66,7 @@ describe('the creature adjectives are said of a BEING: German "das", no animal-o
 });
 
 describe('the order and time adjectives are glossed in every language', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['NEXT', { en: 'that follows.', it: 'che segue.', fr: 'qui suit.', de: 'der folgt.', es: 'que sigue.', ja: '続く。', pt: 'que segue.' }],
     // The separable German verb closes its clause whole: "vorangeht".
     ['PREVIOUS', { en: 'that precedes.', it: 'che precede.', fr: 'qui précède.', de: 'der vorangeht.', es: 'que precede.', ja: '先行する。', pt: 'que precede.' }],
@@ -91,7 +92,7 @@ describe('every family comes apart', () => {
     ['new and young', ['NEW', 'YOUNG']],
     ['adult and old', ['ADULT', 'OLD']],
   ])('%s', (_, ids) => {
-    for (const language of Object.keys(LANGUAGES) as LanguageCode[]) {
+    for (const language of READY_LANGUAGES) {
       const texts = ids.map((id) => definitionAll(id)[language]);
       expect(new Set(texts).size, `${language}: ${texts.join(' | ')}`).toBe(ids.length);
     }
@@ -109,7 +110,7 @@ test('the literal-by-design adjectives have no gloss', () => {
 // ── The words ─────────────────────────────────────────────────────────
 
 describe('the nouns: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // German Hoden is the same word in the plural; Japanese has no plural to show.
     ['TESTICLE',
       { en: 'the testicle.', it: 'il testicolo.', fr: 'le testicule.', de: 'der Hoden.', es: 'el testículo.', ja: '精巣。', pt: 'o testículo.' },
@@ -146,7 +147,7 @@ describe('the nouns: a singular and a plural in every language', () => {
 });
 
 describe('the verbs: a present, a resultative and a future clause in every language', () => {
-  test.each<[string, NounPhrase, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, NounPhrase, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // vorangehen is separable: the particle closes the main clause and the participle takes -ge- inside.
     ['PRECEDE', the('WOMAN'),
       { en: 'the woman precedes.', it: 'la donna precede.', fr: 'la femme précède.', de: 'die Frau geht voran.', es: 'la mujer precede.', ja: '女は先行します。', pt: 'a mulher precede.' },

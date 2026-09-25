@@ -113,10 +113,11 @@ describe('schema', () => {
     expect(() => insertConcept('THE', 'article')).toThrow(/CHECK constraint failed/);
   });
 
-  test('rejects a language outside the seven supported', () => {
-    expect(() =>
-      db.prepare("INSERT INTO verb_lexemes (language, lemma) VALUES ('nl', 'eten')").run(),
-    ).toThrow(/CHECK constraint failed/);
+  // P10-E1: the language list is @signi/shared's LANGUAGES, which seed.ts checks every form against;
+  // the schema enumerates no languages, so a new one (Swiss German) needs no table rebuild.
+  test('takes a lexeme in any language, the list being the seed\'s to check', () => {
+    db.prepare("INSERT INTO verb_lexemes (language, lemma) VALUES ('gsw', 'ässe')").run();
+    expect(db.prepare("SELECT lemma FROM verb_lexemes WHERE language = 'gsw'").get()).toEqual({ lemma: 'ässe' });
   });
 
   test('allows a concept one hypernym only', () => {
@@ -252,6 +253,57 @@ describe('migrations', () => {
 
     expect(columns(db, 'saved_phrases')).toContain('kind');
     expect(db.prepare("SELECT kind FROM saved_phrases WHERE id = 'old'").get()).toEqual({ kind: 'phrase' });
+  });
+
+  // P10-E1: a database created while the schema listed the seven languages refuses an eighth; it is
+  // rebuilt without the CHECK, keeping its rows, the forms that point at them and their indexes.
+  test('drops a legacy language check, keeping every row, so a Swiss German lexeme goes in', async () => {
+    const file = path.join(tmp, 'seven.db');
+    const legacy = new Database(file);
+    legacy.exec(`
+      CREATE TABLE semantic_concepts (id TEXT PRIMARY KEY, role TEXT NOT NULL, description TEXT NOT NULL);
+      CREATE TABLE verb_lexemes (
+        id       INTEGER PRIMARY KEY AUTOINCREMENT,
+        language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+        lemma    TEXT NOT NULL,
+        notes    TEXT
+      );
+      CREATE TABLE verb_forms (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        lexeme_id  INTEGER NOT NULL REFERENCES verb_lexemes(id) ON DELETE CASCADE,
+        form_key   TEXT NOT NULL,
+        form_value TEXT NOT NULL,
+        UNIQUE (lexeme_id, form_key)
+      );
+      CREATE TABLE concept_definitions (
+        concept_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+        language   TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+        definition TEXT NOT NULL,
+        PRIMARY KEY (concept_id, language)
+      );
+      INSERT INTO semantic_concepts (id, role, description) VALUES ('EAT', 'verb', 'to consume food');
+      INSERT INTO verb_lexemes (language, lemma) VALUES ('de', 'essen');
+      INSERT INTO verb_forms (lexeme_id, form_key, form_value) VALUES (1, '3sg_present', 'isst');
+      INSERT INTO concept_definitions (concept_id, language, definition) VALUES ('EAT', 'en', 'to consume food');
+    `);
+    expect(() => legacy.prepare("INSERT INTO verb_lexemes (language, lemma) VALUES ('gsw', 'ässe')").run()).toThrow(/CHECK/);
+    legacy.close();
+
+    const db = await track(file);
+    db.prepare("INSERT INTO verb_lexemes (language, lemma) VALUES ('gsw', 'ässe')").run();
+    db.prepare("INSERT INTO concept_definitions (concept_id, language, definition) VALUES ('EAT', 'gsw', 'Ässe konsumiere')").run();
+    expect(db.prepare('SELECT language, lemma FROM verb_lexemes ORDER BY id').all()).toEqual([
+      { language: 'de', lemma: 'essen' }, { language: 'gsw', lemma: 'ässe' },
+    ]);
+    expect(db.prepare('SELECT form_value FROM verb_forms WHERE lexeme_id = 1').get()).toEqual({ form_value: 'isst' });
+    for (const table of ['verb_lexemes', 'concept_definitions']) {
+      const sql = db.prepare<[string], { sql: string }>("SELECT sql FROM sqlite_master WHERE name = ?").get(table)!.sql;
+      expect(sql).not.toMatch(/CHECK \(language/);
+    }
+    expect(db.prepare("SELECT name FROM sqlite_master WHERE name = 'idx_verb_lexemes_lang'").get()).toBeTruthy();
+    // The foreign keys still hold: the form row cascades with its lexeme.
+    db.prepare("DELETE FROM verb_lexemes WHERE language = 'de'").run();
+    expect(db.prepare('SELECT COUNT(*) AS n FROM verb_forms').get()).toEqual({ n: 0 });
   });
 
   // P09-E30: a database whose role CHECK predates the interjection is rebuilt with the wider check,

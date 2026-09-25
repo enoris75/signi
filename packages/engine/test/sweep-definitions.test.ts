@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, ReadyLanguageCode } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // The sweep of 2026-09-22 (docs/localization, A23–A30 and B52–B58) glossed 105 concepts and seeded
 // the 40 words the B half of them stood on. This file pins both halves: the new words' paradigms,
@@ -13,12 +14,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // EVERY_ADJECTIVE, where those exhaustive tables already live.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
@@ -26,7 +27,7 @@ const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subj
 // ── The words (B52–B58) ───────────────────────────────────────────────
 
 describe('the sweep\'s nouns: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // B52. The genera the natural kinds hang under. French être and Italian essere are the copula's
     // own noun; German Wesen is the same word in the plural.
     ['BEING',
@@ -110,7 +111,7 @@ describe('the sweep\'s nouns: a singular and a plural in every language', () => 
 });
 
 describe('the sweep\'s verbs: a present clause in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, string | undefined]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, string | undefined]>([
     ['FLY', { en: 'the man flies.', it: "l'uomo vola.", fr: "l'homme vole.", de: 'der Mann fliegt.', es: 'el hombre vuela.', ja: '男は飛びます。', pt: 'o homem voa.' }, undefined],
     // sprechen is a strong e → i verb in the third singular.
     ['SPEAK', { en: 'the man speaks.', it: "l'uomo parla.", fr: "l'homme parle.", de: 'der Mann spricht.', es: 'el hombre habla.', ja: '男は話します。', pt: 'o homem fala.' }, undefined],
@@ -135,7 +136,7 @@ describe('the sweep\'s verbs: a present clause in every language', () => {
 // ── The glosses (A23–A30, B52–B58) ────────────────────────────────────
 
 describe('the glosses the sweep shipped', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // A23. The object gap ("that one presses") and the locative one ("where one makes phrases").
     ['BUTTON', { en: 'an object that one presses.', it: 'un oggetto che si preme.', fr: "un objet qu'on presse.", de: 'ein Gegenstand, den man drückt.', es: 'un objeto que se pulsa.', ja: '押す物体。', pt: 'um objeto que se pressiona.' }],
     ['CANVAS', { en: 'a place where one makes phrases.', it: 'un luogo dove si fanno frasi.', fr: "un lieu où l'on fait des phrases.", de: 'ein Ort, an dem man Phrasen macht.', es: 'un lugar donde se hacen frases.', ja: 'フレーズを作る場所。', pt: 'um lugar onde se fazem frases.' }],

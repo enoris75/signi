@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, PhrasePlan, SubordinatingConjunction } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, SubordinatingConjunction, ReadyLanguageCode } from '@signi/shared';
 import { SUBORDINATING_CONJUNCTIONS } from '@signi/shared';
 import { np, say, sayAll } from './harness.js';
 
@@ -16,7 +16,7 @@ const runs = (conjunction: SubordinatingConjunction, extra: Partial<PhrasePlan> 
 });
 
 describe('the five conjunctions in the seven languages', () => {
-  test.each<[SubordinatingConjunction, Record<LanguageCode, string>]>([
+  test.each<[SubordinatingConjunction, Record<ReadyLanguageCode, string>]>([
     ['when', {
       en: 'the man runs when the cat eats.', it: "l'uomo corre quando il gatto mangia.",
       fr: "l'homme court quand le chat mange.", de: 'der Mann läuft, wenn der Kater frisst.',
@@ -493,7 +493,7 @@ describe('until, since, though (P09-E27)', () => {
     adverbialClause: { conjunction, clause: { subject: np('DOG'), verbPhrase: { verb: 'EAT', ...sub }, ...extra } },
   });
 
-  test.each<[string, PhrasePlan, Record<LanguageCode, string>]>([
+  test.each<[string, PhrasePlan, Record<ReadyLanguageCode, string>]>([
     ['until (present)', catRuns('until'), {
       en: 'the cat runs until the dog eats.', it: 'il gatto corre finché il cane non mangia.',
       fr: "le chat court jusqu'à ce que le chien mange.", de: 'der Kater läuft, bis der Hund frisst.',

@@ -23,7 +23,7 @@ const en = (plan: PhrasePlan) => find(translate(plan, LOOKUP), 'en')?.text;
 
 describe('translate', () => {
   test('renders the plan into every language, in engine order', () => {
-    expect(translate(CAT_RUNS, LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt']);
+    expect(translate(CAT_RUNS, LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw']);
   });
 
   test("closes every sentence with its language's full stop", () => {

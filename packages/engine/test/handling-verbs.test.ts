@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // docs/localization B61: P09's handling and leaving verbs — GET, PUT, KEEP, BRING, LEAVE_BEHIND,
 // TURN, LOOK_AT, LEAVE_DEPART and GO_OUT, seeded here, and TAKE, seeded in the shared base — with the
@@ -12,12 +13,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // a feminine subject is pinned here rather than in verb.test.ts's table, as the P09 lanes agreed.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { definiteness: 'definite', ...extra });
@@ -28,7 +29,7 @@ const seed = (id: string) => concepts.find((c) => c.id === id);
 // ── The glosses ───────────────────────────────────────────────────────
 
 describe('the glosses', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // ACQUIRE plus one complement, as BUY is "to acquire objects with money": the instrument for TAKE
     // (HAND is glossed back on it, B65), the source for GET. A228 is fixed, so Italian's animate
     // source is the plain "da" of a verb with no goal.
@@ -63,7 +64,7 @@ describe('the glosses', () => {
   test('the two new "leave" glosses differ in every language', () => {
     const depart = definitionAll('LEAVE_DEPART');
     const behind = definitionAll('LEAVE_BEHIND');
-    for (const language of Object.keys(depart) as LanguageCode[]) expect(depart[language]).not.toBe(behind[language]);
+    for (const language of Object.keys(depart) as ReadyLanguageCode[]) expect(depart[language]).not.toBe(behind[language]);
   });
 });
 
@@ -82,14 +83,14 @@ describe('where the words hang, and what the picker says beside them', () => {
   });
 
   test('OUTSIDE is a direction adverb, as UP and DOWN are', () => {
-    expect(Object.values(seed('OUTSIDE')!.forms).map((f) => f['subtype'])).toEqual(Array(7).fill('direction'));
+    expect(Object.values(seed('OUTSIDE')!.forms).map((f) => f['subtype'])).toEqual(Array(8).fill('direction'));
   });
 });
 
 // Present, simple past, resultative (a feminine subject, for the Romance agreement), future and
 // negation, for every new verb.
 describe('the transitive verbs: persons, tenses and aspects', () => {
-  test.each<[string, string, Record<LanguageCode, string>[]]>([
+  test.each<[string, string, Record<ReadyLanguageCode, string>[]]>([
     ['GET', 'BOOK', [
       { en: 'the woman gets the book.', it: 'la donna ottiene il libro.', fr: 'la femme obtient le livre.', de: 'die Frau bekommt das Buch.', es: 'la mujer consigue el libro.', ja: '女は本を手に入れます。', pt: 'a mulher consegue o livro.' },
       { en: 'the woman got the book.', it: 'la donna ottenne il libro.', fr: 'la femme obtint le livre.', de: 'die Frau bekam das Buch.', es: 'la mujer consiguió el libro.', ja: '女は本を手に入れました。', pt: 'a mulher conseguiu o livro.' },
@@ -152,7 +153,7 @@ describe('the transitive verbs: persons, tenses and aspects', () => {
 });
 
 describe('the intransitive verbs: persons, tenses and aspects', () => {
-  test.each<[string, Record<LanguageCode, string>[]]>([
+  test.each<[string, Record<ReadyLanguageCode, string>[]]>([
     // quedarse is pronominal; restare, rester and bleiben take BE.
     ['STAY', [
       { en: 'the woman stays.', it: 'la donna resta.', fr: 'la femme reste.', de: 'die Frau bleibt.', es: 'la mujer se queda.', ja: '女は残ります。', pt: 'a mulher fica.' },

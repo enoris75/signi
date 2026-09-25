@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode } from '@signi/shared';
-import { LANGUAGES } from '@signi/shared';
+import type { LanguageCode, ReadyLanguageCode } from '@signi/shared';
+import { READY_LANGUAGES } from '@signi/shared';
 import { np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C24's grammar features and C27's grammar nouns. The features are the values the
 // builder's chips and the console's commands set — a determiner's identifiability, a clause's kind,
@@ -16,15 +17,15 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // the glosses stand on, KNOWN, FORMALITY, ASSERT and FACT, are pinned at the end.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
-type Row = [string, Record<LanguageCode, string>];
+type Row = [string, Record<ReadyLanguageCode, string>];
 
 // ── The families (C24) ────────────────────────────────────────────────
 
@@ -127,7 +128,7 @@ describe('every value of a control comes apart from the others, in every languag
   ];
   test.each(FAMILIES)('%s', (_family, ids) => {
     const glosses = ids.map(definitionAll);
-    for (const language of Object.keys(LANGUAGES) as LanguageCode[]) {
+    for (const language of READY_LANGUAGES) {
       const texts = glosses.map((g) => g[language]);
       expect(new Set(texts).size, `${language}: ${texts.join(' | ')}`).toBe(ids.length);
     }

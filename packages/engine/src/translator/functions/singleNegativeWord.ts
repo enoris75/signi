@@ -9,7 +9,7 @@ import { tonicPronoun } from '../../functions/tonicPronoun.js';
  * would deny it again. German says "der Kater gibt niemandem etwas", "niemand läuft mit jemandem",
  * never "*gibt niemandem nichts" (A308 follow-up).
  */
-export const NO_NEGATIVE_CONCORD: ReadonlySet<string> = new Set(['de']);
+export const NO_NEGATIVE_CONCORD: ReadonlySet<string> = new Set(['de', 'gsw']);
 
 /** The clause's slots as they were before `negativePolarity` swapped them. */
 export interface PositiveSlots {

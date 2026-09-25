@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { COMPLEMENT_RENDER_ORDER, LANGUAGES } from '@signi/shared';
 import type { GrammaticalRole } from '@signi/shared';
-import { concepts, NONFINITE } from './index.js';
+import { concepts, GSW_PENDING, NONFINITE } from './index.js';
 import { ancestors, assertValidHierarchy } from './hierarchy.js';
 
 // Integrity of the seed corpus: the rules the seed and the engine rely on but that neither the
@@ -122,8 +122,12 @@ describe('the concept corpus', () => {
         .map(([l, f]) => ({ id: `${c.id} (${l})`, f })),
     );
     expect(named.map((n) => n.id)).toEqual(expect.arrayContaining(['LOCATIVE (de)', 'YOUNG_WOMAN (de)']));
+    // The adjective takes its strong nominative ending: German *-e* on these feminines, Swiss German
+    // *-e / -i / -es* by gender ("jungi Frau", "adverbiali Bestimmig", P10-E5).
+    const ending = (id: string, f: Record<string, string>) =>
+      id.endsWith('(gsw)') ? ({ masc: 'e', fem: 'i', neut: 'es' } as Record<string, string>)[f['gender'] ?? 'fem'] : 'e';
     const bad = named
-      .filter(({ f }) => f['citation'] !== [f['adjective'] ? `${f['adjective']}e` : '', f['base'], f['postnominal']].filter(Boolean).join(' '))
+      .filter(({ id, f }) => f['citation'] !== [f['adjective'] ? `${f['adjective']}${ending(id, f)}` : '', f['base'], f['postnominal']].filter(Boolean).join(' '))
       .map((n) => n.id);
     expect(bad).toEqual([]);
   });
@@ -201,6 +205,54 @@ describe('NONFINITE', () => {
       Object.keys(byLanguage)
         .filter((l) => !byId.get(id)?.forms[l])
         .map((l) => `${id}:${l}`),
+    );
+    expect(bad).toEqual([]);
+  });
+});
+
+// P10-E4: the Swiss German column. While `gsw` is a preview language its forms are optional to the
+// seed skills (P10-E1 D1), so completeness is a report, not a boot check — this is it, at 100%.
+describe('the Swiss German column (P10-E4)', () => {
+  test('gives every concept a gsw lexeme, or names it pending', () => {
+    expect(concepts.filter((c) => !c.forms['gsw']).map((c) => c.id)).toEqual([...GSW_PENDING]);
+  });
+
+  test('stores no preterite and no genitive — the cells Swiss German does not have (P10 D5, D7)', () => {
+    const bad = concepts.flatMap((c) =>
+      Object.keys(c.forms['gsw'] ?? {})
+        .filter((key) => /_past$/.test(key) || key === 'genitive' || key === 'weak')
+        .map((key) => `${c.id}: ${key}`),
+    );
+    expect(bad).toEqual([]);
+  });
+
+  test('gives every verb its participle, the past being the perfect (P10 D5)', () => {
+    const bad = concepts.filter((c) => c.role === 'verb' && !c.forms['gsw']?.['participle']).map((c) => c.id);
+    expect(bad).toEqual([]);
+  });
+
+  // The auxiliary is lexical, as in German, and matches German's everywhere but SIT_DOWN: Zürich
+  // *abhocke* is a motion verb, *isch abghockt*, where German's reflexive *sich setzen* takes haben.
+  test('selects sii where German selects sein, and only there', () => {
+    const selectsBe = (c: (typeof concepts)[number], l: string) =>
+      (NONFINITE[c.id]?.[l]?.['aux'] ?? c.forms[l]?.['aux']) === 'be';
+    const differ = concepts
+      .filter((c) => c.role === 'verb' && selectsBe(c, 'de') !== selectsBe(c, 'gsw'))
+      .map((c) => c.id);
+    expect(differ).toEqual(['SIT_DOWN']);
+  });
+
+  test('gives the Zürich plural one form for all three persons (P10-E4 D3)', () => {
+    const bad = concepts.filter((c) => {
+      const f = c.forms['gsw'];
+      return c.role === 'verb' && f && (f['1pl_present'] !== f['2pl_present'] || f['2pl_present'] !== f['3pl_present']);
+    }).map((c) => c.id);
+    expect(bad).toEqual([]);
+  });
+
+  test('spells no ß and no apostrophe (the Dieth style sheet)', () => {
+    const bad = concepts.flatMap((c) =>
+      Object.entries(c.forms['gsw'] ?? {}).filter(([, v]) => /[ß']/.test(v)).map(([k, v]) => `${c.id}.${k}: ${v}`),
     );
     expect(bad).toEqual([]);
   });

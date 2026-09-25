@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, VerbPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, furigana, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization B80, B89 and B90, three of P09-E24's tickets (COCA ranks 201–400): the time words
 // MINUTE, MORNING, LATER, ONCE and OFTEN; the degree adverb A_LITTLE and the place adverb FAR_AWAY;
@@ -18,12 +19,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // (`locative_ni_reading`: 遠くに).
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { definiteness: 'definite', ...extra });
@@ -35,7 +36,7 @@ const catEatsFood = (verbPhrase: Partial<VerbPhrase>) =>
 const at = (phrase: NounPhrase) => catRuns({}, { complements: { temporal: { phrase } } });
 
 describe('the glosses B80, B89 and B90 ship', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // C26's part-whole shape with HOUR as the whole. Japanese 時間 is HOUR's word and TIME's.
     ['MINUTE', {
       en: 'a part of an hour.', it: "una parte di un'ora.", fr: "une partie d'une heure.", de: 'ein Teil einer Stunde.',
@@ -81,7 +82,7 @@ describe('the glosses B80, B89 and B90 ship', () => {
 });
 
 describe('MINUTE and MORNING: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     ['MINUTE',
       { en: 'the minute.', it: 'il minuto.', fr: 'la minute.', de: 'die Minute.', es: 'el minuto.', ja: '分。', pt: 'o minuto.' },
       { en: 'the minutes.', it: 'i minuti.', fr: 'les minutes.', de: 'die Minuten.', es: 'los minutos.', ja: '分。', pt: 'os minutos.' }],

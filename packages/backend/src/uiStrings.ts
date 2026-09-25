@@ -10,13 +10,11 @@ import {
   translateSubordinator,
   translateWord,
 } from '@signi/engine';
-import { UI_STRINGS, LANGUAGES } from '@signi/shared';
+import { UI_STRINGS, READY_LANGUAGES, isPreviewLanguage } from '@signi/shared';
 import type { LanguageCode, Translation, UiStringDef, UiStringFormat, UiStringKey, UiStrings } from '@signi/shared';
 import { notingLookup } from './lexicon.js';
 
 type LexicalLookup = ReturnType<typeof notingLookup>['lookup'];
-
-const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 
 function applyFormat(text: string, format?: UiStringFormat): string {
   let out = text;
@@ -58,6 +56,7 @@ function renderEntry(def: UiStringDef, lookup: LexicalLookup): Translation[] {
  */
 export function buildUiStrings(): UiStrings {
   const out = {} as UiStrings;
+  const previewHoles = new Map<LanguageCode, number>();
 
   for (const key of Object.keys(UI_STRINGS) as UiStringKey[]) {
     // Annotated, not inferred: the catalog preserves each entry's literal type, and only the
@@ -81,16 +80,24 @@ export function buildUiStrings(): UiStrings {
       if (t.text) byLanguage[t.language] = applyFormat(t.text, def.format);
     }
 
-    const missing = LANGUAGE_CODES.filter((code) => !byLanguage[code]);
+    const missing = READY_LANGUAGES.filter((code) => !byLanguage[code]);
     if (missing.length > 0) {
       throw new Error(
         `UI string "${key}" did not render in: ${missing.join(', ')}. ` +
           'Check the concepts it references are seeded in every language.',
       );
     }
+    // A preview language (P10-E1) is allowed holes: it is not an interface language yet, and the
+    // client falls back to the entry's English for it. The holes are counted, not thrown.
+    for (const t of rendered) {
+      if (!t.text && isPreviewLanguage(t.language)) previewHoles.set(t.language, (previewHoles.get(t.language) ?? 0) + 1);
+    }
 
     out[key] = byLanguage;
   }
 
+  for (const [language, count] of previewHoles) {
+    console.warn(`[ui-strings] preview language "${language}": ${count} of ${Object.keys(UI_STRINGS).length} UI strings do not render yet.`);
+  }
   return out;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode } from '@signi/shared';
+import type { LanguageCode, ReadyLanguageCode } from '@signi/shared';
 import { compileDefinition, definitionVocabulary } from '@signi/phrase';
 import { sayAll } from './harness.js';
 import { concepts } from '../../backend/src/concepts/index.js';
@@ -14,7 +14,7 @@ const VOCAB = definitionVocabulary(concepts.map((c) => seedConcept(c)));
 const said = (line: string) => sayAll(compileDefinition(line, VOCAB));
 
 describe('a pronoun as a named owner (P11-E9)', () => {
-  test.each<[string, string, Record<LanguageCode, string>]>([
+  test.each<[string, string, Record<ReadyLanguageCode, string>]>([
     ['my mother runs', '/subj ( MOTHER /poss [ 1st ] ) /verb ( RUN )', {
       en: 'my mother runs.', it: 'mia madre corre.', fr: 'ma mère court.', de: 'meine Mutter läuft.',
       es: 'mi madre corre.', pt: 'a minha mãe corre.', ja: '母は走ります。',
@@ -41,7 +41,7 @@ describe('a pronoun as a named owner (P11-E9)', () => {
   });
 
   // The third person, where gender is the only thing that varies: the chooser's gender pick.
-  test.each<[string, string, Partial<Record<LanguageCode, string>>]>([
+  test.each<[string, string, Partial<Record<ReadyLanguageCode, string>>]>([
     ['his', '[ 3rd ]', { en: 'I see his book.', de: 'ich sehe sein Buch.', ja: '私は彼の本を見ます。', it: 'vedo il suo libro.' }],
     ['her', '[ 3rd /fem ]', { en: 'I see her book.', de: 'ich sehe ihr Buch.', ja: '私は彼女の本を見ます。', fr: 'je vois son livre.' }],
     ['its', '[ 3rd /neut ]', { en: 'I see its book.', de: 'ich sehe sein Buch.', ja: '私はその本を見ます。' }],

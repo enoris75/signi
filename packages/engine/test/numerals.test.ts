@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, VerbPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, VerbPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C31: the cardinal numeral. It is a value beside `definiteness`, not a concept — no
 // picker offers one word for it, and Japanese has no word at all without the counter its noun
@@ -11,12 +12,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 
 const seed = (id: string) => concepts.find((c) => c.id === id);
 
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = seed(id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 describe('a counted noun phrase', () => {
@@ -89,7 +90,7 @@ describe('the Japanese counter', () => {
 });
 
 describe('the time words the numerals unlock', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['DAY', {
       en: 'a period of twenty-four hours.', it: 'un periodo di ventiquattro ore.',
       fr: 'une période de vingt-quatre heures.', de: 'ein Zeitraum von vierundzwanzig Stunden.',

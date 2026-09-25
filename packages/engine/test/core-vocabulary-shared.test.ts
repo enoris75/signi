@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { concepts } from '../../backend/src/concepts/index.js';
 
@@ -13,7 +13,7 @@ const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subj
 const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { definiteness: 'definite', ...extra });
 
 describe('the nouns: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // Italian and Spanish mano are feminine despite the -o; Italian's plural is mani, German's Hände.
     ['HAND',
       { en: 'the hand.', it: 'la mano.', fr: 'la main.', de: 'die Hand.', es: 'la mano.', ja: '手。', pt: 'a mão.' },

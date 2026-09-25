@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { SUBORDINATING_CONJUNCTIONS } from '@signi/shared';
 import { translateSubordinator } from './translateSubordinator.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 const byLanguage = (sub: Parameters<typeof translateSubordinator>[0]) =>
-  Object.fromEntries(translateSubordinator(sub).map((t) => [t.language, t.text]));
+  Object.fromEntries(translateSubordinator(sub).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]));
 
 // The subordinate-clause menu's words (P09-E12 D9): the words each engine's clauses open on.
 describe('translateSubordinator', () => {

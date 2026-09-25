@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode } from '@signi/shared';
+import type { LanguageCode, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 import { concepts } from '../../backend/src/concepts/index.js';
 
@@ -76,12 +76,12 @@ describe('HELP_VERB: a verb whose German object is dative', () => {
   test('no other language moves, against the same frame on an accusative verb', () => {
     const helping = sayAll(clause(np('CAT'), 'HELP_VERB', { directObject: np('DOG') }));
     const seeing = sayAll(clause(np('CAT'), 'SEE', { directObject: np('DOG') }));
-    const object: Record<LanguageCode, string> = {
+    const object: Record<ReadyLanguageCode, string> = {
       en: 'the dog', it: 'il cane', fr: 'le chien', de: 'dem Hund', es: 'el perro', ja: '犬を', pt: 'o cão',
     };
     expect(helping.es).toContain('al perro');
     expect(seeing.es).toContain('el perro');
-    for (const lang of ['en', 'it', 'fr', 'ja', 'pt'] as LanguageCode[]) {
+    for (const lang of ['en', 'it', 'fr', 'ja', 'pt'] as ReadyLanguageCode[]) {
       expect(helping[lang], lang).toContain(object[lang]);
       expect(seeing[lang], lang).toContain(object[lang]);
     }

@@ -10,9 +10,9 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import type { LanguageCode, RubySegment, Translation } from '@signi/shared';
-import { LANGUAGES } from '@signi/shared';
+import { LANGUAGE_CODES, isPreviewLanguage } from '@signi/shared';
 import type { SentenceResult } from '../hooks/useTranslation.ts';
-import { FLAG } from '../i18n/flags.ts';
+import { Flag } from '../i18n/flags.tsx';
 import { useUiString } from '../i18n/useUiString.ts';
 import { focusRing } from '../keyboard/focusRing.ts';
 
@@ -33,8 +33,6 @@ function RubyText({ segments }: { segments: RubySegment[] }) {
     </>
   );
 }
-
-const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 
 interface Props {
   // One entry per root sentence, in period order. Sentences that aren't translatable yet
@@ -124,7 +122,13 @@ function LanguageRow({
   const [copied, setCopied] = useState(false);
   // Named `uiString` rather than `t` — the translation lambdas below already bind `t`.
   const uiString = useUiString();
-  const name = uiString(`language.${language}`);
+  // A row whose variety is not recoverable from its text names it (P10-E2): Swiss German says which
+  // dialect it writes, "Swiss German (Zürich)", and says in its tooltip how, and that no standard
+  // spelling exists to be checked against.
+  const dialect = language === 'gsw' ? uiString('language.gsw.dialect') : '';
+  const name = dialect ? `${uiString(`language.${language}`)} (${dialect})` : uiString(`language.${language}`);
+  const about = language === 'gsw' ? [uiString('language.gsw.spelling'), uiString('language.gsw.caveat')] : [];
+  const unready = isPreviewLanguage(language);
   const lines = sentences.map((s) => s.translations?.find((t) => t.language === language));
   const text = lines
     .filter((t): t is Translation => Boolean(t))
@@ -169,20 +173,49 @@ function LanguageRow({
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-        <Box sx={{ fontSize: '0.9rem', lineHeight: 1 }}>{FLAG[language]}</Box>
-        <Typography
-          component="span"
-          sx={{
-            fontFamily: '"Inter", sans-serif',
-            fontSize: '0.6rem',
-            fontWeight: 700,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: 'text.secondary',
-          }}
+        <Box sx={{ fontSize: '0.9rem', lineHeight: 1 }}>
+          <Flag language={language} />
+        </Box>
+        <Tooltip
+          title={about.length ? about.map((line) => <Box key={line}>{line}</Box>) : ''}
+          placement="top"
         >
-          {name}
-        </Typography>
+          <Typography
+            component="span"
+            data-testid={`row-name-${language}`}
+            sx={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: '0.6rem',
+              fontWeight: 700,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'text.secondary',
+            }}
+          >
+            {name}
+          </Typography>
+        </Tooltip>
+        {/* A language still in preview (P10-E1): rendered, not yet reviewed. */}
+        {unready && (
+          <Box
+            component="span"
+            data-testid="row-language-preview"
+            sx={{
+              px: 0.75,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              fontFamily: '"Inter", sans-serif',
+              fontSize: '0.55rem',
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'text.secondary',
+            }}
+          >
+            {uiString('status.preview')}
+          </Box>
+        )}
         {preview && (
           <Box
             component="span"

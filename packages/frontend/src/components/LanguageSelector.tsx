@@ -3,16 +3,15 @@ import type { SelectChangeEvent } from '@mui/material';
 import type { HTMLAttributes } from 'react';
 import TranslateIcon from '@mui/icons-material/Translate';
 import type { LanguageCode } from '@signi/shared';
-import { LANGUAGES } from '@signi/shared';
-import { FLAG } from '../i18n/flags.ts';
+import { READY_LANGUAGES } from '@signi/shared';
+import { Flag } from '../i18n/flags.tsx';
 import { useUiLanguage } from '../i18n/LanguageContext.tsx';
 import { useUiString } from '../i18n/useUiString.ts';
 
-const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
-
 // Header control for choosing the app's UI language. Its option labels are rendered by the
 // engine in the current UI language (the `language.*` entries of the UI-string catalog) —
-// the same translation path as the rest of the app.
+// the same translation path as the rest of the app. Only a ready language is offered: a preview one
+// (P10-E1) is a row of the translations panel, not yet a language to live in.
 export function LanguageSelector() {
   const { uiLanguage, setUiLanguage } = useUiLanguage();
   const t = useUiString();
@@ -39,14 +38,14 @@ export function LanguageSelector() {
         '& .MuiSelect-select': { display: 'flex', alignItems: 'center', gap: 0.75, py: 0.75 },
       }}
     >
-      {LANGUAGE_CODES.map((code) => (
+      {READY_LANGUAGES.map((code) => (
         <MenuItem
           key={code}
           value={code}
           sx={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', gap: 1 }}
         >
           <Box component="span" sx={{ fontSize: '1rem', lineHeight: 1 }}>
-            {FLAG[code]}
+            <Flag language={code} />
           </Box>
           {t(`language.${code}`)}
         </MenuItem>

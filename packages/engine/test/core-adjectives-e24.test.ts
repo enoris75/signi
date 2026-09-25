@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09-E24's core adjectives (docs/localization/done/B87): DIFFERENT, SURE, the two REALs, IMPORTANT,
 // LONG, BLACK and WHITE, and the differentia LENGTH that LONG's gloss stands on. Also the engine work
@@ -11,12 +12,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // Romance languages, and a Japanese adjective whose word is a godan or a する verb (違う, 実在する).
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const seed = (id: string) => concepts.find((c) => c.id === id);
@@ -27,7 +28,7 @@ const houses = (adjective: string) =>
   sayAll(clause(np('HOUSE', { number: 'plural', definiteness: 'indefinite', adjectives: [adjective] }), 'COLLAPSE'));
 
 describe('the glosses, in every language', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // SAME's gloss inverted: SAME says OTHER, not this word, so the pair is not a circle. German
     // gleich is SAME's lexeme; the predicate SAME keeps its article in five languages.
     ['DIFFERENT', {
@@ -91,7 +92,7 @@ describe('LENGTH: a singular, a plural and its gender', () => {
 });
 
 describe('the adjectives on a feminine noun, attributive plural and predicate', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // After the noun in Romance: before it, diverse / diferentes is "various". Japanese 違う is a verb.
     ['DIFFERENT',
       { en: 'different houses collapse.', it: 'case diverse crollano.', fr: 'des maisons différentes s\'effondrent.',

@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode } from '@signi/shared';
+import type { LanguageCode, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C28, the verb roots: sixty verbs the sweep of 2026-09-22 left on the literal because
 // a root has no genus to be glossed by. Sixteen turned out to have one once the shapes that had
@@ -12,16 +13,16 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // adjectives CLOSED and OPEN_ADJECTIVE. This file pins both halves.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 describe('the verb roots C28 glossed', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // A route on the genus: the complement MOVE_ONESELF always licensed and no gloss had used.
     // JUMP is the same noun as a direction ("into the air"), so the two stay apart everywhere.
     ['FLY', { en: 'to move through the air.', it: "muoversi attraverso l'aria.", fr: "se déplacer à travers l'air.", de: 'sich durch die Luft bewegen.', es: 'moverse por el aire.', ja: '空気を移動する。', pt: 'mover-se pelo ar.' }],
@@ -64,7 +65,7 @@ describe('the words C28 seeded', () => {
   // The two states OPEN and CLOSE leave: agreeing attributively in gender and number, predicated
   // with estar in Spanish and Portuguese (transient), and in Japanese a た-adjective that predicates
   // as 〜ている — in the present, the negative and the past alike.
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     ['CLOSED',
       { en: 'the closed houses.', it: 'le case chiuse.', fr: 'les maisons fermées.', de: 'die geschlossenen Häuser.', es: 'las casas cerradas.', ja: '閉じた家。', pt: 'as casas fechadas.' },
       { en: 'the house is not closed.', it: 'la casa non è chiusa.', fr: "la maison n'est pas fermée.", de: 'das Haus ist nicht geschlossen.', es: 'la casa no está cerrada.', ja: '家は閉じていません。', pt: 'a casa não está fechada.' },

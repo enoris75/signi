@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C24's last four adjectives — FIRST, SECOND, THIRD and CONDITIONAL — are what follows
 // which and what another clause depends on, and both verbs govern their object in a way the engine
@@ -14,12 +15,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // Spanish a verb-wide personal a (`object_a`: "sigue al primer objeto", still "lo sigue").
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const CLAUSE = np('CLAUSE');
@@ -27,7 +28,7 @@ const CONDITION = np('CONDITION');
 const CAT = np('CAT');
 
 describe('DEPEND: an object every language but Japanese takes with a preposition', () => {
-  test.each<[string, Partial<PhrasePlan>, Record<LanguageCode, string>]>([
+  test.each<[string, Partial<PhrasePlan>, Record<ReadyLanguageCode, string>]>([
     ['present', { verbPhrase: { verb: 'DEPEND' }, directObject: CONDITION },
       { en: 'the clause depends on the condition.', it: 'la proposizione dipende dalla condizione.', fr: 'la proposition dépend de la condition.', de: 'der Satz hängt von der Bedingung ab.', es: 'la oración depende de la condición.', ja: '節は条件に依存しています。', pt: 'a oração depende da condição.' }],
     // Italian dipendere selects essere; German abhängen is strong and separable.
@@ -55,7 +56,7 @@ describe('DEPEND: an object every language but Japanese takes with a preposition
 });
 
 describe('FOLLOW: an object German takes with auf, Spanish with a, Japanese with に', () => {
-  test.each<[string, Partial<PhrasePlan>, Record<LanguageCode, string>]>([
+  test.each<[string, Partial<PhrasePlan>, Record<ReadyLanguageCode, string>]>([
     ['a noun object', { directObject: np('DOG') },
       { en: 'the cat follows the dog.', it: 'il gatto segue il cane.', fr: 'le chat suit le chien.', de: 'der Kater folgt auf den Hund.', es: 'el gato sigue al perro.', ja: '猫は犬に続きます。', pt: 'o gato segue o cão.' }],
     // Spanish's a is a personal a, not A139's preposition: the pronoun is still the clitic.
@@ -88,7 +89,7 @@ describe('FOLLOW: an object German takes with auf, Spanish with a, Japanese with
 });
 
 describe('the four glosses they shipped (localization C24)', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['FIRST', { en: 'that all other objects follow.', it: 'che tutti gli altri oggetti seguono.', fr: 'que tous les autres objets suivent.', de: 'auf den alle anderen Gegenstände folgen.', es: 'que todos los otros objetos siguen.', ja: 'すべての別の物体が続く。', pt: 'que todos os outros objetos seguem.' }],
     ['SECOND', { en: 'that follows the first object.', it: 'che segue il primo oggetto.', fr: 'qui suit le premier objet.', de: 'der auf den ersten Gegenstand folgt.', es: 'que sigue al primer objeto.', ja: '第一の物体に続く。', pt: 'que segue o primeiro objeto.' }],
     ['THIRD', { en: 'that follows the second object.', it: 'che segue il secondo oggetto.', fr: 'qui suit le deuxième objet.', de: 'der auf den zweiten Gegenstand folgt.', es: 'que sigue al segundo objeto.', ja: '第二の物体に続く。', pt: 'que segue o segundo objeto.' }],

@@ -1,4 +1,5 @@
 import type { PhrasePlan, RubySegment, Translation } from '@signi/shared';
+import { isPreviewLanguage } from '@signi/shared';
 import type { Mood } from '../../types.js';
 import { engines } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
@@ -43,8 +44,8 @@ export interface TranslateOptions {
   phrase?: 'directObject';
 }
 
-export function translate(plan: PhrasePlan, lookup: LexiconLookup, options: TranslateOptions = {}): Translation[] {
-  if (options.phrase) return translatePhrase(plan, lookup);
+export function translate(plan: PhrasePlan, lexicon: LexiconLookup, options: TranslateOptions = {}): Translation[] {
+  if (options.phrase) return translatePhrase(plan, lexicon);
   // An address calls the hearer, and an instruction (the label on a control, a recipe step) is
   // addressed to nobody, so the two contradict each other: refused by name rather than rendered as a
   // name before an infinitive (A338). `/api/translate` says the same as a 400 (`planError`).
@@ -52,6 +53,17 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup, options: Tran
     throw new Error('an instruction addresses nobody, so it takes no address: plan.address must be left out (A338)');
   }
   return engines.map((engine) => {
+    // A preview language (P10-E1 D1) says nothing at all for a plan naming a word it has no lexeme
+    // for, rather than a sentence with a hole in it — and never borrows another language's word to
+    // fill it. A word is missing when English has it and this language does not.
+    let missing = false;
+    const lookup: LexiconLookup = isPreviewLanguage(engine.language)
+      ? (id, language) => {
+        const entry = lexicon(id, language);
+        if (!entry && language === engine.language && lexicon(id, 'en')) missing = true;
+        return entry;
+      }
+      : lexicon;
     // The top clause's mood: 'conditional' when a hypothetical condition is attached,
     // 'imperative' for a command, 'infinitive' for a bare citation phrase (a verb definition),
     // else plain indicative (undefined). These are mutually exclusive (the UI never sets more
@@ -80,13 +92,17 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup, options: Tran
     const address = plan.address ? resolveAddress(plan.address, engine.language, lookup) : undefined;
     const addressed = address ? engine.render(address) : '';
     const called = address ? (exclaimed ? addressed : capitalized(addressed)) + separator : '';
+    const body = tidyCommas(engine.render(resolved));
+    // A language that renders nothing — a preview language with no forms for the plan's words
+    // (P10-E1) — says nothing at all, not a bare full stop or a vocative with no clause behind it.
+    if ((!body || missing) && isPreviewLanguage(engine.language)) return { language: engine.language, text: '' };
     const ruby = engine.renderRuby?.(resolved);
     const exclaimedRuby = exclaimed && ruby ? [interjectionSeg(interjection!), { t: separator }] : [];
     const calledRuby = address && ruby ? [...engine.renderRuby!(address), { t: separator }] : [];
     return {
       language: engine.language,
       // A parenthetical's closing comma (P09-E33) gives way to the stop, or to a comma it meets.
-      text: exclaimed + called + open + tidyCommas(engine.render(resolved)) + stop,
+      text: exclaimed + called + open + body + stop,
       ...(ruby ? { ruby: [...exclaimedRuby, ...calledRuby, ...(open ? [{ t: open }] : []), ...ruby, { t: stop }] } : {}),
     };
   });

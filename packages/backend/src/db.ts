@@ -100,7 +100,7 @@ function initSchema(db: Database.Database): void {
     -- (from that description); a language with no row here falls back to English at read time.
     CREATE TABLE IF NOT EXISTS concept_definitions (
       concept_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
-      language   TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      language   TEXT NOT NULL,
       definition TEXT NOT NULL,
       PRIMARY KEY (concept_id, language)
     );
@@ -112,14 +112,14 @@ function initSchema(db: Database.Database): void {
 
     CREATE TABLE IF NOT EXISTS verb_lexemes (
       id       INTEGER PRIMARY KEY AUTOINCREMENT,
-      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      language TEXT NOT NULL,
       lemma    TEXT NOT NULL,   -- infinitive / dictionary form
       notes    TEXT
     );
 
     CREATE TABLE IF NOT EXISTS noun_lexemes (
       id       INTEGER PRIMARY KEY AUTOINCREMENT,
-      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      language TEXT NOT NULL,
       singular TEXT NOT NULL,   -- citation / nominative singular form
       plural   TEXT,            -- NULL for uncountable or defective nouns
       gender   TEXT CHECK (gender IN ('masc','fem','neut') OR gender IS NULL),
@@ -128,7 +128,7 @@ function initSchema(db: Database.Database): void {
 
     CREATE TABLE IF NOT EXISTS pronoun_lexemes (
       id       INTEGER PRIMARY KEY AUTOINCREMENT,
-      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      language TEXT NOT NULL,
       lemma    TEXT NOT NULL,
       person   TEXT NOT NULL CHECK (person IN ('1','2','3')),
       number   TEXT NOT NULL CHECK (number IN ('singular','plural')),
@@ -138,14 +138,14 @@ function initSchema(db: Database.Database): void {
 
     CREATE TABLE IF NOT EXISTS adjective_lexemes (
       id       INTEGER PRIMARY KEY AUTOINCREMENT,
-      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      language TEXT NOT NULL,
       lemma    TEXT NOT NULL,
       notes    TEXT
     );
 
     CREATE TABLE IF NOT EXISTS adverb_lexemes (
       id       INTEGER PRIMARY KEY AUTOINCREMENT,
-      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      language TEXT NOT NULL,
       lemma    TEXT NOT NULL,
       notes    TEXT
     );
@@ -154,7 +154,7 @@ function initSchema(db: Database.Database): void {
     -- base form row, like an adverb.
     CREATE TABLE IF NOT EXISTS interjection_lexemes (
       id       INTEGER PRIMARY KEY AUTOINCREMENT,
-      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      language TEXT NOT NULL,
       lemma    TEXT NOT NULL,
       notes    TEXT
     );
@@ -423,6 +423,7 @@ function initSchema(db: Database.Database): void {
     db.exec("ALTER TABLE semantic_concepts ADD COLUMN sex TEXT CHECK (sex IN ('masc','fem') OR sex IS NULL)");
   }
   widenRoleCheck(db);
+  dropLanguageChecks(db);
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.
   const savedPhraseCols = db
@@ -465,4 +466,57 @@ function widenRoleCheck(db: Database.Database): void {
   } finally {
     db.pragma('foreign_keys = ON');
   }
+}
+
+/**
+ * The tables that once refused any language outside the seven (P10-E1): `concept_definitions` and
+ * the six lexeme tables. The language list is `LANGUAGES` in @signi/shared, which `seed.ts` checks
+ * every form against, so the schema no longer enumerates it — a CHECK here would be a second list,
+ * and the one that refused Swiss German.
+ */
+const LANGUAGE_CHECKED_TABLES = [
+  'concept_definitions',
+  'verb_lexemes',
+  'noun_lexemes',
+  'pronoun_lexemes',
+  'adjective_lexemes',
+  'adverb_lexemes',
+  'interjection_lexemes',
+];
+
+const LANGUAGE_CHECK = /\s*CHECK\s*\(\s*language\s+IN\s*\([^)]*\)\s*\)/;
+
+/**
+ * A database created before P10-E1 carries `CHECK (language IN ('en', …, 'pt'))` on seven tables,
+ * which SQLite cannot ALTER away: seeding a new language into it fails. Rebuild each such table
+ * without the CHECK, keeping every row — the procedure `widenRoleCheck` follows (new table from the
+ * old CREATE, copy, drop, rename), with foreign keys off so the drop cascades nothing into the form
+ * and link tables that point at it. The indexes on `language` go with the dropped table and are
+ * recreated from the schema's own `CREATE INDEX IF NOT EXISTS`.
+ */
+function dropLanguageChecks(db: Database.Database): void {
+  const stale = LANGUAGE_CHECKED_TABLES.flatMap((name) => {
+    const row = db
+      .prepare<[string], { sql: string }>("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?")
+      .get(name);
+    return row && LANGUAGE_CHECK.test(row.sql) ? [{ name, sql: row.sql }] : [];
+  });
+  if (stale.length === 0) return;
+  db.pragma('foreign_keys = OFF');
+  try {
+    db.transaction(() => {
+      for (const { name, sql } of stale) {
+        const create = sql
+          .replace(LANGUAGE_CHECK, '')
+          .replace(new RegExp(`^CREATE TABLE\\s+("?)${name}\\1`), `CREATE TABLE ${name}_unchecked`);
+        db.exec(create);
+        db.exec(`INSERT INTO ${name}_unchecked SELECT * FROM ${name}`);
+        db.exec(`DROP TABLE ${name}`);
+        db.exec(`ALTER TABLE ${name}_unchecked RENAME TO ${name}`);
+      }
+    })();
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
+  initSchema(db);
 }

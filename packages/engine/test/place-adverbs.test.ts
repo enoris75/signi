@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan } from '@signi/shared';
-import { LANGUAGES } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
+import { READY_LANGUAGES } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C25: the place and direction adverbs, and the construct they are glossed with — a
 // verbless subject rendered as the locative or direction complement it names
@@ -12,12 +13,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // words the BACKWARDS gloss stands on, DIRECTION_SPACE and OPPOSITE.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 /** A verbless period whose subject is the `type` complement it names. */
@@ -29,7 +30,7 @@ const gloss = (type: 'locative' | 'direction', phrase: NounPhrase, specifiers?: 
 const bare = (text: string): string => text.replace(/[.。]$/, '');
 
 describe('the place and direction adverbs are glossed in every language', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // The place something happens in: a locative, with its default relation.
     ['EVERYWHERE', { en: 'in all places.', it: 'in tutti i luoghi.', fr: 'dans tous les lieux.', de: 'an allen Orten.', es: 'en todos los lugares.', ja: 'すべての場所で。', pt: 'em todos os lugares.' }],
     ['TOGETHER', { en: 'in a group.', it: 'in un gruppo.', fr: 'dans un groupe.', de: 'in einer Gruppe.', es: 'en un grupo.', ja: 'グループで。', pt: 'em um grupo.' }],
@@ -61,7 +62,7 @@ describe('a complement gloss is what the clause says after its verb', () => {
   ])('%s: the %s of "the cat %s …"', (_id, type, verb, phrase) => {
     const fragment = sayAll(gloss(type, phrase));
     const sentence = sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase } } }));
-    for (const lang of Object.keys(LANGUAGES) as LanguageCode[]) expect(sentence[lang]).toContain(bare(fragment[lang]));
+    for (const lang of READY_LANGUAGES) expect(sentence[lang]).toContain(bare(fragment[lang]));
   });
 
   test('a hearth noun takes its locative idiom, as the complement does', () => {

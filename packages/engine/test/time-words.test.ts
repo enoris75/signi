@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization B59, P09's time words: NIGHT, YEAR and TODAY (DAY and WEEK came with the shared seed,
 // see core-vocabulary-shared.test.ts), and DARK, the differentia NIGHT's gloss is built on. Their
@@ -15,19 +16,19 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // and in the undeclined predicate (ist dunkel) — see `deSyncopate`, whose unit test carries the rule.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
 const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { definiteness: 'definite', ...extra });
 
 describe('the glosses B59 ships', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // FLAME's part-whole shape ("the visible part of a fire"), with DAY as the whole: the adjective
     // sits between the whole and the head in Japanese (日の暗い部分), where a relative clause would
     // put itself on the day (光がない日の部分). German pins the -el declension: dunkle, not dunkele.
@@ -46,7 +47,7 @@ describe('the glosses B59 ships', () => {
 });
 
 describe('the nouns: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     ['NIGHT',
       { en: 'the night.', it: 'la notte.', fr: 'la nuit.', de: 'die Nacht.', es: 'la noche.', ja: '夜。', pt: 'a noite.' },
       { en: 'the nights.', it: 'le notti.', fr: 'les nuits.', de: 'die Nächte.', es: 'las noches.', ja: '夜。', pt: 'as noites.' }],

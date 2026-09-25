@@ -5361,6 +5361,30 @@ export const UI_STRINGS = defineUiStrings({
   'language.es': { word: 'SPANISH', format: { capitalize: true }, fallback: 'Spanish' },
   'language.ja': { word: 'JAPANESE', format: { capitalize: true }, fallback: 'Japanese' },
   'language.pt': { word: 'PORTUGUESE', format: { capitalize: true }, fallback: 'Portuguese' },
+  'language.gsw': { word: 'SWISS_GERMAN', format: { capitalize: true }, fallback: 'Swiss German' },
+
+  // What the Swiss German row cannot say in its text (P10-E2): which dialect it writes, in brackets
+  // after its name — "Swiss German (Zürich)", de "Schweizerdeutsch (Zürich)" — and, in its tooltip,
+  // how it spells it and that there is no standard spelling to check it against (P10 D1, D2, §6).
+  'language.gsw.dialect': { word: 'ZURICH', fallback: 'Zürich' },
+  // "Dieth's spelling" (it "l'ortografia di Dieth", de "Dieths Rechtschreibung", ja ディートのつづり).
+  'language.gsw.spelling': {
+    plan: { subject: { concept: 'SPELLING', possessor: { concept: 'DIETH' } } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: "Dieth's spelling",
+  },
+  // "Swiss German does not have a standard spelling." The row's caveat, kept after promotion (P10-E15
+  // D2). The verb is denied rather than the object quantified: *no* reads as "not any" in Japanese
+  // (どの…も), where the denied verb gives 標準の綴りがありません, and French takes its partitive *pas de*.
+  'language.gsw.caveat': {
+    plan: {
+      subject: { concept: 'SWISS_GERMAN' },
+      verbPhrase: { verb: 'HAVE', negative: true },
+      directObject: { concept: 'SPELLING', definiteness: 'indefinite', adjectives: ['STANDARD'] },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'Swiss German does not have a standard spelling.',
+  },
 
   // The selector itself, as its aria-label: the language of the interface, LANGUAGE with INTERFACE as an
   // attributive noun (en "interface language", fr "langue d'interface", ja インターフェースの言語). Named

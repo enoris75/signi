@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
 import { ancestors, conceptIndex } from '../../backend/src/concepts/hierarchy.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09's everyday nouns and its institutions (docs/localization B65 and B64): THING, PROBLEM,
 // CASE_INSTANCE, SYSTEM, the two programs, SCHOOL, STUDENT, COMPANY_BUSINESS, STATE_NATION and WORLD,
@@ -14,12 +15,12 @@ import { ancestors, conceptIndex } from '../../backend/src/concepts/hierarchy.js
 // six lanes that seeded P09 the same day do not edit the same rows.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
@@ -28,7 +29,7 @@ const the = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { 
 // ── The words ─────────────────────────────────────────────────────────
 
 describe('the nouns: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // B65. THING takes each language's plain word, not OBJECT_THING's oggetto, Gegenstand, 物体.
     ['THING',
       { en: 'the thing.', it: 'la cosa.', fr: 'la chose.', de: 'das Ding.', es: 'la cosa.', ja: 'もの。', pt: 'a coisa.' },
@@ -256,7 +257,7 @@ describe('the verbs: the persons, the tenses and the aspects their languages inf
 // ── The glosses ───────────────────────────────────────────────────────
 
 describe('the glosses render in every language', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // B65. THING's whole phrase is a coordinated group, the first noun definition that is; Japanese
     // says "or" with か.
     ['THING', { en: 'an object or a concept.', it: 'un oggetto o un concetto.', fr: 'un objet ou un concept.', de: 'ein Gegenstand oder ein Begriff.', es: 'un objeto o un concepto.', ja: '物体か概念。', pt: 'um objeto ou um conceito.' }],

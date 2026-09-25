@@ -5,6 +5,7 @@ import { indefiniteModifierEs } from '../../languages/es/indefiniteModifier.js';
 import { indefiniteModifierFr } from '../../languages/fr/indefiniteModifier.js';
 import { indefiniteModifierIt } from '../../languages/it/indefiniteModifier.js';
 import { indefiniteModifierPt } from '../../languages/pt/indefiniteModifier.js';
+import { indefiniteModifierGsw } from '../../languages/gsw/indefiniteModifier.js';
 import type { IndefiniteKey, IndefiniteSpeller } from '../translator.types.js';
 
 /**
@@ -17,6 +18,7 @@ const SPELLERS: Partial<Record<string, IndefiniteSpeller>> = {
   it: indefiniteModifierIt,
   fr: indefiniteModifierFr,
   de: indefiniteModifierDe,
+  gsw: indefiniteModifierGsw,
   es: indefiniteModifierEs,
   pt: indefiniteModifierPt,
 };

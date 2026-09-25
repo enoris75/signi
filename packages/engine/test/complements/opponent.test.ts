@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, LexicalEntry, NounElement, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, LexicalEntry, NounElement, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { translate } from '../../src/index.js';
 import { clause, np, say, sayAll } from '../harness.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // The harness has seeded the in-memory lexicon by now, so its lookup is the one the app ships.
 const { lookupLexicalEntry } = await import('../../../backend/src/lexicon.js');
@@ -23,19 +24,19 @@ const lookupWithFight = (id: string, language: string): LexicalEntry | undefined
   const play = lookupLexicalEntry('PLAY_GAME', language);
   return play && { ...play, conceptId: id };
 };
-const sayAllWithFight = (plan: PhrasePlan): Record<LanguageCode, string> =>
-  Object.fromEntries(translate(plan, lookupWithFight).map((t) => [t.language, t.text])) as Record<LanguageCode, string>;
+const sayAllWithFight = (plan: PhrasePlan): Record<ReadyLanguageCode, string> =>
+  Object.fromEntries(translate(plan, lookupWithFight).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text])) as Record<ReadyLanguageCode, string>;
 
 // A test-only verb that is PLAY_GAME in every language, but whose lexeme names its own opponent's
 // word in the languages given: the `opponent_prep` FIGHT_JA carries, outside Japanese.
-const sayAllWithPrep = (plan: PhrasePlan, preps: Partial<Record<LanguageCode, string>>): Record<LanguageCode, string> => {
+const sayAllWithPrep = (plan: PhrasePlan, preps: Partial<Record<ReadyLanguageCode, string>>): Record<ReadyLanguageCode, string> => {
   const lookup = (id: string, language: string): LexicalEntry | undefined => {
     if (id !== 'TEST_PLAY') return lookupLexicalEntry(id, language);
     const play = lookupLexicalEntry('PLAY_GAME', language);
-    const prep = preps[language as LanguageCode];
+    const prep = preps[language as ReadyLanguageCode];
     return play && { ...play, conceptId: id, forms: { ...play.forms, ...(prep ? { opponent_prep: prep } : {}) } };
   };
-  return Object.fromEntries(translate(plan, lookup).map((t) => [t.language, t.text])) as Record<LanguageCode, string>;
+  return Object.fromEntries(translate(plan, lookup).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text])) as Record<ReadyLanguageCode, string>;
 };
 
 // A wh-question on the opponent slot, as questions.test.ts builds one.

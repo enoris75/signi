@@ -3216,6 +3216,29 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'Maria',   gender: 'fem', count: 'singular' },
     },
   },
+  {
+    // Eugen Dieth (1893–1956), whose *Schwyzertütschi Dialäktschrift* (1938) is the spelling the
+    // Swiss German row is written in (P10 D2): "Dieth's spelling", the row's tooltip (P10-E2).
+    id: 'DIETH',
+    role: 'noun',
+    description: 'Eugen Dieth, the Swiss linguist who devised a spelling for Swiss German dialects',
+    emoji: '🧑‍🏫',
+    proper: true,
+    human: true,
+    sex: 'masc',
+    animate: true,
+    countable: false,
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'Dieth',    count: 'singular' },
+      it: { base: 'Dieth',    gender: 'masc', count: 'singular', takes_article: '0' },
+      fr: { base: 'Dieth',    gender: 'masc', count: 'singular', takes_article: '0' },
+      de: { base: 'Dieth',    gender: 'masc', count: 'singular' },
+      es: { base: 'Dieth',    gender: 'masc', count: 'singular' },
+      ja: { base: 'ディート', count: 'singular' },
+      pt: { base: 'Dieth',    gender: 'masc', count: 'singular' },
+    },
+  },
   // P09's *Mr* (localization C38). A title is a common noun that fuses with a name into one phrase,
   // and four things about it are each language's own: Italian drops the final -e before a name
   // (`before_name`, "il signor Pietro" beside "il signore"); Italian, Spanish and Portuguese write
@@ -3547,6 +3570,27 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'Portugal',    gender: 'masc', takes_article: '0', count: 'singular' },
     },
   },
+  {
+    // The city whose dialect the Swiss German row writes (P10 D1): the row reads "Swiss German
+    // (Zürich)" in every interface language (P10-E2 D2). A city name takes no article in any of the
+    // seven, the Romance ones included.
+    id: 'ZURICH',
+    role: 'noun',
+    description: 'the largest city of Switzerland, on Lake Zurich',
+    emoji: '🏙️',
+    proper: true,
+    countable: false,
+    isA: 'CITY',
+    forms: {
+      en: { base: 'Zurich',      count: 'singular' },
+      it: { base: 'Zurigo',      gender: 'fem',  count: 'singular', takes_article: '0' },
+      fr: { base: 'Zurich',      gender: 'masc', count: 'singular', takes_article: '0' },
+      de: { base: 'Zürich',      gender: 'neut', count: 'singular' },
+      es: { base: 'Zúrich',      gender: 'masc', count: 'singular' },
+      ja: { base: 'チューリッヒ', count: 'singular' },
+      pt: { base: 'Zurique',     gender: 'masc', takes_article: '0', count: 'singular' },
+    },
+  },
 
   {
     id: 'LANGUAGE',
@@ -3718,6 +3762,45 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'portugués', gender: 'masc', takes_article: '1', count: 'singular' },
       ja: { base: 'ポルトガル語', count: 'singular', reading: 'ぽるとがるご' },
       pt: { base: 'português', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P10: the language of the eighth row — Zürichdeutsch, in Dieth spelling (P10 D1, D2). Its own
+    // name is Dieth-consistent for Zürich, long *ii* (P10-E2 D1, verify at E14). No definition: the
+    // other language names say "the language of <country>", and Switzerland has four.
+    id: 'SWISS_GERMAN',
+    role: 'noun',
+    description: 'the Alemannic German spoken in German-speaking Switzerland',
+    emoji: '🗣️',
+    proper: true,
+    countable: false,
+    isA: 'LANGUAGE',
+    forms: {
+      en: { base: 'Swiss German', count: 'singular' },
+      it: { base: 'svizzero tedesco', gender: 'masc', count: 'singular' },
+      fr: { base: 'suisse allemand', gender: 'masc', count: 'singular' },
+      de: { base: 'Schweizerdeutsch', gender: 'neut', count: 'singular', genitive: 'Schweizerdeutsch' },
+      es: { base: 'alemán suizo', gender: 'masc', takes_article: '1', count: 'singular' },
+      ja: { base: 'スイスドイツ語', count: 'singular', reading: 'すいすどいつご' },
+      pt: { base: 'alemão suíço', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The conventional way a language writes its words (P10-E2: "Dieth's spelling", "no standard
+    // spelling"). Countable: a language may have several.
+    id: 'SPELLING',
+    role: 'noun',
+    description: 'the conventional way of writing the words of a language; orthography',
+    emoji: '🔡',
+    synonym: 'orthography',
+    forms: {
+      en: { base: 'spelling', plural: 'spellings', count: 'singular' },
+      it: { base: 'ortografia', plural: 'ortografie', gender: 'fem', count: 'singular' },
+      fr: { base: 'orthographe', plural: 'orthographes', gender: 'fem', count: 'singular' },
+      de: { base: 'Rechtschreibung', plural: 'Rechtschreibungen', gender: 'fem', count: 'singular' },
+      es: { base: 'ortografía', plural: 'ortografías', gender: 'fem', count: 'singular' },
+      ja: { base: '綴り', count: 'singular', reading: 'つづり' },
+      pt: { base: 'ortografia', plural: 'ortografias', gender: 'fem', count: 'singular' },
     },
   },
   {

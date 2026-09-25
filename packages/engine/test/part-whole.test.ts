@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { LanguageCode, NounPhrase, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
 import { np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // Localization C26: the part-whole relation (`NounPhrase.possessorRole`), the instrument gap, and
 // the glosses they shipped. The relation is a flag on the possessed phrase saying its possessor is
@@ -12,15 +13,15 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // keyboard" into the Saxon "a keyboard's part", a part the keyboard owns.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
-const said = (subject: NounPhrase): Record<LanguageCode, string> => sayAll({ subject } as PhrasePlan);
+const said = (subject: NounPhrase): Record<ReadyLanguageCode, string> => sayAll({ subject } as PhrasePlan);
 const whole = (head: string, extra: Partial<NounPhrase>, of: NounPhrase): NounPhrase =>
   np(head, { ...extra, possessor: of, possessorRole: 'whole' });
 const KEYBOARD = np('KEYBOARD', { definiteness: 'indefinite' });
@@ -103,7 +104,7 @@ describe('the part-whole possessor', () => {
 });
 
 describe('the words C26 seeded: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // Feminine la fine / la fin, masculine el fin / o fim; German das Ende.
     ['END',
       { en: 'the end.', it: 'la fine.', fr: 'la fin.', de: 'das Ende.', es: 'el fin.', ja: '終わり。', pt: 'o fim.' },
@@ -123,7 +124,7 @@ describe('the words C26 seeded: a singular and a plural in every language', () =
 });
 
 describe('the glosses C26 shipped', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // The part-whole relation: PART with its whole (partOfGloss).
     ['KEY', { en: 'a part of a keyboard.', it: 'una parte di una tastiera.', fr: "une partie d'un clavier.", de: 'ein Teil einer Tastatur.', es: 'una parte de un teclado.', ja: 'キーボードの部分。', pt: 'uma parte de um teclado.' }],
     ['ROW', { en: 'a part of a list.', it: 'una parte di un elenco.', fr: "une partie d'une liste.", de: 'ein Teil einer Liste.', es: 'una parte de una lista.', ja: '一覧の部分。', pt: 'uma parte de uma lista.' }],
@@ -162,7 +163,7 @@ describe('the glosses C26 shipped', () => {
 // diphthongs under the stress (vierte), and Italian vivere has a strong past (visse, vissuto).
 describe('the verbs C26 seeded: LIVE_ALIVE and POUR', () => {
   const CAT = np('CAT');
-  test.each<[string, Partial<PhrasePlan>, Record<LanguageCode, string>]>([
+  test.each<[string, Partial<PhrasePlan>, Record<ReadyLanguageCode, string>]>([
     ['LIVE_ALIVE, present', { verbPhrase: { verb: 'LIVE_ALIVE' } },
       { en: 'the cat lives.', it: 'il gatto vive.', fr: 'le chat vit.', de: 'der Kater lebt.', es: 'el gato vive.', ja: '猫は生きます。', pt: 'o gato vive.' }],
     ['LIVE_ALIVE, past', { verbPhrase: { verb: 'LIVE_ALIVE', tense: 'past' } },

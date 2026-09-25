@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase, VerbPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, VerbPhrase, ReadyLanguageCode } from '@signi/shared';
 import { np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // The words seeded for the concept definitions of localization B33–B39 and B48–B51, and the glosses
 // they unlock on the noun side. The verb glosses they unlock are pinned beside their genus: BURN in
@@ -12,18 +13,18 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // rest of their paradigms is pinned here.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
 
 describe('the definition words: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // B33. The flame a burning thing gives off.
     ['FLAME',
       { en: 'a flame.', it: 'una fiamma.', fr: 'une flamme.', de: 'eine Flamme.', es: 'una llama.', ja: '炎。', pt: 'uma chama.' },
@@ -79,7 +80,7 @@ describe('the definition words: a singular and a plural in every language', () =
 
   // The three person nouns have a feminine: fr locutrice, compagne; de -in; it/es/pt -a. Italian,
   // Spanish and Portuguese parlante / hablante / falante change only the article.
-  test.each<[string, Record<LanguageCode, string>, Partial<Record<LanguageCode, string>>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Partial<Record<ReadyLanguageCode, string>>]>([
     ['SPEAKER',
       { en: 'a speaker.', it: 'una parlante.', fr: 'une locutrice.', de: 'eine Sprecherin.', es: 'una hablante.', ja: '話し手。', pt: 'uma falante.' },
       { it: 'le parlanti.', fr: 'les locutrices.', de: 'die Sprecherinnen.', es: 'las hablantes.', pt: 'as falantes.' }],
@@ -117,7 +118,7 @@ describe('the definition words: a singular and a plural in every language', () =
 // as they article a continent; English, German, Spanish and Japanese leave it bare. Portugal is the
 // one Portuguese does not article.
 describe('the seven countries (localization B36)', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['ENGLAND', { en: 'England.', it: "l'Inghilterra.", fr: "l'Angleterre.", de: 'England.', es: 'Inglaterra.', ja: 'イングランド。', pt: 'a Inglaterra.' }],
     ['ITALY', { en: 'Italy.', it: "l'Italia.", fr: "l'Italie.", de: 'Italien.', es: 'Italia.', ja: 'イタリア。', pt: 'a Itália.' }],
     ['FRANCE', { en: 'France.', it: 'la Francia.', fr: 'la France.', de: 'Frankreich.', es: 'Francia.', ja: 'フランス。', pt: 'a França.' }],
@@ -136,7 +137,7 @@ describe('the seven countries (localization B36)', () => {
 // definite, because "a language of Italy" says one of several. English puts a proper-noun possessor
 // in the Saxon genitive, German declines it with -s.
 describe('the seven languages are glossed by their country (localization B36)', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['ENGLISH', { en: "England's language.", it: "la lingua dell'Inghilterra.", fr: "la langue de l'Angleterre.", de: 'die Sprache Englands.', es: 'el idioma de Inglaterra.', ja: 'イングランドの言語。', pt: 'a língua da Inglaterra.' }],
     ['ITALIAN', { en: "Italy's language.", it: "la lingua dell'Italia.", fr: "la langue de l'Italie.", de: 'die Sprache Italiens.', es: 'el idioma de Italia.', ja: 'イタリアの言語。', pt: 'a língua da Itália.' }],
     ['FRENCH', { en: "France's language.", it: 'la lingua della Francia.', fr: 'la langue de la France.', de: 'die Sprache Frankreichs.', es: 'el idioma de Francia.', ja: 'フランスの言語。', pt: 'a língua da França.' }],
@@ -153,7 +154,7 @@ describe('the seven languages are glossed by their country (localization B36)', 
 // B37. B31's shape, "a complement that indicates means": the siblings differ only in the noun. The
 // three motion names take the place reached, left and crossed, where LOCATIVE takes "places".
 describe('the complement names are glossed on their genus (localization B37)', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     ['DIRECTION', { en: 'a complement that indicates destinations.', it: 'un complemento che indica destinazioni.', fr: 'un complément qui indique des destinations.', de: 'eine Ergänzung, die Ziele bezeichnet.', es: 'un complemento que indica destinos.', ja: '目的地を示す補語。', pt: 'um complemento que indica destinos.' }],
     ['SOURCE', { en: 'a complement that indicates origins.', it: 'un complemento che indica origini.', fr: 'un complément qui indique des origines.', de: 'eine Ergänzung, die Ausgangspunkte bezeichnet.', es: 'un complemento que indica orígenes.', ja: '起点を示す補語。', pt: 'um complemento que indica origens.' }],
     ['ROUTE', { en: 'a complement that indicates paths.', it: 'un complemento che indica percorsi.', fr: 'un complément qui indique des parcours.', de: 'eine Ergänzung, die Wege bezeichnet.', es: 'un complemento que indica recorridos.', ja: '経路を示す補語。', pt: 'um complemento que indica percursos.' }],

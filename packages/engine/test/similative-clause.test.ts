@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { ContentClause, LanguageCode, PhrasePlan, SubordinatingConjunction, VerbPhrase } from '@signi/shared';
+import type { ContentClause, LanguageCode, PhrasePlan, ReadyLanguageCode, SubordinatingConjunction, VerbPhrase } from '@signi/shared';
 import { np, say, sayAll } from './harness.js';
 
 // Localization C41: the similative *as* — a subordinating conjunction (as / come / comme / wie / como
@@ -113,7 +113,7 @@ describe('the adverbial clause said alone', () => {
   test('is what the clause renders in a sentence', () => {
     const fragment = sayAll(alone(one()));
     const sentence = sayAll(runs(one()));
-    for (const language of Object.keys(fragment) as LanguageCode[]) {
+    for (const language of Object.keys(fragment) as ReadyLanguageCode[]) {
       const bare = fragment[language].replace(/[.。]$/, '');
       expect(sentence[language], language).toContain(bare);
     }

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { translateApproximator } from '../src/index.js';
 import { clause, np, sayAll } from './harness.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09-E38: NounPhrase.approximator — `about` on a numeral, `almost` on the quantity determiners
 // all / no / many. Anywhere else it is ignored. Spanish "unos / unas" is the article and agrees (D2).
@@ -136,7 +137,7 @@ describe('P09-E38: almost on a quantity determiner', () => {
 // P09-E49: the determiner menu's approximator row is labelled with the word it adds — the one the
 // sentence writes, Spanish's agreeing *about* cited in the masculine.
 describe('P09-E49: the approximator row’s label', () => {
-  const label = (a: 'about' | 'almost') => Object.fromEntries(translateApproximator(a).map((t) => [t.language, t.text]));
+  const label = (a: 'about' | 'almost') => Object.fromEntries(translateApproximator(a).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]));
 
   test('about', () => {
     expect(label('about')).toEqual({ en: 'about', it: 'circa', fr: 'environ', de: 'etwa', es: 'unos', pt: 'cerca de', ja: '約' });

@@ -27,7 +27,7 @@ export function controllerCase(
 ): ResolvedVerbPhrase | undefined {
   if (!verbPhrase || !objectControlled) return verbPhrase;
   const forms = verbPhrase.verb.forms;
-  const extra: Record<string, string> | undefined = language === 'de'
+  const extra: Record<string, string> | undefined = (language === 'de' || language === 'gsw')
     ? (forms['controller_case'] === 'dat' ? { object_case: 'dat' } : undefined)
     : ROMANCE_DATIVE[language] && forms['object_case'] === 'dat' && !forms['object_prep']
       ? { object_prep: ROMANCE_DATIVE[language]! }

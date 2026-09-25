@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, ReadyLanguageCode } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { isPreviewLanguage } from '@signi/shared';
 
 // P09-E24's people, body and idea words (docs/localization B75, B79, B81): GIRL, GUY, KID and MEMBER;
 // HEAD, FACE, BACK_BODY and HEALTH; IDEA, REASON, ISSUE, INFORMATION, RESEARCH, STUDY_NOUN and
@@ -11,12 +12,12 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // the topic-gap relative ISSUE is the first gloss on.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
-function definitionAll(id: string): Record<LanguageCode, string> {
+function definitionAll(id: string): Record<ReadyLanguageCode, string> {
   const concept = concepts.find((c) => c.id === id);
   if (!concept?.definition) throw new Error(`${id} has no definition plan`);
   return Object.fromEntries(
-    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
-  ) as Record<LanguageCode, string>;
+    translate(concept.definition, lookupLexicalEntry).filter((t) => !isPreviewLanguage(t.language)).map((t) => [t.language, t.text]),
+  ) as Record<ReadyLanguageCode, string>;
 }
 
 const said = (concept: string, extra: Partial<NounPhrase> = {}) => sayAll({ subject: np(concept, extra) });
@@ -26,7 +27,7 @@ const a = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { de
 // ── The words ─────────────────────────────────────────────────────────
 
 describe('the count nouns: a singular and a plural in every language', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     // B75. Mädchen is neuter and the same word in the plural.
     ['GIRL',
       { en: 'the girl.', it: 'la ragazza.', fr: 'la fille.', de: 'das Mädchen.', es: 'la niña.', ja: '女の子。', pt: 'a menina.' },
@@ -75,7 +76,7 @@ describe('the count nouns: a singular and a plural in every language', () => {
 });
 
 describe('the mass nouns keep the singular and go bare as an object', () => {
-  test.each<[string, Record<LanguageCode, string>, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>, Record<ReadyLanguageCode, string>]>([
     ['HEALTH',
       { en: 'the health.', it: 'la salute.', fr: 'la santé.', de: 'die Gesundheit.', es: 'la salud.', ja: '健康。', pt: 'a saúde.' },
       { en: 'the cat sees health.', it: 'il gatto vede salute.', fr: 'le chat voit de la santé.', de: 'der Kater sieht Gesundheit.', es: 'el gato ve salud.', ja: '猫は健康を見ます。', pt: 'o gato vê saúde.' }],
@@ -145,7 +146,7 @@ describe('what the new lexemes do beyond their plural', () => {
 // ── The glosses ───────────────────────────────────────────────────────
 
 describe('the glosses', () => {
-  test.each<[string, Record<LanguageCode, string>]>([
+  test.each<[string, Record<ReadyLanguageCode, string>]>([
     // B75. GIRL's is YOUNG_WOMAN's by design (sweep-definitions.test.ts allows the pair).
     ['GIRL', { en: 'a young female person.', it: 'una giovane persona femminile.', fr: 'une jeune personne féminine.', de: 'eine junge weibliche Person.', es: 'una persona joven y femenina.', ja: '若い女性の人。', pt: 'uma pessoa jovem e feminina.' }],
     ['MEMBER', { en: 'a part of a group.', it: 'una parte di un gruppo.', fr: "une partie d'un groupe.", de: 'ein Teil einer Gruppe.', es: 'una parte de un grupo.', ja: 'グループの部分。', pt: 'uma parte de um grupo.' }],
