@@ -321,6 +321,26 @@ describe('buildUiStrings', () => {
     });
   });
 
+  // The complements that got a box of their own (P09-E44): each ring's controls name it by the grammar
+  // noun that titles it, built as the topic's are.
+  test('names the controls of the role box', () => {
+    const strings = buildUiStrings();
+    const family = (part: string) =>
+      Object.fromEntries(['clear', 'show', 'hide', 'expand', 'compact', 'remove'].map((verb) => [verb, strings[`action.${verb}.${part}` as keyof typeof strings]]));
+    const role = family('role');
+    for (const verb of Object.keys(role)) expect(Object.keys(role[verb] ?? {}).sort()).toEqual([...LANGUAGE_CODES].sort());
+    expect(role.remove).toEqual({
+      en: 'Remove the role',
+      it: 'Rimuovi il complemento di ruolo',
+      fr: 'Retirer le complément circonstanciel de rôle',
+      de: 'Die adverbiale Bestimmung der Rolle entfernen',
+      es: 'Quitar el complemento circunstancial de función',
+      ja: '役割の副詞語句を取り除き',
+      pt: 'Remover o adjunto adverbial de papel',
+    });
+    expect(role.clear).toMatchObject({ en: 'Clear the role', it: 'Cancella il complemento di ruolo', de: 'Die adverbiale Bestimmung der Rolle löschen' });
+  });
+
   // A period's part in a link is a clause, named as each tradition names it (B21). Japanese compounds
   // the name on 節, and OTHER takes the indefinite article's place in Spanish and Portuguese.
   test('names the clauses, conditions and conjuncts of linked periods', () => {

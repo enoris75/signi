@@ -368,6 +368,8 @@ export const COMMANDS: readonly CommandDef[] = [
   // P13's two: what the object is taken as or turned into, and the companion — `/objpred` and `/with`.
   role("objpred", ["objectcomplement"], "objectPredicative", "object complement", "slot.objectPredicative", "warning", /^objectPredicative$/),
   role("with", ["comitative"], "comitative", "companion", "slot.comitative", "warning", /^comitative$/),
+  // P09-E44: the capacity the subject acts in, "acts as a friend" — `/role` (`/as` is `/equally`'s).
+  role("role", ["capacity"], "role", "role", "slot.role", "warning", /^role$/),
   {
     name: "inst",
     aliases: ["instrument", "instrumental"],

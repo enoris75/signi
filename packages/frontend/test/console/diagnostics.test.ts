@@ -147,6 +147,7 @@ const SAMPLES: Samples = {
   relativeSamePeriod: [[{}, 'Choose another period']],
   relativeGapEmpty: [[{ ref: '#2.subj' }, 'Missing word: #2.subj']],
   relativeGapTaken: [[{ ref: '#2.subj' }, 'Another relative clause already has this noun: #2.subj']],
+  relativeGapRole: [[{ period: 2 }, 'Choose a noun: #2.subj, #2.obj']],
   linkCircle: [[{ period: 2 }, 'Choose another period']],
   clauseSelf: [[{ role: 'condition' }, 'Choose another period']],
   clauseInOtherLink: [[{ period: 2 }, 'That period is already linked: #2']],

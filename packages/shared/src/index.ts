@@ -312,12 +312,12 @@ export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'ca
  * order (`COMPLEMENT_RENDER_ORDER`) for the ones it has, so the reading order on the canvas is the
  * sentence's: the `topic` beside the manner, the `temporal` after the place, the `purpose` after the
  * cause (P09-E12b). The object complement and the comitative got theirs with P13 (a definition says
- * "to have as a part", "to go with a person"). The `role` and the `opponent` render from a plan (the
- * UI strings of C12 are built on them) but have no box on the canvas, so the frontend — which
- * derives its slots, satellites and selection fields from this list — does not know about them. Add
- * one here to give it a box.
+ * "to have as a part", "to go with a person"), and the `role` with P09-E44 ("acts as a friend"). The
+ * `opponent` renders from a plan (the UI strings of C12 are built on it) but has no box on the
+ * canvas, so the frontend — which derives its slots, satellites and selection fields from this list
+ * — does not know about it. Add one here to give it a box.
  */
-export const COMPLEMENT_TYPES: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'cause', 'purpose'];
+export const COMPLEMENT_TYPES: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'role', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'cause', 'purpose'];
 
 /**
  * The complements the builder offers on **every** period with a verb, whether the verb licenses

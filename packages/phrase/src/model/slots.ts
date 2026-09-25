@@ -218,9 +218,9 @@ export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
   // the topic B, from "about" (its A is the temporal's).
   purpose: "F",
   topic: "B",
-  // P09-E13's role takes E, from the essive whose "as" it is (its R is the route's, and the A of
-  // "as" the temporal's). Plan-only, so no menu offers it yet.
-  role: "E",
+  // P09-E13's role takes Q, from *qua*, "in the capacity of" (P09-E44): the E of the essive whose "as"
+  // it is went to the object complement, its R is the route's, and the A of "as" the temporal's.
+  role: "Q",
   // P09-E22's opponent takes V, from "versus" (its O is the object complement's, and the A of
   // "against" the temporal's). Plan-only, so no menu offers it yet.
   opponent: "V",
@@ -524,6 +524,9 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   // subject it goes with.
   objectPredicative: { x: 86, y: 36 },
   comitative: { x: 22, y: 66 },
+  // P09-E44's role, above the subject it is said of ("the man acts as a friend"), in the row the
+  // companion below the subject leaves empty.
+  role: { x: 22, y: 18 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

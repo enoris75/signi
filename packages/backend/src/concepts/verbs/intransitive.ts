@@ -1114,7 +1114,8 @@ export const intransitiveVerbs: ConceptSeed[] = [
     id: 'WORK_LABOUR',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['manner', 'locative', 'cause', 'instrumental'],
+    // `role`: the capacity one works in, "works as a student" (P09-E44).
+    complements: ['manner', 'role', 'locative', 'cause', 'instrumental'],
     description: 'to do a job; to labour',
     definition: `
       /inf /verb ( ACT ) /so #2

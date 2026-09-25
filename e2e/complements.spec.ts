@@ -246,6 +246,25 @@ test.describe('complements', () => {
       ja: '女は猫について考えます。',
     });
   });
+
+  // P09-E44. The capacity the subject acts in, where the verb licenses it (ACT). Nothing infers its
+  // gender from the subject, so the feminine is the box's own chip; six languages print it bare.
+  test('the role, with the gender its own chip gives it', async ({ app }) => {
+    await app.buildClause('WOMAN', 'ACT');
+    await app.revealAndPick('role', 'FRIEND');
+    await app.expectSentences({ en: 'the woman acts as a friend.', it: 'la donna agisce come amico.' });
+
+    await app.satellite('roleGender').click();
+    await app.expectSentences({
+      en: 'the woman acts as a friend.',
+      it: 'la donna agisce come amica.',
+      fr: 'la femme agit comme amie.',
+      de: 'die Frau handelt als Freundin.',
+      es: 'la mujer actúa como amiga.',
+      pt: 'a mulher age como amiga.',
+      ja: '女は友達として行動します。',
+    });
+  });
 });
 
 // The instrumental is the one complement with no box on the verb's canvas: its noun phrase lives in

@@ -11,7 +11,7 @@ apply round trip.
 actions, in all 7 languages. No seed work.
 **Status:** **planning, unscheduled**. Filed 2026-09-25 from P09's plan-only constructs. The
 engine side is [P09-E22](Z-done/P09-E22-adversarial-against.md). E45 shares its mechanism with
-[P09-E44](P09-E44-role-complement-box.md) (the role box): each adds one `BoxComplementType` member
+[P09-E44](Z-done/P09-E44-role-complement-box.md) (the role box): each adds one `BoxComplementType` member
 and one set of `PhraseSelection` fields. The two can land in one lane, but each retires on its own.
 
 What the engine renders from a plan at HEAD. Probed 2026-09-25 with `sayAll` on an in-memory seed:

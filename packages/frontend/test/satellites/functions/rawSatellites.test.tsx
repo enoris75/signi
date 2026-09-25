@@ -266,6 +266,15 @@ describe('rawSatellites', () => {
       expect(offered({ verb: concept('SEE', 'verb', { transitivity: 'transitive' }) })).toContain('objectPredicative');
     });
 
+    // P09-E44: the role is licensed — ACT and WORK_LABOUR offer it — and no adjunct.
+    it('offers the role only where the verb licenses it, in the builder’s order', () => {
+      const act = concept('ACT', 'verb', { complements: ['manner', 'role', 'locative', 'cause', 'instrumental'] });
+      const toggles = offered({ verb: act }).filter((key) => (COMPLEMENT_TYPES as string[]).includes(key));
+
+      expect(toggles).toEqual(['instrumental', 'role', 'comitative', 'manner', 'locative', 'temporal', 'cause', 'purpose']);
+      expect(offered({ verb: concept('EAT', 'verb', { transitivity: 'transitive', complements: ['instrumental', 'locative', 'cause'] }) })).not.toContain('role');
+    });
+
     it('offers the topic only where the verb licenses it, and no complement without a verb', () => {
       const think = concept('THINK', 'verb', { complements: ['topic'] });
 

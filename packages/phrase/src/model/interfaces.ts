@@ -182,15 +182,15 @@ export const governsInfinitive = (sel: Pick<PhraseSelection, "verb" | "predicati
  */
 /**
  * The complements this canvas draws a box for. Two kinds are left out. The `instrumental` has a
- * box, but in a period container of its own, reached by a link (see LINKED_COMPLEMENT_TYPES). The
- * `objectPredicative`, the `comitative`, P09-E13's `role` and P09-E22's `opponent` have no builder slot at all: they are plan-only
- * complements the engine renders (see COMPLEMENT_TYPES in @signi/shared), which is what the UI
- * strings built on them need, and all they need. Giving one a box means adding its selection fields
- * below, as every other complement has them.
+ * box, but in a period container of its own, reached by a link (see LINKED_COMPLEMENT_TYPES).
+ * P09-E22's `opponent` has no builder slot at all: it is a plan-only complement the engine renders
+ * (see COMPLEMENT_TYPES in @signi/shared), which is what the UI strings built on it need, and all
+ * they need. Giving it a box means adding its selection fields below, as every other complement
+ * has them — as P13 did for the object complement and the comitative, and P09-E44 for the `role`.
  */
 export type BoxComplementType = Exclude<
     ComplementType,
-    "instrumental" | "role" | "opponent"
+    "instrumental" | "opponent"
 >;
 
 export interface SlotConfig {
@@ -464,6 +464,14 @@ export interface PhraseSelection {
     comitativeAdjective?: Concept;
     comitativeAdjective2?: Concept;
     comitativeAdjective3?: Concept;
+    // The capacity the subject acts in ("acts **as a friend**", ACT, WORK_LABOUR; P09-E44): a noun
+    // head only, bare in six languages, its gender the user's (nothing infers it from the subject).
+    role?: Concept;
+    roleNumber?: "singular" | "plural";
+    roleGender?: "masc" | "fem" | "neut";
+    roleAdjective?: Concept;
+    roleAdjective2?: Concept;
+    roleAdjective3?: Concept;
     // Adverbial of manner ("runs *at the speed of light*", "cuts *with care*"). A full noun
     // phrase, like the motion complements. Its preposition is not a field here: it follows the
     // head noun's semantic manner relation (SPEED→"at", CARE→"with"), resolved in the engine.
@@ -540,6 +548,7 @@ export interface PhraseSelection {
     mannerConjuncts?: PhraseSelection[];
     objectPredicativeConjuncts?: PhraseSelection[];
     comitativeConjuncts?: PhraseSelection[];
+    roleConjuncts?: PhraseSelection[];
     // The one conjunction joining a block's whole group (default 'and'). Only `and` / `or` join
     // noun phrases — see NOUN_COORD_CONJUNCTIONS.
     subjectConjunction?: CoordConjunction;
@@ -557,6 +566,7 @@ export interface PhraseSelection {
     mannerConjunction?: CoordConjunction;
     objectPredicativeConjunction?: CoordConjunction;
     comitativeConjunction?: CoordConjunction;
+    roleConjunction?: CoordConjunction;
     subjectPossessor?: PhraseSelection;
     directObjectPossessor?: PhraseSelection;
     predicativePossessor?: PhraseSelection;
@@ -572,6 +582,7 @@ export interface PhraseSelection {
     mannerPossessor?: PhraseSelection;
     objectPredicativePossessor?: PhraseSelection;
     comitativePossessor?: PhraseSelection;
+    rolePossessor?: PhraseSelection;
     // A *pronominal* possessor: instead of a genitive `${which}Possessor` phrase, the noun's
     // possessor corefers with another noun in the same period ("the boy and *his* horse"), stored
     // as that antecedent's `NounAddress`. The engine then renders a possessive pronoun agreeing
@@ -592,6 +603,7 @@ export interface PhraseSelection {
     mannerPossessorRef?: NounAddress;
     objectPredicativePossessorRef?: NounAddress;
     comitativePossessorRef?: NounAddress;
+    rolePossessorRef?: NounAddress;
 }
 
 // Extra grammatical settings a picker can commit alongside a concept. The pronoun

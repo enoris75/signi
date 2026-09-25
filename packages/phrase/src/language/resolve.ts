@@ -194,6 +194,8 @@ export const NOUN_NAMES: Record<NounKey, string> = {
   // P13's two boxes: the object complement and the companion.
   objectPredicative: "objpred",
   comitative: "with",
+  // P09-E44's box: the capacity one acts in.
+  role: "role",
 };
 
 const NOUN_BY_NAME: Record<string, NounKey> = Object.fromEntries(

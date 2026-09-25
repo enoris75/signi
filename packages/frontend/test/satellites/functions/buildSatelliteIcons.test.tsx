@@ -350,6 +350,14 @@ describe('buildSatelliteIcons', () => {
       expect(directObjectToggle?.key).toBe('directObject');
     });
 
+    // P09-E44: the role rides the same row, where the verb licenses it.
+    it('carries the role’s toggle on a verb that licenses it', () => {
+      const act = concept('ACT', 'verb', { transitivity: 'intransitive', complements: ['manner', 'role', 'locative', 'cause', 'instrumental'] });
+      const { complementToggleIcons } = icons({ verb: act });
+
+      expect(keysOf(complementToggleIcons)).toEqual(['role', 'comitative', 'manner', 'locative', 'temporal', 'cause', 'purpose']);
+    });
+
     it('pins the object’s fold-away control apart from the toggle row and the verb box', () => {
       const result = icons({ verb: SEE });
 

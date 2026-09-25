@@ -51,7 +51,9 @@ export type ComplementSlot =
   | "topic"
   | "cause"
   // A verb with no object has nothing to take as something (P13); the comitative goes with any verb.
-  | "objectPredicative";
+  | "objectPredicative"
+  // The capacity one acts in is licensed (ACT, WORK_LABOUR; P09-E44).
+  | "role";
 
 /** A word a command could not reach, and the word of the period that could take it. */
 export interface NoTargetArgs {
@@ -219,6 +221,7 @@ const SEGMENTS = {
   relativeSamePeriod: () => [say("diagnostic.chooseOtherPeriod")],
   relativeGapEmpty: (a: { ref: string }) => [say("diagnostic.missingWord", a.ref)],
   relativeGapTaken: (a: { ref: string }) => [say("diagnostic.nounAlreadyTaken", a.ref)],
+  relativeGapRole: (a: { period: number }) => [say("diagnostic.chooseNoun", `#${a.period}.subj, #${a.period}.obj`)],
   linkCircle: (_: { period: number }) => [say("diagnostic.chooseOtherPeriod")],
   clauseSelf: (_: { role: ClauseRole }) => [say("diagnostic.chooseOtherPeriod")],
   clauseInOtherLink: (a: { period: number }) => [say("diagnostic.periodAlreadyLinked", `#${a.period}`)],

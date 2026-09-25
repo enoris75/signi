@@ -135,6 +135,18 @@ test.describe('the phrase console', () => {
     await app.expectSentences({ en: 'the cat eats.' });
   });
 
+  // P09-E44: the capacity one acts in, on the verb that licenses it.
+  test('says what the subject acts as with /role, and /del role takes it back', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/subj woman /verb act /role ( friend /fem )');
+    await run(page);
+    await app.expectSentences({ en: 'the woman acts as a friend.', it: 'la donna agisce come amica.', de: 'die Frau handelt als Freundin.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/subj ( woman ) /verb ( act ) /role ( friend /fem )');
+    await page.keyboard.type('/del role');
+    await run(page);
+    await app.expectSentences({ en: 'the woman acts.' });
+  });
+
   test('says there is with /there, and /del there takes it back', async ({ app, page }) => {
     await prompt(page).click();
     await page.keyboard.type('/there /subj ( cat /a ) /verb be /loc house');

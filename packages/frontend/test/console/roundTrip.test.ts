@@ -162,6 +162,15 @@ const OPS: Op[] = [
     const w = wordFor(rng, type as SlotKey, 'period');
     return R.applyConceptSelect(sel, type as SlotKey, w.concept, w.opts);
   }),
+  // The capacity the subject acts in (P09-E44), where the verb offers it: a noun head only, and its
+  // gender and number the user's own — nothing infers them from the subject.
+  onPeriod((sel, rng, s, cid) => {
+    if (!offeredComplements(sel.verb).includes('role') || (isLinked(s, cid) && sel.role)) return undefined;
+    let next = R.applyConceptSelect(sel, 'role', pick(rng, NOUNS)!);
+    if (next.role?.gendered && rng() < 0.5) next = R.toggleGender(next, 'role');
+    if (rng() < 0.5) next = R.toggleNumber(next, 'role');
+    return next;
+  }),
   // Adjectives and noun modifiers, on any noun head.
   onPeriod((sel, rng) => {
     const head = pick(rng, nounHeads(sel));
@@ -266,7 +275,8 @@ const OPS: Op[] = [
     let next = R.addConjunct(sel, which);
     const i = R.conjunctsOf(next, which).length - 1;
     if (rng() < 0.9) {
-      const w = wordFor(rng, 'subject', 'conjunct');
+      // Beside a predicate, what a predicate takes (P13, conjunctSpec): no pronoun there.
+      const w = which === 'predicative' ? wordFor(rng, 'predicative', 'period') : wordFor(rng, 'subject', 'conjunct');
       next = R.updateConjunct(next, which, i, (c) => R.applyConceptSelect(c, 'subject', w.concept, w.opts));
     }
     if (rng() < 0.3) next = R.cycleNounConjunction(next, which);
