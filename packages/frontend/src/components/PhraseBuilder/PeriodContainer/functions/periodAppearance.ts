@@ -94,8 +94,11 @@ export function periodLabel(
   // A subordinate clause says so before its mood: the infinitive link draws its clause in the
   // infinitive, and that period is the complement first. Its word in brackets, as the coordinated
   // clause's conjunction: "Subordinate clause (When)", it "Proposizione subordinata (Quando)".
+  // A wh-question's clause is named by its own question word (P09-E55), so it takes no bracket.
   if (subordinate?.asTarget)
-    return `${t("clause.subordinate")} (${t(subordinateLabelKey(subordinate.asTarget))})`;
+    return subordinate.asTarget.force === "wh" && subordinate.asTarget.kind === "content"
+      ? t("clause.subordinate")
+      : `${t("clause.subordinate")} (${t(subordinateLabelKey(subordinate.asTarget))})`;
   if (imperative?.active) return t("imperative.command");
   if (infinitive?.active) return t("infinitive.phrase");
   if (question?.active) return t("mood.question");

@@ -42,6 +42,7 @@ import {
   canBeCoordinate,
   canBeInstrument,
   canBeSubordinate,
+  governedForce,
   canStartCondition,
   canStartCoordination,
   canStartSubordinate,
@@ -910,8 +911,11 @@ class Run {
       Boolean(next.infinitive) !== Boolean(root.infinitive) ||
       Boolean(next.interrogative) !== Boolean(root.interrogative);
     // A mood can't be flipped on a period alone while it takes part in a conditional or a
-    // coordination (see PeriodCard's moodLocked): the relation has to go first.
-    if (flips && this.moodLocked(id))
+    // coordination (see PeriodCard's moodLocked): the relation has to go first. The clause of a verb
+    // that reports a question either way (KNOW, P09-E55) has its question for its own; ASK's stays one.
+    const onlyQuestion =
+      Boolean(next.imperative) === Boolean(root.imperative) && Boolean(next.infinitive) === Boolean(root.infinitive);
+    if (flips && this.moodLocked(id) && !(onlyQuestion && this.reportedQuestion(id) === "either"))
       fail(item.head, coded("moodLocked"));
     let sel = next;
     if (mood === "command" && item.word) {
@@ -931,6 +935,18 @@ class Run {
    * the clause of, locks its mood (see moodLocked). A subordinate clause has no mood of its own
    * (P09-E12 D9); the clause governing it keeps its.
    */
+  /**
+   * The question a period may carry as the that-clause of a verb that reports one (P09-E55, the
+   * verb's `clauseForce`), in no other relation: `interrogative` under ASK, `either` under KNOW.
+   */
+  reportedQuestion(id: string): "interrogative" | "either" | undefined {
+    const link = this.links.find((l) => isSubordinateLink(l) && l.target.containerId === id);
+    if (!link || !isSubordinateLink(link) || link.kind !== "content") return undefined;
+    if (this.links.some((l) => (isConditionalLink(l) || isCoordinativeLink(l)) && (l.source.containerId === id || l.target.containerId === id)))
+      return undefined;
+    return governedForce(this.containers.find((c) => c.id === link.source.containerId));
+  }
+
   moodLocked(id: string): boolean {
     return this.links.some(
       (l) =>
@@ -970,7 +986,7 @@ class Run {
     }
     const id = frame.containerId;
     const root = this.root(id);
-    if (!root.interrogative && this.moodLocked(id)) fail(item.head, coded("moodLocked"));
+    if (!root.interrogative && this.moodLocked(id) && !this.reportedQuestion(id)) fail(item.head, coded("moodLocked"));
     let sel = setQuestionRole(root, role, possessed);
     if (animacy) sel = setQuestionAnimate(sel, animacy.value === "who");
     if (relation) sel = relation(sel);
@@ -1142,7 +1158,9 @@ class Run {
       // The question's gap, and the existential (P09-E12): the period's own, whatever is in reach.
       case "wh": {
         if (!this.root(containerId).questionRole) fail(span, coded("nothingToRemove"));
-        this.updateRoot(containerId, (s) => setQuestionRole(s, undefined));
+        // ASK's clause stays a question, a yes/no one (P09-E55 D3).
+        const asked = this.reportedQuestion(containerId) === "interrogative";
+        this.updateRoot(containerId, (s) => (asked ? setInterrogative(setQuestionRole(s, undefined), true) : setQuestionRole(s, undefined)));
         return;
       }
       case "there": {
@@ -1278,11 +1296,15 @@ class Run {
           fail(op.span, coded("takesNoInfinitive", { verb: this.vocab.label(verb!) }));
         if (!canStartSubordinate(this.links, main, op.link)) fail(op.span, coded("cantTakeSubordinate"));
         if (!canBeSubordinate(this.containers, this.links, op.mainId, clauseId, op.link))
-          fail(op.span, this.clauseRefusal(op.mainId, clauseId, "subordinate"));
+          fail(op.span, this.clauseRefusal(op.mainId, clauseId, "subordinate", op.link === "content" && Boolean(governedForce(main))));
         this.links = addSubordinate(this.links, op.mainId, clauseId, op.link, id(), op.conjunction);
         // The infinitive complement and the clause of purpose (P13) are drawn in the infinitive mood, as
         // the canvas's pick sets them.
         if (op.link === "infinitive" || op.link === "purpose") this.updateRoot(clauseId, (root) => setInfinitive(root, true));
+        // The clause of a verb that reports only questions (ASK) is one, as the canvas's pick makes it
+        // (P09-E55 D3): "/verb ( ask ) /clause { … }" asks whether.
+        if (op.link === "content" && governedForce(main) === "interrogative")
+          this.updateRoot(clauseId, (root) => setInterrogative(root, true));
         return;
       }
       case "instrument": {
@@ -1366,7 +1388,9 @@ class Run {
     return undefined;
   }
 
-  clauseRefusal(sourceId: string, targetId: string, role: ClauseRole): Coded {
+  // `questionLicensed`: a that-clause of a verb that reports a question (P09-E55), which a question
+  // target does not bar.
+  clauseRefusal(sourceId: string, targetId: string, role: ClauseRole, questionLicensed = false): Coded {
     const n = this.periodNumber(targetId);
     if (sourceId === targetId) return coded("clauseSelf", { role });
     if (isSelfOrAncestor(targetId, sourceId, this.links)) return coded("linkCircle", { period: n });
@@ -1374,7 +1398,7 @@ class Run {
     // An if-clause and a subordinate clause ask nothing, so a question is refused as either (A268,
     // P09-E12 M5); a coordinate's mood is the pair's, and a question joins a question.
     const target = this.containers.find((c) => c.id === targetId)?.selection;
-    if ((role === "condition" || role === "subordinate") && (target?.interrogative || target?.questionRole))
+    if ((role === "condition" || (role === "subordinate" && !questionLicensed)) && (target?.interrogative || target?.questionRole))
       return coded("clauseQuestion", { period: n, role });
     return coded("clauseCannot", { period: n, role });
   }

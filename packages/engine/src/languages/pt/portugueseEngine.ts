@@ -57,6 +57,7 @@ export const portugueseEngine: LanguageEngine = {
   // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
   // D9): `that`, the object clause's complementizer, or a subordinating conjunction. Portuguese cites each as it opens its clause ("depois que").
   renderSubordinator(sub: Subordinator): string {
+    if (sub === 'whether') return 'se'; // P09-E55, the indirect yes/no question's complementizer
     return sub === 'that' ? 'que' : SUBORDINATORS[sub];
   },
   renderConjunction(conjunction: CoordConjunction): string {

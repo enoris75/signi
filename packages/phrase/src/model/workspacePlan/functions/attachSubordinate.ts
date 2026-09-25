@@ -2,6 +2,8 @@ import type { ContentClause, InfinitiveComplement, NounElement, NounPhrase, Phra
 import { isSubordinateLink, subordinateReading, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
 import { attachLinks } from "./attachLinks.ts";
+import { askQuestion } from "../../selectionToPlan/functions/askQuestion.ts";
+import { governedForce } from "../../linkRules.ts";
 import { hasHead } from "./hasHead.ts";
 
 // Attach the subordinate clause sourced from `container` onto `plan` (P09-E12 D9). The linked
@@ -69,6 +71,18 @@ export function attachSubordinate(
       plan.subject = { concept: "THING" };
       plan.contentSubject = clausePlan as ContentClause;
     } else {
+      // A clause is a question where its verb reports one (P09-E55): "asks **what** the cat eats",
+      // its gap left out as a root's is (askQuestion). Elsewhere it states — a question left on the
+      // clause of a verb that reports none says nothing — and a statement under a verb that reports
+      // only questions (ASK) is withheld, as a clause without a subject is: no plan reaches the
+      // engine's refusal (P09-E17).
+      const force = governedForce(container);
+      if (force === "interrogative" && !clausePlan.interrogative) return;
+      if (force) askQuestion(clausePlan, clause.selection);
+      else {
+        delete clausePlan.interrogative;
+        delete clausePlan.questionRole;
+      }
       delete plan.directObject;
       plan.contentObject = clausePlan as ContentClause;
     }

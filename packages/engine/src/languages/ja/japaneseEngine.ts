@@ -59,6 +59,7 @@ export const japaneseEngine: LanguageEngine = {
   // the plain past, which the citation keeps (〜た後で).
   renderSubordinator(sub: Subordinator): string {
     if (sub === 'that') return '〜と';
+    if (sub === 'whether') return '〜かどうか'; // P09-E55, the indirect yes/no question's complementizer
     return sub === 'after' ? `〜た${JA_SUBORDINATORS[sub].word}`
       : JA_SUBORDINATORS[sub].te ? `〜て${JA_SUBORDINATORS[sub].word}`
       : `〜${JA_SUBORDINATORS[sub].word}`;

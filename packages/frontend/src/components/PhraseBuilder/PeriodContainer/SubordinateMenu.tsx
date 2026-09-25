@@ -12,8 +12,9 @@ export interface SubordinateMenuProps {
   onClose: () => void;
 }
 
-// A row's value: its conjunction for an adverbial clause, else the link kind it starts.
-const valueOf = (o: SubordinateOption): string => o.conjunction ?? o.link;
+// A row's value: its conjunction for an adverbial clause, *whether* for the question (P09-E55), else
+// the link kind it starts.
+const valueOf = (o: SubordinateOption): string => o.conjunction ?? (o.question ? "whether" : o.link);
 
 // The subordinate-clause picker (P09-E12 D9), the coordination's ConjunctionMenu for a clause the
 // period governs: *that* (its object clause) where the verb takes one and has no object, *to* (its

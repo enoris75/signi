@@ -57,7 +57,7 @@ export function SubordinateButton({ control }: SubordinateButtonProps) {
         options={control.options}
         onSelect={(option) => {
           setMenuAnchor(null);
-          control.onStart(option.link, option.conjunction);
+          control.onStart(option.link, option.conjunction, option.question);
         }}
         onClose={() => setMenuAnchor(null)}
       />

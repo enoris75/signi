@@ -6,7 +6,7 @@ import { usePeriodCursor, usePeriodHasCursor } from "../../keyboard/KeyboardProv
 import type { PeriodContext } from "../../keyboard/keymap.ts";
 import type { PhraseSelection, WorkspaceBinding } from "./interfaces.ts";
 import { MIN_GRAPH_HEIGHT } from "./slots.ts";
-import { moodLocked } from "./functions/moodLocked.ts";
+import { moodLocked, questionLocked } from "./functions/moodLocked.ts";
 import { PeriodContainer, periodControls } from "./PeriodContainer/index.ts";
 import { Resizer } from "./Resizer.tsx";
 import { GRAPH_HEIGHT_KEY } from "./storageKeys.ts";
@@ -88,6 +88,8 @@ export function PeriodCard({
   // (undefined for a standalone period). See PeriodContainer/functions/periodControls.ts.
   const clauseControls = periodControls(binding, selection);
   const locked = moodLocked(binding);
+  // A reported question's own (P09-E55): free under KNOW, locked on under ASK.
+  const askLocked = questionLocked(binding);
 
   // What a key pressed on the card acts on: the very handlers its own controls call, published for
   // the one key listener in the app (see KeyboardProvider). Rebuilt every render, so a command
@@ -119,6 +121,7 @@ export function PeriodCard({
       toggleInfinitive: onToggleInfinitive,
       toggleQuestion: onToggleQuestion,
       moodLocked: locked,
+      questionLocked: askLocked,
       condition: conditional && {
         canStart: conditional.canStart,
         hasLink: conditional.hasCondition,
@@ -211,7 +214,7 @@ export function PeriodCard({
         instrumental={clauseControls.instrumental}
         imperative={{ active: Boolean(selection.imperative), disabled: locked, onToggle: onToggleImperative }}
         infinitive={{ active: Boolean(selection.infinitive), disabled: locked, onToggle: onToggleInfinitive }}
-        question={{ active: Boolean(selection.interrogative), disabled: locked, onToggle: onToggleQuestion }}
+        question={{ active: Boolean(selection.interrogative), disabled: askLocked, onToggle: onToggleQuestion }}
       >
         {children}
 

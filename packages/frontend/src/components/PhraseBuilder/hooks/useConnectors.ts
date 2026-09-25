@@ -9,6 +9,7 @@ import {
   isRelativeLink,
   isSubordinateLink,
   subordinateLabelKey,
+  type ClauseForce,
 } from "../interfaces.ts";
 import { useUiString } from "../../../i18n/useUiString.ts";
 import { ALL_SLOTS, MUI_COLOR_HEX } from "../slots.ts";
@@ -53,7 +54,8 @@ function sameConnectors(a: Connector[], b: Connector[]): boolean {
 // into, plus the layout effect that measures each link into workspace-relative pixels.
 // Returns the refs for the workspace to wire into its container bindings and the computed
 // connectors for the SVG overlay to draw.
-export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
+// `forceOf` names a content clause by its force (P09-E55): *that*, *whether*, or a plain subordinate clause.
+export function useConnectors(links: PhraseLink[], instrumentalLabel: string, forceOf?: (containerId: string) => ClauseForce) {
   // Not the usual `t`: the measuring loop below already spends that name on a DOMRect.
   const uiString = useUiString();
   const workspaceRef = useRef<HTMLDivElement>(null);
@@ -154,7 +156,7 @@ export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
         x2: t.left + t.width / 2 - rootRect.left,
         y2: t.top + t.height / 2 - rootRect.top,
         color: MUI_COLOR_HEX.error,
-        label: uiString(subordinateLabelKey(link)).toLowerCase(),
+        label: uiString(subordinateLabelKey({ ...link, force: forceOf?.(link.target.containerId) })).toLowerCase(),
       });
     }
     // Instrumental connectors: the clause's verb-phrase toggle row → the instrument period's

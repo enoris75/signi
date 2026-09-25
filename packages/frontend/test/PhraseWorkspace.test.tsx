@@ -429,7 +429,7 @@ describe('PhraseWorkspace', () => {
         strings: { 'slot.instrumental': { it: 'Strumento' } },
       });
 
-      expect(vi.mocked(useConnectors)).toHaveBeenLastCalledWith([CONDITIONAL], 'strumento');
+      expect(vi.mocked(useConnectors)).toHaveBeenLastCalledWith([CONDITIONAL], 'strumento', expect.any(Function));
     });
 
     it('registers each period’s noun boxes and link anchors under its own container', () => {

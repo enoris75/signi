@@ -10,6 +10,7 @@ import {
   NounAddress,
   NounKey,
   PhraseSelection,
+  QuestionRole,
   builderNounAddress,
   conjunctAddress,
   possessorAddress,
@@ -35,10 +36,11 @@ import {
   updateNounAt,
   toggleImperative,
   toggleInfinitive,
+  setInterrogative,
   toggleInterrogative,
   toggleQuestionRole,
 } from "./phraseReducers.ts";
-import { moodLocked } from "./functions/moodLocked.ts";
+import { keepsQuestion, marksLocked } from "./functions/moodLocked.ts";
 import { canAsk, hasRelation } from "./functions/questionGates.ts";
 import {
   buildSatelliteIcons,
@@ -400,6 +402,12 @@ export function PhraseBuilder({
   };
   // The question keeps the subject box (a question has a subject), so the cursor stays where it is.
   const handleToggleQuestion = () => onPhraseUpdate(toggleInterrogative);
+  // A gap's mark, taken off the clause of ASK, leaves a yes/no question rather than a statement ASK
+  // cannot report (P09-E55 D3).
+  const staysAsked = (next: PhraseSelection) =>
+    keepsQuestion(binding) && !next.interrogative ? setInterrogative(next, true) : next;
+  const handleToggleMark = (which: QuestionRole, possessed?: "subject" | "directObject") =>
+    onPhraseUpdate((prev) => staysAsked(toggleQuestionRole(prev, which, possessed)));
 
   // An owner's ring is shown while its owner is open, which the period's builder holds (see
   // `ownersOpen`), so that reads in place of the possessor satellite's own reveal.
@@ -416,7 +424,8 @@ export function PhraseBuilder({
     t,
     {
       // A question mark that would make the period a question respects the lock the border's toggle does.
-      moodLocked: moodLocked(binding),
+      // …except on the clause of a verb that reports a question (P09-E55), whose gap is its own.
+      moodLocked: marksLocked(binding),
       // A that-clause this period governs is its verb's object, so the object box gives way to it.
       clauseObject: binding?.subordinate.asSource?.kind === "content",
       // An owner's ring carries the *whose* mark its period gates (P09-E52).
@@ -473,7 +482,7 @@ export function PhraseBuilder({
       onCyclePossessorRole: (which: NounKey) => commands.handleCyclePossessorRole(which),
       // A hosted ring's phrase is a noun phrase, not a clause: it asks nothing and states no existence.
       ...(!ringHost && {
-        onToggleQuestion: commands.handleToggleQuestion,
+        onToggleQuestion: (which: QuestionRole) => handleToggleMark(which),
         onToggleQuestionAnimate: commands.handleToggleQuestionAnimate,
         onToggleExistential: commands.handleToggleExistential,
         onCycleGloss: () => commands.handleCycleGloss(1),
@@ -811,12 +820,12 @@ export function PhraseBuilder({
     ownerQuestion: (spot) => {
       const possessed = spot.possessed;
       if (ringHost || (possessed !== "subject" && possessed !== "directObject")) return undefined;
-      const locked = moodLocked(binding) && !selection.interrogative;
+      const locked = marksLocked(binding) && !selection.interrogative;
       const governsClause = possessed === "directObject" && binding?.subordinate.asSource?.kind === "content";
       return {
         available: canAsk(selection, "possessor", possessed) && !locked && !governsClause,
         asked: selection.questionRole === "possessor" && (selection.questionPossessed ?? "subject") === possessed,
-        toggle: () => onPhraseUpdate((prev) => toggleQuestionRole(prev, "possessor", possessed)),
+        toggle: () => handleToggleMark("possessor", possessed),
       };
     },
   });
@@ -977,7 +986,7 @@ export function PhraseBuilder({
       toggleNegative: commands.handleToggleNegative,
       toggleCauseNegative: commands.handleToggleCauseNegative,
       // On an owner's ring, Q toggles the period's *whose* (P09-E52 D5).
-      toggleQuestion: ringHost?.question ? () => ringHost.question!.toggle() : commands.handleToggleQuestion,
+      toggleQuestion: ringHost?.question ? () => ringHost.question!.toggle() : (which: QuestionRole) => handleToggleMark(which),
       toggleQuestionAnimate: commands.handleToggleQuestionAnimate,
       toggleExistential: commands.handleToggleExistential,
       cycleTense: commands.handleCycleTense,

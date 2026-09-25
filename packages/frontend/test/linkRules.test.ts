@@ -16,6 +16,7 @@ import {
   canStartCoordination,
   canStartSubordinate,
   clearSubordinate,
+  governedForce,
   inClauseRelation,
   setInstrumentalLevel,
   setInstrumentalNegative,
@@ -125,6 +126,28 @@ describe('linkRules', () => {
       // It may keep its relative clauses.
       const rel = addRelativeLink([], { containerId: 'B', nounKey: 'subject' }, { containerId: 'C', nounKey: 'subject' }, 'r');
       expect(canBeSubordinate(ALL, rel, 'S', 'B', 'content')).toBe(true);
+    });
+
+    // P09-E55: the that-clause of a verb that reports a question may be one.
+    it('takes a question as the that-clause of a verb that reports one', () => {
+      const governor = (id: string, clauseForce?: 'interrogative' | 'either'): PhraseContainer => ({
+        id,
+        selection: { subject: noun('MAN'), verb: { ...verb(id), clauseObject: 'content', ...(clauseForce && { clauseForce }) } },
+      });
+      const [ASKS, KNOWS, THINKS] = [governor('ASK', 'interrogative'), governor('KNOW', 'either'), governor('THINK')];
+      const yesno = { ...B, selection: { ...B.selection, interrogative: true } };
+      const wh = { ...B, selection: { ...B.selection, interrogative: true, questionRole: 'directObject' as const } };
+      for (const clause of [yesno, wh]) {
+        const all = [clause, ASKS, KNOWS, THINKS];
+        expect(canBeSubordinate(all, [], 'ASK', 'B', 'content')).toBe(true);
+        expect(canBeSubordinate(all, [], 'KNOW', 'B', 'content')).toBe(true);
+        expect(canBeSubordinate(all, [], 'THINK', 'B', 'content')).toBe(false);
+        expect(canBeSubordinate(all, [], 'KNOW', 'B', 'adverbial')).toBe(false);
+      }
+      expect(governedForce(ASKS)).toBe('interrogative');
+      expect(governedForce(THINKS)).toBeUndefined();
+      // A statement is linked under ASK too: the link makes it a question (D3).
+      expect(canBeSubordinate([B, ASKS], [], 'ASK', 'B', 'content')).toBe(true);
     });
 
     it('keeps one subordinate clause per governing clause, and ties the clause up in it', () => {

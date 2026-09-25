@@ -90,6 +90,51 @@ test.describe('period links', () => {
     await expect(app.sentences('en')).toHaveCount(2);
   });
 
+  // P09-E55: the indirect question. ASK offers *Whether* alone, and its clause becomes a question.
+  test('the man asks whether the cat runs', async ({ app }) => {
+    await app.buildClauseIn(0, 'MAN', 'ASK');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'CAT', 'RUN');
+
+    await app.period(0).getByRole('button', { name: 'Add a subordinate clause' }).click();
+    await expect(app.page.getByRole('menuitem', { name: /^That/ })).toHaveCount(0);
+    await app.page.keyboard.press('Escape');
+
+    await app.linkSubordinate(0, 1, 'Whether');
+    await app.expectSentences({
+      en: 'the man asks whether the cat runs.',
+      it: "l'uomo chiede se il gatto corre.",
+      fr: "l'homme demande si le chat court.",
+      de: 'der Mann fragt, ob der Kater läuft.',
+      es: 'el hombre pregunta si el gato corre.',
+      pt: 'o homem pergunta se o gato corre.',
+      ja: '男は猫が走るかどうか尋ねます。',
+    });
+    await expect(app.period(0).getByRole('button', { name: 'Remove the subordinate clause (Whether)' })).toBeVisible();
+  });
+
+  test('the man knows where the cat eats', async ({ app }) => {
+    await app.buildClauseIn(0, 'MAN', 'KNOW');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'CAT', 'EAT');
+    await app.linkSubordinate(0, 1, 'That');
+    await app.expectSentences({ en: 'the man knows that the cat eats.' });
+
+    // The clause's own marks are free under a verb that reports a question.
+    await app.period(1).getByTestId('satellite-locative').click();
+    await app.page.keyboard.press('Escape');
+    await app.period(1).getByTestId('satellite-locativeQuestion').click();
+    await app.expectSentences({
+      en: 'the man knows where the cat eats.',
+      it: "l'uomo sa dove mangia il gatto.",
+      fr: "l'homme sait où le chat mange.",
+      de: 'der Mann weiß, wo der Kater frisst.',
+      es: 'el hombre sabe dónde come el gato.',
+      pt: 'o homem sabe onde o gato come.',
+      ja: '男は猫がどこで食べるか知っています。',
+    });
+  });
+
   test('an adverbial clause joins any verb with its conjunction', async ({ app }) => {
     await app.buildClauseIn(0, 'MAN', 'RUN');
     await app.addPeriod();

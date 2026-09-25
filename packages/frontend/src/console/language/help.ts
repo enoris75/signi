@@ -181,7 +181,8 @@ export const EXAMPLES: Record<string, string> = {
   statement: "/command /verb ( eat ) /statement",
   if: "/subj ( dog ) /verb ( run ) /if { /subj ( cat ) /verb ( eat ) }",
   join: "/subj ( dog ) /verb ( run ) /join but { /subj ( cat ) /verb ( eat ) }",
-  clause: "/subj ( man ) /verb ( say ) /clause { /subj ( cat ) /verb ( run ) }",
+  // P09-E55: the clause of ASK is a question, its gap its own.
+  clause: "/subj ( man ) /verb ( ask ) /clause { /wh obj /subj ( cat ) /verb ( eat ) }",
   sub: "/subj ( man ) /verb ( run ) /sub when { /subj ( cat ) /verb ( eat ) }",
   to: "/subj ( cat ) /verb ( need ) /to { /verb ( run ) }",
   level: "/subj ( man ) /verb ( start ) /inst { /verb ( choose ) /obj ( word ) } /level process",

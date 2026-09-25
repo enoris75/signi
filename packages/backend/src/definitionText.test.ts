@@ -3,7 +3,7 @@ import { translate } from '@signi/engine';
 import type { PhrasePlan } from '@signi/shared';
 import { compileDefinition, definitionVocabulary, planToWorkspace, printDefinition, workspaceToPlans } from '@signi/phrase';
 import { concepts } from './concepts/index.js';
-import { compileSeedDefinitions, seedConcept } from './concepts/definitionText.js';
+import { clauseForceOf, compileSeedDefinitions, seedConcept } from './concepts/definitionText.js';
 import { adjectives } from './concepts/adjectives.js';
 import { adverbs } from './concepts/adverbs.js';
 import { interjections } from './concepts/interjections.js';
@@ -69,7 +69,7 @@ describe('a seed defined in text (P13)', () => {
   // The facts a line is checked against, as the seed states them and as the database serves them:
   // the definition compiler reads the first, the console the second, and they must not disagree.
   test('knows each word as the API serves it', () => {
-    const FACTS = ['role', 'transitivity', 'complements', 'clauseObject', 'prepositionalObject', 'modal', 'slot', 'person', 'number', 'gendered', 'mannerRelation', 'dimensionRelation'] as const;
+    const FACTS = ['role', 'transitivity', 'complements', 'clauseObject', 'clauseForce', 'prepositionalObject', 'modal', 'slot', 'person', 'number', 'gendered', 'mannerRelation', 'dimensionRelation'] as const;
     const pick = (c: object) => Object.fromEntries(FACTS.flatMap((k) => ((c as Record<string, unknown>)[k] === undefined ? [] : [[k, (c as Record<string, unknown>)[k]]])));
     const served = new Map(listConcepts({ senses: true }).map((c) => [c.id, pick(c)]));
     for (const seed of concepts) expect(pick(seedConcept(seed)), seed.id).toEqual(served.get(seed.id));
@@ -82,6 +82,20 @@ describe('a seed defined in text (P13)', () => {
       'ASK', 'BELIEVE', 'CALL_PHONE', 'CLICK', 'DEPEND', 'FOLLOW', 'LEAVE', 'LIKE',
       'LOOK_AT', 'MARRY', 'MEET', 'NEED', 'PLAY_INSTRUMENT', 'REMEMBER', 'THANK', 'WAIT',
     ]);
+  });
+
+  // P09-E55: which verbs' that-clause may be a question, derived from `content_clause_force`.
+  test('serves the force each verb’s that-clause may have', () => {
+    const served = Object.fromEntries(
+      listConcepts({ senses: true }).filter((c) => c.clauseForce).map((c) => [c.id, c.clauseForce]),
+    );
+    expect(served).toEqual({ ASK: 'interrogative', KNOW: 'either', SAY: 'either', TELL: 'either' });
+  });
+
+  test('refuses a verb whose languages disagree on its clause’s force', () => {
+    const split = { id: 'SPLIT', role: 'verb' as const, forms: { en: { content_clause_force: 'either' }, de: {} } };
+    expect(() => clauseForceOf(split as never)).toThrow(/SPLIT.*content_clause_force/);
+    expect(clauseForceOf({ id: 'ASKS', role: 'verb', forms: { en: { content_clause_force: 'interrogative' } } } as never)).toBe('interrogative');
   });
 
   // Every seed as it is written, and CAT defined by `text`.

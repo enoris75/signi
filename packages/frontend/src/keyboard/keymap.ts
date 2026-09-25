@@ -158,6 +158,8 @@ export interface PeriodContext {
   toggleInfinitive: () => void;
   toggleQuestion: () => void;
   moodLocked: boolean;
+  /** The question's own lock, where it differs (P09-E55): free on the clause of a verb that reports one. */
+  questionLocked?: boolean;
   /** I / J — the two clause-level relations: start the pick, or drop the link there is. */
   condition: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
   coordination: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
@@ -1119,7 +1121,7 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     label: "Question",
     labelKey: "mood.question",
     hint: true,
-    when: (ctx) => !ctx.moodLocked,
+    when: (ctx) => !(ctx.questionLocked ?? ctx.moodLocked),
     run: (ctx) => ctx.toggleQuestion(),
   },
   {

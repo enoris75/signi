@@ -46,6 +46,16 @@ const GENDERED_NOUNS_SQL = `
   WHERE nf.form_key = 'fem'
 `;
 
+// The force each verb's that-clause may have (P09-E55, `Concept.clauseForce`), which the seed check
+// holds equal across a verb's languages.
+const CLAUSE_FORCE_SQL = `
+  SELECT cvl.concept_id, MAX(vf.form_value) AS force
+  FROM verb_forms vf
+  JOIN concept_verb_links cvl ON cvl.lexeme_id = vf.lexeme_id AND cvl.is_primary = 1
+  WHERE vf.form_key = 'content_clause_force'
+  GROUP BY cvl.concept_id
+`;
+
 // The verbs whose object takes a preposition in some language (P09-E54, `Concept.prepositionalObject`).
 const PREPOSITIONAL_OBJECT_SQL = `
   SELECT DISTINCT cvl.concept_id
@@ -226,6 +236,13 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
 
   const genderedNounRows = db.prepare<[], { concept_id: string }>(GENDERED_NOUNS_SQL).all();
   const genderedNouns = new Set(genderedNounRows.map((r) => r.concept_id));
+  const clauseForces = new Map(
+    db
+      .prepare<[], { concept_id: string; force: string }>(CLAUSE_FORCE_SQL)
+      .all()
+      .filter((r) => r.force === 'interrogative' || r.force === 'either')
+      .map((r) => [r.concept_id, r.force as 'interrogative' | 'either']),
+  );
   const prepositionalObjects = new Set(
     db.prepare<[], { concept_id: string }>(PREPOSITIONAL_OBJECT_SQL).all().map((r) => r.concept_id),
   );
@@ -255,6 +272,7 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     emoji: r.emoji ?? undefined,
     modal: r.modal === 1 || undefined,
     clauseObject: (r.clause_object as ClauseObject | null) ?? undefined,
+    clauseForce: clauseForces.get(r.id),
     prepositionalObject: prepositionalObjects.has(r.id) || undefined,
     slot: (r.slot as ConceptSlot | null) ?? undefined,
     mannerRelation: (r.manner_relation as MannerRelation) ?? undefined,

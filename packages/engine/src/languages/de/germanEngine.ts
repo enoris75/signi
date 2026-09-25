@@ -82,6 +82,7 @@ export const germanEngine: LanguageEngine = {
   // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
   // D9): `that`, the object clause's complementizer, or a subordinating conjunction. German cites each as it opens its verb-final clause ("dass", "nachdem").
   renderSubordinator(sub: Subordinator): string {
+    if (sub === 'whether') return 'ob'; // P09-E55, the indirect yes/no question's complementizer
     return sub === 'that' ? 'dass' : SUBORDINATORS[sub];
   },
   renderConjunction(conjunction: CoordConjunction): string {

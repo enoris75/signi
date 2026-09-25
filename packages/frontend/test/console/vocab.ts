@@ -66,7 +66,11 @@ export const VERBS = [
   // One of the two seeded verbs that license the topic ("thinks about the cat").
   verb('THINK', 'think', 'pensare', { transitivity: 'intransitive', ...complements('topic') }),
   // The verbs that take a clause as their object (P09-E12 D9): a that-clause, an infinitive.
-  verb('SAY', 'say', 'dire', { clauseObject: 'content' }),
+  verb('SAY', 'say', 'dire', { clauseObject: 'content', clauseForce: 'either' }),
+  // Its that-clause is a question, never a statement (P09-E55), as the API serves it.
+  verb('ASK', 'ask', 'chiedere', { transitivity: 'ditransitive', clauseObject: 'content', clauseForce: 'interrogative' }),
+  // Its that-clause is a statement only (P09-E55): no clauseForce.
+  verb('BELIEVE', 'believe', 'credere', { clauseObject: 'content' }),
   // Its object takes a preposition in it, fr and pt ("ha bisogno del cane"), as the API serves (P09-E54).
   verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive', prepositionalObject: true }),
   // The copula, the existential's verb (P09-E12 M7): "there is a cat in the house".

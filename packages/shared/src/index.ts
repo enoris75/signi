@@ -703,6 +703,13 @@ export interface Concept {
    */
   clauseObject?: ClauseObject;
   /**
+   * Which force the verb's that-clause may have (P09-E55), from its lexemes' `content_clause_force`:
+   * `interrogative` — only a question, "asks **whether** / **what** …" (ASK); `either` — a statement or
+   * a question, "knows **that** / **where** …" (KNOW, SAY, TELL). Absent: a statement only (THINK,
+   * BELIEVE). Derived, not seeded, and the same in all seven languages (the seed check holds it).
+   */
+  clauseForce?: 'interrogative' | 'either';
+  /**
    * Whether the verb's object takes a preposition in some language (P09-E54): a lexeme names
    * `object_prep` — "waits **for** the dog", *wartet auf den Hund*. Derived from the lexemes, not
    * seeded. Such a verb has no passive there, and a passive wh-question over it is refused (P09-E16),
@@ -1544,7 +1551,7 @@ export type ClauseObject = 'content' | 'infinitive';
  * one of the subordinating conjunctions, or `that`, the complementizer of an object content clause
  * (che / que / dass / と). See `UiStringSubordinatorDef`.
  */
-export type Subordinator = SubordinatingConjunction | 'that';
+export type Subordinator = SubordinatingConjunction | 'that' | 'whether';
 
 export const SUBORDINATING_CONJUNCTIONS: SubordinatingConjunction[] = ['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though', 'as'];
 

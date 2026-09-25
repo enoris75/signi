@@ -17,8 +17,10 @@ import {
   isInstrumentalLink,
   isRelativeLink,
   isSubordinateLink,
+  forceOfClause,
+  type SubordinateStanding,
 } from "../interfaces.ts";
-import { setInfinitive } from "../phraseReducers.ts";
+import { setInfinitive, setInterrogative } from "../phraseReducers.ts";
 import {
   addConditional,
   addCoordinative,
@@ -29,6 +31,7 @@ import {
   canBeCoordinate as coordinateAllowed,
   canBeSubordinate as subordinateAllowed,
   canStartSubordinate,
+  governedForce,
   canBeInstrument as instrumentAllowed,
   canBeRelativeTarget,
   clearConditional as withoutConditional,
@@ -179,12 +182,18 @@ export function useWorkspaceLinks(
   }
 
   // ── Subordinate (container-to-container) linking ───────────────────────────
-  function startSubordinate(containerId: string, kind: SubordinateKind, conjunction?: SubordinatingConjunction) {
+  function startSubordinate(
+    containerId: string,
+    kind: SubordinateKind,
+    conjunction?: SubordinatingConjunction,
+    question?: boolean,
+  ) {
     setPick({
       active: true,
       kind: "subordinate",
       link: kind,
       ...(kind === "adverbial" ? { conjunction: conjunction ?? "when" } : {}),
+      ...(kind === "content" && question ? { question: true } : {}),
       source: { containerId },
     });
   }
@@ -196,13 +205,19 @@ export function useWorkspaceLinks(
   function completeSubordinate(clauseContainerId: string) {
     if (!pick.active || pick.kind !== "subordinate") return;
     const mainId = pick.source.containerId;
-    const { link: kind, conjunction } = pick;
+    const { link: kind, conjunction, question } = pick;
     cancelPick();
     if (!subordinateAllowed(containers, links, mainId, clauseContainerId, kind)) return;
     setLinks((ls) => addSubordinate(ls, mainId, clauseContainerId, kind, uid(), conjunction));
     if (kind === "infinitive" || kind === "purpose")
       setContainers?.((cs) =>
         cs.map((c) => (c.id === clauseContainerId ? { ...c, selection: setInfinitive(c.selection, true) } : c)),
+      );
+    // *Whether*, or any that-clause of a verb that reports only questions (ASK), makes its clause a
+    // question (P09-E55 D3), as an infinitive link makes its clause an infinitive.
+    if (kind === "content" && (question || governedForce(containers.find((c) => c.id === mainId)) === "interrogative"))
+      setContainers?.((cs) =>
+        cs.map((c) => (c.id === clauseContainerId ? { ...c, selection: setInterrogative(c.selection, true) } : c)),
       );
   }
 
@@ -270,8 +285,17 @@ export function useWorkspaceLinks(
     const subordinates = links.filter(isSubordinateLink);
     const subAsSource = subordinates.find((l) => l.source.containerId === c.id);
     const subAsTarget = subordinates.find((l) => l.target.containerId === c.id);
-    const subStanding = (l: typeof subAsSource) =>
-      l && { kind: l.kind, ...(l.kind === "adverbial" ? { conjunction: l.conjunction } : {}) };
+    const subStanding = (l: typeof subAsSource): SubordinateStanding | undefined => {
+      if (!l) return undefined;
+      const clause = containers.find((x) => x.id === l.target.containerId);
+      const licence = l.kind === "content" ? governedForce(containers.find((x) => x.id === l.source.containerId)) : undefined;
+      return {
+        kind: l.kind,
+        ...(l.kind === "adverbial" ? { conjunction: l.conjunction } : {}),
+        ...(l.kind === "content" && clause ? { force: forceOfClause(clause.selection) } : {}),
+        ...(licence ? { licence } : {}),
+      };
+    };
 
     const instrumentals = links.filter(isInstrumentalLink);
     const instLink = instrumentals.find(
@@ -336,7 +360,7 @@ export function useWorkspaceLinks(
           pick.active &&
           pick.kind === "subordinate" &&
           subordinateAllowed(containers, links, pick.source.containerId, c.id, pick.link),
-        onStart: (kind, conjunction) => startSubordinate(c.id, kind, conjunction),
+        onStart: (kind, conjunction, question) => startSubordinate(c.id, kind, conjunction, question),
         onClear: () => clearSubordinate(c.id),
         onPick: () => completeSubordinate(c.id),
         // Whose the infinitive is (P13): offered where the governing clause has an object to hand it.

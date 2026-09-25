@@ -380,10 +380,15 @@ const OPS: Op[] = [
     if (!L.canStartSubordinate(s.links, source, kind)) return undefined;
     if (!L.canBeSubordinate(s.containers, s.links, source.id, target.id, kind)) return undefined;
     const links = L.addSubordinate(s.links, source.id, target.id, kind, id(), pick(rng, SUBORDINATING_CONJUNCTIONS)!);
+    // P09-E55: a question target where the verb reports one — the pick's *Whether*, or any clause of
+    // ASK, is made a question.
+    const asked = kind === 'content' && (L.governedForce(source) === 'interrogative' || (L.governedForce(source) && rng() < 0.3));
     const containers =
       kind === 'infinitive' || kind === 'purpose'
         ? s.containers.map((c) => (c.id === target.id ? { ...c, selection: R.setInfinitive(c.selection, true) } : c))
-        : s.containers;
+        : asked
+          ? s.containers.map((c) => (c.id === target.id ? { ...c, selection: R.setInterrogative(c.selection, true) } : c))
+          : s.containers;
     return { ...s, containers, links };
   },
   // An instrument's level, and — raised to an act — a verb for it.
