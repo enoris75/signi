@@ -8,7 +8,7 @@ import { PickerFooter } from "./PickerFooter.tsx";
 import { PICKER_FONT, PromptWidth } from "./PromptWidth.tsx";
 import { PronounChooser } from "./PronounChooser.tsx";
 import { usePickerKeys } from "./hooks/usePickerKeys.ts";
-import { pronounFor, usePronounChooser, type PronounChoice } from "./hooks/usePronounChooser.ts";
+import { pronounFor, usePronounChooser, type PronounChoice, type PronounPerson } from "./hooks/usePronounChooser.ts";
 import { ConceptSelectOpts } from "./interfaces.ts";
 import { useMayTakeFocus } from "../../console/ConsoleMarks.tsx";
 
@@ -24,6 +24,7 @@ export function SubjectTypeahead({
   kind = "noun",
   onKindChange,
   testId = "typeahead-subject",
+  persons,
 }: {
   onSelect: (concept: Concept, opts?: ConceptSelectOpts) => void;
   // The picker is pronoun-inclusive (pronouns + nouns); the prompt varies by slot (a subject, a
@@ -39,6 +40,8 @@ export function SubjectTypeahead({
   // keeps `typeahead-noun`, which it shares with the noun-only complements, so which component
   // fills a box stays an implementation detail.
   testId?: string;
+  // The pronoun persons the box takes, where not every one is (P11-E8's vocative: the 2nd alone).
+  persons?: readonly PronounPerson[];
 }) {
   const t = useUiString();
   const prompt = `${t(placeholderKey)}…`;
@@ -88,6 +91,7 @@ export function SubjectTypeahead({
     onCommit: commitPronoun,
     onExitTop: () => picker.setInTabs(true),
     onClose: () => picker.setOpen(false),
+    persons,
   });
 
   // Which handler the keys go to.
@@ -169,6 +173,7 @@ export function SubjectTypeahead({
             <PronounChooser
               chooser={chooser}
               pronouns={pronouns}
+              persons={persons}
               onCommit={() => commitPronoun(chooser.choice)}
             />
           ) : (

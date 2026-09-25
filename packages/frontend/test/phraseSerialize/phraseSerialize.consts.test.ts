@@ -7,7 +7,7 @@ import {
 } from '../../src/components/PhraseBuilder/phraseSerialize/phraseSerialize.consts.ts';
 
 describe('CONCEPT_BASE_KEYS', () => {
-  it('names the core slots, the modal chain with its adverbs, and every complement head', () => {
+  it('names the core slots, the modal chain with its adverbs, and every complement head, and the vocative', () => {
     expect([...CONCEPT_BASE_KEYS].sort()).toEqual(
       [
         'subject',
@@ -19,6 +19,8 @@ describe('CONCEPT_BASE_KEYS', () => {
         'verbModalAdverb',
         'verbModal2Adverb',
         ...COMPLEMENT_TYPES,
+        // The period's vocative (P11-E8).
+        'vocative',
       ].sort(),
     );
   });

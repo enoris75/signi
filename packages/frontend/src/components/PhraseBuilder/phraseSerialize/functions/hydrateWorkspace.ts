@@ -5,7 +5,7 @@ import type {
   AbstractionLevel,
   CoordConjunction,
   NounAddress,
-  NounKey,
+  RelativeGap,
   PhraseContainer,
   PhraseLink,
 } from "../../interfaces.ts";
@@ -101,7 +101,7 @@ export function hydrateWorkspace(
           // legacy `indirectObject` endpoint like any other saved key). A missing kind is a
           // legacy relative link, which always carries noun keys.
           source: { containerId: l.source.containerId, nounKey: nounKey(l.source.nounKey) as NounAddress },
-          target: { containerId: l.target.containerId, nounKey: nounKey(l.target.nounKey) as NounKey },
+          target: { containerId: l.target.containerId, nounKey: nounKey(l.target.nounKey) as RelativeGap },
           // The clause said alone (P13): only a literal true drops the head.
           ...(l.headless === true ? { headless: true } : {}),
         },

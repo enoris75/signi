@@ -18,6 +18,8 @@ export const CONCEPT_BASE_KEYS = new Set<string>([
   ...MODAL_SLOTS,
   ...MODAL_ADVERB_SLOTS,
   ...COMPLEMENT_TYPES,
+  // The period's vocative (P11-E8), a noun block of its own.
+  "vocative",
 ]);
 
 // Phrases saved before the recipient became the `terminus` complement carry `indirectObject`

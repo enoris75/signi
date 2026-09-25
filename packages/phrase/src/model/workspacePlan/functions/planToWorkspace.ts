@@ -58,7 +58,7 @@ type NewLink = PhraseLink extends infer L ? (L extends PhraseLink ? Omit<L, "id"
 const PERIOD_FIELDS = new Set([
   "subject", "verbPhrase", "directObject", "complements", "condition", "coordination", "interrogative",
   "existential", "imperative", "imperativeRegister", "infinitive", "contentObject", "adverbialClause",
-  "infinitiveComplement", "purpose", "contentSubject", "adverbialGloss", "interjection",
+  "infinitiveComplement", "purpose", "contentSubject", "adverbialGloss", "interjection", "address",
 ]);
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
@@ -127,6 +127,14 @@ class Builder {
     else if (plan.interjection) set(sel, "interjection", this.concept(plan.interjection));
     if (plan.interrogative) sel.interrogative = true;
     if (plan.existential) sel.existential = true;
+    // The period's vocative (P11-E8), the root's too, in its box before the clause. Where the canvas
+    // would not say it — a linked clause, a citation, an instruction (see vocativeOffered) — it is not
+    // said here either.
+    if (plan.address) {
+      if (!root || plan.infinitive || (plan.imperative && plan.imperativeRegister === "instruction"))
+        this.unsupported.add("PhrasePlan.address of a linked clause, a citation or an instruction");
+      else this.noun(c, sel, "vocative", plan.address, "vocative");
+    }
     // A command's and a citation's subject is the placeholder the mood puts there, not a word; so is
     // the throwaway under a subject clause or an adverb's gloss (P13), which the canvas reads off a
     // period with no subject (see subordinateReading).
@@ -329,6 +337,8 @@ class Builder {
     if (np.definiteness) {
       if (which === "subject" || which === "directObject" || DETERMINER_COMPLEMENT_TYPES.includes(which as ComplementType))
         set(sel, `${which}Definiteness`, np.definiteness);
+      // The vocative has no determiner (P11-E8): the engine says the address bare whatever it holds.
+      else if (which === "vocative") this.unsupported.add("PhrasePlan.address.definiteness");
       else this.unsupported.add(`complements.${which}.definiteness`);
     }
     // An approximator (P09-E49) is a flag on the canvas, its word the quantity's own; a value the

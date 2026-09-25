@@ -210,6 +210,31 @@ describe('words', () => {
     expect(labels(c)).toEqual(expect.arrayContaining(['cat', '1st', '3rd', 'one']));
   });
 
+  // P11-E8: the vocative calls the hearer, so its pronoun is the 2nd person's alone, and its bracket
+  // offers no determiner, which the engine would not say.
+  it('offers nouns and the 2nd person alone for /voc, and no determiner in its bracket', () => {
+    const c = at('/voc ');
+    expect(labels(c)).toEqual(expect.arrayContaining(['cat', 'mom', '2nd']));
+    expect(labels(c)).not.toContain('1st');
+    expect(labels(c)).not.toContain('3rd');
+    expect(labels(c)).not.toContain('one');
+    const state = ok('/voc mom');
+    const inside = at('/voc ( mom /', { state, context: { containerId: 'p1', word: { containerId: 'p1', slot: 'vocative' } } });
+    expect(labels(inside)).toEqual(expect.arrayContaining(['/pl', '/and', '/adj']));
+    expect(labels(inside)).not.toEqual(expect.arrayContaining(['/the']));
+    expect(labels(inside)).not.toContain('/a');
+    expect(labels(inside)).not.toContain('/this');
+  });
+
+  it('offers /voc on a root period only, as its border toggle is', () => {
+    expect(labels(at('/vo'))).toContain('/voc');
+    // A citation and a coordination's second clause say no vocative.
+    expect(labels(at('/vo', { state: ok('/inf /verb run') }))).not.toContain('/voc');
+    const linked = ok('/subj cat /verb run /join and ( /subj dog /verb eat )');
+    expect(labels(at('/vo', { state: linked, context: { containerId: linked.containers[1]!.id } }))).not.toContain('/voc');
+    expect(labels(at('/vo', { state: linked, context: { containerId: linked.containers[0]!.id } }))).toContain('/voc');
+  });
+
   it('finds a word by its alias, and offers and inserts the word itself (P09-E23)', () => {
     const c = at('/verb pic');
     expect(labels(c)).toEqual(['choose']);

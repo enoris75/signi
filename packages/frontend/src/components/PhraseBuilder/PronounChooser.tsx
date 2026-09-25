@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useConceptDefinition } from "../../i18n/useConceptLabel.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import {
+  PRONOUN_PERSONS,
   pronounFor,
   pronounGenders,
   type PronounChooser as Chooser,
@@ -20,15 +21,20 @@ export function PronounChooser({
   chooser,
   pronouns,
   onCommit,
+  persons = PRONOUN_PERSONS,
 }: {
   chooser: Chooser;
   // The pronoun vocabulary, so the person row can name the concept each option stands for and
   // show its definition on hover — the tooltip the noun list gets from ConceptOption.
   pronouns: readonly Concept[];
   onCommit: () => void;
+  // The persons the box takes (P11-E8's vocative: the 2nd alone); the others are shown, greyed, as the
+  // imperative's selector greys its persons under an instruction.
+  persons?: readonly PronounPerson[];
 }) {
   const t = useUiString();
   const { choice, set, row, setRow } = chooser;
+  const off = (person: PronounPerson) => !persons.includes(person);
 
   return (
     <Box sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
@@ -39,15 +45,16 @@ export function PronounChooser({
           value={choice.person}
           onChange={(_, v) => v && set("person", v)}
         >
-          <PersonToggle person="1" pronouns={pronouns} label={t("pronoun.first")} />
-          <PersonToggle person="2" pronouns={pronouns} label={t("pronoun.second")} />
-          <PersonToggle person="3" pronouns={pronouns} label={t("pronoun.third")} />
+          <PersonToggle person="1" pronouns={pronouns} label={t("pronoun.first")} disabled={off("1")} />
+          <PersonToggle person="2" pronouns={pronouns} label={t("pronoun.second")} disabled={off("2")} />
+          <PersonToggle person="3" pronouns={pronouns} label={t("pronoun.third")} disabled={off("3")} />
           {/* The generic / impersonal "one" — a pronoun of its own, not a 4th person. */}
           <PersonToggle
             person="generic"
             pronouns={pronouns}
             label={t("pronoun.generic")}
             testId="pronoun-generic"
+            disabled={off("generic")}
           />
         </ToggleButtonGroup>
       </ChooserRow>
@@ -117,11 +124,13 @@ function PersonToggle({
   pronouns,
   label,
   testId,
+  disabled = false,
 }: {
   person: PronounPerson;
   pronouns: readonly Concept[];
   label: string;
   testId?: string;
+  disabled?: boolean;
 }) {
   const definition = useConceptDefinition();
   const concept = pronounFor(pronouns, person);
@@ -137,7 +146,7 @@ function PersonToggle({
       enterDelay={400}
       disableInteractive
     >
-      <ToggleButton value={person} data-concept={concept?.id} data-testid={testId}>
+      <ToggleButton value={person} data-concept={concept?.id} data-testid={testId} disabled={disabled}>
         {label}
       </ToggleButton>
     </Tooltip>

@@ -45,6 +45,9 @@ export type GroupDef = {
   // carries no control and no port, and no line joins it to the verb phrase — its word's solid ring
   // carries the clear button, and the card's border toggle shows and removes it.
   bare?: boolean;
+  // A constituent of the period that stands outside its clause (P11-E8's vocative): its dotted ring
+  // carries the noun's controls, but no port, and no line joins it to the verb phrase.
+  detached?: boolean;
   // Set on a conjunct's ring as its head's canvas sees it: the head's group label, and which of
   // the head's conjuncts it is. Tidying packs it right after the rings before it in its group.
   conjunct?: { head: string; index: number };
@@ -301,10 +304,10 @@ export function buildRingSpecs({
       }
 
       for (const other of groups) {
-        if (other === verb || other.bare || verbEnd(other, complementToggleIcons, directObjectToggle) !== null) continue;
+        if (other === verb || other.bare || other.detached || verbEnd(other, complementToggleIcons, directObjectToggle) !== null) continue;
         outer.push({ key: portKey(label, other.label), aim: { point: centerOf(other.mainKey) }, half: PORT_HALF });
       }
-    } else if (verb) {
+    } else if (verb && !group.detached) {
       outer.push({ key: portKey(label, VERB_PHRASE), aim: { point: centerOf(verb.mainKey) }, half: PORT_HALF });
     }
   }

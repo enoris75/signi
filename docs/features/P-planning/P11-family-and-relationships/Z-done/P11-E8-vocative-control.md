@@ -1,18 +1,18 @@
 # P11-E8. *Mom, run* — a vocative box, its border toggle and `/voc`
 
-**Feature:** the canvas, keyboard and console control for [P11-E3](Z-done/P11-E3-address-and-the-vocative.md)'s
+**Feature:** the canvas, keyboard and console control for [P11-E3](P11-E3-address-and-the-vocative.md)'s
 vocative, "**Mom**, run", "**Mom**, the cat runs". `PhrasePlan.address` is a noun element, and the
 engine renders it before the clause, with each language's separator, in all seven languages. Neither
 the canvas nor the console can build one.
 **Shape:** no engine grammar. A period-level **noun box** in front of the clause, revealed from the
-card's border. It seats directly after [P09-E47](../P09-core-vocabulary/Z-done/P09-E47-interjection-palette.md)'s
+card's border. It seats directly after [P09-E47](../../P09-core-vocabulary/Z-done/P09-E47-interjection-palette.md)'s
 interjection box. `vocative` joins the canvas's noun blocks, so it gets the noun ring's own controls,
 less the ones address cannot use. `/voc` in the console, with its print → apply round trip.
 **Scope:** one seed (the grammar noun VOCATIVE, D5), shared UI strings, the phrase model, the canvas,
 the keyboard and the console. All 7 languages for every new UI string.
-**Status:** **planning, unscheduled**. Filed 2026-09-25 from P11's plan-only constructs. The engine
-side is [P11-E3](Z-done/P11-E3-address-and-the-vocative.md). Its refusals were added later by
-A335, A336, A338 and A349. The interjection is E47's, which is also unscheduled; see D1.
+**Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25 from P11's plan-only
+constructs. The engine side is [P11-E3](P11-E3-address-and-the-vocative.md). Its refusals were
+added later by A335, A336, A338 and A349. The interjection is E47's, which shipped first (D1).
 
 Engine output at HEAD (1d8f359b), from hand-written plans. Rendered 2026-09-25 with `sayAll` on an
 in-memory seed:
@@ -29,7 +29,7 @@ in-memory seed:
 
 The commands use the builder's default imperative, 2nd singular in the request register. The
 Portuguese *Minha esposa* has had no article since A336 was fixed. E3's *Done* table still shows *A minha
-esposa*, and that row is stale. The last column needs [P11-E9](P11-E9-pronoun-owner.md) as well: a command has no *I* in the period for "my" to point at.
+esposa*, and that row is stale. The last column needs [P11-E9](../P11-E9-pronoun-owner.md) as well: a command has no *I* in the period for "my" to point at.
 
 ## Why
 
@@ -43,17 +43,17 @@ round-trip through the console, so the control ships with its command.
 
 Verified at HEAD, 2026-09-25.
 
-**The plan field.** [`PhrasePlan.address?: NounElement`](../../../../packages/shared/src/index.ts#L1874)
+**The plan field.** [`PhrasePlan.address?: NounElement`](../../../../../packages/shared/src/index.ts#L1896)
 belongs to the top clause only, and a linked clause's address is ignored. The imperative's addressee
-`subject` is kept separate from it ([L1721](../../../../packages/shared/src/index.ts#L1721), E3 D4).
-The interjection sits next to it ([L1884](../../../../packages/shared/src/index.ts#L1884)), and
-[`translate`](../../../../packages/engine/src/translator/functions/translate.ts#L51) renders them in
+`subject` is kept separate from it ([L1743](../../../../../packages/shared/src/index.ts#L1743), E3 D4).
+The interjection sits next to it ([L1907](../../../../../packages/shared/src/index.ts#L1907)), and
+[`translate`](../../../../../packages/engine/src/translator/functions/translate.ts#L59) renders them in
 this order: interjection, address, then the clause. A vocative after an interjection loses the
 sentence capital: "Hey, Mom, run.", *Ehi, mamma, corri.*
 
 **What the engine accepts and refuses** in the address. Each case was probed.
 
-- [`resolveAddress`](../../../../packages/engine/src/translator/functions/resolveAddress.ts#L29)
+- [`resolveAddress`](../../../../../packages/engine/src/translator/functions/resolveAddress.ts#L29)
   resolves each conjunct as definite and then marks it bare, so **the determiner the plan picks is
   never spoken**. "Mom", indefinite, *this*, contrastive, and *all* all render as "Mom," / "Cat," / "Cats,".
 - It **accepts** these:
@@ -66,19 +66,19 @@ sentence capital: "Hey, Mom, run.", *Ehi, mamma, corri.*
   - an `and` / `or` group ("Mom and Dad, run.");
   - a relative clause ("Cat that runs, eat.", *Kater, der läuft, iss.*);
   - a name, with or without a title (*Signor Pietro, corri*, pinned in
-    [`address.test.ts`](../../../../packages/engine/test/address.test.ts));
+    [`address.test.ts`](../../../../../packages/engine/test/address.test.ts));
   - a **2nd-person** pronoun ("You, run.", *Toi, cours.*) or an indefinite one ("Someone, run.",
     *Quelqu'un, cours.*).
 - It **refuses** these by name:
-  - a 1st- or 3rd-person pronoun, including GENERIC_PERSON ([L43](../../../../packages/engine/src/translator/functions/resolveAddress.ts#L43), A338);
-  - an address on an `instruction`-register command ([`translate.ts:24`](../../../../packages/engine/src/translator/functions/translate.ts#L24)).
-    `/api/translate` returns a 400 for both ([`addressError`](../../../../packages/backend/src/planError.ts#L70)).
+  - a 1st- or 3rd-person pronoun, including GENERIC_PERSON ([L43](../../../../../packages/engine/src/translator/functions/resolveAddress.ts#L43), A338);
+  - an address on an `instruction`-register command ([`translate.ts:24`](../../../../../packages/engine/src/translator/functions/translate.ts#L24)).
+    `/api/translate` returns a 400 for both ([`addressError`](../../../../../packages/backend/src/planError.ts#L70)).
   - A **coreferent possessor** (P11-E2's `{ kind: 'coreferent', slot: 'subject' }`) inside the
     address throws: "a coreferent possessor needs a clause whose subject it names, and this phrase
     stands in none".
 - It **renders but should not be offered** an address on an infinitive: "Mom, to run.", *Mamma,
   correre.*, お母さん、走る。 A citation is said to no one (E47 D2 reasons the same way).
-- [`applyKinName`](../../../../packages/engine/src/translator/functions/applyKinName.ts) makes MOM /
+- [`applyKinName`](../../../../../packages/engine/src/translator/functions/applyKinName.ts) makes MOM /
   DAD a name only when the phrase is plain: definite, singular, and with no possessor, adjective,
   noun modifier, relative clause, numeral or title. In address, "My mom, run." keeps the common noun
   (*Mia mamma, corri*), as it should.
@@ -92,49 +92,50 @@ command defaults to 2nd singular, and a plural address keeps it. Probed:
 | you (plural) | *Voi, corri.* *Vous, cours.* *Ihr, lauf.* *Vocês, corra.* | (E3's pins: *Vous, courez.*) |
 
 **No control builds it.** Nothing in `packages/phrase` or `packages/frontend` reads or writes
-`address` or `interjection`. (The console's `address` / `NounAddress` is a noun's *path*, as in
-`subject/possessor`, and is unrelated to the vocative.) E47 has not shipped: `ConceptPalette` still
-carries `interjection` only "to keep the map total"
-([L22](../../../../packages/frontend/src/components/ConceptPalette.tsx#L22)).
+`address`. (The console's `address` / `NounAddress` is a noun's *path*, as in `subject/possessor`, and
+is unrelated to the vocative.) *Re-verified at 23ea680a:* E47 has since shipped — the interjection is
+the card's seventh border control (`InterjectionToggle`, RecordVoiceOver), a bare ring before the
+subject, `interjectionOffered`, **E** and `/interj` — so what this section says E47 "would" do, it
+does; the anchors below are re-read at that commit.
 
-- **Model.** The noun blocks are [`NounKey`](../../../../packages/phrase/src/model/interfaces.ts#L610),
+- **Model.** The noun blocks are [`NounKey`](../../../../../packages/phrase/src/model/interfaces.ts#L741),
   which is `"subject" | "directObject" | BoxComplementType`, listed in
-  [`NOUN_KEYS`](../../../../packages/phrase/src/model/slots.ts#L63). Everything a noun ring carries
+  [`NOUN_KEYS`](../../../../../packages/phrase/src/model/slots.ts#L71). Everything a noun ring carries
   (number, gender, adjectives, possessor, conjuncts, relative clause, numeral) is keyed by it.
-  `planToWorkspace`'s [`PERIOD_FIELDS`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L56)
+  `planToWorkspace`'s [`PERIOD_FIELDS`](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L58)
   has no `address`, so a plan that has one reports it as unsupported. Only roots become sentences,
   and root-only fields are written beside `askQuestion`
-  ([`workspaceToPlans.ts:28`](../../../../packages/phrase/src/model/workspacePlan/functions/workspaceToPlans.ts#L28)).
-  [`canBeRelativeTarget`](../../../../packages/phrase/src/model/linkRules.ts#L85) accepts any
+  ([`workspaceToPlans.ts:28`](../../../../../packages/phrase/src/model/workspacePlan/functions/workspaceToPlans.ts#L28)).
+  [`canBeRelativeTarget`](../../../../../packages/phrase/src/model/linkRules.ts#L86) accepts any
   `NounKey` that holds a word.
 - **Canvas.** Nothing on the canvas is period-level and placed before the clause. The border stacks
-  six controls ([`BorderControls.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/BorderControls.tsx#L41)),
+  six controls ([`BorderControls.tsx`](../../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/BorderControls.tsx#L20)),
   and the card grows by `n·32 − 4 + 16`px
-  ([`PeriodContainer.tsx:79`](../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/PeriodContainer.tsx#L79)).
-  E47 would make that seven, at 236px. A box is drawn when it is revealed or holds a value
-  ([`resolveSatellites.ts:18`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/resolveSatellites.ts#L18)).
-  Tidy orders the rings by [`READING_ORDER`](../../../../packages/frontend/src/components/PhraseBuilder/layout.ts#L41),
+  ([`PeriodContainer.tsx:84`](../../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/PeriodContainer.tsx#L84)).
+  E47 made that seven, at 236px. A box is drawn when it is revealed or holds a value
+  ([`resolveSatellites.ts:18`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/resolveSatellites.ts#L18)).
+  Tidy orders the rings by [`READING_ORDER`](../../../../../packages/frontend/src/components/PhraseBuilder/layout.ts#L41),
   starting with the subject.
-  [`DEFAULT_POSITIONS`](../../../../packages/phrase/src/model/slots.ts#L500) seats the subject at
-  `{ x: 22, y: 42 }`. E47 proposes `{ x: 6, y: 42 }` for the interjection, and P09-E44 proposes
-  `{ x: 22, y: 18 }` for the role box.
-- **Pronouns.** The [`PronounChooser`](../../../../packages/frontend/src/components/PhraseBuilder/PronounChooser.tsx#L42)
+  [`DEFAULT_POSITIONS`](../../../../../packages/phrase/src/model/slots.ts#L522) seats the subject at
+  `{ x: 22, y: 42 }`. E47 shipped `{ x: 9, y: 42 }` for the interjection, and P09-E44 `{ x: 22, y: 18 }` for
+  the role box.
+- **Pronouns.** The [`PronounChooser`](../../../../../packages/frontend/src/components/PhraseBuilder/PronounChooser.tsx#L42)
   offers 1st, 2nd, 3rd and generic. The person selector sets `imperativePerson`
-  ([`setImperativePerson`](../../../../packages/phrase/src/model/phraseReducers.ts#L657)).
-- **Keys.** On the period, C T Q I J U R O N L S W Z and Shift+N are taken. E47 claims **E**, and **V** is
-  free ([`keymap.ts`](../../../../packages/frontend/src/keyboard/keymap.ts#L1090)). The box keys
-  (determiner D [L433](../../../../packages/frontend/src/keyboard/keymap.ts#L433), possessor P
-  [L514](../../../../packages/frontend/src/keyboard/keymap.ts#L514), coordinate C
-  [L525](../../../../packages/frontend/src/keyboard/keymap.ts#L525)) act on any `ctx.nounKey`.
-- **Console.** Each noun box's command is a [`role(...)`](../../../../packages/phrase/src/language/commands.ts#L169)
-  entry ([`/subj`](../../../../packages/phrase/src/language/commands.ts#L350)). Its reference
-  step is in [`NOUN_NAMES`](../../../../packages/phrase/src/language/resolve.ts#L180). The printer
+  ([`setImperativePerson`](../../../../../packages/phrase/src/model/phraseReducers.ts#L738)).
+- **Keys.** On the period, C T Q I J U R O N L S W Z and Shift+N are taken. E47 took **E**, and **V** is
+  free ([`keymap.ts`](../../../../../packages/frontend/src/keyboard/keymap.ts#L1209)). The box keys
+  (determiner D [L442](../../../../../packages/frontend/src/keyboard/keymap.ts#L442), possessor P
+  [L526](../../../../../packages/frontend/src/keyboard/keymap.ts#L526), coordinate C
+  [L574](../../../../../packages/frontend/src/keyboard/keymap.ts#L574)) act on any `ctx.nounKey`.
+- **Console.** Each noun box's command is a [`role(...)`](../../../../../packages/phrase/src/language/commands.ts#L174)
+  entry ([`/subj`](../../../../../packages/phrase/src/language/commands.ts#L419)). Its reference
+  step is in [`NOUN_NAMES`](../../../../../packages/phrase/src/language/resolve.ts#L185). The printer
   writes the mood, `/wh` and `/there` before any word
-  ([`print.ts:205`](../../../../packages/phrase/src/language/print.ts#L205)). `/voc` and
+  ([`print.ts:245`](../../../../../packages/phrase/src/language/print.ts#L245)). `/voc` and
   `/vocative` are free.
 - **Label.** No VOCATIVE (or ADDRESSEE) concept is seeded. `CANVAS_PARTS`
-  ([`uiStrings.ts:263`](../../../../packages/shared/src/uiStrings.ts#L263)) and the part families
-  (`CLEARABLE_PARTS`, `COLLAPSIBLE_PARTS`, `REMOVABLE_PARTS`, [L309–L322](../../../../packages/shared/src/uiStrings.ts#L309))
+  ([`uiStrings.ts:310`](../../../../../packages/shared/src/uiStrings.ts#L310)) and the part families
+  (`CLEARABLE_PARTS`, `COLLAPSIBLE_PARTS`, `REMOVABLE_PARTS`, [L367–L380](../../../../../packages/shared/src/uiStrings.ts#L367))
   have no entry for it.
 
 ## Design
@@ -205,7 +206,7 @@ and nothing else".
 | relative clause (as source) | yes | "Cat that runs, eat." |
 | **determiner**, contrast | **withdrawn** | forced bare in all seven, so the chip would change nothing in any language. E44 kept its chip only because English prints it |
 | title | none | no builder control sets `NounPhrase.title` anywhere today (C38 is label-only) |
-| coreferent possessor ([P11-E7](P11-E7-coreferent-possessor-control.md)) | **not offered** | the engine throws on one inside the address |
+| coreferent possessor ([P11-E7](../P11-E7-coreferent-possessor-control.md)) | **not offered** | the engine throws on one inside the address |
 | question mark, existential, voice | no | clause slots only |
 
 Withdrawing the determiner is not a case for "grow, never hide". That rule keeps controls the grammar
@@ -265,7 +266,7 @@ The labels rendered in all seven:
   `COLLAPSIBLE_PARTS` and `REMOVABLE_PARTS`. This yields `action.{clear,expand,compact,remove}.vocative`,
   with "clear the vocative" / *die Anrede löschen* / 呼びかけを消去 and "compact the vocative" /
   呼びかけを圧縮 probed.
-- `"slot.vocative": "vocative"` in [`PART_BY_LABEL_KEY`](../../../../packages/frontend/src/components/PhraseBuilder/canvasCommands.ts#L23),
+- `"slot.vocative": "vocative"` in [`PART_BY_LABEL_KEY`](../../../../../packages/frontend/src/components/PhraseBuilder/canvasCommands.ts#L23),
   so no English fallback leaks.
 
 **Open points for the seed:**
@@ -289,7 +290,7 @@ Reseed `signi.db`.
   Enter for the word, A, N, G, P, C, Backspace. `noun.determiner` is withdrawn, because its `when`
   finds no `vocativeDefiniteness`.
 - `KEY_COMMANDS['period.vocative'] = 'voc'` in the console coverage test. There is no Alt layer.
-- Recheck V against E47, [P11-E6](P11-E6-humble-verb-control.md) and [P11-E7](P11-E7-coreferent-possessor-control.md) before landing. None of them claims V as filed.
+- Recheck V against E47, [P11-E6](../P11-E6-humble-verb-control.md) and [P11-E7](../P11-E7-coreferent-possessor-control.md) before landing. None of them claims V as filed.
 
 **Recommendation: as stated.**
 
@@ -318,7 +319,7 @@ Reseed `signi.db`.
 ## Implementation
 
 1. **Seeds:** VOCATIVE (D5). Reseed.
-2. **Shared** ([`uiStrings.ts`](../../../../packages/shared/src/uiStrings.ts)): the strings in D5, and
+2. **Shared** ([`uiStrings.ts`](../../../../../packages/shared/src/uiStrings.ts)): the strings in D5, and
    `diagnostic.vocativeCallsTheHearer` if needed. Rebuild the shared dist.
 3. **Model** (`packages/phrase/src/model`):
    - `NounKey` / `NOUN_KEYS` and the `vocative*` fields (D2);
@@ -403,3 +404,127 @@ Reseed `signi.db`.
   P11-E6's humble / honorific control, not for this box. It is recorded here as an observation, not
   filed.
 - **Spanish ¡…!** and the exclamative (E47's follow-up).
+
+## Done
+
+Shipped 2026-09-25, in one commit. E47 had landed by then, so the vocative is the card's **eighth**
+border control, after the interjection's, and the card grows to 268px. The engine is untouched: the
+canvas and the console build the `PhrasePlan.address` E3 already renders.
+
+| lang | Mom, run | Mom, the cat runs | Mom, does the cat run? | Mom and Dad, run (2pl) |
+|---|---|---|---|---|
+| en | Mom, run. | Mom, the cat runs. | Mom, does the cat run? | Mom and Dad, run. |
+| it | Mamma, corri. | Mamma, il gatto corre. | Mamma, il gatto corre? | Mamma e papà, correte. |
+| fr | Maman, cours. | Maman, le chat court. | Maman, est-ce que le chat court ? | Maman et Papa, courez. |
+| de | Mama, lauf. | Mama, der Kater läuft. | Mama, läuft der Kater? | Mama und Papa, lauft. |
+| es | Mamá, corre. | Mamá, el gato corre. | Mamá, ¿el gato corre? | Mamá y Papá, corred. |
+| pt | Mamãe, corra. | Mamãe, o gato corre. | Mamãe, o gato corre? | Mamãe e Papai, corram. |
+| ja | お母さん、走ってください。 | お母さん、猫は走ります。 | お母さん、猫は走りますか？ | お母さんとお父さん、走ってください。 |
+
+Built on the canvas (the border toggle and **V**, the group from the ring's coordinate control) and
+checked in all seven by `translation.spec.ts`. The last column is the person default (D4) at work: the
+second word in the group turned the command's 2nd singular into the 2nd plural. *My wife, run* waits
+for [P11-E9](../P11-E9-pronoun-owner.md), as the table above says: the vocative's owner controls are
+the ordinary ones, so E9's picker reaches them unchanged.
+
+What landed:
+
+- **seed**: VOCATIVE in `nouns.ts`, after SUBJECT_GRAMMAR, `isA` PHRASE — *vocative, vocativo (m),
+  vocatif (m), Anrede (f), vocativo (m), vocativo (m), 呼びかけ (よびかけ)*. French takes the case name
+  *vocatif*, not *apostrophe*, which is also the punctuation mark; German *Anrede*, not *Vokativ*.
+  Definition: "a phrase that indicates the person who the speaker calls" (`/subj ( PHRASE /a /rel
+  #2.subj )`, `/subj ( PHRASE ) /verb ( INDICATE ) /obj ( PERSON /the /rel #3.obj )`, `/subj ( SPEAKER
+  /the ) /verb ( CALL ) /obj ( PERSON )`). It names the hearer rather than repeating HEY's "a word with
+  which one calls a person", and collides with no shipped definition in any language. Two probed
+  drafts were dropped: NAME is 名付ける, *to christen*, in Japanese, and with the generic *one* the
+  relative reads "a person who **is called**" (*che si chiama*, *que se llama*) in three languages.
+  Pinned in `nounPhrase.test.ts`'s grammar-noun table and `furigana.test.ts`. Reseed `signi.db`.
+- **shared**: one block after `action.removeInterjection` — `slot.vocative`, `action.addVocative`,
+  `action.removeVocative`, `purpose.vocative`. `CANVAS_PARTS.vocative` joins `CLEARABLE_PARTS` and
+  `COLLAPSIBLE_PARTS` (`action.{clear,expand,compact}.vocative`); `PART_BY_LABEL_KEY` maps
+  `slot.vocative`. All seven pinned in `uiStrings.test.ts` and `command-purposes.test.ts`.
+- **model**: `NounKey` gains `vocative`, and so does `NOUN_KEYS` (last), with the `vocative*` fields
+  (number, gender, three adjectives, possessor and its pointer, conjuncts, conjunction). It is no
+  `BoxComplementType`: no verb-ring toggle, no complement letter. `RelativeGap` excludes it, so no
+  relative clause's gap can be typed as one; `canBeRelativeTarget` refuses it at run time too.
+  `VOCATIVE_PRONOUNS` (the 2nd person) and `inVocative` / `inVocativeGroup` (address predicates) sit in
+  the model. `vocativeOffered(selection, root)` is the one gate the border toggle, the plan and the
+  console's completion share: a root period, not a citation, not an instruction. `workspaceToPlans`
+  writes `plan.address` on the root, before the relative clauses are attached (so "Cat that runs,
+  eat." — a clause headed by the vocative — reaches the address through `getTopElement`), and leaves
+  out a group holding a 1st or 3rd person or the generic one. `planToWorkspace` reads `address` into
+  the box on a root and names it unsupported on a linked clause, a citation or an instruction; a
+  determiner in it (`PhrasePlan.address.definiteness`) and a coreferent owner (`Possessor.coreferent`)
+  are named unsupported too. The saved-phrase format stores the head by id (`CONCEPT_BASE_KEYS`).
+- **canvas**: `VocativeToggle` (Campaign: E47 took RecordVoiceOver), the eighth border control; the
+  box is a `NounPhraseBuilder` with the noun ring's own controls — adjectives, number, gender (a
+  pronoun's, or a gendered noun's), relative clause, headless chip, owner and its role, standard,
+  examples, coordinate. No determiner, no question mark, no existential, no reading: the satellites
+  are the block's own, not a special case in the shared list. Its group is `detached` (a new
+  `GroupDef` flag): a dotted ring with controls, but no port and no line to the verb phrase. Its
+  pronoun chooser greys every person but the 2nd, and so does its conjuncts' (`vocativeHead`), whose
+  determiner is withdrawn too (`bareHead`). `READING_ORDER` puts "Vocative" after "Interjection". A
+  vocative already built stays where the toggle is withdrawn, its box faded (`vocative-dimmed`).
+- **person default** (D4): `personFollowsVocative`, applied to every edit the period's canvas makes
+  (the builder wraps its `onPhraseUpdate`, so the hosted conjunct rings are covered) and never by the
+  reducers or the console. 2sg becomes 2pl when the vocative turns plural — its number, a filled
+  second conjunct, a plural "you" — and 2pl goes back when it turns singular or goes; 1pl is left.
+- **keyboard**: `period.vocative` on **V**, pressing the border toggle as E does. The box takes the
+  noun keys through `ctx.nounKey = "vocative"`; D finds no `vocativeDefiniteness`.
+- **console**: `/voc` (alias `/vocative`, purpose `purpose.vocative`), printed after `/interj` and
+  before `/subj`; `/del voc` takes it back; `#n.voc` names it as a relative clause's source and is
+  refused as a gap (`relativeGapRole`'s "choose a noun"). Its word spec takes nouns and the 2nd
+  person alone (`WordSpec.pronouns`), and so does its conjuncts'. Completion offers `/voc` where the
+  toggle is offered, and inside the bracket no determiner.
+
+**Landed differently from the plan:**
+
+- **The shown state is view state** (`vocativeOpen` in `PhraseBuilder`), not a `vocativeShown`
+  selection flag and `setVocativeShown` reducer — E47's reason: a flag prints nothing, so the round
+  trip would lose it, and the coverage test would ask the reducer for a command.
+- **The seat is below the subject**, `DEFAULT_POSITIONS.vocative = { x: 10, y: 88 }`, and the ring
+  **yields** to every other (`useOverlapResolution`'s `yielding` set). Measured at 1500×1000 on *Mom,
+  cat eats mouse* (group-box rects, page px): without the vocative, Subject (54, 249) 147², Verb
+  Phrase (233, 205) 236², Direct Object (532, 250) 144²; with it, the same three to the pixel and the
+  Vocative 144² at (38, 529), below the subject, the canvas grown under it. The top-left seat D1
+  proposed (x 10, y 18) shoved the subject off the row (to y 479): a ring that just appeared outranks
+  the ones it lands on. With the interjection too, the row is still one (centres 150 / 151 / 150, the
+  subject shoved right as E47 measured) and the vocative sits below. Tidy puts it in reading order
+  (interjection · vocative · subject · …), where, four rings wide, the verb phrase starts a second
+  row. The verb's ring is untouched (236²).
+- **No remove control on the ring**, so no `action.remove.vocative` and `REMOVABLE_PARTS` is unchanged:
+  the border toggle is the remove, as E47's is.
+- **No new diagnostic** for `/voc ( 1st )`: the vocative's word spec knows no pronoun but the 2nd
+  person, so the line says *Unknown word: 1st*, as `/interj cat` does, and completion never offers
+  one.
+- **The numeral** is the console's (`/voc ( cat /pl /num 2 )`, "Two cats, run.") and a plan's: on the
+  canvas it lives in the determiner menu, which the vocative withdraws.
+- **The standard and the examples stay** on the ring as on any noun's ("Animals such as the cat,
+  run." renders); D3's table did not list them.
+- **The person default also fires when a period with a plural vocative turns into a command.**
+- **The command's person is printed as a value**, `/command youall /voc ( mom /and dad ) /verb ( run )`,
+  not `/command /youall` as D7 wrote it.
+
+Measured: the border stack is 252px for eight controls, the card 268px at least (`PeriodContainer`).
+
+Tests: `workspaceToPlans.test.ts` (root, command, group, coordination, condition, relative period,
+infinitive, instruction, persons, a relative clause from it, the four columns back from
+`planToWorkspace`, the unsupported cases), `linkRules.test.ts`, `personFollowsVocative.test.ts`,
+`rawSatellites.test.tsx`, `graph.test.ts`, `BorderControls.test.tsx`, `PeriodContainer.test.tsx`
+(268px), `PhraseBuilder.test.tsx` (the toggle after the interjection, the ring's controls, the
+chooser's persons, the person default, withdrawal on each link target, the infinitive and an
+instruction), `serializeWorkspace.test.ts`, `phraseSerialize.consts.test.ts`; the console's golden
+(`/voc` with `/interj`, a group under `youall`, a relative clause from it, `#2.voc` refused, `/voc
+1st`), help, coverage, `complete.test.ts` and the round-trip walk, which sets, pluralizes, coordinates,
+owns and clears the vocative (green at `SEEDS=5000`; the superlative-set check now reads 40,000 walks,
+as the new op thinned that rare state). e2e: `translation.spec.ts` (the statement, the question, the
+command by V, *Mom and Dad* in the 2nd plural, dimming under an instruction), `console.spec.ts`
+(`/voc`, `/del voc`).
+
+### For P11-E7
+
+A pointer inside the vocative box stays a feature copy, as every pointer is today. To keep E7's
+coreferent link out of the address, test the owner's noun address with `inVocative` (in
+`packages/phrase/src/model/interfaces.ts`): it is true for `vocative` and anything under it
+(`vocative/possessor`, `vocative/conjunct/0`, …). A nested builder's head is its `possessorPath`, so
+the check reads the address the pointer is stored on, not the local key.

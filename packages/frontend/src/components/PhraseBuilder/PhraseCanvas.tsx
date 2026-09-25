@@ -68,6 +68,9 @@ export interface PhraseCanvasProps {
   // The interjection's box stays, faded, where the period no longer offers it — a linked clause, a
   // citation — but its word is still chosen (P09-E47 D2): the engine does not speak it there.
   interjectionDimmed?: boolean;
+  // So does the vocative's (P11-E8) where the period no longer says one — a linked clause, a citation,
+  // an instruction — while it still holds words.
+  vocativeDimmed?: boolean;
 }
 
 const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
@@ -94,6 +97,7 @@ export function PhraseCanvas({
   recolor,
   overlay = false,
   interjectionDimmed = false,
+  vocativeDimmed = false,
 }: PhraseCanvasProps) {
   const {
     selection,
@@ -164,6 +168,16 @@ export function PhraseCanvas({
 
       <>
         {interjection}
+        {/* The period's vocative (P11-E8): a noun box of its own after the interjection, with the
+            noun ring's controls, joined to nothing, while the card's border toggle shows it. */}
+        {ctx.renderedSlots?.some((s) => s.key === "vocative") && (
+          <Box
+            data-testid={vocativeDimmed ? "vocative-dimmed" : undefined}
+            sx={vocativeDimmed ? { opacity: 0.45 } : undefined}
+          >
+            <NounPhraseBuilder which="vocative" ctx={ctx} />
+          </Box>
+        )}
         {ctx.showSubject === false ? null : moodBox ? (
           // A subject-dropping mood (command / infinitive) drops the subject, so the subject box
           // has no noun to hold: the mood box *is* the subject node — dragged, positioned and

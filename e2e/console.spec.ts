@@ -197,6 +197,20 @@ test.describe('the phrase console', () => {
     await expect(page.getByTestId('box-interjection')).toHaveCount(0);
   });
 
+  // P11-E8: the period's vocative, printed after the interjection and before the subject.
+  test('calls the hearer with /voc, and /del voc takes it back', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/command /verb run /voc mom');
+    await run(page);
+    await app.expectSentences({ en: 'Mom, run.', it: 'Mamma, corri.', de: 'Mama, lauf.', ja: 'お母さん、走ってください。' });
+    await expect(page.getByTestId('box-vocative')).toContainText('mom');
+    await expect(page.getByTestId('source-strip')).toContainText('/command /voc ( mom ) /verb ( run )');
+    await page.keyboard.type('/del voc');
+    await run(page);
+    await app.expectSentences({ en: 'run.' });
+    await expect(page.getByTestId('box-vocative')).toHaveCount(0);
+  });
+
   test('says there is with /there, and /del there takes it back', async ({ app, page }) => {
     await prompt(page).click();
     await page.keyboard.type('/there /subj ( cat /a ) /verb be /loc house');

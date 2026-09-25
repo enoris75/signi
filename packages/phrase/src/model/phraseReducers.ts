@@ -270,6 +270,21 @@ export function applyConceptSelect(
       delete next.directObjectGender;
     }
   }
+  // The vocative (P11-E8) takes a noun or the hearer's pronoun, seeded as the subject's are: a pronoun
+  // is singular until the chooser says otherwise and carries no noun phrase's parts.
+  if (slot === "vocative") {
+    clearAdjectives(next, "vocative");
+    if (concept.role !== "noun") clearNounPhraseParts(next, "vocative");
+    if (concept.role === "pronoun") {
+      next.vocativeNumber = "singular";
+      const g = prev.vocativeGender ?? "masc";
+      next.vocativeGender = concept.person !== "3" && g === "neut" ? "masc" : g;
+    } else if (concept.gendered) {
+      next.vocativeGender = nounGender(prev.vocativeGender);
+    } else {
+      delete next.vocativeGender;
+    }
+  }
   if (COMPLEMENT_KEY_SET.has(slot)) {
     // Swapping the complement noun invalidates its adjectives.
     clearAdjectives(next, slot as NounKey);
@@ -288,7 +303,7 @@ export function applyConceptSelect(
   // A standard survives its head changing between an adjective and a noun: another adjective takes it
   // over ("bigger than the dog" → "older than the dog"), and so does a noun's compared adjective ("a
   // bigger animal than the dog", P09-E50 D3). A pronoun takes no adjective, so it drops it.
-  if (concept.role === "pronoun" && (slot === "subject" || slot === "directObject" || COMPLEMENT_KEY_SET.has(slot)))
+  if (concept.role === "pronoun" && (slot === "subject" || slot === "directObject" || slot === "vocative" || COMPLEMENT_KEY_SET.has(slot)))
     delete next[STANDARD_KEY(slot as NounKey)];
   if (opts?.number !== undefined)
     (next as PhraseSelection)[`${slot}Number` as keyof PhraseSelection] = opts.number as never;
@@ -318,7 +333,7 @@ export function applyClear(
     clearAdjectives(next, "subject");
     for (const type of BOX_COMPLEMENT_TYPES) clearNoun(next, type);
   }
-  if (slot === "subject" || slot === "directObject" || COMPLEMENT_KEY_SET.has(slot))
+  if (slot === "subject" || slot === "directObject" || slot === "vocative" || COMPLEMENT_KEY_SET.has(slot))
     clearNoun(next, slot as NounKey);
   // Clearing an adjective drops the ones chained after it — their reveal controls
   // ride the box that just went away. Modals chain off the verb the same way.

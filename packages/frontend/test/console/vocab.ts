@@ -47,6 +47,13 @@ export const NOUNS = [
   c('ANIMAL', 'noun', 'animal', 'animale', { animate: true }),
 ];
 
+// The parents one calls in the vocative (P11-E8): "Mom and Dad, run". Nouns the console knows, kept
+// out of NOUNS so the round trip's random walk keeps the words it draws.
+export const KIN = [
+  c('MOM', 'noun', 'mom', 'mamma', { animate: true, human: true }),
+  c('DAD', 'noun', 'dad', 'papà', { animate: true, human: true }),
+];
+
 export const PRONOUNS = [
   c('FIRST_PERSON', 'pronoun', 'I', 'io', { person: '1', description: '1st Person' }),
   c('SECOND_PERSON', 'pronoun', 'you', 'tu', { person: '2', description: '2nd Person' }),
@@ -112,7 +119,7 @@ export const ADVERBS = [
 // The period's interjection (P09-E47): HEY, the corpus's one.
 export const INTERJECTIONS = [c('HEY', 'interjection', 'hey', 'ehi')];
 
-export const ALL = [...NOUNS, ...PRONOUNS, ...VERBS, ...ADJECTIVES, ...ADVERBS, ...INTERJECTIONS];
+export const ALL = [...NOUNS, ...KIN, ...PRONOUNS, ...VERBS, ...ADJECTIVES, ...ADVERBS, ...INTERJECTIONS];
 
 export const byId = (id: string): Concept => {
   const hit = ALL.find((x) => x.id === id);
@@ -127,7 +134,7 @@ const PERSON_NAMES: Record<string, Record<string, string>> = {
 
 export function vocabFor(language: LanguageCode = 'en'): Vocabulary {
   return {
-    concepts: { noun: NOUNS, pronoun: PRONOUNS, verb: VERBS, adjective: ADJECTIVES, adverb: ADVERBS, interjection: INTERJECTIONS },
+    concepts: { noun: [...NOUNS, ...KIN], pronoun: PRONOUNS, verb: VERBS, adjective: ADJECTIVES, adverb: ADVERBS, interjection: INTERJECTIONS },
     language,
     label: (concept) =>
       concept.role === 'pronoun'

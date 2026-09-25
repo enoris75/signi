@@ -173,6 +173,28 @@ const GOLDEN: Record<string, Golden> = {
     holds: { interjection: 'HEY', subject: 'CAT' },
     misuse: { line: '/interj cat', says: { code: 'unknownWord', args: { text: 'cat' } } },
   },
+  // P11-E8: the period's vocative, printed after the interjection and before the subject, as it is
+  // spoken; its bracket takes the ring's noun statements. It calls the hearer, so the 1st person is no
+  // word it knows (A338), as a noun is none for /interj.
+  voc: {
+    line: '/verb run /voc mom /subj cat /interj hey',
+    prints: '/interj ( hey ) /voc ( mom ) /subj ( cat ) /verb ( run )',
+    holds: { vocative: 'MOM', subject: 'CAT' },
+    check: () => {
+      const both = ok('/command youall /verb ( run ) /voc ( mom /and dad )');
+      expect(noun(sel(both))).toMatchObject({ vocative: 'MOM', imperativePerson: '2pl' });
+      expect(sel(both).vocativeConjuncts?.map((c) => c.subject?.id)).toEqual(['DAD']);
+      expect(print(both)).toBe('/command youall /voc ( mom /and dad ) /verb ( run )');
+      // No determiner: the engine says the address bare.
+      expect(run('/voc ( mom /the )').diagnostic).toMatchObject({ code: 'noTarget' });
+      // It heads a relative clause ("Cat that runs, eat."), and is never one's gap.
+      const relative = ok('/command /voc ( cat /rel ( /verb run ) ) /verb ( eat )');
+      expect(relative.links[0]).toMatchObject({ source: { nounKey: 'vocative' }, target: { nounKey: 'subject' } });
+      expect(print(relative)).toBe('/command /voc ( cat /rel #2.subj ) /verb ( eat )');
+      expect(run('/subj cat /rel #2.voc\n/voc dog /verb run').diagnostic?.code).toBe('relativeGapRole');
+    },
+    misuse: { line: '/voc 1st', says: { code: 'unknownWord', args: { text: '1st' } } },
+  },
   factitive: {
     line: '/verb eat /obj food /objpred cat /factitive',
     prints: '/verb ( eat ) /obj ( food ) /objpred ( cat /factitive )',

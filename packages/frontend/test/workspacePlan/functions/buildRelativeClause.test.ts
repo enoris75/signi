@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
 import { buildRelativeClause } from '../../../src/components/PhraseBuilder/workspacePlan/functions/buildRelativeClause.ts';
-import type { NounKey, PhraseContainer, PhraseLink } from '../../../src/components/PhraseBuilder/interfaces.ts';
+import type { PhraseContainer, PhraseLink, RelativeGap } from '../../../src/components/PhraseBuilder/interfaces.ts';
 import { BOY, byId, CAT, DOG, EAT, HOUSE, instrumental, KNIFE, period, relative, SLEEP } from '../fixtures.ts';
 
-const clause = (target: PhraseContainer, gap: NounKey, links: PhraseLink[] = [], periods = [target]) =>
+const clause = (target: PhraseContainer, gap: RelativeGap, links: PhraseLink[] = [], periods = [target]) =>
   buildRelativeClause(target, gap, links, byId(...periods), new Set(['main']));
 
 describe('buildRelativeClause', () => {

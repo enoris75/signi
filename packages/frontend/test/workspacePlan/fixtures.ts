@@ -4,6 +4,7 @@ import type { AbstractionLevel, Concept, CoordConjunction, SubordinatingConjunct
 import type {
   NounAddress,
   NounKey,
+  RelativeGap,
   PhraseContainer,
   PhraseLink,
   PhraseSelection,
@@ -30,7 +31,7 @@ export const period = (id: string, selection: PhraseSelection): PhraseContainer 
 export const relative = (
   id: string,
   [sourceId, sourceKey]: [string, NounAddress],
-  [targetId, targetKey]: [string, NounKey],
+  [targetId, targetKey]: [string, RelativeGap],
 ): PhraseLink => ({
   id,
   source: { containerId: sourceId, nounKey: sourceKey },

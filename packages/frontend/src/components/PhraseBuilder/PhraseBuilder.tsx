@@ -43,7 +43,8 @@ import {
   toggleInterrogative,
   toggleQuestionRole,
 } from "./phraseReducers.ts";
-import { interjectionOffered } from "./functions/interjectionOffered.ts";
+import { interjectionOffered, vocativeOfferedOn } from "./functions/interjectionOffered.ts";
+import { personFollowsVocative } from "./functions/personFollowsVocative.ts";
 import { keepsQuestion, marksLocked } from "./functions/moodLocked.ts";
 import { canAsk, hasRelation } from "./functions/questionGates.ts";
 import {
@@ -174,7 +175,7 @@ export interface PhraseBuilderProps {
 
 export function PhraseBuilder({
   selection,
-  onPhraseUpdate,
+  onPhraseUpdate: updatePhrase,
   onRemove,
   soleContainer = false,
   onMoveUp,
@@ -210,6 +211,20 @@ export function PhraseBuilder({
   const offersInterjection = !ringHost && !possessorPath && interjectionOffered(selection, binding);
   const interjectionShown =
     !ringHost && !possessorPath && (offersInterjection ? (interjectionOpen ?? Boolean(selection.interjection)) : Boolean(selection.interjection));
+  // The vocative box (P11-E8), shown the same way from its own border toggle: offered on a root period
+  // that says its address (see vocativeOfferedOn); where it is withdrawn — a linked clause, a citation,
+  // an instruction — a vocative already built stays, dimmed, and an empty box goes.
+  const [vocativeOpen, setVocativeOpen] = useState<boolean | undefined>(undefined);
+  const period = !ringHost && !possessorPath;
+  const offersVocative = period && vocativeOfferedOn(selection, binding);
+  const vocativeShown = period && (offersVocative ? (vocativeOpen ?? Boolean(selection.vocative)) : Boolean(selection.vocative));
+  // Every edit this period's canvas makes — its own boxes' and its hosted rings' — lets the command's
+  // person follow the vocative's number (P11-E8 D4): "Mom and Dad" are told *correte*, not *corri*. The
+  // console applies its reducers without it, so a person it prints is the one it keeps.
+  const onPhraseUpdate = period
+    ? (updater: (prev: PhraseSelection) => PhraseSelection) =>
+        updatePhrase((prev) => personFollowsVocative(prev, updater(prev)))
+    : updatePhrase;
   // A period of its own, another clause's instrument, or a hosted ring's noun phrase — and so
   // whether it draws a canvas yet (see resolveBuilderMode). The interjection's box draws it too.
   const mode = resolveBuilderMode({
@@ -220,7 +235,7 @@ export function PhraseBuilder({
     hosted: Boolean(ringHost),
   });
   const { nounPhraseMode, actionMode, hasContent } = mode;
-  const showCanvas = mode.showCanvas || interjectionShown;
+  const showCanvas = mode.showCanvas || interjectionShown || vocativeShown;
   // Coref-pick coordinator for pronominal possessors ("the boy and his horse"). The outermost
   // period builder owns one (keyed to the whole period selection) and re-provides it below; a
   // nested conjunct / possessor builder inherits the parent's, so a pick spans the whole tree.
@@ -299,7 +314,7 @@ export function PhraseBuilder({
     });
   // A hosted ring's head slot wears its role's name and colour (see roleSlotFor).
   const roleSlot = roleSlotFor(ringHost);
-  const visibleSlots = visibleSlotsFor(selection, roleSlot, interjectionShown);
+  const visibleSlots = visibleSlotsFor(selection, roleSlot, interjectionShown, vocativeShown);
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
   const commands = phraseCommands(onPhraseUpdate);
@@ -454,6 +469,20 @@ export function PhraseBuilder({
     setInterjectionOpen(true);
     focusSlot("interjection");
   };
+  // The vocative's border toggle (P11-E8): show its box and take the cursor into it, or take the box
+  // away with everything it holds — its words, its owner, its group, the relative clause it heads.
+  const handleToggleVocative = () => {
+    if (vocativeShown) {
+      binding?.relative.onRemoveLink("vocative");
+      conjunctsOf(selection, "vocative").forEach((_, i) => binding?.relative.onRemoveLink(conjunctAddress("vocative", i)));
+      commands.handleRemoveVocative();
+      setVocativeOpen(false);
+      if (activeSlot?.startsWith("vocative")) setActiveSlot(selection.subject ? "verb" : "subject");
+      return;
+    }
+    setVocativeOpen(true);
+    focusSlot("vocative");
+  };
   // A gap's mark, taken off the clause of ASK, leaves a yes/no question rather than a statement ASK
   // cannot report (P09-E55 D3).
   const staysAsked = (next: PhraseSelection) =>
@@ -484,6 +513,8 @@ export function PhraseBuilder({
       ...(ringHost?.question && { ownerQuestion: ringHost.question }),
       // A hosted ring's noun takes no standard and no examples of its own (P09-E50 D4, P09-E48 D2).
       hosted: Boolean(ringHost),
+      // A vocative's conjunct is said bare, as the vocative is (P11-E8).
+      bareHead: ringHost?.kind === "conjunct" && ringHost.role === "vocative",
     },
   );
 
@@ -994,7 +1025,9 @@ export function PhraseBuilder({
     positionsStaleRef,
     // An owner's empty ring is its word picker for as long as it takes to name or point to the owner:
     // it moves out of the other rings' way rather than shoving them, since pointing makes it vanish.
-    yielding: new Set(besideSpots.filter((o) => !o.named).map((o) => o.address)),
+    // The vocative (P11-E8) stands outside the clause, so it gives way too: it finds a seat round the
+    // clause's row rather than shoving the subject off it, and the canvas grows to hold it.
+    yielding: new Set([...besideSpots.filter((o) => !o.named).map((o) => o.address), "Vocative"]),
   });
 
   // Tidy the whole period: pack the constituents' rings into non-overlapping rows in reading
@@ -1116,6 +1149,7 @@ export function PhraseBuilder({
     pronounHead: (ringHost?.kind === "conjunct" && !nounOnlyConjunct(ringHost.role)) || ringHost?.kind === "standard",
     // …and a predicate's conjunct takes an adjective, as the predicate does (P13).
     predicateHead: ringHost?.kind === "conjunct" && ringHost.role === "predicative",
+    vocativeHead: ringHost?.kind === "conjunct" && ringHost.role === "vocative",
     showSubject: !actionMode,
     activeSlot,
     renderedSlots,
@@ -1216,6 +1250,7 @@ export function PhraseBuilder({
       recolor={roleSlot ? { subject: roleSlot.color } : undefined}
       overlay={Boolean(ringHost)}
       interjectionDimmed={interjectionShown && !offersInterjection}
+      vocativeDimmed={vocativeShown && !offersVocative}
       hosted={
         <>
           {chains.length > 0 && (
@@ -1327,6 +1362,7 @@ export function PhraseBuilder({
       onToggleInfinitive={handleToggleInfinitive}
       onToggleQuestion={handleToggleQuestion}
       interjection={offersInterjection ? { shown: interjectionShown, onToggle: handleToggleInterjection } : undefined}
+      vocative={offersVocative ? { shown: vocativeShown, onToggle: handleToggleVocative } : undefined}
       controlsRef={periodControlsRef}
       graphHeight={graphHeight}
       onGraphHeightChange={setGraphHeight}

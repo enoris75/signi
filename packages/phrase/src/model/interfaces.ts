@@ -229,7 +229,11 @@ export interface SlotConfig {
     BoxComplementType |
     `${BoxComplementType}Adjective` |
     `${BoxComplementType}Adjective2` |
-    `${BoxComplementType}Adjective3`;
+    `${BoxComplementType}Adjective3` |
+    "vocative" |
+    "vocativeAdjective" |
+    "vocativeAdjective2" |
+    "vocativeAdjective3";
     label: string;
     // When set, the box titles itself with this engine-rendered string in the current UI
     // language instead of the static English `label` (which stays as the fallback and as the
@@ -541,6 +545,17 @@ export interface PhraseSelection {
     opponentAdjective?: Concept;
     opponentAdjective2?: Concept;
     opponentAdjective3?: Concept;
+    // The period's vocative (P11-E8, PhrasePlan.address): "**Mom**, run", "**Mom**, the cat runs" — the
+    // hearer, named before the clause and outside it, in a noun box of its own that the card's border
+    // reveals. It is not the subject, not even a command's (P11-E3 D4). Only the root period's is spoken,
+    // and not under the infinitive or an instruction: the plan leaves it out there, and the box stays,
+    // dimmed, with its words (see vocativeOffered). No determiner: the engine says the address bare.
+    vocative?: Concept;
+    vocativeNumber?: "singular" | "plural";
+    vocativeGender?: "masc" | "fem" | "neut";
+    vocativeAdjective?: Concept;
+    vocativeAdjective2?: Concept;
+    vocativeAdjective3?: Concept;
     // Adverbial of manner ("runs *at the speed of light*", "cuts *with care*"). A full noun
     // phrase, like the motion complements. Its preposition is not a field here: it follows the
     // head noun's semantic manner relation (SPEED→"at", CARE→"with"), resolved in the engine.
@@ -665,6 +680,7 @@ export interface PhraseSelection {
     comitativeConjuncts?: PhraseSelection[];
     roleConjuncts?: PhraseSelection[];
     opponentConjuncts?: PhraseSelection[];
+    vocativeConjuncts?: PhraseSelection[];
     // The one conjunction joining a block's whole group (default 'and'). Only `and` / `or` join
     // noun phrases — see NOUN_COORD_CONJUNCTIONS.
     subjectConjunction?: CoordConjunction;
@@ -684,6 +700,7 @@ export interface PhraseSelection {
     comitativeConjunction?: CoordConjunction;
     roleConjunction?: CoordConjunction;
     opponentConjunction?: CoordConjunction;
+    vocativeConjunction?: CoordConjunction;
     subjectPossessor?: PhraseSelection;
     directObjectPossessor?: PhraseSelection;
     predicativePossessor?: PhraseSelection;
@@ -701,6 +718,7 @@ export interface PhraseSelection {
     comitativePossessor?: PhraseSelection;
     rolePossessor?: PhraseSelection;
     opponentPossessor?: PhraseSelection;
+    vocativePossessor?: PhraseSelection;
     // A *pronominal* possessor: instead of a genitive `${which}Possessor` phrase, the noun's
     // possessor corefers with another noun in the same period ("the boy and *his* horse"), stored
     // as that antecedent's `NounAddress`. The engine then renders a possessive pronoun agreeing
@@ -723,6 +741,7 @@ export interface PhraseSelection {
     comitativePossessorRef?: NounAddress;
     rolePossessorRef?: NounAddress;
     opponentPossessorRef?: NounAddress;
+    vocativePossessorRef?: NounAddress;
 }
 
 // Extra grammatical settings a picker can commit alongside a concept. The pronoun
@@ -733,12 +752,13 @@ export interface ConceptSelectOpts {
   gender?: "masc" | "fem" | "neut";
 }
 
-export type NumberSlot = "subject" | "directObject" | BoxComplementType;
+export type NumberSlot = NounKey;
 
-export type GenderSlot = "subject" | "directObject" | BoxComplementType;
+export type GenderSlot = NounKey;
 
-// The noun blocks that can carry a relative clause / possessor (same set as NumberSlot).
-export type NounKey = "subject" | "directObject" | BoxComplementType;
+// The noun blocks that can carry a relative clause / possessor (same set as NumberSlot): the clause's
+// own, and the period's vocative (P11-E8), which stands before the clause and is no complement.
+export type NounKey = "subject" | "directObject" | BoxComplementType | "vocative";
 
 // The address of a noun anywhere in a container's phrase tree, used as a cross-container
 // link endpoint. A top-level noun is just its `NounKey`; a possessor head is that address
@@ -754,7 +774,8 @@ export type NounAddress = string;
 // The slot of a relative clause's period its head fills (P13, RelativeClause.headRole): one of its
 // nouns; its instrument, which has no box of its own ("an object **with which** one goes", CAR); or
 // the possessor of its subject, the genitive relative ("a word **whose** meaning …", HYPERNYM).
-export type RelativeGap = NounKey | "instrumental" | "subject/possessor";
+// Never the vocative (P11-E8): a relative clause has no address, so its head cannot fill one.
+export type RelativeGap = Exclude<NounKey, "vocative"> | "instrumental" | "subject/possessor";
 
 // Append a `/possessor` step to a noun address — the address of that noun's possessor head.
 export const possessorAddress = (base: NounAddress): NounAddress => `${base}/possessor`;
@@ -782,6 +803,19 @@ export const builderNounAddress = (
   which: NounKey,
 ): NounAddress =>
   headPath === undefined ? which : which === "subject" ? headPath : `${headPath}/${which}`;
+
+/**
+ * Whether a noun address lies inside the period's vocative (P11-E8): the vocative itself, one of its
+ * conjuncts, or anything nested in them — an owner, a standard, examples ("vocative/possessor",
+ * "vocative/conjunct/0/possessor"). The engine says the address outside every clause, so nothing in it
+ * may be a coreferent link to the subject (P11-E2 throws there).
+ */
+export const inVocative = (address: NounAddress | undefined): boolean =>
+  address === "vocative" || Boolean(address?.startsWith("vocative/"));
+
+/** Whether a noun address is one of the vocative group's own heads, which the engine says bare (P11-E8). */
+export const inVocativeGroup = (address: NounAddress | undefined): boolean =>
+  address === "vocative" || /^vocative\/conjunct\/\d+$/.test(address ?? "");
 
 export const POSSESSOR_KEY = (which: NounKey) =>
   `${which}Possessor` as keyof PhraseSelection;
@@ -836,8 +870,9 @@ export function slotCategories(
   // The direct object takes a pronoun on the same footing as the subject ("I see you"), and
   // the causal, purpose and topic complements take one behind their adposition ("because of him",
   // "for her", "about him" — the engine's TONIC_COMPLEMENTS), as do the companion and the opponent
-  // ("with her", "against him").
-  if (slotKey === "directObject" || slotKey === "cause" || slotKey === "purpose" || slotKey === "topic" || slotKey === "comitative" || slotKey === "opponent")
+  // ("with her", "against him"). So does the vocative (P11-E8), "You, run.", where only the 2nd person
+  // is offered (see VOCATIVE_PRONOUNS).
+  if (slotKey === "directObject" || slotKey === "cause" || slotKey === "purpose" || slotKey === "topic" || slotKey === "comitative" || slotKey === "opponent" || slotKey === "vocative")
     return { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   if (slotKey === "predicative")
     return { options: [NOUN_CATEGORY, ADJECTIVE_CATEGORY], fallback: "noun" };

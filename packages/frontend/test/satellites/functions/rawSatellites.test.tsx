@@ -862,9 +862,9 @@ describe('rawSatellites', () => {
 
   describe('the control tree', () => {
     it('hangs every satellite off a word or off another satellite in the list', () => {
-      const satellites = list({ verb: GO, subject: CAT, directObject: CAT });
+      const satellites = list({ verb: GO, subject: CAT, directObject: CAT, vocative: CAT });
       const satelliteKeys = new Set(satellites.map((s) => s.key));
-      const words = ['subject', 'verb', 'directObject'];
+      const words = ['subject', 'verb', 'directObject', 'vocative'];
 
       for (const s of satellites) {
         expect(words.includes(s.parent) || satelliteKeys.has(s.parent)).toBe(true);
@@ -1065,5 +1065,32 @@ describe('the owner’s question', () => {
 
   it('is on no other phrase', () => {
     expect(find(rawSatellites({ subject: CAT, verb: SEE }, 'en', t), 'possessorQuestion')).toBeUndefined();
+  });
+});
+
+// P11-E8: the vocative's ring is a noun ring less what an address cannot use.
+describe('the vocative’s ring', () => {
+  it('offers a noun’s controls, and no determiner, question, existential or reading', () => {
+    expect(offered({ vocative: CAT, verb: SLEEP }, 'vocative')).toEqual([
+      'vocativeAdjective',
+      'vocativeNumber',
+      'vocativeRelative',
+      'vocativeHeadless',
+      'vocativePossessor',
+      'vocativeExamples',
+      'vocativeConjunct',
+    ]);
+    // Each hangs off the vocative's own word.
+    expect(list({ vocative: CAT }).filter((s) => s.key === 'vocativeNumber').map((s) => s.parent)).toEqual(['vocative']);
+  });
+
+  it('offers a pronoun its number and gender alone', () => {
+    const YOU = concept('SECOND_PERSON', 'pronoun', { person: '2' });
+    expect(offered({ vocative: YOU }, 'vocative')).toEqual(['vocativeNumber', 'vocativeGender', 'vocativeConjunct']);
+  });
+
+  it('takes no determiner on a vocative’s conjunct, which the engine says bare too', () => {
+    const conjunct = rawSatellites({ subject: CAT }, 'en', t, { hosted: true, bareHead: true });
+    expect(conjunct.find((s) => s.key === 'subjectDefiniteness')!.available).toBe(false);
   });
 });

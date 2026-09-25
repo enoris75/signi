@@ -3,7 +3,7 @@ import {
   type Concept,
   type UiStringKey,
 } from "@signi/shared";
-import { isInstrumentalLink, isRelativeLink, isSubordinateLink, type NounKey, type PhraseSelection, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
+import { isInstrumentalLink, isRelativeLink, isSubordinateLink, type NounKey, type RelativeGap, type PhraseSelection, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
 import {
   canBeCondition,
   canBeCoordinate,
@@ -16,6 +16,8 @@ import {
 } from "../../components/PhraseBuilder/linkRules.ts";
 import { BOX_COMPLEMENT_TYPES } from "../../components/PhraseBuilder/slots.ts";
 import { comparedAdjectiveIndex, readsAsSet } from "@signi/phrase/model/functions/comparison.ts";
+import { vocativeOffered } from "@signi/phrase/model/functions/vocativeOffered.ts";
+import { isRoot } from "@signi/phrase/model/workspacePlan/functions/isRoot.ts";
 import { applyScript, roleRefusal, type Frame, type NounFrameKind } from "./apply.ts";
 import {
   COMMANDS,
@@ -401,6 +403,12 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
     case "role":
       // A phrase names its head once, and only that: its bracket's first word, or /subj.
       if (frame.kind !== "period") return action.slot === "subject" && frame.words.length === 0 ? 2 : undefined;
+      // The vocative is offered where its border toggle is (P11-E8): on a root period that says it. It
+      // is typed anywhere, and held dimmed where the period says none.
+      if (action.slot === "vocative") {
+        const c = state.containers.find((x) => x.id === frame.containerId);
+        if (!c || !vocativeOffered(c.selection, isRoot(c, state.links))) return undefined;
+      }
       return roleRefusal(state, frame.containerId, action.slot, def, opts.vocab) ? undefined : 2;
     case "condition": {
       const c = state.containers.find((x) => x.id === frame.containerId);
@@ -833,7 +841,7 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
       case "relative": {
         const source = words.find((w) => takes(action, w));
         if (!source) return;
-        for (const key of ["subject", "directObject", ...BOX_COMPLEMENT_TYPES] as NounKey[]) {
+        for (const key of ["subject", "directObject", ...BOX_COMPLEMENT_TYPES] as RelativeGap[]) {
           const concept = c.selection[key as SlotKey];
           if (!concept) continue;
           if (!canBeRelativeTarget(state.containers, state.links, source.ref.containerId, { containerId: c.id, nounKey: key })) continue;

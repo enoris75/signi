@@ -5,7 +5,7 @@ import { focusRing } from "../../keyboard/focusRing.ts";
 import { usePeriodCursor, usePeriodHasCursor } from "../../keyboard/KeyboardProvider.tsx";
 import type { PeriodContext } from "../../keyboard/keymap.ts";
 import type { PhraseSelection, WorkspaceBinding } from "./interfaces.ts";
-import type { InterjectionControl } from "./PeriodContainer/PeriodContainer.types.ts";
+import type { InterjectionControl, VocativeControl } from "./PeriodContainer/PeriodContainer.types.ts";
 import { MIN_GRAPH_HEIGHT } from "./slots.ts";
 import { moodLocked, questionLocked } from "./functions/moodLocked.ts";
 import { PeriodContainer, periodControls } from "./PeriodContainer/index.ts";
@@ -36,6 +36,8 @@ export interface PeriodCardProps {
   onToggleQuestion: () => void;
   // The interjection's border toggle (P09-E47); absent where the period offers none.
   interjection?: InterjectionControl;
+  // The vocative's border toggle (P11-E8); absent where the period says none.
+  vocative?: VocativeControl;
   // One more period, empty or loaded from the saved ones — the workspace's own two buttons, which
   // the period's N and L reach without leaving the card (see the keymap's period scope).
   onAddPeriod?: () => void;
@@ -73,6 +75,7 @@ export function PeriodCard({
   onToggleInfinitive,
   onToggleQuestion,
   interjection,
+  vocative,
   onAddPeriod,
   onLoadPeriod,
   controlsRef,
@@ -169,6 +172,8 @@ export function PeriodCard({
       toggleInterjection: interjection
         ? () => pressControl("interjection", cardRef.current ?? document)
         : undefined,
+      // So does the vocative's (P11-E8): V presses it.
+      toggleVocative: vocative ? () => pressControl("vocative", cardRef.current ?? document) : undefined,
       toggleCompact: onToggleCompact,
       tidy: onTidy,
       hasGroups,
@@ -224,6 +229,7 @@ export function PeriodCard({
         infinitive={{ active: Boolean(selection.infinitive), disabled: locked, onToggle: onToggleInfinitive }}
         question={{ active: Boolean(selection.interrogative), disabled: askLocked, onToggle: onToggleQuestion }}
         interjection={interjection}
+        vocative={vocative}
       >
         {children}
 

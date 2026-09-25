@@ -4014,6 +4014,34 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The phrase that calls the hearer, "**Mom**, run" (P11-E3's PhrasePlan.address). It names the
+    // period's vocative box, its border toggle and `/voc` (P11-E8). French says *vocatif*, the case's
+    // name, not the school grammar's *apostrophe*, which is also the punctuation mark; German *Anrede*,
+    // the form of address, not the case *Vokativ* it does not have. Its definition names the hearer
+    // rather than repeating HEY's "a word with which one calls a person": "a phrase that indicates the
+    // person who the speaker calls" (NAME is 名付ける, *to christen*, and *one* reads "is called" as
+    // *si chiama* in Italian, Spanish and Portuguese).
+    id: 'VOCATIVE',
+    role: 'noun',
+    description: 'the phrase that names the person one calls, before the clause (grammar)',
+    definition: `
+      /subj ( PHRASE /a /rel #2.subj )
+      /subj ( PHRASE ) /verb ( INDICATE ) /obj ( PERSON /the /rel #3.obj )
+      /subj ( SPEAKER /the ) /verb ( CALL ) /obj ( PERSON )
+    `,
+    emoji: '📣',
+    isA: 'PHRASE',
+    forms: {
+      en: { base: 'vocative', plural: 'vocatives', count: 'singular' },
+      it: { base: 'vocativo', plural: 'vocativi', gender: 'masc', count: 'singular' },
+      fr: { base: 'vocatif', plural: 'vocatifs', gender: 'masc', count: 'singular' },
+      de: { base: 'Anrede', plural: 'Anreden', gender: 'fem', count: 'singular' },
+      es: { base: 'vocativo', plural: 'vocativos', gender: 'masc', count: 'singular' },
+      ja: { base: '呼びかけ', count: 'singular', reading: 'よびかけ' },
+      pt: { base: 'vocativo', plural: 'vocativos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The complement a transitive verb's action falls on, not a physical thing — suffixed like
     // SUBJECT_GRAMMAR because the plain word means both, and only this sense is seeded
     // (ja 目的語, not 物体).

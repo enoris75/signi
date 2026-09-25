@@ -447,6 +447,13 @@ export const COMMANDS: readonly CommandDef[] = [
     ...role("interj", ["interjection"], "interjection", "interjection", "slot.interjection", "info"),
     purposeKey: "purpose.interjection",
   },
+  // P11-E8: the period's vocative, "**Mom**, run" — the hearer named before the clause, printed after
+  // the interjection and before the subject, as it is spoken. Its bracket takes the noun statements its
+  // ring offers (`/voc ( mom /and dad )`); the box's own control is the card's border toggle.
+  {
+    ...role("voc", ["vocative"], "vocative", "vocative", "slot.vocative", "info"),
+    purposeKey: "purpose.vocative",
+  },
   {
     name: "inst",
     aliases: ["instrument", "instrumental"],

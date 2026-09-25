@@ -68,11 +68,21 @@ export const nounOnlyConjunct = (which: NounKey | undefined): boolean => which =
 
 // Every noun block on the canvas: the core roles plus each boxed complement. These are the
 // blocks that carry adjectives, number/gender, a determiner, a possessor, a relative clause.
+// Last, the period's vocative (P11-E8): a noun block before the clause, no complement of its verb —
+// no determiner (the engine says it bare), no question, no existential, never a relative clause's gap.
 export const NOUN_KEYS: NounKey[] = [
   "subject",
   "directObject",
   ...BOX_COMPLEMENT_TYPES,
+  "vocative",
 ];
+
+/**
+ * The pronouns the vocative takes (P11-E8): the hearer's own, "You, run.", *Toi, cours.* An address
+ * calls the hearer, so the engine refuses the 1st and 3rd persons and the generic one (A338); the
+ * canvas's pronoun chooser greys them in the box, and the console knows no other word there.
+ */
+export const VOCATIVE_PRONOUNS: readonly string[] = ["SECOND_PERSON"];
 
 /**
  * The noun blocks that can be *coordinated* ("Peter and Paul could speak aramaic or latin") —
@@ -254,6 +264,28 @@ export const ALL_SLOTS: SlotConfig[] = [
     roles: ["interjection"],
     color: "info",
   },
+  // The period's vocative (P11-E8), "**Mom**, run": the hearer, named after the interjection and before
+  // the subject, as it is spoken. Like the interjection it is on the canvas only while the card's border
+  // toggle shows it (see getActiveSlots), in the same colour, since both stand outside the clause. A noun,
+  // or a 2nd-person pronoun ("You, run."): the engine refuses any other person (A338).
+  {
+    key: "vocative",
+    label: "Vocative",
+    labelKey: "slot.vocative",
+    required: false,
+    roles: ["noun", "pronoun"],
+    color: "info",
+  },
+  ...adjectiveSlots("vocative").map(
+    (key, i): SlotConfig => ({
+      key: key as SlotConfig["key"],
+      label: i === 0 ? "Adjective" : `Adjective ${i + 1}`,
+      labelKey: ADJECTIVE_LABEL_KEY,
+      required: false,
+      roles: ["adjective"],
+      color: "info",
+    }),
+  ),
   {
     key: "subjectAdjective",
     label: "Adjective",
@@ -432,6 +464,7 @@ export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
   ...adjectiveSlots("directObject"),
   ...BOX_COMPLEMENT_TYPES,
   ...BOX_COMPLEMENT_TYPES.flatMap((type) => adjectiveSlots(type)),
+  ...adjectiveSlots("vocative"),
 ]);
 
 /**
@@ -482,10 +515,17 @@ export const COLLAPSIBLE_GROUPS: {
       ...(DETERMINER_COMPLEMENT_TYPES.includes(type) ? [`${type}Definiteness`] : []),
     ],
   })),
+  // P11-E8's vocative: its adjectives, and no determiner (the engine says the address bare).
+  {
+    label: "Vocative",
+    mainKey: "vocative",
+    childKeys: adjectiveSlots("vocative"),
+  },
 ];
 
 const SUBJECT_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("subject"));
 const DIRECT_OBJECT_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("directObject"));
+const VOCATIVE_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("vocative"));
 
 export function getActiveSlots(
   transitivity?: Transitivity,
@@ -497,6 +537,8 @@ export function getActiveSlots(
     // The interjection is the period's, not the verb's or the subject's: its box is shown from the
     // card's border toggle, which the canvas asks (see visibleSlotsFor), never by what the clause holds.
     if (slot.key === "interjection") return false;
+    // So is the vocative (P11-E8), with its adjectives: the border toggle shows the box.
+    if (slot.key === "vocative" || VOCATIVE_ADJECTIVES.has(slot.key)) return false;
     if (slot.key === "directObject") return transitivity !== "intransitive";
     if (DIRECT_OBJECT_ADJECTIVES.has(slot.key))
       return transitivity !== "intransitive";
@@ -524,6 +566,12 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   // enough in that its ring starts inside the canvas's left wall, where the overlap resolver holds it
   // and shoves the subject's ring right to clear it.
   interjection: { x: 9, y: 42 },
+  // P11-E8's vocative, spoken after the interjection and before the subject — but outside the clause,
+  // so it takes the seat below the subject rather than one on the clause's row: the row keeps its
+  // subject, verb and object, the ring yields to them (see useOverlapResolution's `yielding`), and the
+  // canvas grows under it. Tidy puts it back in reading order. Measured on *Mom, cat eats mouse*: a seat
+  // above the subject (x 10, y 18) ends here too, after pushing through the subject's ring.
+  vocative: { x: 10, y: 88 },
   subject: { x: 22, y: 42 },
   verb: { x: 52, y: 42 },
   directObject: { x: 82, y: 42 },

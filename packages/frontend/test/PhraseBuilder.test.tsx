@@ -1454,3 +1454,79 @@ describe('the interjection', () => {
   });
 });
 
+// P11-E8: the vocative's noun box, shown and taken away by the card's eighth border control, after the
+// interjection's — offered on a root period that says an address, withdrawn and dimmed elsewhere.
+describe('the vocative', () => {
+  const toggle = () => document.querySelector<HTMLElement>('[data-kb-control="vocative"]');
+  const MOM = concept('MOM', 'noun', { human: true });
+
+  it('shows its box from the border, after the interjection, and goes with its words', () => {
+    const binding = makeBinding();
+    const { selection } = renderPeriod({ interjection: concept('HEY', 'interjection'), subject: CAT, verb: SLEEP }, { binding });
+    expect(boxes()).not.toContain('vocative');
+    expect(toggle()).toHaveAccessibleName('Add a vocative');
+
+    fireEvent.click(toggle()!);
+    // Spoken after the interjection, before the subject.
+    expect(boxes().slice(0, 3)).toEqual(['interjection', 'vocative', 'subject']);
+    // A noun phrase with a ring of its own, joined to nothing (see roleGroups' `detached`).
+    expect(groups()).toContain('Vocative');
+    pickOption('CAT');
+    expect(selection().vocative?.id).toBe('CAT');
+    expect(toggle()).toHaveAccessibleName('Remove the vocative');
+
+    fireEvent.click(toggle()!);
+    expect(selection().vocative).toBeUndefined();
+    expect(boxes()).not.toContain('vocative');
+    // The relative clause it headed goes with it.
+    expect(binding.relative.onRemoveLink).toHaveBeenCalledWith('vocative');
+  });
+
+  it('carries the noun ring’s controls, less a determiner and the clause’s marks', () => {
+    renderPeriod({ vocative: MOM, subject: CAT, verb: SLEEP }, { binding: makeBinding() });
+    for (const key of ['vocativeAdjective', 'vocativeNumber', 'vocativePossessor', 'vocativeConjunct', 'vocativeRelative'])
+      expect(satellite(key)).toBeInTheDocument();
+    for (const key of ['vocativeDefiniteness', 'vocativeQuestion', 'vocativeExistential', 'vocativeGloss'])
+      expect(screen.queryByTestId(`satellite-${key}`)).not.toBeInTheDocument();
+  });
+
+  it('offers the 2nd person alone among its pronouns', () => {
+    renderPeriod({ subject: CAT, verb: SLEEP });
+    fireEvent.click(toggle()!);
+    fireEvent.click(screen.getByTestId('pronoun-tab'));
+    expect(screen.getByRole('button', { name: 'second' })).toBeEnabled();
+    for (const name of ['first', 'third']) expect(screen.getByRole('button', { name })).toBeDisabled();
+    expect(screen.getByTestId('pronoun-generic')).toBeDisabled();
+  });
+
+  it('turns a command’s 2nd singular plural with it, and back, but leaves “let’s” alone', () => {
+    const { selection } = renderPeriod({ imperative: true, imperativePerson: '2sg', vocative: MOM, verb: SLEEP });
+    fireEvent.click(satellite('vocativeNumber'));
+    expect(selection()).toMatchObject({ vocativeNumber: 'plural', imperativePerson: '2pl' });
+    fireEvent.click(satellite('vocativeNumber'));
+    expect(selection().vocativeNumber).toBe('singular');
+    expect(selection().imperativePerson ?? '2sg').toBe('2sg');
+
+    const lets = renderPeriod({ imperative: true, imperativePerson: '1pl', vocative: MOM, verb: SLEEP });
+    fireEvent.click(screen.getAllByTestId('satellite-vocativeNumber').at(-1)!);
+    expect(lets.selection()).toMatchObject({ vocativeNumber: 'plural', imperativePerson: '1pl' });
+  });
+
+  it.each<[string, PhraseSelection, BindingOverrides]>([
+    ['a relative clause', {}, { relative: { targetKeys: new Set(['subject']) } }],
+    ['an if-clause', {}, { conditional: { hasTarget: true } }],
+    ['a coordinate', {}, { coordinative: { hasTarget: true } }],
+    ['a subordinate clause', {}, { subordinate: { asTarget: { kind: 'content' } } }],
+    ['a citation', { infinitive: true }, {}],
+    ['an instruction', { imperative: true, imperativeRegister: 'instruction' }, {}],
+  ])('is withdrawn from %s, whose vocative stays dimmed', (_, mood, overrides) => {
+    renderPeriod({ vocative: MOM, subject: CAT, verb: SLEEP, ...mood }, { binding: makeBinding(overrides) });
+    expect(toggle()).toBeNull();
+    expect(screen.getByTestId('vocative-dimmed')).toContainElement(box('vocative'));
+  });
+
+  it('is offered on a root period, a command in the request register among them', () => {
+    renderPeriod({ imperative: true, verb: SLEEP }, { binding: makeBinding({ conditional: { hasSource: true } }) });
+    expect(toggle()).toHaveAccessibleName('Add a vocative');
+  });
+});

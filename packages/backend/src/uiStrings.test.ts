@@ -767,7 +767,7 @@ describe('buildUiStrings', () => {
   test('says what each console command is for, as a verb is glossed', () => {
     const strings = buildUiStrings();
     const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
-    expect(purposes).toHaveLength(35);
+    expect(purposes).toHaveLength(36);
     const stopped = purposes.flatMap(([key, byLanguage]) =>
       Object.entries(byLanguage as Record<string, string>).filter(([, text]) => /[.。]$/.test(text)).map(([l]) => `${key}:${l}`),
     );
@@ -1473,6 +1473,51 @@ describe('the interjection’s strings', () => {
         en: 'to add an interjection to a period', it: "aggiungere un'interiezione a un periodo", fr: 'ajouter une interjection à une période',
         de: 'eine Interjektion zu einem Satzgefüge hinzufügen', es: 'añadir una interjección a un período', pt: 'adicionar uma interjeição a um período',
         ja: '文に感動詞を加える',
+      },
+    });
+  });
+});
+
+// P11-E8: the vocative's box, toggle and command, composed from the seeded VOCATIVE — French *vocatif*,
+// German *Anrede*, Japanese 呼びかけ.
+describe('the vocative’s strings', () => {
+  test('render in all seven', () => {
+    const strings = buildUiStrings();
+    const keys = [
+      'slot.vocative',
+      'action.addVocative',
+      'action.removeVocative',
+      'action.clear.vocative',
+      'action.expand.vocative',
+      'action.compact.vocative',
+      'purpose.vocative',
+    ] as const;
+    expect(Object.fromEntries(keys.map((k) => [k, strings[k]]))).toEqual({
+      'slot.vocative': { en: 'Vocative', it: 'Vocativo', fr: 'Vocatif', de: 'Anrede', es: 'Vocativo', pt: 'Vocativo', ja: '呼びかけ' },
+      'action.addVocative': {
+        en: 'Add a vocative', it: 'Aggiungi un vocativo', fr: 'Ajouter un vocatif', de: 'Eine Anrede hinzufügen',
+        es: 'Añadir un vocativo', pt: 'Adicionar um vocativo', ja: '呼びかけを追加',
+      },
+      'action.removeVocative': {
+        en: 'Remove the vocative', it: 'Rimuovi il vocativo', fr: 'Retirer le vocatif', de: 'Die Anrede entfernen',
+        es: 'Quitar el vocativo', pt: 'Remover o vocativo', ja: '呼びかけを取り除き',
+      },
+      'action.clear.vocative': {
+        en: 'Clear the vocative', it: 'Cancella il vocativo', fr: 'Effacer le vocatif', de: 'Die Anrede löschen',
+        es: 'Borrar el vocativo', pt: 'Limpar o vocativo', ja: '呼びかけを消去',
+      },
+      'action.expand.vocative': {
+        en: 'Expand the vocative', it: 'Espandi il vocativo', fr: 'Étendre le vocatif', de: 'Die Anrede erweitern',
+        es: 'Expandir el vocativo', pt: 'Expandir o vocativo', ja: '呼びかけを展開',
+      },
+      'action.compact.vocative': {
+        en: 'Compact the vocative', it: 'Compatta il vocativo', fr: 'Compacter le vocatif', de: 'Die Anrede verdichten',
+        es: 'Compactar el vocativo', pt: 'Compactar o vocativo', ja: '呼びかけを圧縮',
+      },
+      'purpose.vocative': {
+        en: 'to add a vocative to a period', it: 'aggiungere un vocativo a un periodo', fr: 'ajouter un vocatif à une période',
+        de: 'eine Anrede zu einem Satzgefüge hinzufügen', es: 'añadir un vocativo a un período', pt: 'adicionar um vocativo a um período',
+        ja: '文に呼びかけを加える',
       },
     });
   });

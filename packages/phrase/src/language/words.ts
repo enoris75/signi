@@ -8,6 +8,7 @@ import {
 } from "@signi/shared";
 import {
   builderNounAddress,
+  inVocativeGroup,
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
   type NounAddress,
@@ -191,7 +192,8 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
     case "gender":
       return gendersOffered(w).includes(s.value);
     case "determiner":
-      return w.kind === "noun" && c?.role === "noun" && hasDeterminer(w.which!, c);
+      // A vocative's conjunct is said bare as its head is (P11-E8), whatever its own slot would take.
+      return w.kind === "noun" && c?.role === "noun" && hasDeterminer(w.which!, c) && !inVocativeGroup(w.address);
     // A route's and a place's relation, and — P13 — a direction's, whose default is the plain goal.
     case "specifier":
       return (

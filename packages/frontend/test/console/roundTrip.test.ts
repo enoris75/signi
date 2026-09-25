@@ -20,6 +20,7 @@ import {
 import {
   QUESTION_ROLES,
   builderNounAddress,
+  inVocativeGroup,
   conjunctAddress,
   isRelativeLink,
   possessorAddress,
@@ -41,7 +42,8 @@ import { applyScript } from '../../src/console/language/apply.ts';
 import { normalizeWorkspace } from '../../src/console/language/normalize.ts';
 import { printWorkspace } from '../../src/console/language/print.ts';
 import type { Vocabulary, WorkspaceState } from '../../src/console/language/types.ts';
-import { ADJECTIVES, ADVERBS, EN, INTERJECTIONS, IT, NOUNS, PRONOUNS, VERBS, byId } from './vocab.ts';
+import { ADJECTIVES, ADVERBS, EN, INTERJECTIONS, IT, KIN, NOUNS, PRONOUNS, VERBS, byId } from './vocab.ts';
+import { vocativeOffered } from '@signi/phrase/model/functions/vocativeOffered.ts';
 import { empty, ids } from './helpers.ts';
 
 // ── A seeded random walk ─────────────────────────────────────────────────────
@@ -78,7 +80,17 @@ type R_Opts = { number?: 'singular' | 'plural'; gender?: 'masc' | 'fem' | 'neut'
 /** A word for a slot, from the categories its picker offers. */
 type Frame = 'period' | 'possessor' | 'standard' | 'examples' | 'conjunct';
 
+/** A word for the vocative or one of its conjuncts (P11-E8): a noun, or the hearer's own pronoun. */
+function vocativeWord(rng: Rng): { concept: Concept; opts?: R_Opts } {
+  if (rng() >= 0.25) return { concept: pick(rng, [...NOUNS, ...KIN])! };
+  return { concept: byId('SECOND_PERSON'), opts: { number: pick(rng, ['singular', 'plural'] as const)!, gender: pick(rng, ['masc', 'fem'] as const)! } };
+}
+
+// The nouns of a period's own: the clause's, and its vocative (P11-E8).
+const PERIOD_NOUNS: NounKey[] = ['subject', 'directObject', ...BOX_COMPLEMENT_TYPES, 'vocative'];
+
 function wordFor(rng: Rng, slot: SlotKey, frame: Frame): { concept: Concept; opts?: R_Opts } {
+  if (slot === 'vocative') return vocativeWord(rng);
   const nounOrPronoun = () => (rng() < 0.25 ? pronounPick(rng) : { concept: pick(rng, NOUNS)! });
   if (slot === 'subject') return frame === 'possessor' ? { concept: pick(rng, NOUNS)! } : nounOrPronoun();
   // The purpose, the topic and the opponent take a pronoun behind their adposition as the cause does
@@ -106,7 +118,7 @@ function nounHeads(root: PhraseSelection): { address: NounAddress; frame: Frame 
       R.conjunctsOf(sel, which).forEach((c, i) => walk(c, conjunctAddress(address, i), 'conjunct', ['subject']));
     }
   };
-  walk(root, undefined, 'period', ['subject', 'directObject', ...BOX_COMPLEMENT_TYPES]);
+  walk(root, undefined, 'period', PERIOD_NOUNS);
   return out;
 }
 
@@ -218,7 +230,7 @@ const OPS: Op[] = [
       const r = rng();
       if (r < 0.25 && c.role !== 'adjective') return R.toggleNumber(slice, which);
       if (r < 0.45 && (c.role === 'pronoun' || c.gendered)) return R.toggleGender(slice, which);
-      if (r < 0.65 && c.role === 'noun' && (which === 'subject' || which === 'directObject' || ['predicative', 'terminus', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose', 'topic', 'opponent'].includes(which) || (which === 'manner' && c.mannerRelation !== 'measure')))
+      if (r < 0.65 && c.role === 'noun' && !inVocativeGroup(head.address) && (which === 'subject' || which === 'directObject' || ['predicative', 'terminus', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose', 'topic', 'opponent'].includes(which) || (which === 'manner' && c.mannerRelation !== 'measure')))
         return R.setDefiniteness(slice, which, pick(rng, DEFINITENESS)!);
       if (r < 0.75 && (which === 'route' || which === 'locative') && head.frame === 'period')
         return R.setSpecifier(slice, pick(rng, PATH_SPECIFIERS)!, which);
@@ -283,7 +295,7 @@ const OPS: Op[] = [
   // A period noun's standard, for its compared adjective (P09-E50): named or taken off, its adjective's
   // degree cycled, or the adjective itself removed — the standard outlives both, muted but printed.
   onPeriod((sel, rng, s, cid) => {
-    const which = pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
+    const which = pick(rng, PERIOD_NOUNS.filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
     if (!which) return undefined;
     const r = rng();
     if (sel[`${which}Standard` as keyof PhraseSelection] && r < 0.2) return R.removeStandard(sel, which);
@@ -297,7 +309,7 @@ const OPS: Op[] = [
   // A period noun's examples (P09-E48): named, flipped between such as and including, or taken off.
   // A head a relative clause hangs off keeps its word, as a linked box does.
   onPeriod((sel, rng, s, cid) => {
-    const which = pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
+    const which = pick(rng, PERIOD_NOUNS.filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
     if (!which) return undefined;
     const r = rng();
     if (sel[`${which}Examples` as keyof PhraseSelection] && r < 0.25) return R.removeExamples(sel, which);
@@ -318,6 +330,8 @@ const OPS: Op[] = [
       const w =
         which === 'predicative' ? wordFor(rng, 'predicative', 'conjunct')
         : which === 'role' ? { concept: pick(rng, NOUNS)! }
+        // A vocative's takes what the vocative takes: a noun, or the 2nd person (P11-E8).
+        : which === 'vocative' ? vocativeWord(rng)
         : wordFor(rng, 'subject', 'conjunct');
       next = R.updateConjunct(next, which, i, (c) => R.applyConceptSelect(c, 'subject', w.concept, w.opts));
     }
@@ -411,7 +425,7 @@ const OPS: Op[] = [
       // subject's possessor. canBeRelativeTarget says whether the period has them.
       const nounKey: RelativeGap | undefined = rng() < 0.15
         ? pick(rng, ['instrumental', 'subject/possessor'] as const)
-        : pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => target.selection[k]));
+        : pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as RelativeGap[]).filter((k) => target.selection[k as NounKey]));
       if (!from || !nounKey) return undefined;
       const t = { containerId: target.id, nounKey };
       if (!L.canBeRelativeTarget(s.containers, s.links, source.id, t)) return undefined;
@@ -541,6 +555,20 @@ const OPS: Op[] = [
     if (sel.infinitive || s.links.some((l) => l.target.containerId === cid)) return undefined;
     return R.applyConceptSelect(sel, 'interjection', pick(rng, INTERJECTIONS)!);
   }),
+  // The period's vocative (P11-E8), set where the card's border offers it — a root period that says one
+  // (vocativeOffered) — and cleared anywhere, as the border toggle takes it away. The ops above
+  // pluralize it, coordinate it, give it an owner and adjectives, and link a relative clause from it;
+  // the links the walk makes afterwards, and a later mood, leave it held where no plan says it.
+  onPeriod((sel, rng, s, cid) => {
+    if (sel.vocative && rng() < 0.3) {
+      if (s.links.some((l) => l.source.containerId === cid && 'nounKey' in l.source && l.source.nounKey.startsWith('vocative'))) return undefined;
+      return R.applyClear(sel, 'vocative');
+    }
+    if (sel.vocative && isLinked(s, cid)) return undefined;
+    if (!vocativeOffered(sel, !s.links.some((l) => l.target.containerId === cid))) return undefined;
+    const w = vocativeWord(rng);
+    return R.applyConceptSelect(sel, 'vocative', w.concept, w.opts);
+  }),
   // Clearing: an adjective, a modal, a possessor, a conjunct — never a word a link stands on.
   onPeriod((sel, rng, s, cid) => {
     if (isLinked(s, cid)) return undefined;
@@ -622,6 +650,17 @@ describe('the round trip', () => {
     );
   });
 
+  // P11-E8: the walk reaches the vocative in the shapes its ring makes — pluralized, coordinated, owned,
+  // the 2nd person — so each prints and comes back. (It heads a relative clause too, but too rarely to
+  // count on in a few thousand walks: golden.test.ts's /voc entry holds that one.)
+  it('reaches the vocative pluralized, coordinated, owned and as the 2nd person', () => {
+    const texts = Array.from({ length: Math.max(SEEDS, 2000) }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
+    const vocatives = texts.flatMap((t) => t.match(/\/voc \( .*?(?= \/(subj|verb|obj) \(|$)/gm) ?? []);
+    for (const shape of [/\/pl\b/, /\/(and|or|bothand) /, /\/poss /, /\/voc \( 2nd/]) {
+      expect(vocatives.some((v) => shape.test(v)), String(shape)).toBe(true);
+    }
+  });
+
   it('prints a reached state the same way twice', () => {
     for (let seed = 1; seed <= 50; seed++) {
       const state = reach(seed, 25);
@@ -633,10 +672,10 @@ describe('the round trip', () => {
   // P09-E12 D5: the walk reaches the standard of comparison, so the printer's `/than` is exercised —
   // under a degree that takes one, and muted under one that does not — and its `/outof`, the same
   // field read as a superlative's set (P09-E51 D3). A predicate adjective is a rare state (a copular
-  // verb, then an adjective in its box), and rarer still once E12b added its ops, so this looks much
-  // further than the default 400.
+  // verb, then an adjective in its box), and rarer still once E12b and P11-E8 added their ops, so this
+  // looks much further than the default 400 (40,000 seeds since P11-E8's vocative op).
   it('reaches the standard of comparison, a superlative’s set, and a muted one', () => {
-    const seeds = Math.max(SEEDS, 20000);
+    const seeds = Math.max(SEEDS, 40000);
     const texts = Array.from({ length: seeds }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
     const standards = texts.flatMap((t) => t.match(/\/pred \( \S+( \/\w+)* \/(than|outof) \[/g) ?? []);
     expect(standards.some((p) => /\/(more|less|equally) \/than/.test(p))).toBe(true);

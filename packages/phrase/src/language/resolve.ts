@@ -5,7 +5,7 @@ import type {
   NounKey,
   SlotKey,
 } from "../model/interfaces.ts";
-import { COMPLEMENT_KEY_SET, nounOnlyConjunct } from "../model/slots.ts";
+import { COMPLEMENT_KEY_SET, nounOnlyConjunct, VOCATIVE_PRONOUNS } from "../model/slots.ts";
 import { coded, type Coded } from "./diagnostics.ts";
 import type { Vocabulary } from "./types.ts";
 
@@ -24,6 +24,11 @@ export interface WordSpec {
   roles: GrammaticalRole[];
   /** Verbs only: the modal verbs (`/modal`) or every other one (`/verb`). */
   modal?: boolean;
+  /**
+   * Pronouns only: the persons taken, by concept id, where not every one is — the vocative's, which
+   * calls the hearer and so takes the 2nd person alone (P11-E8, A338).
+   */
+  pronouns?: readonly string[];
 }
 
 /**
@@ -34,6 +39,8 @@ export interface WordSpec {
 export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "standard" | "examples" | "conjunct" = "period"): WordSpec {
   if (slot === "subject") return frame === "possessor" ? { roles: ["noun"] } : { roles: ["noun", "pronoun"] };
   if (slot === "interjection") return { roles: ["interjection"] };
+  // The vocative (P11-E8): a noun, or the hearer's own pronoun — "You, run." — and no other person.
+  if (slot === "vocative") return { roles: ["noun", "pronoun"], pronouns: VOCATIVE_PRONOUNS };
   if (slot === "verb") return { roles: ["verb"], modal: false };
   if (slot === "verbModal" || slot === "verbModal2") return { roles: ["verb"], modal: true };
   if (slot === "modifier" || /^verbModal2?Adverb$/.test(slot)) return { roles: ["adverb"] };
@@ -50,8 +57,8 @@ export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "stan
  * — or, beside a predicate, what a predicate takes (P13), "is not **male or female**".
  */
 export const conjunctSpec = (which: NounKey | undefined): WordSpec =>
-  which === "predicative"
-    ? wordSpecFor("predicative")
+  which === "predicative" || which === "vocative"
+    ? wordSpecFor(which)
     : nounOnlyConjunct(which)
       ? { roles: ["noun"] }
       : wordSpecFor("subject", "conjunct");
@@ -60,7 +67,9 @@ export const conjunctSpec = (which: NounKey | undefined): WordSpec =>
 export function wordsFor(spec: WordSpec, vocab: Vocabulary): Concept[] {
   return spec.roles.flatMap((role) =>
     (vocab.concepts[role] ?? []).filter(
-      (c) => role !== "verb" || spec.modal === undefined || Boolean(c.modal) === spec.modal,
+      (c) =>
+        (role !== "verb" || spec.modal === undefined || Boolean(c.modal) === spec.modal) &&
+        (role !== "pronoun" || !spec.pronouns || spec.pronouns.includes(c.id)),
     ),
   );
 }
@@ -203,6 +212,8 @@ export const NOUN_NAMES: Record<NounKey, string> = {
   role: "role",
   // P09-E45's: the party the act is directed against.
   opponent: "vs",
+  // P11-E8: the period's vocative — a relative clause's source, never its gap (#n.voc).
+  vocative: "voc",
 };
 
 const NOUN_BY_NAME: Record<string, NounKey> = Object.fromEntries(

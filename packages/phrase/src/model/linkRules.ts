@@ -81,7 +81,8 @@ export function relativeTargetKeys(links: PhraseLink[], containerId: string): Se
  * Whether the noun `targetNoun` of `target` may become the gap of a relative clause headed by a noun
  * of `sourceContainerId`: another period, not an ancestor of the source (no cycle), a noun that holds
  * a word, and not already the gap of another clause. Never the `role` (P09-E44): the engine refuses a
- * relative over a role gap (A288), "the friend the man acts as".
+ * relative over a role gap (A288), "the friend the man acts as". Never the vocative (P11-E8), which
+ * no relative clause has.
  */
 export function canBeRelativeTarget(
   containers: PhraseContainer[],
@@ -91,6 +92,8 @@ export function canBeRelativeTarget(
 ): boolean {
   if (sourceContainerId === target.containerId) return false;
   if (target.nounKey === "role") return false;
+  // Nor the vocative (P11-E8): only the top clause says one, and a relative clause has none to fill.
+  if ((target.nounKey as string) === "vocative") return false;
   const c = containers.find((x) => x.id === target.containerId);
   if (!c) return false;
   // The instrument (P13): a gap of a verb that takes one and has none linked — the head is it.

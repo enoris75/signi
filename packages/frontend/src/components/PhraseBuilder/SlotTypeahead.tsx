@@ -8,7 +8,11 @@ import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
 import { AdverbTypeahead } from "./AdverbTypeahead.tsx";
 import { InterjectionTypeahead } from "./InterjectionTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
+import type { PronounPerson } from "./hooks/usePronounChooser.ts";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
+
+// The persons the vocative's pronoun chooser offers (P11-E8): the 2nd, as VOCATIVE_PRONOUNS says.
+const VOCATIVE_PERSONS: readonly PronounPerson[] = ["2"];
 
 // The inline word-picker shown inside an empty, active slot box — or, when `editing`,
 // inside an already-filled box the user clicked to change its word. Returns
@@ -119,6 +123,7 @@ function pickerFor(
       // topic, the companion and the opponent: "because of him", "for her", "with her", "against
       // him" — use the pronoun-inclusive picker; the motion/locative complements stay noun-only.
       // Which ones is slotCategories' to say, so the model, the console and this picker agree (P09-E45).
+      // The vocative (P11-E8) is one of them, and takes the hearer's own person alone: "You, run."
       if (slotCategories(slotKey)?.options.some((o) => o.value === "pronoun"))
         return (
           <SubjectTypeahead
@@ -126,6 +131,7 @@ function pickerFor(
             placeholderKey="slot.nounOrPronoun.placeholder"
             kind={kind}
             onKindChange={onKindChange}
+            persons={slotKey === "vocative" ? VOCATIVE_PERSONS : undefined}
           />
         );
       // Every other complement — the motion/locative family and the dative terminus — is a

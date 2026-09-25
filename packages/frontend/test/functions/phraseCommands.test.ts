@@ -42,6 +42,8 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleCycleDegree', (c) => c.handleCycleDegree('subjectAdjective'), (p) => reducers.cycleDegree(p, 'subjectAdjective')],
   // The interjection's border toggle taking its box away, word and all (P09-E47).
   ['handleRemoveInterjection', (c) => c.handleRemoveInterjection(), (p) => reducers.applyClear(p, 'interjection')],
+  // The vocative's border toggle taking its box away, words and all (P11-E8).
+  ['handleRemoveVocative', (c) => c.handleRemoveVocative(), (p) => reducers.applyClear(p, 'vocative')],
   ['handleRemoveStandard', (c) => c.handleRemoveStandard('directObject'), (p) => reducers.removeStandard(p, 'directObject')],
   ['handleRemoveExamples', (c) => c.handleRemoveExamples('subject'), (p) => reducers.removeExamples(p, 'subject')],
   ['handleToggleExampleRelation', (c) => c.handleToggleExampleRelation('subject'), (p) => reducers.toggleExampleRelation(p, 'subject')],
