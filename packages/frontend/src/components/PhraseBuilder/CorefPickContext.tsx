@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { Concept, PronominalPossessor, UiStringKey } from "@signi/shared";
 import { NounAddress, PhraseSelection } from "./interfaces.ts";
-import { resolveAntecedent } from "./selectionToPlan/index.ts";
+import { linkClauseOf, pointedAt, type LinkClause } from "./functions/subjectLink.ts";
 
 // Coordinating the "point to a noun" gesture for a *pronominal* possessor ("the boy and his
 // horse"). The possessor control lives on a noun that may be nested (a conjunct's, or an owner's),
@@ -23,7 +23,12 @@ export interface CorefPick {
   pick: (candidate: NounAddress) => void;
   // Resolve an antecedent address against the period's selection, for display ("refers to the
   // boy") and for the possessive-pronoun hint. Null when the address no longer resolves.
+  // A pointer at the subject names the command's addressee under a command, not the word kept behind
+  // the command box (P11-E7 D4; see `pointedAt`).
   resolve: (address: NounAddress) => { concept: Concept; features: PronominalPossessor } | undefined;
+  // The clause a pointer of `possessed` at `antecedent` is rendered in for its chip, where the pointer
+  // is the link to the subject (P11-E7 D5; see `linkClauseOf`). Undefined for a copy.
+  linkOf: (possessed: NounAddress, antecedent: NounAddress) => LinkClause | undefined;
 }
 
 export const CorefPickContext = createContext<CorefPick | null>(null);
@@ -39,7 +44,12 @@ export function useCorefPick(): CorefPick | null {
  * `CorefPickContext`; nested conjunct / possessor builders inherit the parent's instead (so one
  * pick spans the whole tree), and simply ignore the value this returns.
  */
-export function useProvideCorefPick(rootSelection: PhraseSelection): CorefPick {
+export function useProvideCorefPick(
+  rootSelection: PhraseSelection,
+  // Whether the period is an infinitive or purpose clause another period governs, whose subject is
+  // that period's and so beyond this one's reach (P11-E7 D4).
+  controlled = false,
+): CorefPick {
   const [state, setState] = useState<{
     possessed: NounAddress;
     commit: (antecedent: NounAddress) => void;
@@ -72,13 +82,18 @@ export function useProvideCorefPick(rootSelection: PhraseSelection): CorefPick {
   );
 
   const resolve = useCallback(
-    (address: NounAddress) => resolveAntecedent(rootSelection, address),
-    [rootSelection],
+    (address: NounAddress) => pointedAt(rootSelection, address, controlled),
+    [rootSelection, controlled],
+  );
+
+  const linkOf = useCallback(
+    (possessed: NounAddress, antecedent: NounAddress) => linkClauseOf(rootSelection, possessed, antecedent, controlled),
+    [rootSelection, controlled],
   );
 
   return useMemo<CorefPick>(
-    () => ({ picking: state?.possessed ?? null, start, cancel, isEligible, pick, resolve }),
-    [state, start, cancel, isEligible, pick, resolve],
+    () => ({ picking: state?.possessed ?? null, start, cancel, isEligible, pick, resolve, linkOf }),
+    [state, start, cancel, isEligible, pick, resolve, linkOf],
   );
 }
 

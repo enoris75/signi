@@ -284,7 +284,10 @@ const OPS: Op[] = [
       const owner = ownerPick(rng);
       return R.updateNounAt(sel, head.address, (s, which) => R.updatePossessor(s, which, (p) => R.applyConceptSelect(p, 'subject', owner.concept, owner.opts)));
     }
-    const antecedent = pick(rng, nounHeads(sel).filter((h) => h.address !== head.address && !h.address.startsWith(`${head.address}/`)));
+    // A command's or a citation's mood box stands for the subject and is a target too (P11-E7 D4),
+    // whether or not a subject word is stashed behind it.
+    const moodBox = (sel.imperative || sel.infinitive) && !sel.subject ? [{ address: 'subject', frame: 'period' as const }] : [];
+    const antecedent = pick(rng, [...nounHeads(sel), ...moodBox].filter((h) => h.address !== head.address && !h.address.startsWith(`${head.address}/`)));
     return antecedent ? R.updateNounAt(sel, head.address, (s, which) => R.setPossessorRef(s, which, antecedent.address)) : undefined;
   }),
   // The predicate adjective's standard of comparison (P09-E12 D5), named or taken off. It is kept under
@@ -669,6 +672,21 @@ describe('the round trip', () => {
     expect(texts.some((t) => t.includes('/suchas ['))).toBe(true);
     expect(texts.some((t) => t.includes('/including ['))).toBe(true);
   }, 30_000);
+
+  // P11-E7: the walk points owners at the subject, so the link is planned — in a plain clause and
+  // under a command, where the pointer names the mood box.
+  it('reaches the link to the subject, under a command too', () => {
+    const kinds = new Set<string>();
+    for (let seed = 1; seed <= Math.max(SEEDS, 3000); seed++) {
+      const state = reach(seed, 10 + (seed % 30));
+      for (const { plan } of workspaceToPlans(state.containers, state.links)) {
+        const text = JSON.stringify(plan);
+        if (!text.includes('"coreferent"')) continue;
+        kinds.add(plan.imperative ? 'command' : 'clause');
+      }
+    }
+    expect([...kinds]).toEqual(expect.arrayContaining(['clause', 'command']));
+  }, 60_000);
 
   // P11-E9: the walk names a pronoun owner — each person, and the 3rd with a gender — so the printer's
   // `/poss [ 1st ]` is exercised.

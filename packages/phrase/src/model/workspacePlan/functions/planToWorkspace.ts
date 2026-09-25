@@ -14,7 +14,8 @@ import type {
   RelativeClause,
   VerbPhrase,
 } from "@signi/shared";
-import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES, isPronominalPossessor } from "@signi/shared";
+import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES, isCoreferentPossessor, isPronominalPossessor } from "@signi/shared";
+import { linksToSubject } from "../../functions/linksToSubject.ts";
 import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection, RelativeGap } from "../../interfaces.ts";
 import { conjunctAddress, examplesAddress, governsInfinitive, possessorAddress, standardAddress, subordinateReading } from "../../interfaces.ts";
 import { comparedAdjectiveIndex } from "../../functions/comparison.ts";
@@ -46,6 +47,10 @@ export interface PlanWorkspace {
 export function planToWorkspace(plan: PhrasePlan, conceptOf: (id: string) => Concept | undefined): PlanWorkspace {
   const b = new Builder(conceptOf);
   b.period(plan);
+  // A link the clause would write back as a copy — under the passive, or inside the subject — is one
+  // the canvas cannot hold as a link.
+  for (const { container, possessed } of b.subjectLinks)
+    if (!linksToSubject(container.selection, possessed)) b.unsupported.add("Possessor.coreferent where the builder copies");
   return { containers: b.containers, links: b.links, unsupported: [...b.unsupported].sort() };
 }
 
@@ -83,6 +88,8 @@ const set = (sel: PhraseSelection, key: string, value: unknown) => {
 class Builder {
   containers: PhraseContainer[] = [];
   links: PhraseLink[] = [];
+  // Each possessor that is the link to its clause's subject, where it was put (P11-E7).
+  subjectLinks: { container: PhraseContainer; possessed: NounAddress }[] = [];
   unsupported = new Set<string>();
   private n = 0;
   // The one antecedent a pronoun may carry where it is being built: a purpose clause's object's (P13).
@@ -362,6 +369,12 @@ class Builder {
           set(sel, `${which}Possessor`, owner);
         }
         if (np.possessorRole && np.possessorRole !== "owner") this.unsupported.add("NounPhrase.possessorRole on a pronoun");
+      } else if (isCoreferentPossessor(np.possessor)) {
+        // The link to the clause's subject is a pointer at `subject` on the canvas (P11-E7 D6), at any
+        // depth: an owner's slice stores the period's address. Whether the builder writes that
+        // pointer back as the link is its clause's to say, once the whole period is built.
+        set(sel, `${which}PossessorRef`, "subject");
+        this.subjectLinks.push({ container: c, possessed: address });
       } else if ("kind" in np.possessor) this.unsupported.add(`Possessor.${np.possessor.kind}`);
       else {
         const owner: PhraseSelection = {};

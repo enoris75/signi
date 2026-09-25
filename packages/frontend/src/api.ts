@@ -7,6 +7,7 @@ import type {
   SavedPhraseRecord,
   SavedPhraseSummary,
   SavedPhrasesResponse,
+  TranslateRequest,
   Translation,
   UiStrings,
   UiStringsResponse,
@@ -22,11 +23,12 @@ export async function fetchConcepts(role?: GrammaticalRole): Promise<Concept[]> 
   return data.concepts;
 }
 
-export async function fetchTranslation(plan: PhrasePlan): Promise<Translation[]> {
+// `phrase` asks for one phrase of the plan, resolved in its clause, rather than the period (P11-E7 D5).
+export async function fetchTranslation(plan: PhrasePlan, phrase?: TranslateRequest["phrase"]): Promise<Translation[]> {
   const res = await fetch(`${BASE}/translate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ plan }),
+    body: JSON.stringify(phrase ? { plan, phrase } : { plan }),
   });
   if (!res.ok) throw new Error('Translation failed');
   const data = await res.json() as { translations: Translation[] };

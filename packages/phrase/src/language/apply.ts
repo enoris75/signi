@@ -96,7 +96,7 @@ import {
   updateStandard,
   updateExamples,
 } from "../model/phraseReducers.ts";
-import { resolveAntecedent } from "../model/selectionToPlan/index.ts";
+import { pointerHolds } from "../model/functions/linksToSubject.ts";
 import { adjectiveSlots, MODAL_SLOTS, offeredComplements } from "../model/slots.ts";
 import { nextActiveSlot } from "../model/functions/nextActiveSlot.ts";
 import { visibleSlotsFor } from "../model/functions/visibleSlots.ts";
@@ -1380,7 +1380,9 @@ class Run {
         return;
       }
       case "possessorRef": {
-        if (!resolveAntecedent(this.root(op.containerId), op.antecedent))
+        // A noun it can copy, or the subject it links to — the addressee of a command, the controller
+        // of an infinitive, which no box holds (P11-E7 D6).
+        if (!pointerHolds(this.root(op.containerId), op.possessed, op.antecedent))
           fail(op.span, coded("noNounAt", { ref: printRefText(this.periodNumber(op.containerId), op.antecedent) }));
         this.updateRoot(op.containerId, (root) =>
           updateNounAt(root, op.possessed, (s, which) => setPossessorRef(s, which, op.antecedent)),

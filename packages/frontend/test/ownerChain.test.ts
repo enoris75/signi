@@ -124,6 +124,14 @@ describe('possessionsFor', () => {
     ]);
   });
 
+  // P11-E7 D4: a pointer at a command's subject lands on the command box, which goes by `subject`.
+  it('aims a pointer at a command’s subject at the mood box’s key', () => {
+    const { pointers } = spots({ imperative: true, directObject: HORSE, directObjectPossessorRef: 'subject' });
+    expect(pointers).toEqual([
+      expect.objectContaining({ possessed: 'directObject', antecedent: 'subject', antecedentKey: 'subject' }),
+    ]);
+  });
+
   // P11-E9 D7: a pronoun owner's spot carries the possessive its line will say, and no owner below it.
   it('gives a pronoun owner the possessive it spells, with the noun it owns', () => {
     const I = { ...pronoun('FIRST_PERSON'), person: '1' as const };

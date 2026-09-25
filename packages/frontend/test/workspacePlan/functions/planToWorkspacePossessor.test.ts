@@ -30,6 +30,52 @@ const load = (plan: PhrasePlan) => {
 const owned = (head: string, possessor: PronominalPossessor, verb = 'RUN'): PhrasePlan =>
   ({ subject: { concept: head, possessor }, verbPhrase: { verb } }) as PhrasePlan;
 
+// P11-E7 D6: the link to the subject is a pointer at `subject` on the canvas, at any depth.
+describe('planToWorkspace: the link to the subject (P11-E7)', () => {
+  const LINK = { kind: 'coreferent', slot: 'subject' } as const;
+
+  it('loads a link on the object as a pointer at the subject, and re-plans to itself', () => {
+    const plan = { subject: { concept: 'MOTHER' }, verbPhrase: { verb: 'SEE' }, directObject: { concept: 'BOOK', possessor: LINK } } as PhrasePlan;
+    const { containers, unsupported, back } = load(plan);
+    expect(unsupported).toEqual([]);
+    expect(containers[0]!.selection.directObjectPossessorRef).toBe('subject');
+    expect((back.directObject as { possessor?: unknown }).possessor).toEqual(LINK);
+  });
+
+  it('loads a link at depth, an owner’s owner, with the period’s address', () => {
+    const plan = {
+      subject: { concept: 'MOTHER' },
+      verbPhrase: { verb: 'SEE' },
+      directObject: { concept: 'BOOK', possessor: { concept: 'FATHER', possessor: LINK } },
+    } as PhrasePlan;
+    const { containers, unsupported, back } = load(plan);
+    expect(unsupported).toEqual([]);
+    expect(containers[0]!.selection.directObjectPossessor).toMatchObject({ subjectPossessorRef: 'subject' });
+    expect(back.directObject).toMatchObject({ possessor: { concept: 'FATHER', possessor: LINK } });
+  });
+
+  it('loads a command’s link, which binds to the addressee', () => {
+    const plan = {
+      subject: { concept: 'SECOND_PERSON', number: 'singular' },
+      verbPhrase: { verb: 'SEE' },
+      directObject: { concept: 'BOOK', possessor: LINK },
+      imperative: true,
+    } as PhrasePlan;
+    const { unsupported, back } = load(plan);
+    expect(unsupported).toEqual([]);
+    expect((back.directObject as { possessor?: unknown }).possessor).toEqual(LINK);
+  });
+
+  it('names a link the builder would write back as a copy: under the passive', () => {
+    const plan = {
+      subject: { concept: 'MOTHER' },
+      verbPhrase: { verb: 'SEE', voice: 'passive' },
+      directObject: { concept: 'BOOK', possessor: LINK },
+    } as PhrasePlan;
+    expect(load(plan).unsupported).toEqual(['Possessor.coreferent where the builder copies']);
+  });
+});
+
 describe('planToWorkspace: a possessive pronoun (P11-E9)', () => {
   it.each<[string, PhrasePlan]>([
     ['my mother runs', owned('MOTHER', { kind: 'pronominal', person: '1', number: 'singular' })],

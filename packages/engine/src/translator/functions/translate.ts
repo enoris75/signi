@@ -14,10 +14,37 @@ const interjectionSeg = (forms: Record<string, string>): RubySegment => {
   return r && r !== t ? { t, r } : { t };
 };
 
+/** The top clause's mood: see `translate`. */
+const topMoodOf = (plan: PhrasePlan): Mood | undefined =>
+  plan.condition ? 'conditional' : plan.imperative ? 'imperative' : plan.infinitive ? 'infinitive' : undefined;
+
+/**
+ * The plan's direct object, resolved in its clause, rendered as the bare noun phrase a verbless
+ * period is — with no full stop (see TranslateOptions.phrase). An absent object is ''.
+ */
+function translatePhrase(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
+  return engines.map((engine) => {
+    const resolved = resolvePhrase(plan, engine.language, lookup, topMoodOf(plan), undefined, !!plan.infinitive);
+    const phrase = resolved.directObject;
+    return { language: engine.language, text: phrase ? engine.render({ subject: phrase }) : '' };
+  });
+}
+
 /** A sentence's first word, capitalized where the script has case. */
 const capitalized = (text: string): string => text.charAt(0).toLocaleUpperCase() + text.slice(1);
 
-export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
+/** What `translate` renders of a plan: the whole period, or one of its phrases (see TranslateRequest). */
+export interface TranslateOptions {
+  /**
+   * The direct object alone, resolved **in its clause** and said as a bare noun phrase: a possessor
+   * linked to the subject (P11-E2) is bound to it first, which a noun phrase on its own cannot be —
+   * the chip on the canvas's link line shows the possessed phrase the sentence will say (P11-E7 D5).
+   */
+  phrase?: 'directObject';
+}
+
+export function translate(plan: PhrasePlan, lookup: LexiconLookup, options: TranslateOptions = {}): Translation[] {
+  if (options.phrase) return translatePhrase(plan, lookup);
   // An address calls the hearer, and an instruction (the label on a control, a recipe step) is
   // addressed to nobody, so the two contradict each other: refused by name rather than rendered as a
   // name before an infinitive (A338). `/api/translate` says the same as a 400 (`planError`).
@@ -30,13 +57,7 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
     // else plain indicative (undefined). These are mutually exclusive (the UI never sets more
     // than one). A command hands its mood on to a coordinated second clause (see resolvePhrase)
     // but never to a relative clause.
-    const topMood: Mood | undefined = plan.condition
-      ? 'conditional'
-      : plan.imperative
-        ? 'imperative'
-        : plan.infinitive
-          ? 'infinitive'
-          : undefined;
+    const topMood = topMoodOf(plan);
     // A sentence adverb opens a main statement (P09-E39, see `liftSentenceAdverb`).
     const resolved = liftSentenceAdverb(resolvePhrase(plan, engine.language, lookup, topMood, undefined, !!plan.infinitive), topMood);
     // Every rendered period closes with its language's full stop, appended here rather

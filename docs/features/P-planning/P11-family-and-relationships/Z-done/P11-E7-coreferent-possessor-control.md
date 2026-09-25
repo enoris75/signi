@@ -1,6 +1,6 @@
 # P11-E7. *His own family* — pointing at the clause's subject makes the link
 
-**Feature:** the canvas, keyboard and console control for [P11-E2](Z-done/P11-E2-coreference.md)'s
+**Feature:** the canvas, keyboard and console control for [P11-E2](P11-E2-coreference.md)'s
 coreferent possessor, `{ kind: 'coreferent', slot: 'subject' }` (shared `CoreferentPossessor`): "the
 boy sees **his** mother" where *his* is the boy because he is the subject. Japanese then says 自分の,
 and the kin chain reads through it (兄は自分の**母**を見ます).
@@ -11,8 +11,8 @@ boxes that are not noun rings today become targets for the pick: the command box
 box. `/poss #n.subj` keeps its syntax and now means the link.
 **Scope:** `@signi/phrase` (plan building, `planToWorkspace`, console apply/print/normalize), the
 coref pick (`CorefPickContext`, the mood boxes), the link's chip. No new UI string. No engine change.
-**Status:** **planning, unscheduled**. Filed 2026-09-25 from P11's plan-only constructs. The engine
-side is [P11-E2](Z-done/P11-E2-coreference.md).
+**Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25 from P11's plan-only
+constructs. The engine side is [P11-E2](P11-E2-coreference.md).
 
 Engine output at HEAD (1d8f359b), rendered 2026-09-25 against the seeded lexicon. Each cell shows
 what the builder's pointer plan says today, and then what the link says **(bold)** where the two
@@ -50,6 +50,70 @@ Hand-written plans, all engine output:
 | de | der Mann läuft, um seine Mutter zu sehen. | der Mann sagt dem Jungen, seine Mutter zu sehen. | sein Buch sehen. |
 | ja | 男は自分のお母さんを見るために走ります。 | 男は男の子に自分のお母さんを見るように言います。 | 自分の本を見る。 |
 
+## Done
+
+Shipped 2026-09-25, as D1–D6 recommend. Every **bold** cell of the first table, and every cell of
+the second, is now the builder's own plan: a console line (`/poss #1.subj`, the canvas's pointer) put
+through `applyScript` → `workspaceToPlans` renders it byte-for-byte, *my older brother* included,
+since [P11-E9](P11-E9-pronoun-owner.md) now builds its 1st-person owner (兄は自分の母を見ます).
+Pinned in [`engine/test/coreferent-control.test.ts`](../../../../../packages/engine/test/coreferent-control.test.ts)
+(the object-controlled row with LET, "the man lets the boy see his mother", 男は男の子に自分のお母さんを見させます,
+since no seeded verb says TELL with an infinitive in the console). On the canvas: the boy sees his
+dog is 男の子は自分の犬を見ます and its chip 自分の犬, "the woman sees her book" (en/de), and "see your
+book" built by pointing at the command box
+([`e2e/possessor-reference.spec.ts`](../../../../../e2e/possessor-reference.spec.ts)). Switching
+the verb to the passive gives back 彼の犬は男の子に見られます, and a coordinated subject reads "their".
+No seed definition or UI string uses a pointer, so no composed text moved.
+
+What landed, and where it differs from the plan below:
+
+1. **The gate** (D3): [`linksToSubject.ts`](../../../../../packages/phrase/src/model/functions/linksToSubject.ts)
+   holds `LINK_GATES`, one predicate each — outside the subject's subtree, active, in a clause
+   (a verb) — and `linksToSubject(root, possessed)` is their conjunction. **The address gate is not
+   written** (E8's vocative box is another lane's): it is one more entry in `LINK_GATES`, as the
+   list's last comment says. `pointedPossessor` is the one place a pointer becomes a plan possessor
+   (the link, else the copy, else — at a command's or a citation's hidden subject the link cannot
+   reach — nothing, D4), and `pointerHolds` is what the console prints, keeps and accepts.
+2. **The model** (D1, D2): `buildNounPhrase` and `buildNounElement` take the noun's address in the
+   period (`…/possessor`, `…/conjunct/i`, `…/standard`, `…/examples`), threaded from each top call's
+   `which`. A coordinated subject is bound as the group, per the engine; `subject/conjunct/i` and
+   `subject/possessor` stay copies. **Deviation (D2's highlight):** no extra group lighting was added —
+   the conjunct rings already light up as their own (copy) targets, and the head's ring means the group.
+3. **Round trip** (D6): `planToWorkspace` maps `Possessor.coreferent` to `PossessorRef: "subject"` at
+   any depth, and names a link it would plan back as a copy (under the passive, inside the subject)
+   `Possessor.coreferent where the builder copies`. `normalize` threads each slice's address to judge
+   a pointer as the printer does. `#n.subj` now applies under a command and in a governed or cited
+   infinitive (no `noNounAt`); the printed line is unchanged, so no golden line moved.
+4. **Canvas** (D4): the mood box (command or citation) is a pick target — numbered, dashed, taken by a
+   click or ↵ — and goes by the canvas key `subject`, so the dashed line lands on it with no new
+   geometry report. `CorefPickContext.resolve('subject')` names the addressee under a command (not the
+   stashed word) and "one" under a citation; `useProvideCorefPick` takes `controlled` for a period that
+   is another's infinitive or purpose, whose controller it cannot see — there the pointer's label falls
+   back to `hint.aNoun` and **its line carries no chip** (deviation: D5 would render it; the matrix
+   subject is in another container's selection).
+5. **The chip** (D5 (2)): **one engine change**, `translate(plan, lookup, { phrase: 'directObject' })`
+   ([`translate.ts`](../../../../../packages/engine/src/translator/functions/translate.ts)): the plan
+   is resolved as a clause — its links bound — and only its object is rendered, as the bare noun phrase
+   a verbless period is, with no stop. `TranslateRequest.phrase` carries it through `POST
+   /api/translate` (anything else is a 400). The canvas asks with `{ subject, imperative?,
+   imperativeRegister?, infinitive? }` from the period's own plan and the possessed noun as the object
+   (`linkClauseOf`, `usePossessivePhrases`'s `clause`), so the chip says 自分の犬 as the sentence does,
+   "their book" for a group and "your book" for a command, in every language. **Deviation:** the
+   control's label names the subject's head word, not the group's words joined by its conjunction.
+6. **Keys**: none new; `P`, then a digit or ↵ on the command box, as on any target.
+
+Also fixed in passing: an unused `QuestionRole` import in `rawSatellites.tsx` that failed the
+frontend's `tsc` in `npm run build` at 23ea680a.
+
+Tests: `buildNounPhrase.test.ts` (the L91 pin rewritten to the link; link from the object, a
+complement, an owner's owner, a standard; the copy in the subject's subtree, at `subject/possessor`,
+under the passive and verbless; a command and a citation), `planToWorkspacePossessor.test.ts`,
+`CorefPickContext.test.tsx` (the command box eligible, naming the addressee; the group linked whole),
+`subjectLink.test.ts`, `ownerChain.test.ts`, the console's `golden.test.ts` and a round-trip reach
+test (the link in a clause and under a command; green at `SEEDS=5000`), the engine's
+`coreferent-control.test.ts` (both tables and the `phrase` option, verbless too) and the backend's
+`index.test.ts`.
+
 ## Why
 
 E2 built the link and left it plan-only. The builder already has the gesture that means it: point
@@ -67,82 +131,82 @@ only needs to say so.
 Verified at HEAD (1d8f359b), 2026-09-25.
 
 - **The pointed-to owner is a selection field.** It is `${which}PossessorRef`, an antecedent
-  `NounAddress` ([`interfaces.ts:575`](../../../../packages/phrase/src/model/interfaces.ts#L575),
-  [L653](../../../../packages/phrase/src/model/interfaces.ts#L653)), set by
-  [`setPossessorRef`](../../../../packages/phrase/src/model/phraseReducers.ts#L862) and exclusive
-  with a named owner. [`buildNounPhrase`](../../../../packages/phrase/src/model/selectionToPlan/functions/buildNounPhrase.ts#L27)
-  turns it into [`resolveAntecedent`](../../../../packages/phrase/src/model/selectionToPlan/functions/resolveAntecedent.ts#L13)'s
+  `NounAddress` ([`interfaces.ts:575`](../../../../../packages/phrase/src/model/interfaces.ts#L575),
+  [L653](../../../../../packages/phrase/src/model/interfaces.ts#L653)), set by
+  [`setPossessorRef`](../../../../../packages/phrase/src/model/phraseReducers.ts#L862) and exclusive
+  with a named owner. [`buildNounPhrase`](../../../../../packages/phrase/src/model/selectionToPlan/functions/buildNounPhrase.ts#L27)
+  turns it into [`resolveAntecedent`](../../../../../packages/phrase/src/model/selectionToPlan/functions/resolveAntecedent.ts#L13)'s
   `PronominalPossessor`. The person comes from the concept, the number and gender from the
   antecedent's picks. The address `subject` names the block's own fields, which in a group are the
   **first conjunct only**. `buildNounPhrase` knows `which` and `root` but not the possessed noun's
   address. A nested owner's slice calls its head `subject` too
-  ([test](../../../../packages/frontend/test/selectionToPlan/functions/buildNounPhrase.test.ts#L107)).
+  ([test](../../../../../packages/frontend/test/selectionToPlan/functions/buildNounPhrase.test.ts#L107)).
 - **The gesture.** The possessor control's `openAndPick`
-  ([`possessorToggleAction`](../../../../packages/frontend/src/components/PhraseBuilder/functions/possessorToggleAction.ts#L13))
+  ([`possessorToggleAction`](../../../../../packages/frontend/src/components/PhraseBuilder/functions/possessorToggleAction.ts#L13))
   opens an empty owner ring and starts a coref pick
-  ([`PhraseBuilder.tsx:363`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L363)).
-  [`isEligible`](../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L55)
+  ([`PhraseBuilder.tsx:363`](../../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L363)).
+  [`isEligible`](../../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L55)
   accepts any noun address except the possessed noun and its own subtree. So the subject's second
   conjunct may point at `subject` ("the cat and his dog run"), and so may the subject's own owner.
-  Only noun boxes are targets ([`linkPickHandlers`](../../../../packages/frontend/src/components/PhraseBuilder/functions/linkPickHandlers.ts#L33)).
+  Only noun boxes are targets ([`linkPickHandlers`](../../../../../packages/frontend/src/components/PhraseBuilder/functions/linkPickHandlers.ts#L33)).
   The **command box and the infinitive box** that stand in the subject's place
-  ([`PhraseCanvas.tsx:122`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseCanvas.tsx#L122))
+  ([`PhraseCanvas.tsx:122`](../../../../../packages/frontend/src/components/PhraseBuilder/PhraseCanvas.tsx#L122))
   are plain boxes and cannot be picked.
 - **A command keeps the user's subject pick** in the selection while
-  [`selectionToPlan`](../../../../packages/phrase/src/model/selectionToPlan/functions/selectionToPlan.ts#L44)
+  [`selectionToPlan`](../../../../../packages/phrase/src/model/selectionToPlan/functions/selectionToPlan.ts#L44)
   writes the addressee, so a pointer to `subject` reads the hidden word (the table's "see his
   book"). A linked infinitive or purpose period has no subject box at all (`/inf` in the console), so
   nothing in it can point at its controller.
 - **A relative clause's gap holds the head's word** (the console makes it "as a pick on the canvas
-  makes it", [`apply.ts:772`](../../../../packages/phrase/src/language/apply.ts#L772)), so pointing
+  makes it", [`apply.ts:772`](../../../../../packages/phrase/src/language/apply.ts#L772)), so pointing
   at a subject relative's own subject works today and copies the head's features.
 - **The chip.** The dashed line carries the possessed phrase, rendered on request by
-  [`usePossessivePhrases`](../../../../packages/frontend/src/i18n/usePossessivePhrase.ts#L51) as
+  [`usePossessivePhrases`](../../../../../packages/frontend/src/i18n/usePossessivePhrase.ts#L51) as
   `{ subject: { concept, possessor: features } }`, a bare noun phrase. It falls back to the catalog's
-  `pronoun.possessive.*` ([`possessiveHintKey`](../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L106))
-  and is labelled in [`decoratePerimeterControls`](../../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L71).
+  `pronoun.possessive.*` ([`possessiveHintKey`](../../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L106))
+  and is labelled in [`decoratePerimeterControls`](../../../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L71).
   A link **cannot** be rendered that way. In a bare noun phrase it stands in the subject it points
   at, and the engine refuses it. A verbless plan with an object renders the subject alone ("the
   woman."), which was probed.
 - **What the engine refuses**, each named by `planError`
-  ([`coreferentPath`](../../../../packages/backend/src/planError.ts#L150)) and by
-  [`bindCoreferents`](../../../../packages/engine/src/translator/functions/bindCoreferents.ts#L106):
+  ([`coreferentPath`](../../../../../packages/backend/src/planError.ts#L150)) and by
+  [`bindCoreferents`](../../../../../packages/engine/src/translator/functions/bindCoreferents.ts#L106):
   - a link anywhere inside the subject it points at: its owner chain, a conjunct, a standard
     (`plan.subject.possessor: a coreferent possessor cannot stand in the subject it points at`). A
     relative clause's or a content clause's own subject is refused the same way;
-  - a link in a phrase no clause holds. That is the address, [E8](P11-E8-vocative-control.md)'s vocative
-    ([`coreference.test.ts:332`](../../../../packages/engine/test/coreference.test.ts#L332)).
+  - a link in a phrase no clause holds. That is the address, [E8](../P11-E8-vocative-control.md)'s vocative
+    ([`coreference.test.ts:332`](../../../../../packages/engine/test/coreference.test.ts#L332)).
 
-  The binding is per clause ([`resolvePhrase.ts:159`](../../../../packages/engine/src/translator/functions/resolvePhrase.ts#L159)).
+  The binding is per clause ([`resolvePhrase.ts:159`](../../../../../packages/engine/src/translator/functions/resolvePhrase.ts#L159)).
   A subject relative binds to its head
-  ([`resolveRelativeClause.ts:59`](../../../../packages/engine/src/translator/functions/resolveRelativeClause.ts#L59)).
+  ([`resolveRelativeClause.ts:59`](../../../../../packages/engine/src/translator/functions/resolveRelativeClause.ts#L59)).
   An infinitive, a purpose and a citation bind to their controlled subject, and a command binds to
   its addressee.
 - **The link is not in the round trip.** `planToWorkspace` reports every possessor with a `kind` as
   unsupported, the pronominal one included
-  ([`planToWorkspace.ts:328`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L328)).
-  [`getNoun`](../../../../packages/phrase/src/model/workspacePlan/functions/getNoun.ts#L24) already
+  ([`planToWorkspace.ts:328`](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L328)).
+  [`getNoun`](../../../../../packages/phrase/src/model/workspacePlan/functions/getNoun.ts#L24) already
   steps over the link, which is E2's one frontend change.
 - **Keys:** `P` is `noun.possessor`
-  ([`keymap.ts:514`](../../../../packages/frontend/src/keyboard/keymap.ts#L514)), which opens the
+  ([`keymap.ts:514`](../../../../../packages/frontend/src/keyboard/keymap.ts#L514)), which opens the
   owner and starts the pick. A pick target is taken like any box, with ↵ on it
-  ([`phraseRender.tsx:360`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L360)).
+  ([`phraseRender.tsx:360`](../../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L360)).
 - **Console:** the pointer is `/poss #n.noun`
-  ([`apply.ts:689`](../../../../packages/phrase/src/language/apply.ts#L689), printed at
-  [`print.ts:457`](../../../../packages/phrase/src/language/print.ts#L457)). A ref that does not
+  ([`apply.ts:689`](../../../../../packages/phrase/src/language/apply.ts#L689), printed at
+  [`print.ts:457`](../../../../../packages/phrase/src/language/print.ts#L457)). A ref that does not
   resolve to a word is refused at apply
-  ([L1276](../../../../packages/phrase/src/language/apply.ts#L1276)), dropped by
-  [`normalize.ts:51`](../../../../packages/phrase/src/language/normalize.ts#L51) and not printed.
+  ([L1276](../../../../../packages/phrase/src/language/apply.ts#L1276)), dropped by
+  [`normalize.ts:51`](../../../../../packages/phrase/src/language/normalize.ts#L51) and not printed.
   A possessor's own word takes nouns only
-  ([`resolve.ts:35`](../../../../packages/phrase/src/language/resolve.ts#L35)), so "my" can only be a
+  ([`resolve.ts:35`](../../../../../packages/phrase/src/language/resolve.ts#L35)), so "my" can only be a
   pointer to a 1st-person noun elsewhere in the period.
-- **OWN_ADJECTIVE has no control** ([C37](../../../localization/done/C37-own-intensifier.md) Done 4).
+- **OWN_ADJECTIVE has no control** ([C37](../../../../localization/done/C37-own-intensifier.md) Done 4).
   Nothing in `packages/phrase` writes `possessorOwn`.
 - **No seed definition and no UI string uses a pointer.** A grep of `backend/src/concepts` for
   `/poss #` found none. So the change moves no composed definition.
-- **Pins that assume the copy:** [`buildNounPhrase.test.ts:91`](../../../../packages/frontend/test/selectionToPlan/functions/buildNounPhrase.test.ts#L91)
+- **Pins that assume the copy:** [`buildNounPhrase.test.ts:91`](../../../../../packages/frontend/test/selectionToPlan/functions/buildNounPhrase.test.ts#L91)
   (pointer to `subject` gives `kind: 'pronominal'`), and
-  [`e2e/possessor-reference.spec.ts`](../../../../e2e/possessor-reference.spec.ts#L11)
+  [`e2e/possessor-reference.spec.ts`](../../../../../e2e/possessor-reference.spec.ts#L11)
   (BOY/SEE/DOG in en/it/de/es, unchanged under the link; its chip test reads 彼の犬 in ja).
 
 ## Design
@@ -244,7 +308,7 @@ by its `conjunction.value.*`.
   the pointer round-trips. `planToWorkspace` maps `Possessor.coreferent` to `PossessorRef:
   "subject"` on the possessed noun (at any depth: an owner's slice stores the period's address), so
   the link leaves `unsupported`. `Possessor.pronominal` has no address to recover, so
-  [P11-E9](Z-done/P11-E9-pronoun-owner.md) loads it as a free pronoun owner (shipped).
+  [P11-E9](P11-E9-pronoun-owner.md) loads it as a free pronoun owner (shipped).
 
 **Recommendation: as stated.** The printed line does not change, so the golden lines stay valid.
 

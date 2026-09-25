@@ -1,5 +1,5 @@
 import type { CoordConjunction, NounElement, NounPhrase } from "@signi/shared";
-import { CONJUNCTION_KEY, CONJUNCTS_KEY, type NounKey, type PhraseSelection } from "../../interfaces.ts";
+import { CONJUNCTION_KEY, CONJUNCTS_KEY, conjunctAddress, type NounAddress, type NounKey, type PhraseSelection } from "../../interfaces.ts";
 import { buildNounPhrase } from "./buildNounPhrase.ts";
 import { field } from "./field.ts";
 
@@ -13,11 +13,17 @@ import { field } from "./field.ts";
  * contributes nothing and the slot stays a plain noun phrase — the same rule the instrumental
  * link follows (a half-built period renders no complement rather than half of one).
  */
-export function buildNounElement(sel: PhraseSelection, which: NounKey, root: PhraseSelection = sel): NounElement | undefined {
-  const head = buildNounPhrase(sel, which, root);
+export function buildNounElement(
+  sel: PhraseSelection,
+  which: NounKey,
+  root: PhraseSelection = sel,
+  // Where the element sits in the period (see buildNounPhrase).
+  address: NounAddress = which,
+): NounElement | undefined {
+  const head = buildNounPhrase(sel, which, root, address);
   if (!head) return undefined;
   const conjuncts = (field<PhraseSelection[]>(sel, CONJUNCTS_KEY(which)) ?? [])
-    .map((c) => buildNounPhrase(c, "subject", root))
+    .map((c, i) => buildNounPhrase(c, "subject", root, conjunctAddress(address, i)))
     .filter((np): np is NounPhrase => Boolean(np));
   if (conjuncts.length === 0) return head;
   return {

@@ -225,7 +225,9 @@ export function PhraseBuilder({
   // period builder owns one (keyed to the whole period selection) and re-provides it below; a
   // nested conjunct / possessor builder inherits the parent's, so a pick spans the whole tree.
   const parentCoref = useCorefPick();
-  const ownCoref = useProvideCorefPick(selection);
+  // An infinitive or purpose clause another period governs has its subject there (P11-E7 D4).
+  const controlled = ["infinitive", "purpose"].includes(binding?.subordinate.asTarget?.kind ?? "");
+  const ownCoref = useProvideCorefPick(selection, controlled);
   const coref = parentCoref ?? ownCoref;
   // Pointing at the noun a pronominal possessor stands for ("the boy and **his** horse") is a pick
   // like any other: its eligible nouns are numbered where they sit, a digit takes one, and esc
@@ -674,7 +676,7 @@ export function PhraseBuilder({
   // the backend renders on request: the Romance possessive agrees with the noun possessed, so no
   // catalog entry can hold it (C16). Both the chip on the link and the control's tooltip read it.
   const possessivePhrase = usePossessivePhrases(
-    possessiveRequests(selection, pointers, coref.resolve, owners),
+    possessiveRequests(selection, pointers, coref, owners, nounAddress),
   );
 
   // The group-extending control rides the group's last ring; each possessor control names or points
@@ -684,6 +686,8 @@ export function PhraseBuilder({
     selection,
     ringHost,
     resolve: coref.resolve,
+    linkOf: coref.linkOf,
+    addressOf: nounAddress,
     onTogglePossessor: handleTogglePossessor,
     word,
     possessivePhrase,
@@ -853,6 +857,7 @@ export function PhraseBuilder({
     controlOn,
     colorOf: (role) => headOf(role)?.color ?? "",
     resolve: coref.resolve,
+    linkOf: coref.linkOf,
     t,
     possessivePhrase,
     compact,

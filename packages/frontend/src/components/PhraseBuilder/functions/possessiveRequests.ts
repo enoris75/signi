@@ -3,6 +3,7 @@ import type { PossessiveRequest } from "../../../i18n/usePossessivePhrase.ts";
 import type { CorefPick } from "../CorefPickContext.tsx";
 import { POSSESSOR_KEY, POSSESSOR_REF_KEY, type NounAddress, type NounKey, type PhraseSelection } from "../interfaces.ts";
 import type { OwnerSpot, PointerSpot } from "../ownerChain.ts";
+import type { LinkClause } from "./subjectLink.ts";
 import { NOUN_KEYS } from "../slots.ts";
 import { isPersonalPronoun, pronounFeatures } from "@signi/phrase/model/selectionToPlan/functions/pronounFeatures.ts";
 
@@ -18,20 +19,25 @@ import { isPersonalPronoun, pronounFeatures } from "@signi/phrase/model/selectio
 export function possessiveRequests(
   selection: PhraseSelection,
   pointers: readonly PointerSpot[],
-  resolve: CorefPick["resolve"],
+  coref: Pick<CorefPick, "resolve" | "linkOf">,
   owners: readonly OwnerSpot[] = [],
+  // A local noun's address in the period (see builderNounAddress): where a pointer stands decides
+  // whether it is the link to the subject (P11-E7).
+  addressOf: (which: NounKey) => NounAddress = (which) => which,
 ): PossessiveRequest[] {
   const out: PossessiveRequest[] = [];
-  const push = (concept: string | undefined, features: PronominalPossessor | undefined) => {
-    if (concept && features) out.push({ concept, features });
+  const push = (concept: string | undefined, features: PronominalPossessor | undefined, clause?: LinkClause) => {
+    if (concept && features) out.push({ concept, features, ...(clause && { clause }) });
   };
-  const add = (concept: string | undefined, antecedent: NounAddress | undefined) =>
-    push(concept, antecedent ? resolve(antecedent)?.features : undefined);
-  for (const spot of pointers) add(spot.possessedConcept, spot.antecedent);
+  // A pointer renders as the copy it is, or — the link to its clause's subject — in that clause.
+  const add = (concept: string | undefined, possessed: NounAddress, antecedent: NounAddress | undefined) => {
+    if (antecedent) push(concept, coref.resolve(antecedent)?.features, coref.linkOf(possessed, antecedent));
+  };
+  for (const spot of pointers) add(spot.possessedConcept, spot.possessed, spot.antecedent);
   for (const spot of owners) push(spot.possessedConcept, spot.pronoun);
   for (const which of NOUN_KEYS) {
     const concept = (selection[which] as Concept | undefined)?.id;
-    add(concept, selection[POSSESSOR_REF_KEY(which)] as NounAddress | undefined);
+    add(concept, addressOf(which), selection[POSSESSOR_REF_KEY(which)] as NounAddress | undefined);
     push(concept, namedPronounOwner(selection, which));
   }
   return out;

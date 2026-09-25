@@ -1,4 +1,4 @@
-export { translate } from './functions/translate.js';
+export { translate, type TranslateOptions } from './functions/translate.js';
 export { translateApproximator } from './functions/translateApproximator.js';
 export { translateConjunction } from './functions/translateConjunction.js';
 export { translateDegree } from './functions/translateDegree.js';

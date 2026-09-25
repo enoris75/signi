@@ -8,6 +8,7 @@ import type { DiagnosticCode } from '../../src/console/language/diagnostics.ts';
 import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
 import type { WorkspaceState } from '../../src/console/language/types.ts';
 import { ids_, ok, print, run, script, sel } from './helpers.ts';
+import { workspaceToPlans } from '@signi/phrase/model/workspacePlan/functions/workspaceToPlans.ts';
 
 interface Golden {
   line: string;
@@ -598,6 +599,35 @@ describe('the passive question', () => {
     expect(sel(state)).toMatchObject({ interrogative: true, questionRole: 'directObject', verbVoice: 'passive' });
     expect(print(state)).toBe('/wh obj /subj ( cat ) /verb ( eat /passive )');
     expect(print(ok(print(state)))).toBe(print(state));
+  });
+});
+
+// P11-E7 D6: `/poss #n.subj` keeps its syntax and means the link to the clause's subject wherever the
+// clause allows one — also where no box holds the subject: a command's addressee, an infinitive's
+// controller.
+describe('a pointer at the clause’s subject', () => {
+  const LINK = { kind: 'coreferent', slot: 'subject' };
+  const plans = (state: WorkspaceState) => workspaceToPlans(state.containers, state.links).map((p) => p.plan);
+
+  it.each<[string, string]>([
+    ['/subj woman /verb see /obj ( book /poss #1.subj )', '/subj ( woman ) /verb ( see ) /obj ( book /poss #1.subj )'],
+    ['/command /verb see /obj ( book /poss #1.subj )', '/command /verb ( see ) /obj ( book /poss #1.subj )'],
+  ])('%s: prints itself, and plans the link', (line, prints) => {
+    const state = ok(line);
+    expect(print(state)).toBe(prints);
+    expect(print(ok(prints))).toBe(prints);
+    expect(plans(state)[0]!.directObject).toMatchObject({ possessor: LINK });
+  });
+
+  it('links a purpose clause’s owner to the controller no box holds', () => {
+    const state = ok('/subj man /verb run /so ( /verb see /obj ( mother /poss #2.subj ) )');
+    expect(plans(state)[0]!.purpose).toMatchObject({ directObject: { possessor: LINK } });
+    expect(script(ok(script(state)))).toBe(script(state));
+  });
+
+  it('keeps the copy where the clause allows no link: under the passive', () => {
+    const state = ok('/subj woman /verb ( see /passive ) /obj ( book /poss #1.subj )');
+    expect(plans(state)[0]!.directObject).toMatchObject({ possessor: { kind: 'pronominal' } });
   });
 });
 

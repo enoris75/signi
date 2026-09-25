@@ -31,7 +31,7 @@ import {
   type LanguageCode,
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
-import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole, type SlotQuestionRole } from "../../interfaces.ts";
+import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type SlotQuestionRole } from "../../interfaces.ts";
 import { canAsk, canBeExistential, hasPatient, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
 import { standardIsSet, takesStandard } from "../../standardRing.ts";
 import { takesExamples } from "../../examplesRing.ts";

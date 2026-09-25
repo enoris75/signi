@@ -3,6 +3,7 @@ import type { NounKey } from "../interfaces.ts";
 import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
 import type { PossessivePhrase } from "../../../i18n/usePossessivePhrase.ts";
 import { possessiveHintKey, type CorefPick } from "../CorefPickContext.tsx";
+import type { LinkClause } from "./subjectLink.ts";
 import {
   ownerLink,
   ownerPortKey,
@@ -38,6 +39,7 @@ export function possessionEdges({
   controlOn,
   colorOf,
   resolve,
+  linkOf = () => undefined,
   t,
   possessivePhrase,
   compact,
@@ -50,6 +52,8 @@ export function possessionEdges({
   // The colour of the period noun a possession belongs with.
   colorOf: (role: NounKey) => string;
   resolve: CorefPick["resolve"];
+  // Whether a pointer is the link to its clause's subject, and the clause its chip is rendered in (P11-E7 D5).
+  linkOf?: CorefPick["linkOf"];
   t: UiStringLookup;
   // The possessed noun phrase, once the backend has rendered it (see `usePossessivePhrases`).
   possessivePhrase: PossessivePhrase;
@@ -60,8 +64,8 @@ export function possessionEdges({
     controlOn(key, perimeterControlKey("possessor", key), perimeterControlKey("possessor", "subject"));
 
   // The phrase a possessive renders, and the bare possessive until it has come back (C16).
-  const says = (concept: string | undefined, features: PronominalPossessor) =>
-    possessivePhrase(concept, features) ?? t(possessiveHintKey(features));
+  const says = (concept: string | undefined, features: PronominalPossessor, clause?: LinkClause) =>
+    possessivePhrase(concept, features, clause) ?? t(possessiveHintKey(features));
 
   const ownerLines = owners.flatMap((spot): OwnerLine[] => {
     const link = ownerLink({
@@ -89,7 +93,7 @@ export function possessionEdges({
     const resolved = resolve(spot.antecedent);
     // The whole phrase where the render has come back, the bare possessive until then: the Romance
     // possessive agrees with the noun possessed, which only the engine can settle (C16).
-    const pronoun = resolved ? says(spot.possessedConcept, resolved.features) : undefined;
+    const pronoun = resolved ? says(spot.possessedConcept, resolved.features, linkOf(spot.possessed, spot.antecedent)) : undefined;
     return [{ spot, link, pronoun, color: colorOf(spot.role) }];
   });
 

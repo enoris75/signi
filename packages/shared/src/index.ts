@@ -1979,6 +1979,12 @@ export interface Translation {
 
 export interface TranslateRequest {
   plan: PhrasePlan;
+  /**
+   * Render one phrase of the plan rather than the period: `directObject` is the object alone,
+   * resolved in its clause — so a possessor linked to the subject is bound to it — and said as a bare
+   * noun phrase with no full stop. The canvas's link chip reads it (P11-E7 D5).
+   */
+  phrase?: 'directObject';
 }
 
 export interface TranslateResponse {

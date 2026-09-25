@@ -22,6 +22,7 @@ import { GroupBox } from "./GroupBox.tsx";
 import { useBoxCursor } from "../../keyboard/KeyboardProvider.tsx";
 import { focusRing } from "../../keyboard/focusRing.ts";
 import { boxScopesOf } from "../../keyboard/scope.ts";
+import { PICK_TARGET, pickBadgeSx } from "../../keyboard/usePickKeys.ts";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
@@ -135,6 +136,8 @@ export function PhraseCanvas({
   // The mood box stands where the subject box stands, so the cursor reaches it the same way — and
   // a command's own keys (its addressee and its register) apply while it is there.
   const moodCursor = useBoxCursor("subject", boxScopesOf("subject", selection));
+  // Whether the mood box is a target of the possessor pick in flight (P11-E7 D4).
+  const moodPick = Boolean(moodBox) && (ctx.isPickTarget?.("subject") ?? false);
   const openingRef = useRef<HTMLDivElement>(null);
   const openingPicker = !showCanvas && !moodBox;
   const openingSize = useElementSize(openingRef, DEFAULT_NODE_SIZE, openingPicker);
@@ -171,9 +174,18 @@ export function PhraseCanvas({
           // The subject's own satellites are withdrawn with it (see buildSatellites), leaving
           // nothing to overlay.
           <Box
-            {...ctx.makeDragProps("subject", () => {})}
+            {...ctx.makeDragProps("subject", moodPick ? () => ctx.onPickTarget?.("subject") : () => {})}
             {...moodCursor}
-            sx={[ctx.makeDragProps("subject", () => {}).sx, focusRing("primary")]}
+            // It stands for the subject in a possessor's pick too (P11-E7 D4): pointing at it is
+            // pointing at the addressee or the one cited, which the plan writes as the link.
+            {...(moodPick ? { [PICK_TARGET]: "subject", onClick: () => ctx.onPickTarget?.("subject") } : {})}
+            data-testid="mood-box"
+            sx={[
+              ctx.makeDragProps("subject", () => {}).sx,
+              focusRing("primary"),
+              pickBadgeSx,
+              moodPick && { outline: "2px dashed", outlineColor: "primary.main", outlineOffset: 4, borderRadius: 2 },
+            ]}
             ref={nodeElRef(ctx, "subject")}
             onFocus={(e: React.FocusEvent<HTMLElement>) => {
               moodCursor.onFocus(e);

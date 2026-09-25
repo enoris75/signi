@@ -14,7 +14,7 @@ owner ring (`PhraseBuilder.tsx`, `rawSatellites.tsx`, `OwnerRings.tsx`), the pic
 completion. No new UI string, no seed, no engine change.
 **Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25; found while writing
 [P11-E6](../P11-E6-humble-verb-control.md), whose *Out of scope* names the gap.
-[P11-E7](../P11-E7-coreferent-possessor-control.md) and [P11-E8](../P11-E8-vocative-control.md) record it
+[P11-E7](P11-E7-coreferent-possessor-control.md) and [P11-E8](../P11-E8-vocative-control.md) record it
 too.
 
 Engine output at HEAD (1bb7c878), from hand-written plans. Rendered 2026-09-25 with `sayAll` on an
@@ -74,7 +74,8 @@ What landed, and where it differs from the plan below:
 2. **`planToWorkspace`** (D8) loads `Possessor.pronominal` as an owner slice `{ subject: <person's
    pronoun>, subjectNumber, subjectGender (3rd only) }`. A plan that also carries a `possessorRole`
    on it names `NounPhrase.possessorRole on a pronoun` unsupported, since the canvas would hold it
-   and never write it. `Possessor.coreferent` is still unsupported here (E7's).
+   and never write it. `Possessor.coreferent` loads as a pointer at `subject` since
+   [E7](P11-E7-coreferent-possessor-control.md).
 3. **Canvas** (D1, D3, D5, D7, D8). `pronounHead` is set for an owner ring, and a new `ownerHead`
    flag gives its empty box the pronoun-inclusive picker under the noun-or-pronoun prompt (its field
    keeps the `typeahead-noun` test id). The chooser's generic is shown **`aria-disabled`, not
@@ -343,7 +344,7 @@ The builder then has three ways to give a noun a pronoun owner, and they mean di
 |---|---|---|
 | name a pronoun in the owner ring (this task) | `pronominal`, the features picked | 彼の / 私の / あなたの: whoever those features name |
 | point at a noun of the period, not the clause subject | `pronominal`, copied from that noun | as the copied features read |
-| point at the clause's subject ([E7](../P11-E7-coreferent-possessor-control.md)) | `coreferent` | 自分の: the subject itself |
+| point at the clause's subject ([E7](P11-E7-coreferent-possessor-control.md)) | `coreferent` | 自分の: the subject itself |
 
 1. **Keep them apart.** A free *his* is the other person's. That is a real meaning, and it is the
    only way to say it, since E7 turns every pointer at the subject into the link.
@@ -427,7 +428,7 @@ a question for the bug catalogue. It is recorded here and not filed.
   父は参ります (E6's table). E6 D2's `canBeHumble` gains one case: a noun under RELATIVE whose named
   owner's head is FIRST_PERSON. Whichever of the two lands second adds it. E6's *Out of scope* note
   retires when this ships.
-- **[P11-E7](../P11-E7-coreferent-possessor-control.md).** There is no conflict of gestures: E7 changes
+- **[P11-E7](P11-E7-coreferent-possessor-control.md).** There is no conflict of gestures: E7 changes
   what a pointer at the subject means, and this task adds a ring. The two tickets overlap in two
   places:
   - `planToWorkspace`: E7 maps the link, this maps the features;

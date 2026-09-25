@@ -263,6 +263,27 @@ describe('POST /api/translate', () => {
     expect(await res.json()).toEqual({ translations: translate(plan, lookupLexicalEntry) });
   });
 
+  // P11-E7 D5: the object alone, bound in its clause — the link chip's text.
+  test('renders the direct object alone, its link bound to the subject, when asked', async () => {
+    const plan: PhrasePlan = {
+      subject: { concept: 'WOMAN' },
+      verbPhrase: { verb: 'SEE' },
+      directObject: { concept: 'BOOK', possessor: { kind: 'coreferent', slot: 'subject' } },
+    };
+    const res = await post('/api/translate', { plan, phrase: 'directObject' });
+    expect(res.status).toBe(200);
+    const { translations } = (await res.json()) as { translations: { language: string; text: string }[] };
+    expect(translations).toEqual(translate(plan, lookupLexicalEntry, { phrase: 'directObject' }));
+    expect(translations.find((t) => t.language === 'de')?.text).toBe('ihr Buch');
+    expect(translations.find((t) => t.language === 'ja')?.text).toBe('自分の本');
+  });
+
+  test('rejects a phrase it does not render', async () => {
+    const res = await post('/api/translate', { plan: PLAN, phrase: 'subject' });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: 'Unknown phrase: subject' });
+  });
+
   test.each([
     ['no body', undefined],
     ['no plan', {}],

@@ -30,6 +30,8 @@ export function decoratePerimeterControls({
   selection,
   ringHost,
   resolve,
+  linkOf = () => undefined,
+  addressOf = (which) => which,
   onTogglePossessor,
   t,
   word,
@@ -41,6 +43,10 @@ export function decoratePerimeterControls({
   ringHost: Pick<RingHost, "kind" | "isLast"> | undefined;
   // Resolves the noun a possessor points to (see CorefPickContext).
   resolve: CorefPick["resolve"];
+  // Whether a pointer is the link to its clause's subject, and the clause it is said in (P11-E7 D5), by
+  // the pointing noun's address in the period (`addressOf` maps this builder's own keys there).
+  linkOf?: CorefPick["linkOf"];
+  addressOf?: (which: NounKey) => NounAddress;
   onTogglePossessor: (which: NounKey) => void;
   t: UiStringLookup;
   // The antecedent's word in the UI language (`useConceptLabel`), for the control that points at it.
@@ -70,7 +76,7 @@ export function decoratePerimeterControls({
     // until then — which is right in English, German and Japanese and only approximate in the
     // Romance languages, where it agrees with the noun possessed (C16).
     const says = resolved
-      && (possessivePhrase((selection[which] as Concept | undefined)?.id, resolved.features)
+      && (possessivePhrase((selection[which] as Concept | undefined)?.id, resolved.features, antecedent ? linkOf(addressOf(which), antecedent) : undefined)
         ?? t(possessiveHintKey(resolved.features)));
     // A named owner that is a pronoun says the same thing a pointer does (P11-E9 D7): its person, and
     // the possessed phrase its possessive renders ("first person (“my mother”)").

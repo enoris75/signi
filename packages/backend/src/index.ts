@@ -59,8 +59,13 @@ app.post('/api/translate', (req, res) => {
   // The engine renders a concept the lexicon cannot find as an empty word, so a plan naming one
   // would come back as a 200 with a hole in it; the noting lookup collects every id it asked for
   // that has no concept row.
+  // One phrase of the plan, resolved in its clause, where one is asked for (P11-E7 D5).
+  if (body.phrase !== undefined && body.phrase !== 'directObject') {
+    res.status(400).json({ error: `Unknown phrase: ${String(body.phrase)}` });
+    return;
+  }
   const { lookup, unknown } = notingLookup();
-  const translations = translate(body.plan, lookup);
+  const translations = translate(body.plan, lookup, body.phrase ? { phrase: body.phrase } : {});
   if (unknown.size > 0) {
     const ids = [...unknown];
     res.status(400).json({ error: `Unknown concept${ids.length > 1 ? 's' : ''}: ${ids.join(', ')}` });
