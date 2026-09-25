@@ -237,6 +237,7 @@ describe('P10-E12: possession without a genitive', () => {
     ['my house — a pronominal possessor, unchanged', house({ kind: 'pronominal', person: '1', number: 'singular' }), 'mis Huus.'],
     ["my father's house", house(np('FATHER', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })), 'mim Vatter sis Huus.'],
     ['the roof of the house — vo for a thing', subject(np('DOOR', { possessor: np('HOUSE') })), 'd Tür vom Huus.'],
+    ['the dative is the death of the genitive — vo for a case name', clause(np('DATIVE'), 'BE', { complements: { predicative: { phrase: np('DEATH', { definiteness: 'definite', possessor: np('GENITIVE') }) } } }), 'de Dativ isch de Tod vom Genitiv.'],
   ])('%s', (_label, plan, expected) => {
     expect(gsw(plan)).toBe(expected);
   });

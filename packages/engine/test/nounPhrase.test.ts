@@ -675,9 +675,42 @@ describe('grammar nouns: clauses, complements, the verb’s features, modifier r
     ['MATERIAL',
       { en: 'a material.', it: 'un materiale.', fr: 'un matériau.', de: 'ein Material.', es: 'un material.', ja: '材料。', pt: 'um material.' },
       { en: 'the materials.', it: 'i materiali.', fr: 'les matériaux.', de: 'die Materialien.', es: 'los materiales.', ja: '材料。', pt: 'os materiais.' }],
+    // The case and two of its values. German Kasus is one form throughout: ein Kasus, die Kasus.
+    ['CASE_GRAMMAR',
+      { en: 'a case.', it: 'un caso.', fr: 'un cas.', de: 'ein Kasus.', es: 'un caso.', ja: '格。', pt: 'um caso.' },
+      { en: 'the cases.', it: 'i casi.', fr: 'les cas.', de: 'die Kasus.', es: 'los casos.', ja: '格。', pt: 'os casos.' }],
+    ['DATIVE',
+      { en: 'a dative.', it: 'un dativo.', fr: 'un datif.', de: 'ein Dativ.', es: 'un dativo.', ja: '与格。', pt: 'um dativo.' },
+      { en: 'the datives.', it: 'i dativi.', fr: 'les datifs.', de: 'die Dative.', es: 'los dativos.', ja: '与格。', pt: 'os dativos.' }],
+    ['GENITIVE',
+      { en: 'a genitive.', it: 'un genitivo.', fr: 'un génitif.', de: 'ein Genitiv.', es: 'un genitivo.', ja: '属格。', pt: 'um genitivo.' },
+      { en: 'the genitives.', it: 'i genitivi.', fr: 'les génitifs.', de: 'die Genitive.', es: 'los genitivos.', ja: '属格。', pt: 'os genitivos.' }],
   ])('%s', (concept, singular, plural) => {
     expect(said(concept, { definiteness: 'indefinite' })).toEqual(singular);
     expect(said(concept, { number: 'plural' })).toEqual(plural);
+  });
+});
+
+// "Der Dativ ist dem Genitiv sein Tod": the standard-language sentence behind the idiom, with the case
+// nouns as subject, as possessor (German genitive -s, but invariant Kasus) and after BE.
+describe('grammar nouns: the case names', () => {
+  const deathOf = (owner: string) => np('DEATH', { definiteness: 'definite', possessor: np(owner) });
+
+  test('the dative is the death of the genitive', () => {
+    expect(sayAll(clause(np('DATIVE'), 'BE', { complements: { predicative: { phrase: deathOf('GENITIVE') } } }))).toEqual({
+      en: "the dative is the genitive's death.",
+      it: 'il dativo è la morte del genitivo.',
+      fr: 'le datif est la mort du génitif.',
+      de: 'der Dativ ist der Tod des Genitivs.',
+      es: 'el dativo es la muerte del genitivo.',
+      ja: '与格は属格の死です。',
+      pt: 'o dativo é a morte do genitivo.',
+    });
+  });
+
+  test('Kasus takes no genitive -s, Dativ does', () => {
+    expect(sayAll({ subject: deathOf('CASE_GRAMMAR') }).de).toBe('der Tod des Kasus.');
+    expect(sayAll({ subject: deathOf('DATIVE') }).de).toBe('der Tod des Dativs.');
   });
 });
 

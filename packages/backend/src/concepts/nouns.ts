@@ -5393,6 +5393,76 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // Grammatical case, as against CASE_INSTANCE, the thing that happens: suffixed like NUMBER_GRAMMAR,
+    // and for the same reason — Italian, French, Spanish and Portuguese say one word for both, German
+    // does not (Kasus, not Fall, in a grammar) and Japanese has 格 only here. German Kasus is the
+    // same word in every case and number, so its genitive is seeded bare (des Kasus). Glossed on
+    // CATEGORY as NUMBER_GRAMMAR is: "a category that indicates participants".
+    id: 'CASE_GRAMMAR',
+    role: 'noun',
+    description: 'the form of a noun that marks its role in the clause (grammar)',
+    definition: `
+      /subj ( CATEGORY /a /rel #2.subj )
+      /subj ( CATEGORY ) /verb ( INDICATE ) /obj ( PARTICIPANT_GRAMMAR /pl /zero )
+    `,
+    emoji: '🗂️',
+    synonym: 'grammar',
+    isA: 'CATEGORY',
+    forms: {
+      en: { base: 'case', plural: 'cases', count: 'singular' },
+      it: { base: 'caso', plural: 'casi', gender: 'masc', count: 'singular' },
+      fr: { base: 'cas', plural: 'cas', gender: 'masc', count: 'singular' },
+      de: { base: 'Kasus', plural: 'Kasus', gender: 'masc', count: 'singular', genitive: 'Kasus' },
+      es: { base: 'caso', plural: 'casos', gender: 'masc', count: 'singular' },
+      ja: { base: '格', count: 'singular', reading: 'かく' },
+      pt: { base: 'caso', plural: 'casos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The case of the recipient, "Der Dativ ist dem Genitiv sein Tod". Glossed as TERMINUS is, on its
+    // own genus: "a case that indicates recipients". Latin in every language; Japanese 与格.
+    id: 'DATIVE',
+    role: 'noun',
+    description: 'the case marking the recipient of an action (grammar)',
+    definition: `
+      /subj ( CASE_GRAMMAR /a /rel #2.subj )
+      /subj ( CASE_GRAMMAR ) /verb ( INDICATE ) /obj ( RECIPIENT /pl /zero )
+    `,
+    emoji: '📥',
+    isA: 'CASE_GRAMMAR',
+    forms: {
+      en: { base: 'dative', plural: 'datives', count: 'singular' },
+      it: { base: 'dativo', plural: 'dativi', gender: 'masc', count: 'singular' },
+      fr: { base: 'datif', plural: 'datifs', gender: 'masc', count: 'singular' },
+      de: { base: 'Dativ', plural: 'Dative', gender: 'masc', count: 'singular' },
+      es: { base: 'dativo', plural: 'dativos', gender: 'masc', count: 'singular' },
+      ja: { base: '与格', count: 'singular', reading: 'よかく' },
+      pt: { base: 'dativo', plural: 'dativos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The case of the possessor: "a case that indicates possessors". Japanese grammars say 属格 (the
+    // の case), and German's genitive -s is the regular one: des Genitivs.
+    id: 'GENITIVE',
+    role: 'noun',
+    description: 'the case marking the possessor (grammar)',
+    definition: `
+      /subj ( CASE_GRAMMAR /a /rel #2.subj )
+      /subj ( CASE_GRAMMAR ) /verb ( INDICATE ) /obj ( POSSESSOR /pl /zero )
+    `,
+    emoji: '🔗',
+    isA: 'CASE_GRAMMAR',
+    forms: {
+      en: { base: 'genitive', plural: 'genitives', count: 'singular' },
+      it: { base: 'genitivo', plural: 'genitivi', gender: 'masc', count: 'singular' },
+      fr: { base: 'génitif', plural: 'génitifs', gender: 'masc', count: 'singular' },
+      de: { base: 'Genitiv', plural: 'Genitive', gender: 'masc', count: 'singular' },
+      es: { base: 'genitivo', plural: 'genitivos', gender: 'masc', count: 'singular' },
+      ja: { base: '属格', count: 'singular', reading: 'ぞっかく' },
+      pt: { base: 'genitivo', plural: 'genitivos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'GENDER',
     role: 'noun',
     description: 'the class a noun belongs to — masculine, feminine, neuter (grammar)',
