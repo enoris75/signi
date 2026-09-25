@@ -138,6 +138,12 @@ export const JA_ESSIVE = 'として';
 export const JA_PURPOSE = 'ために';
 
 /**
+ * A route asked about a person (A374): 誰を would run a person as if it were a road (猫は誰を走りますか),
+ * so the path is spelled out, "passing through the inside of whom": 猫は誰の中を通って走りますか.
+ */
+export const JA_ANIMATE_ROUTE_QUESTION = 'の中を通って';
+
+/**
  * Cause postposition per sentiment — Japanese marks the stance cleanly: neutral のために
  * ("for the sake of / because of"), negative のせいで ("owing to … fault"), positive のおかげで
  * ("thanks to"). All written in kana, so no furigana reading is attached.

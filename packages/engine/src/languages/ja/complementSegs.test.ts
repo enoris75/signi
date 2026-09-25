@@ -167,6 +167,8 @@ describe('complementSegs', () => {
     test('a bare or through route takes を', () => {
       expect(text(complementSegs(complements({ route: complement(np(ICHIBA)) })))).toBe('市場を');
       expect(text(complementSegs(complements({ route: complement(np(ICHIBA), [path('through')]) })))).toBe('市場を');
+      // A374: a route asked about a person carries its spelled path in place of を.
+      expect(text(complementSegs(complements({ route: { ...complement(np(INU)), link: 'の中を通って' } })))).toBe('犬の中を通って');
     });
 
     test('a spatial relation puts its relational noun before を', () => {

@@ -29,7 +29,8 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   // The route's *por* over *que* would be the *why* of "por que?", so a place gone through is asked
   // *por onde*, as Portuguese asks it anyway (P09-E15).
   const text = gap ? complementsPhrase(gap, {}, verb.conceptId).replace(/\s+/g, ' ').trim() : '';
-  if (gap) return text === 'por que' ? 'por onde' : text;
+  // Over a person the same *por* reads as *for whom*, so the path is spelled *através de quem* (A374).
+  if (gap) return text === 'por que' ? 'por onde' : text === 'por quem' && question.role === 'route' ? 'através de quem' : text;
   const prep = question.role === 'directObject' ? objectPreposition(verb) : '';
   if (question.animate) return prep ? `${prep} quem` : 'quem';
   return prep ? `${prep} que` : 'o que';

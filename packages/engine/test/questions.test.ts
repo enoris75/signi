@@ -1272,7 +1272,7 @@ describe('P09-E28: ever — NEVER in a question', () => {
 describe('known bugs: an animate route question reads as another relation (A374)', () => {
   const through = () => sayAll(about(clause(np('CAT'), 'RUN'), 'route', undefined, true));
 
-  test.fails('es, pt and ja ask through whom', () => {
+  test('es, pt and ja ask through whom', () => {
     expect(through()).toMatchObject({
       es: '¿a través de quién corre el gato?', // now: "¿por quién corre el gato?"
       pt: 'através de quem o gato corre?', // now: "por quem o gato corre?"
@@ -1286,5 +1286,14 @@ describe('known bugs: an animate route question reads as another relation (A374)
       fr: 'à travers qui est-ce que le chat court ?', de: 'durch wen läuft der Kater?',
     });
     expect(sayAll(about(clause(np('CAT'), 'RUN'), 'route'))).toMatchObject({ es: '¿por dónde corre el gato?', ja: '猫はどこを走りますか？' });
+  });
+
+  test('the spelled path holds in the past; a route in a relation of its own keeps its words', () => {
+    expect(sayAll(about(clause(np('CAT'), 'RUN', { verbPhrase: { tense: 'past' } }), 'route', undefined, true))).toMatchObject({
+      es: '¿a través de quién corrió el gato?', pt: 'através de quem o gato correu?', ja: '猫は誰の中を通って走りましたか？',
+    });
+    expect(sayAll(about(clause(np('CAT'), 'RUN'), 'route', path('under'), true))).toMatchObject({
+      es: '¿debajo de quién corre el gato?', pt: 'debaixo de quem o gato corre?', ja: '猫は誰の下を走りますか？',
+    });
   });
 });

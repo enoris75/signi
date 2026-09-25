@@ -14,7 +14,7 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
-import { JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
+import { JA_ANIMATE_ROUTE_QUESTION, JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
 import { isPotentialPassive } from './isPotentialPassive.js';
 import { jaCausativeVerb } from './jaCausativeVerb.js';
 import { jaAgentParticle } from './jaAgentParticle.js';
@@ -121,8 +121,18 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // The complement slot a question asks about is merged in once, here, so the agent's particle sees
   // it too: an asked recipient is still the clause's に, and the agent takes によって beside it —
   // 本は女によって誰にあげられますか (A280), as 本は女によって男にあげられます does.
+  // A plain route asked about a person spells its path, 誰の中を通って, where 誰を would run a person
+  // as a road (A374); a relation of its own keeps its relational noun (誰の下を).
+  const animateRoute = asked?.role === 'route' && asked.animate && !asked.specifiers?.some((s) => s.kind === 'path');
   const complements = askedSlot && askedNoun
-    ? { ...phrase.complements, [askedSlot]: { phrase: askedNoun, ...(asked?.specifiers ? { specifiers: asked.specifiers } : {}) } }
+    ? {
+      ...phrase.complements,
+      [askedSlot]: {
+        phrase: askedNoun,
+        ...(asked?.specifiers ? { specifiers: asked.specifiers } : {}),
+        ...(animateRoute ? { link: JA_ANIMATE_ROUTE_QUESTION } : {}),
+      },
+    }
     : phrase.complements;
   const agent = phrase.agent ?? (asked?.role === 'agent' ? askedNoun : undefined);
   if (agent) segs.push(...slotSegs(agent, jaAgentParticle(complements)));

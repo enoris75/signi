@@ -21,4 +21,10 @@ describe('questionWord (pt)', () => {
     expect(questionWord({ role: 'manner', animate: false }, verb())).toBe('como');
     expect(questionWord({ role: 'cause', animate: false }, verb())).toBe('por que');
   });
+
+  // A374: the route's *por* over a person would read as *for whom*.
+  test('a route asks through a place with por, through a person with the spelled path', () => {
+    expect(questionWord({ role: 'route', animate: false }, verb())).toBe('por onde');
+    expect(questionWord({ role: 'route', animate: true }, verb())).toBe('através de quem');
+  });
 });
