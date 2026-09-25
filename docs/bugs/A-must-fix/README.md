@@ -1,6 +1,9 @@
 # A-must-fix — confirmed bugs
 
-**Six open.** **A371–A375**, filed on 2026-09-25 from the leads the P09-E44–E55 lanes reported, each
+**Seven open.** **A376**, filed on 2026-09-25 from a console line checked by hand, at 7a392187.
+[A376](A376-romance-bare-plural-subject-loses-its-article.md), a bare plural subject keeps no article in it / fr / es / pt (*gatti corrono*, *a gatti piace un topo*) where the generic takes the definite.
+
+**A371–A375**, filed on 2026-09-25 from the leads the P09-E44–E55 lanes reported, each
 re-probed at c8f098dc.
 [A371](A371-attributive-superlative-drops-its-set.md), an attributive superlative's set dropped in all seven ("the biggest house" for "the biggest house in the city").
 [A372](A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md), fr / es / pt write a possessor after an attributive standard, where it reads as the standard's.

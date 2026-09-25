@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds six files, A370–A375, and Part B is empty). One is pinned in `e2e/` instead, as a
+this writing Part A holds seven files, A370–A376, and Part B is empty). One is pinned in `e2e/` instead, as a
 Playwright `test.fail`: A375, a canvas key that only a browser reaches.** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
@@ -71,6 +71,12 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A373 | [A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md](A-must-fix/A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md) | Japanese | WIN with an object and an opponent doubles に (猫は犬にゲームに勝ちます) |
 | A374 | [A374-animate-route-question-reads-as-another-relation.md](A-must-fix/A374-animate-route-question-reads-as-another-relation.md) | Spanish, Portuguese, Japanese | An animate route question reads as *for whom* (¿por quién…?) or runs a person as a path (誰を走りますか) |
 | A375 | [A375-enter-in-the-owner-picker-points-to-the-subject.md](A-must-fix/A375-enter-in-the-owner-picker-points-to-the-subject.md) | frontend | ↵ in the owner ring's word picker builds a pronominal possessor on the subject ("his food") instead of the word typed |
+| A376 | [A376-romance-bare-plural-subject-loses-its-article.md](A-must-fix/A376-romance-bare-plural-subject-loses-its-article.md) | Italian, French, Spanish, Portuguese | A bare plural subject keeps no article (*gatti corrono*, *a gatti piace un topo*) where the generic takes the definite (*i gatti corrono*, *ai gatti piace*) |
+
+**One more open**, **A376**, filed on 2026-09-25 from a console line checked by hand (*a mosche a tempo
+piace una freccia*): the Romance bare plural subject, reported before by B76 and P09-E24 and not filed.
+Two passing tests pin the bare subject as right and move with the fix. The line's *a tempo* was not
+filed: it is the *feature* relation, rendered correctly, where the author meant `/domain`.
 
 **Five more open**, **A371–A375**, filed on 2026-09-25 from the leads the P09-E44–E55 lanes reported,
 each re-probed at c8f098dc: the attributive superlative's lost set (A371), the Romance possessor after
