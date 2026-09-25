@@ -63,7 +63,7 @@ const NOUN_FIELDS = new Set([
   "headStandard", "nounModifiers", "relative", "relativeGloss", "possessor", "dimensionGloss", "mannerGloss",
   "complementGloss", "possessorRole", "antecedent", "numeral", "contrastive",
 ]);
-const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
+const GROUP_FIELDS = new Set(["conjuncts", "conjunction", "correlative"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
 const RELATIVE_FIELDS = new Set(["headRole", "headSpecifiers", "subject", "verbPhrase", "directObject", "complements"]);
 const INFINITIVE_FIELDS = new Set(["verbPhrase", "directObject", "complements", "control", "infinitiveComplement"]);
@@ -292,6 +292,11 @@ class Builder {
         return conjunct;
       }));
       if (el.conjunction !== "and") set(sel, `${which}Conjunction`, el.conjunction);
+      // "both … and" (P09-E46): the canvas holds it on an "and" pair alone, as the engine reads it.
+      if (el.correlative) {
+        if (el.conjunction === "and" && el.conjuncts.length === 2) sel.correlatives = { ...sel.correlatives, [which]: true };
+        else this.unsupported.add("NounGroup.correlative off a pair");
+      }
       return;
     }
     this.phrase(c, sel, which, el, address);

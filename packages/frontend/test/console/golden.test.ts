@@ -79,6 +79,13 @@ const GOLDEN: Record<string, Golden> = {
     misuse: { line: '/verb eat /and dog', says: { code: 'noTarget', args: { command: 'and' } } },
   },
   or: { line: '/subj cat /or dog', prints: '/subj ( cat /or dog )', holds: { subjectConjunction: 'or' }, check: (s) => expect(sel(s).subjectConjuncts).toHaveLength(1) },
+  // "both … and" (P09-E46): an "and" pair spelled with its correlative, printed where its /and goes.
+  bothand: {
+    line: '/subj cat /bothand dog',
+    prints: '/subj ( cat /bothand dog )',
+    check: (s) => expect(sel(s).correlatives).toEqual({ subject: true }),
+    misuse: { line: '/verb eat /bothand dog', says: { code: 'noTarget', args: { command: 'bothand' } } },
+  },
   sg: { line: '/subj cat /pl /sg', holds: { subjectNumber: 'singular' }, prints: '/subj ( cat )', misuse: { line: '/verb eat /sg', says: { code: 'noTarget', args: { command: 'sg' } } } },
   pl: { line: '/subj cat /pl', prints: '/subj ( cat /pl )', holds: { subjectNumber: 'plural' } },
   masc: { line: '/subj cat /fem /masc', holds: { subjectGender: 'masc' }, prints: '/subj ( cat )' },
@@ -402,6 +409,20 @@ describe('every command', () => {
 
   it('has a golden entry for every command of the catalogue', () => {
     expect(Object.keys(GOLDEN).sort()).toEqual(COMMANDS.map((c) => c.name).sort());
+  });
+});
+
+// P09-E46: the correlative spells a pair alone. A third conjunct drops it, as the chip does, so the line
+// reads back plain — whichever of the two conjuncts carried it.
+describe('/bothand past a pair', () => {
+  it.each(['/subj cat /bothand dog /and man', '/subj cat /and dog /bothand man'])('reads “%s” back as a plain and', (line) => {
+    const state = ok(line);
+    expect(sel(state)).not.toHaveProperty('correlatives');
+    expect(print(state)).toBe('/subj ( cat /and dog /and man )');
+  });
+
+  it('is dropped by /or, which the pair no longer spells', () => {
+    expect(sel(ok('/subj cat /bothand dog /del and /or dog'))).not.toHaveProperty('correlatives');
   });
 });
 

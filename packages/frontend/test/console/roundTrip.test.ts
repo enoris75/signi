@@ -266,10 +266,19 @@ const OPS: Op[] = [
     let next = R.addConjunct(sel, which);
     const i = R.conjunctsOf(next, which).length - 1;
     if (rng() < 0.9) {
-      const w = wordFor(rng, 'subject', 'conjunct');
+      // A predicate's conjunct takes what the predicate takes (conjunctSpec, P13), not a pronoun.
+      const w = wordFor(rng, which === 'predicative' ? 'predicative' : 'subject', 'conjunct');
       next = R.updateConjunct(next, which, i, (c) => R.applyConceptSelect(c, 'subject', w.concept, w.opts));
     }
     if (rng() < 0.3) next = R.cycleNounConjunction(next, which);
+    return next;
+  }),
+  // A group's chip clicked once or more (P09-E46): on a pair, and → both … and → or → and.
+  onPeriod((sel, rng) => {
+    const which = pick(rng, COORDINABLE_NOUN_KEYS.filter((k) => R.conjunctsOf(sel, k).length));
+    if (!which) return undefined;
+    let next = R.cycleNounConjunction(sel, which);
+    while (rng() < 0.4) next = R.cycleNounConjunction(next, which);
     return next;
   }),
   // A mood, unless a clause-level link fixes it.

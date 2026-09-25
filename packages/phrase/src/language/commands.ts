@@ -92,7 +92,8 @@ export type Action =
   | { kind: "possessor" }
   /** What a predicate adjective is compared to: `/than [ dog ]` (P09-E12 D5). */
   | { kind: "standard" }
-  | { kind: "conjunct"; conjunction: "and" | "or" }
+  /** A conjunct; `correlative` spells an "and" pair "both … and": `/bothand` (P09-E46). */
+  | { kind: "conjunct"; conjunction: "and" | "or"; correlative?: true }
   | { kind: "relative" }
   /** A demonstrative pointing away from the rest: `/contrast` (P13). */
   | { kind: "contrast" }
@@ -474,6 +475,21 @@ export const COMMANDS: readonly CommandDef[] = [
     action: { kind: "conjunct", conjunction: "or" },
     satellites: /Conjunct$/,
     reducers: ["addConjunct", "updateConjunct", "setNounConjunction"],
+  },
+  // "both … and" (P09-E46): an "and" pair spelled with its correlative, `/subj ( cat /bothand dog )`. A
+  // third conjunct drops it, as the chip does. `/both` is the determiner (P09-E25).
+  {
+    name: "bothand",
+    aliases: ["both_and", "correlative"],
+    group: "role",
+    description: "coordinate, both … and",
+    descriptionKey: "conjunction.correlative.and",
+    purposeKey: "purpose.conjunct",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "conjunct", conjunction: "and", correlative: true },
+    satellites: /Conjunct$/,
+    reducers: ["addConjunct", "updateConjunct", "setNounConjunction", "setCorrelative"],
   },
 
   // ── Noun ──────────────────────────────────────────────────────────────────

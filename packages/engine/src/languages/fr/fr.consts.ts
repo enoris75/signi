@@ -146,6 +146,10 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   however: 'cependant',
 };
 
+// The correlative pair of an "and" group (P09-E26): the word before the first conjunct and the one in
+// place of the plain conjunction. The sentence and the conjunction chip's label (P09-E46) read this pair.
+export const CORRELATIVE_PAIR: readonly [string, string] = ['et', 'et'];
+
 /**
  * The subordinating conjunctions (see PhrasePlan.adverbialClause, P09-E4). Every one but "quand" ends
  * on "que", which elides before a vowel as it always does ("parce qu'il mange"). "Avant que" governs

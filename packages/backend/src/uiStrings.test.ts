@@ -129,7 +129,7 @@ describe('buildUiStrings', () => {
     expect(translateConjunction).toHaveBeenCalledTimes(byKind.conjunction.length);
     for (const [, d] of byKind.conjunction) {
       // The one function word cited on nothing: a conjunction agrees with neither side.
-      expect(translateConjunction).toHaveBeenCalledWith(d.conjunction);
+      expect(translateConjunction).toHaveBeenCalledWith(d.conjunction, d.correlative);
     }
     expect(translateSubordinator).toHaveBeenCalledTimes(byKind.subordinator.length);
     for (const [, d] of byKind.subordinator) {

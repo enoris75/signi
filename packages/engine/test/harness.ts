@@ -95,11 +95,11 @@ export function possessiveAll(
 /**
  * Render one coordinating conjunction into every language — the `translateConjunction` path behind
  * the conjunction menu. It is cited between two clauses and agrees with nothing, so unlike the
- * three above it takes no noun.
+ * three above it takes no noun. `correlative` cites the pair an "and" group may take instead (P09-E46).
  */
-export function conjunctionAll(conjunction: CoordConjunction): Record<LanguageCode, string> {
+export function conjunctionAll(conjunction: CoordConjunction, correlative?: boolean): Record<LanguageCode, string> {
   return Object.fromEntries(
-    translateConjunction(conjunction).map((t) => [t.language, t.text]),
+    translateConjunction(conjunction, correlative).map((t) => [t.language, t.text]),
   ) as Record<LanguageCode, string>;
 }
 

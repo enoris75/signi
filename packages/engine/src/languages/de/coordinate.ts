@@ -1,6 +1,7 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
 import { correlate } from '../../functions/correlate.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
+import { CORRELATIVE_PAIR } from './de.consts.js';
 
 /**
  * Render every conjunct of a noun slot and coordinate them the German way: commas between all
@@ -10,5 +11,5 @@ export function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhr
   const word = el.conjunction === 'or' ? 'oder' : 'und';
   const parts = el.conjuncts.map(render);
   // "sowohl der Kater als auch der Hund" (P09-E26).
-  return correlate(el, parts, ['sowohl', 'als auch']) ?? joinConjuncts(parts, ', ', () => ` ${word} `);
+  return correlate(el, parts, CORRELATIVE_PAIR) ?? joinConjuncts(parts, ', ', () => ` ${word} `);
 }

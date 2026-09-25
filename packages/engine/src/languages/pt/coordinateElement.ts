@@ -1,6 +1,7 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
 import { correlate } from '../../functions/correlate.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
+import { CORRELATIVE_PAIR } from './pt.consts.js';
 
 /**
  * Render every conjunct of a noun slot and coordinate them the Portuguese way: commas between
@@ -11,5 +12,5 @@ export function coordinateElement(el: ResolvedNounElement, render: (np: Resolved
   const word = el.conjunction === 'or' ? 'ou' : 'e';
   const parts = el.conjuncts.map(render);
   // "tanto o gato quanto o cão" (P09-E26).
-  return correlate(el, parts, ['tanto', 'quanto']) ?? joinConjuncts(parts, ', ', () => ` ${word} `);
+  return correlate(el, parts, CORRELATIVE_PAIR) ?? joinConjuncts(parts, ', ', () => ` ${word} `);
 }

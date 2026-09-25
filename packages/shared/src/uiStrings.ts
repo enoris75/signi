@@ -143,6 +143,11 @@ export interface UiStringPossessiveDef extends UiStringCommon {
 export interface UiStringConjunctionDef extends UiStringCommon {
   /** The conjunction this string names ("but" → ma / mais / aber / しかし). */
   conjunction: CoordConjunction;
+  /**
+   * The correlative pair an "and" group of two is spelled with instead (P09-E46), cited with an
+   * ellipsis where the first conjunct goes: "both … and", "sowohl … als auch", …も…も.
+   */
+  correlative?: true;
   plan?: never;
   word?: never;
   determiner?: never;
@@ -2720,6 +2725,9 @@ export const UI_STRINGS = defineUiStrings({
   // can also join two nouns are written differently there (ja 〜と, not そして). Keyed by
   // CoordConjunction beside the hints, so the menu writes t(`conjunction.value.${value}`).
   'conjunction.value.and': { conjunction: 'and', format: { capitalize: true }, fallback: 'And' },
+  // The conjunction chip's third state on a pair (P09-E46): the correlative, "both … and", each engine
+  // citing the pair its sentence writes.
+  'conjunction.correlative.and': { conjunction: 'and', correlative: true, format: { capitalize: true }, fallback: 'Both … and' },
   'conjunction.value.or': { conjunction: 'or', format: { capitalize: true }, fallback: 'Or' },
   'conjunction.value.but': { conjunction: 'but', format: { capitalize: true }, fallback: 'But' },
   'conjunction.value.that_is': { conjunction: 'that_is', format: { capitalize: true }, fallback: 'That is' },

@@ -162,6 +162,10 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   however: 'jedoch',
 };
 
+// The correlative pair of an "and" group (P09-E26): the word before the first conjunct and the one in
+// place of the plain conjunction. The sentence and the conjunction chip's label (P09-E46) read this pair.
+export const CORRELATIVE_PAIR: readonly [string, string] = ['sowohl', 'als auch'];
+
 /**
  * The subordinating conjunctions (see PhrasePlan.adverbialClause, P09-E4). Each introduces a
  * verb-final clause set off by a comma: "der Mann läuft, weil der Kater isst".

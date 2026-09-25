@@ -2,6 +2,8 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveDe } from '../../possessive.js';
 import { COORD_INVERTS, COORD_WORDS, PARENTHETICAL_CONNECTORS } from './de.consts.js';
+import { CORRELATIVE_PAIR } from './de.consts.js';
+import { citeCorrelative } from '../../functions/correlate.js';
 import { DE_DURATION_CITATION, DE_GENITIVE_TEMPORAL, DE_TEMPORAL } from './de.consts.js';
 import { deComparative } from './deComparative.js';
 import { deStem } from './deStem.js';
@@ -84,7 +86,9 @@ export const germanEngine: LanguageEngine = {
   renderSubordinator(sub: Subordinator): string {
     return sub === 'that' ? 'dass' : SUBORDINATORS[sub];
   },
-  renderConjunction(conjunction: CoordConjunction): string {
+  renderConjunction(conjunction: CoordConjunction, options?: { correlative?: boolean }): string {
+    // The correlative pair, its two places marked (P09-E46).
+    if (options?.correlative && conjunction === 'and') return citeCorrelative(CORRELATIVE_PAIR);
     return COORD_WORDS[conjunction];
   },
   // The preposition alone. German marks its spatial relations with case rather than with different

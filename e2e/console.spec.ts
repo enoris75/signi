@@ -135,6 +135,16 @@ test.describe('the phrase console', () => {
     await app.expectSentences({ en: 'the cat eats.' });
   });
 
+  // P09-E46: the correlative, typed; the chip reads it too.
+  test('spells a pair "both … and" with /bothand', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/subj cat /bothand dog /verb run');
+    await run(page);
+    await app.expectSentences({ en: 'both the cat and the dog run.', de: 'sowohl der Kater als auch der Hund laufen.', ja: '猫も犬も走ります。' });
+    await expect(page.getByTestId('source-strip')).toContainText('/subj ( cat /bothand dog ) /verb ( run )');
+    await expect(page.getByTestId('conjunction-chip')).toHaveText(/^both … and$/i);
+  });
+
   test('says there is with /there, and /del there takes it back', async ({ app, page }) => {
     await prompt(page).click();
     await page.keyboard.type('/there /subj ( cat /a ) /verb be /loc house');

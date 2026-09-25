@@ -178,8 +178,10 @@ test.describe('noun phrase', () => {
     await expect(period.getByTestId('phrase-canvas')).toHaveCount(1);
     await expect(period.getByTestId('group-box')).toHaveCount(3);
 
-    // "or" makes the verb agree with the nearest conjunct — singular again.
+    // "or" makes the verb agree with the nearest conjunct — singular again. On a pair the chip passes
+    // through "both … and" first (P09-E46).
     await page.getByRole('button', { name: /^and$/i }).click();
+    await page.getByRole('button', { name: /^both … and$/i }).click();
     await app.expectSentences({
       en: 'the cat or the dog runs.',
       it: 'il gatto o il cane corre.',
@@ -190,6 +192,33 @@ test.describe('noun phrase', () => {
       ja: '猫か犬は走ります。',
     });
     await expect(page.getByRole('button', { name: /^or$/i })).toBeVisible();
+  });
+
+  // P09-E46: on a pair the chip passes through the correlative, "both … and", before "or"; a third
+  // conjunct makes the group no pair, and the chip falls back to AND.
+  test('the chip spells a pair "both … and", and a third conjunct takes it back', async ({ app, page }) => {
+    await app.buildClause('CAT', 'RUN');
+    await app.satellite('subjectConjunct').click();
+    await page.getByTestId('typeahead-subject').last().fill('dog');
+    await page.locator('[data-testid="typeahead-option"][data-concept="DOG"]').click();
+
+    await page.getByRole('button', { name: /^and$/i }).click();
+    await app.expectSentences({
+      en: 'both the cat and the dog run.',
+      it: 'sia il gatto sia il cane corrono.',
+      fr: 'et le chat et le chien courent.',
+      de: 'sowohl der Kater als auch der Hund laufen.',
+      es: 'tanto el gato como el perro corren.',
+      pt: 'tanto o gato quanto o cão correm.',
+      ja: '猫も犬も走ります。',
+    });
+    await expect(page.getByTestId('conjunction-chip')).toHaveText(/^both … and$/i);
+
+    await app.satellite('subjectConjunct').click();
+    await page.getByTestId('typeahead-subject').last().fill('fox');
+    await page.locator('[data-testid="typeahead-option"][data-concept="FOX"]').click();
+    await app.expectSentences({ en: 'the cat, the dog and the fox run.' });
+    await expect(page.getByTestId('conjunction-chip').first()).toHaveText(/^and$/i);
   });
 
   test('a group grows from its last ring and drops a conjunct from its own ring', async ({

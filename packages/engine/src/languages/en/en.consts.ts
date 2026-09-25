@@ -178,6 +178,10 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   however: 'however',
 };
 
+// The correlative pair of an "and" group (P09-E26): the word before the first conjunct and the one in
+// place of the plain conjunction. The sentence and the conjunction chip's label (P09-E46) read this pair.
+export const CORRELATIVE_PAIR: readonly [string, string] = ['both', 'and'];
+
 /**
  * The subordinating conjunctions, as English words (see PhrasePlan.adverbialClause, P09-E4). The
  * clause they introduce follows the main one with no comma: "the man runs when the cat eats".

@@ -440,6 +440,49 @@ describe('removeConjunct', () => {
   });
 });
 
+// P09-E46: "both … and" spells a pair joined by "and", and nothing else — the chip passes through it on
+// a pair, and whatever makes the group no such pair drops it.
+describe('the correlative', () => {
+  const pair: PhraseSelection = { subject: CAT, subjectConjuncts: [{ subject: DOG }] };
+  const three: PhraseSelection = { subject: CAT, subjectConjuncts: [{ subject: DOG }, { subject: BOY }] };
+  const both = R.setCorrelative(pair, 'subject', true);
+  const states = (sel: PhraseSelection, n: number) => {
+    const out: string[] = [];
+    for (let i = 0; i < n; i++) {
+      sel = R.cycleNounConjunction(sel, 'subject');
+      out.push(sel.correlatives?.subject ? 'both' : R.conjunctionOf(sel, 'subject'));
+    }
+    return out;
+  };
+
+  it('cycles a pair and → both … and → or → and', () => {
+    expect(states(pair, 3)).toEqual(['both', 'or', 'and']);
+  });
+
+  it('cycles three conjuncts and ⇄ or, as before', () => {
+    expect(states(three, 2)).toEqual(['or', 'and']);
+  });
+
+  it('is set on an "and" pair only', () => {
+    expect(both.correlatives).toEqual({ subject: true });
+    expect(R.setCorrelative(three, 'subject', true)).toBe(three);
+    expect(R.setCorrelative({ ...pair, subjectConjunction: 'or' }, 'subject', true)).not.toHaveProperty('correlatives');
+    expect(R.setCorrelative(both, 'subject', false)).not.toHaveProperty('correlatives');
+  });
+
+  it('is dropped by "or", by a third conjunct and by a removal', () => {
+    expect(R.setNounConjunction(both, 'subject', 'or')).not.toHaveProperty('correlatives');
+    expect(R.setNounConjunction(both, 'subject', 'and').correlatives).toEqual({ subject: true });
+    expect(R.addConjunct(both, 'subject')).not.toHaveProperty('correlatives');
+    expect(R.removeConjunct(both, 'subject', 0)).not.toHaveProperty('correlatives');
+  });
+
+  it('goes with the head, and keeps another block’s', () => {
+    const two = R.setCorrelative({ ...both, directObject: BOOK, directObjectConjuncts: [{ subject: WOOD }] }, 'directObject', true);
+    expect(R.applyClear(two, 'subject').correlatives).toEqual({ directObject: true });
+  });
+});
+
 // P13: a verbless period's subject reads as an adjective's or an adverb's definition.
 describe('the subject’s reading', () => {
   it('cycles none → dimension → manner → place → direction → time → none', () => {

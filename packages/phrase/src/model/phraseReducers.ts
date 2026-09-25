@@ -150,6 +150,7 @@ function clearNoun(sel: PhraseSelection, which: NounKey): void {
   clearSlotSettings(sel, [which]);
   delete sel[CONJUNCTS_KEY(which)];
   delete sel[CONJUNCTION_KEY(which)];
+  dropCorrelative(sel, which);
   delete sel[STANDARD_KEY(which)];
   if (which === "route") delete sel.routeSpecifier;
   if (which === "locative") delete sel.locativeSpecifier;
@@ -413,7 +414,33 @@ export function setNounConjunction(
   which: NounKey,
   value: CoordConjunction,
 ): PhraseSelection {
-  return { ...prev, [CONJUNCTION_KEY(which)]: value };
+  const next: PhraseSelection = { ...prev, [CONJUNCTION_KEY(which)]: value };
+  // The correlative spells "and" alone (P09-E46).
+  return value === "and" ? next : setCorrelative(next, which, false);
+}
+
+/** Whether a noun block's group is a pair joined by "and", the one group a correlative spells. */
+function isAndPair(prev: PhraseSelection, which: NounKey): boolean {
+  return conjunctsOf(prev, which).length === 1 && conjunctionOf(prev, which) === "and";
+}
+
+// Spell a noun block's "and" pair with its correlative, "both … and" (P09-E46), or take that back. A
+// group that is not such a pair takes none, so turning it on there changes nothing.
+export function setCorrelative(prev: PhraseSelection, which: NounKey, on: boolean): PhraseSelection {
+  if (on && !isAndPair(prev, which)) return prev;
+  if (Boolean(prev.correlatives?.[which]) === on) return prev;
+  const next: PhraseSelection = { ...prev };
+  if (on) next.correlatives = { ...prev.correlatives, [which]: true };
+  else dropCorrelative(next, which);
+  return next;
+}
+
+// Drop a block's correlative flag in place, and the map with the last of them.
+function dropCorrelative(sel: PhraseSelection, which: NounKey): void {
+  if (!sel.correlatives?.[which]) return;
+  const { [which]: _dropped, ...rest } = sel.correlatives;
+  if (Object.keys(rest).length > 0) sel.correlatives = rest;
+  else delete sel.correlatives;
 }
 
 export function toggleNumber(
@@ -891,7 +918,8 @@ export function conjunctionOf(prev: PhraseSelection, which: NounKey): CoordConju
 
 // Append an empty conjunct to a noun block, coordinating it with the block's own head.
 export function addConjunct(prev: PhraseSelection, which: NounKey): PhraseSelection {
-  return { ...prev, [CONJUNCTS_KEY(which)]: [...conjunctsOf(prev, which), {}] };
+  // A third conjunct makes the group no pair, which a correlative spells alone (P09-E46).
+  return setCorrelative({ ...prev, [CONJUNCTS_KEY(which)]: [...conjunctsOf(prev, which), {}] }, which, false);
 }
 
 // Apply `updater` to the i-th conjunct of `which`. Lets the nested noun-phrase-mode builder
@@ -924,6 +952,8 @@ export function removeConjunct(
     delete next[CONJUNCTS_KEY(which)];
     delete next[CONJUNCTION_KEY(which)];
   }
+  // A removal ends the pair the correlative spelled (P09-E46), or leaves no group at all.
+  dropCorrelative(next, which);
   // The conjuncts after it move up one, and an address is positional: a possessor that pointed at the
   // removed conjunct, or at one after it, would now name another noun — its own, even. It is dropped,
   // as the workspace drops the relative links sourced there (see handleRemoveConjunct).
@@ -956,11 +986,13 @@ function dropPossessorRefs(sel: PhraseSelection, drop: (address: string) => bool
   return out;
 }
 
-// Cycle a block's conjunction through the ones that may join noun phrases (and / or).
+// Cycle a block's conjunction through the ones that may join noun phrases (and / or). A pair joined by
+// "and" passes through its correlative on the way (P09-E46): and → both … and → or → and.
 export function cycleNounConjunction(
   prev: PhraseSelection,
   which: NounKey,
 ): PhraseSelection {
+  if (isAndPair(prev, which) && !prev.correlatives?.[which]) return setCorrelative(prev, which, true);
   const current = conjunctionOf(prev, which);
   const i = NOUN_COORD_CONJUNCTIONS.indexOf(current);
   return setNounConjunction(prev, which, NOUN_COORD_CONJUNCTIONS[(i + 1) % NOUN_COORD_CONJUNCTIONS.length]);

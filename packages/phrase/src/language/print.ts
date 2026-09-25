@@ -470,7 +470,8 @@ class Printer {
     // Its conjuncts: a bare word where the phrase is only its word, else a bracket.
     const conjuncts = conjunctsOf(sel, which);
     if (conjuncts.length) {
-      const conjunction = (sel[CONJUNCTION_KEY(which)] as string | undefined) ?? "and";
+      // A pair spelled "both … and" says so where its "and" goes (P09-E46).
+      const conjunction = sel.correlatives?.[which] ? "bothand" : ((sel[CONJUNCTION_KEY(which)] as string | undefined) ?? "and");
       conjuncts.forEach((c, i) => {
         const cAddress = conjunctAddress(address, i);
         const key = `${wordKey(ref)}:and:${i}`;

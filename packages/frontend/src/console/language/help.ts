@@ -89,6 +89,7 @@ export const EXAMPLES: Record<string, string> = {
   than: "/subj ( cat ) /verb ( seem ) /pred ( big /more /than [ dog ] )",
   and: "/subj ( cat /and dog ) /verb ( run )",
   or: "/subj ( cat /or dog ) /verb ( run )",
+  bothand: "/subj ( cat /bothand dog ) /verb ( run )",
   // Noun
   sg: "/subj ( cat /sg )",
   pl: "/subj ( cat /pl )",

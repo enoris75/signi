@@ -603,8 +603,11 @@ export interface LanguageEngine {
    * agrees with nothing, but it is still a word no lexicon holds: each engine spells its own set
    * (see `translateConjunction`), and `then` is an adverb rather than a conjunction in most of
    * them, which is why it comes back as two words ("e poi", "und dann").
+   *
+   * With `correlative` on `and`, the correlative pair instead (P09-E46), its places marked by an
+   * ellipsis: "both … and", "sowohl … als auch", …も…も — the same words the sentence writes.
    */
-  renderConjunction?(conjunction: CoordConjunction): string;
+  renderConjunction?(conjunction: CoordConjunction, options?: { correlative?: boolean }): string;
   /**
    * The word that introduces a subordinate clause, alone, for the builder's subordinate-clause menu
    * (P09-E12 D9): `that`, the complementizer of an object clause, or one of the subordinating

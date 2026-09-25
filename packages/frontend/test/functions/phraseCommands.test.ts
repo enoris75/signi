@@ -63,6 +63,14 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
 ];
 
 describe('phraseCommands', () => {
+  // P09-E46: PERIOD's subject is a pair, so the chip's cycle hands up its correlative first.
+  it('handleCycleConjunction spells a pair "both … and" before "or"', () => {
+    const onPhraseUpdate = vi.fn();
+    phraseCommands(onPhraseUpdate).handleCycleConjunction('subject');
+    const updater = onPhraseUpdate.mock.calls[0][0] as (prev: PhraseSelection) => PhraseSelection;
+    expect(updater(PERIOD).correlatives).toEqual({ subject: true });
+  });
+
   it('binds every command it offers', () => {
     expect(Object.keys(phraseCommands(() => {})).sort()).toEqual(CASES.map(([name]) => name).sort());
   });
