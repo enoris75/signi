@@ -1,15 +1,11 @@
 import type { ConceptSeed } from './types.js';
-import type { PhrasePlan } from '@signi/shared';
 
 // A grammatical person's definition: *the* nth person, a definite noun phrase. These name a fixed,
 // identifiable category of the grammar rather than one of several, so they read with the definite
-// article. personGloss('FIRST') -> en "the first person", it "la prima persona", de "die erste
-// Person", ja "第一の人称". PERSON_GRAMMAR is the grammar sense of the word (ja 人称, not 人), and
-// FIRST / SECOND / THIRD are the seeded ordinals the chooser's person row already names itself
-// with — so the tooltip and the option under it are the same two words.
-const personGloss = (ordinal: string): PhrasePlan => ({
-  subject: { concept: 'PERSON_GRAMMAR', definiteness: 'definite', adjectives: [ordinal] },
-});
+// article. `/subj ( PERSON_GRAMMAR /adj FIRST )` → en "the first person", it "la prima persona", de
+// "die erste Person", ja "第一の人称". PERSON_GRAMMAR is the grammar sense of the word (ja 人称, not
+// 人), and FIRST / SECOND / THIRD are the seeded ordinals the chooser's person row already names
+// itself with — so the tooltip and the option under it are the same two words.
 
 export const pronouns: ConceptSeed[] = [
   // ── PRONOUNS ────────────────────────────────────────────────────
@@ -21,7 +17,7 @@ export const pronouns: ConceptSeed[] = [
     id: 'FIRST_PERSON',
     role: 'pronoun',
     description: '1st Person',
-    definition: personGloss('FIRST'),
+    definition: '/subj ( PERSON_GRAMMAR /adj FIRST )',
     emoji: '🧍',
     forms: {
       // disjunctive = tonic/oblique form used after a preposition ("because of me/us").
@@ -50,7 +46,7 @@ export const pronouns: ConceptSeed[] = [
     id: 'SECOND_PERSON',
     role: 'pronoun',
     description: '2nd Person',
-    definition: personGloss('SECOND'),
+    definition: '/subj ( PERSON_GRAMMAR /adj SECOND )',
     emoji: '👉',
     forms: {
       en: { base: 'you',      person: '2', number: 'singular', plural: 'you',  disjunctive: 'you', disjunctive_plural: 'you', object: 'you', object_plural: 'you', reflexive: 'yourself', reflexive_plural: 'yourselves' },
@@ -66,7 +62,7 @@ export const pronouns: ConceptSeed[] = [
     id: 'THIRD_PERSON',
     role: 'pronoun',
     description: '3rd Person',
-    definition: personGloss('THIRD'),
+    definition: '/subj ( PERSON_GRAMMAR /adj THIRD )',
     emoji: '👤',
     forms: {
       // base = default masc singular; singular_fem/singular_neut and plural stored as extra forms
@@ -128,7 +124,7 @@ export const pronouns: ConceptSeed[] = [
     description: 'an unknown thing',
     // A genus+differentia gloss on THING, the only shape a pronoun of this kind takes: "an unknown
     // thing". The negative half of the word is not glossed separately — it is the same concept.
-    definition: { subject: { concept: 'THING', definiteness: 'indefinite', adjectives: ['UNKNOWN'] } },
+    definition: '/subj ( THING /adj UNKNOWN /a )',
     synonym: 'something',
     emoji: '❔',
     forms: {
@@ -159,7 +155,7 @@ export const pronouns: ConceptSeed[] = [
     role: 'pronoun',
     slot: 'indefinite',
     description: 'all things; the whole of what there is',
-    definition: { subject: { concept: 'THING', definiteness: 'all', number: 'plural' } },
+    definition: '/subj ( THING /pl /all )',
     synonym: 'everything',
     emoji: '🌐',
     forms: {
@@ -191,7 +187,7 @@ export const pronouns: ConceptSeed[] = [
     human: true,
     description: 'an unknown person',
     // SOMETHING's gloss on PERSON: "an unknown person".
-    definition: { subject: { concept: 'PERSON', definiteness: 'indefinite', adjectives: ['UNKNOWN'] } },
+    definition: '/subj ( PERSON /adj UNKNOWN /a )',
     synonym: 'somebody',
     emoji: '🕵️',
     forms: {

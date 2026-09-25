@@ -4,7 +4,12 @@ import type { PhrasePlan } from '@signi/shared';
 import { compileDefinition, definitionVocabulary, planToWorkspace, printDefinition, workspaceToPlans } from '@signi/phrase';
 import { concepts } from './concepts/index.js';
 import { compileSeedDefinitions, seedConcept } from './concepts/definitionText.js';
+import { adjectives } from './concepts/adjectives.js';
+import { adverbs } from './concepts/adverbs.js';
+import { interjections } from './concepts/interjections.js';
 import { nouns } from './concepts/nouns.js';
+import { pronouns } from './concepts/pronouns.js';
+import { verbs } from './concepts/verbs/index.js';
 import { listConcepts } from './conceptList.js';
 import { notingLookup } from './lexicon.js';
 // Seeds the real corpus into this file's in-memory database (SIGNI_DB_PATH, see vitest.config.ts).
@@ -54,7 +59,7 @@ describe('definitions in the phrase language (P13)', () => {
     expect(Object.fromEntries(unplanned)).toEqual({});
   });
 
-  test('most definitions are said already', () => {
+  test('every definition is said', () => {
     // A floor, not a count: every definition since phase 4, and it catches the inverse losing ground.
     expect(said.length).toBeGreaterThanOrEqual(573);
   });
@@ -70,11 +75,11 @@ describe('a seed defined in text (P13)', () => {
     for (const seed of concepts) expect(pick(seedConcept(seed)), seed.id).toEqual(served.get(seed.id));
   });
 
-  // Every seed but CAT as it is, and CAT defined by `text`.
-  const withCat = (text: string) => {
-    const cat = nouns.find((c) => c.id === 'CAT')!;
-    return compileSeedDefinitions([...concepts.filter((c) => c.id !== 'CAT'), { ...cat, definition: text }]);
-  };
+  // Every seed as it is written, and CAT defined by `text`.
+  const withCat = (text: string) =>
+    compileSeedDefinitions(
+      [...pronouns, ...nouns, ...verbs, ...adjectives, ...adverbs, ...interjections].map((c) => (c.id === 'CAT' ? { ...c, definition: text } : c)),
+    );
 
   test('renders as the plan its text says', () => {
     const plan: PhrasePlan = { subject: { concept: 'MAMMAL', definiteness: 'indefinite', adjectives: ['SMALL'] } };

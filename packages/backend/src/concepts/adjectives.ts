@@ -1,22 +1,13 @@
 import type { ConceptSeed } from './types.js';
-import type { Degree, PhrasePlan } from '@signi/shared';
-import { namedAgentGloss, relativeGloss, stateGloss, subjectGapGloss } from './relativeGloss.js';
 
 // An adjective-definition gloss: a dimension noun carrying a degree adjective, rendered verblessly as
-// a prepositional fragment whose adposition the noun's `dimensionRelation` selects — dimGloss('SIZE',
-// 'GREAT') → en "of great size", it "di grande dimensione", de "von großer Größe", ja "大きさが大きい";
-// dimGloss('TEMPERATURE', 'HIGH') → "at high temperature" (the `measure` relation). See
-// NounPhrase.dimensionGloss and the engines' verbless branch. A `comparison` puts the degree
-// adjective itself one step up — ELDER is "of greater age", OLD's own gloss compared (B69).
-const dimGloss = (dimension: string, degree: string, comparison?: Degree): PhrasePlan => ({
-  subject: {
-    concept: dimension,
-    definiteness: 'bare',
-    adjectives: [degree],
-    ...(comparison ? { adjectiveDegrees: [comparison] } : {}),
-    dimensionGloss: true,
-  },
-});
+// a prepositional fragment whose adposition the noun's `dimensionRelation` selects — `/subj ( SIZE
+// /adj GREAT /zero /gloss dimension )` → en "of great size", it "di grande dimensione", de "von großer
+// Größe", ja "大きさが大きい"; TEMPERATURE with HIGH → "at high temperature" (the `measure` relation).
+// See NounPhrase.dimensionGloss and the engines' verbless branch. A degree puts the degree adjective
+// itself one step up — ELDER is "of greater age", `/adj ( GREAT /more )`, OLD's own gloss compared
+// (B69). The rest say what the thing is or does as a relative clause said alone, its head unspoken
+// (`/headless`): OKAY is "that has no problems".
 
 export const adjectives: ConceptSeed[] = [
   // ── ADJECTIVES ───────────────────────────────────────────────────
@@ -24,7 +15,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'BIG',
     role: 'adjective',
     description: 'large in size',
-    definition: dimGloss('SIZE', 'GREAT'),
+    definition: '/subj ( SIZE /adj GREAT /zero /gloss dimension )',
     emoji: '🔭',
     forms: {
       en: { base: 'big' },
@@ -42,7 +33,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'SMALL',
     role: 'adjective',
     description: 'little in size',
-    definition: dimGloss('SIZE', 'LOW'),
+    definition: '/subj ( SIZE /adj LOW /zero /gloss dimension )',
     emoji: '🔬',
     forms: {
       en: { base: 'small' },
@@ -61,7 +52,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'HIGH',
     role: 'adjective',
     description: 'great in vertical extent or degree',
-    definition: dimGloss('HEIGHT', 'GREAT'),
+    definition: '/subj ( HEIGHT /adj GREAT /zero /gloss dimension )',
     emoji: '⛰️',
     forms: {
       en: { base: 'high' },
@@ -81,7 +72,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'LONG',
     role: 'adjective',
     description: 'great in length',
-    definition: dimGloss('LENGTH', 'GREAT'),
+    definition: '/subj ( LENGTH /adj GREAT /zero /gloss dimension )',
     emoji: '🐍',
     forms: {
       en: { base: 'long' },
@@ -140,7 +131,7 @@ export const adjectives: ConceptSeed[] = [
     // The distance scale's two poles, as TEMPERATURE's are COLD and HOT: "at small distance" /
     // "at great distance". SMALL, not LOW, is the low pole here — "at low distance", it "a distanza
     // bassa" say a height — and it is not circular, as it was for SMALL's own gloss (A28).
-    definition: dimGloss('DISTANCE', 'SMALL'),
+    definition: '/subj ( DISTANCE /adj SMALL /zero /gloss dimension )',
     emoji: '📍',
     forms: {
       en: { base: 'near' },
@@ -161,7 +152,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // distance is a location, and Iberian Romance locates with estar (A47)
     description: 'a long distance away',
-    definition: dimGloss('DISTANCE', 'GREAT'),
+    definition: '/subj ( DISTANCE /adj GREAT /zero /gloss dimension )',
     emoji: '🛰️',
     forms: {
       en: { base: 'far' },
@@ -177,7 +168,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'GOOD',
     role: 'adjective',
     description: 'of high quality or virtue',
-    definition: dimGloss('QUALITY', 'HIGH'),
+    definition: '/subj ( QUALITY /adj HIGH /zero /gloss dimension )',
     emoji: '✨',
     // An evaluative predicate: a clause it is said of is judged, not asserted, and the four Romance
     // languages put it in the subjunctive — "è buono che si agisca" (`content_clause_mood`, P09-E4).
@@ -196,7 +187,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'BAD',
     role: 'adjective',
     description: 'of poor quality or harmful',
-    definition: dimGloss('QUALITY', 'LOW'),
+    definition: '/subj ( QUALITY /adj LOW /zero /gloss dimension )',
     emoji: '💀',
     forms: {
       en: { base: 'bad' },
@@ -213,7 +204,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling or expressing joy',
-    definition: dimGloss('JOY', 'HIGH'),
+    definition: '/subj ( JOY /adj HIGH /zero /gloss dimension )',
     emoji: '😊',
     forms: {
       en: { base: 'happy' },
@@ -246,7 +237,10 @@ export const adjectives: ConceptSeed[] = [
     // "That does not have problems" (localization A33), DARK's negated HAVE: fine without saying
     // *good* or *well*, which OKAY is weaker than, and without BE_FARING, its own copula. BEING is the
     // class it is said of (de *das*, of *Wesen*).
-    definition: subjectGapGloss('BEING', 'HAVE', { object: 'PROBLEM', number: 'plural', negative: true }),
+    definition: `
+      /subj ( BEING /a /rel #2.subj /headless )
+      /subj ( BEING ) /verb ( HAVE /not ) /obj ( PROBLEM /pl /zero )
+    `,
     synonym: 'all right',
     emoji: '👌',
     forms: {
@@ -264,7 +258,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling or expressing sorrow',
-    definition: dimGloss('SORROW', 'HIGH'),
+    definition: '/subj ( SORROW /adj HIGH /zero /gloss dimension )',
     emoji: '😢',
     forms: {
       en: { base: 'sad' },
@@ -280,7 +274,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'OLD',
     role: 'adjective',
     description: 'having existed for a long time',
-    definition: dimGloss('AGE', 'GREAT'),
+    definition: '/subj ( AGE /adj GREAT /zero /gloss dimension )',
     emoji: '🧓',
     forms: {
       en: { base: 'old' },
@@ -296,7 +290,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'YOUNG',
     role: 'adjective',
     description: 'having lived or existed for a short time',
-    definition: dimGloss('AGE', 'LOW'),
+    definition: '/subj ( AGE /adj LOW /zero /gloss dimension )',
     emoji: '🧒',
     forms: {
       en: { base: 'young' },
@@ -321,7 +315,7 @@ export const adjectives: ConceptSeed[] = [
     // OLD's own "of great age" one degree up (localization B69). What the word means is older *than
     // another relative*, and the engine has no standard of comparison to name; the dimension is what
     // it can say, and it is what tells ELDER from YOUNGER.
-    definition: dimGloss('AGE', 'GREAT', 'more'),
+    definition: '/subj ( AGE /adj ( GREAT /more ) /zero /gloss dimension )',
     emoji: '👴',
     forms: {
       en: { base: 'older' },
@@ -337,7 +331,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'YOUNGER',
     role: 'adjective',
     description: 'younger, of two or more relatives',
-    definition: dimGloss('AGE', 'LOW', 'more'),
+    definition: '/subj ( AGE /adj ( LOW /more ) /zero /gloss dimension )',
     emoji: '🧒',
     forms: {
       en: { base: 'younger' },
@@ -357,7 +351,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'fully grown',
     // What OLD's "of great age" is not: a being that has finished growing, however long ago.
-    definition: subjectGapGloss('BEING', 'GROW', { modifier: 'NO_LONGER' }),
+    definition: `
+      /subj ( BEING /a /rel #2.subj /headless )
+      /subj ( BEING ) /verb ( GROW /adv NO_LONGER )
+    `,
     emoji: '🧑',
     forms: {
       en: { base: 'adult' },
@@ -374,7 +371,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'of the sex that produces sperm; masculine',
     // The creature adjectives say what they say of a BEING, a creature of either kind: de "das …".
-    definition: subjectGapGloss('BEING', 'HAVE', { object: 'TESTICLE', number: 'plural' }),
+    definition: `
+      /subj ( BEING /a /rel #2.subj /headless )
+      /subj ( BEING ) /verb ( HAVE ) /obj ( TESTICLE /pl /zero )
+    `,
     emoji: '♂️',
     forms: {
       en: { base: 'male' },
@@ -390,7 +390,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'FEMALE',
     role: 'adjective',
     description: 'of the sex that bears offspring; feminine',
-    definition: subjectGapGloss('BEING', 'HAVE', { object: 'OVARY', number: 'plural' }),
+    definition: `
+      /subj ( BEING /a /rel #2.subj /headless )
+      /subj ( BEING ) /verb ( HAVE ) /obj ( OVARY /pl /zero )
+    `,
     emoji: '♀️',
     forms: {
       en: { base: 'female' },
@@ -410,12 +413,10 @@ export const adjectives: ConceptSeed[] = [
     description: 'having the testicles removed',
     // A source gap, in the passive: "from which the testicles have been removed". "That has no
     // testicles" would be FEMALE's too.
-    definition: relativeGloss('BEING', {
-      headRole: 'source',
-      subject: { concept: 'GENERIC_PERSON' },
-      directObject: { concept: 'TESTICLE', definiteness: 'definite', number: 'plural' },
-      verbPhrase: { verb: 'REMOVE', aspect: 'resultative', voice: 'passive' },
-    }),
+    definition: `
+      /subj ( BEING /a /rel #2.src /headless )
+      /subj ( one ) /verb ( REMOVE /result /passive ) /obj ( TESTICLE /pl ) /src ( BEING )
+    `,
     emoji: '✂️',
     forms: {
       en: { base: 'castrated' },
@@ -434,7 +435,10 @@ export const adjectives: ConceptSeed[] = [
     // this one before the noun — "one more" — everywhere it composes (A204).
     description: 'recently made or introduced, or one more of the same kind',
     // What YOUNG's "of low age" cannot say of a thing: when it was made.
-    definition: stateGloss('OBJECT_THING', 'MAKE', { voice: 'passive', modifier: 'RECENTLY' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( MAKE /adv RECENTLY /result /passive ) /obj ( OBJECT_THING )
+    `,
     emoji: '🆕',
     forms: {
       en: { base: 'new' },
@@ -465,7 +469,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'STRONG',
     role: 'adjective',
     description: 'having great physical power or force',
-    definition: dimGloss('STRENGTH', 'GREAT'),
+    definition: '/subj ( STRENGTH /adj GREAT /zero /gloss dimension )',
     emoji: '💪',
     forms: {
       en: { base: 'strong' },
@@ -481,7 +485,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'WEAK',
     role: 'adjective',
     description: 'lacking physical power or force',
-    definition: dimGloss('STRENGTH', 'LOW'),
+    definition: '/subj ( STRENGTH /adj LOW /zero /gloss dimension )',
     emoji: '🥀',
     forms: {
       en: { base: 'weak' },
@@ -498,7 +502,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling a need to rest or sleep',
-    definition: dimGloss('REST', 'LOW'),
+    definition: '/subj ( REST /adj LOW /zero /gloss dimension )',
     emoji: '😴',
     forms: {
       en: { base: 'tired' },
@@ -515,7 +519,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling a need to eat',
-    definition: subjectGapGloss('BEING', 'EAT', { modals: ['WILL'], aspect: 'neutral' }),
+    definition: `
+      /subj ( BEING /a /rel #2.subj /headless )
+      /subj ( BEING ) /verb ( EAT /modal WILL )
+    `,
     emoji: '🤤',
     forms: {
       en: { base: 'hungry' },
@@ -532,7 +539,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'at a low temperature',
-    definition: dimGloss('TEMPERATURE', 'LOW'),
+    definition: '/subj ( TEMPERATURE /adj LOW /zero /gloss dimension )',
     emoji: '🥶',
     forms: {
       en: { base: 'cold' },
@@ -553,7 +560,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'COLD_CLIMATE',
     role: 'adjective',
     description: 'cold, of weather or a climate',
-    definition: dimGloss('TEMPERATURE', 'LOW'),
+    definition: '/subj ( TEMPERATURE /adj LOW /zero /gloss dimension )',
     emoji: '❄️',
     synonym: 'climate',
     forms: {
@@ -577,7 +584,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'kindly and affectionate in feeling',
     // Not on AFFECTION, which is "a warm feeling": the two would define each other.
-    definition: dimGloss('KINDNESS', 'GREAT'),
+    definition: '/subj ( KINDNESS /adj GREAT /zero /gloss dimension )',
     emoji: '🤗',
     synonym: 'kindly',
     forms: {
@@ -595,7 +602,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'at a high temperature',
-    definition: dimGloss('TEMPERATURE', 'HIGH'),
+    definition: '/subj ( TEMPERATURE /adj HIGH /zero /gloss dimension )',
     emoji: '🔥',
     forms: {
       en: { base: 'hot' },
@@ -614,7 +621,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'HOT_CLIMATE',
     role: 'adjective',
     description: 'hot, of weather or a climate',
-    definition: dimGloss('TEMPERATURE', 'HIGH'),
+    definition: '/subj ( TEMPERATURE /adj HIGH /zero /gloss dimension )',
     emoji: '☀️',
     synonym: 'climate',
     forms: {
@@ -631,7 +638,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'INTERESTING',
     role: 'adjective',
     description: 'arousing curiosity or attention',
-    definition: dimGloss('ATTENTION', 'HIGH'),
+    definition: '/subj ( ATTENTION /adj HIGH /zero /gloss dimension )',
     emoji: '🤔',
     forms: {
       en: { base: 'interesting' },
@@ -651,7 +658,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'IMPORTANT',
     role: 'adjective',
     description: 'of great significance or value',
-    definition: dimGloss('VALUE', 'HIGH'),
+    definition: '/subj ( VALUE /adj HIGH /zero /gloss dimension )',
     emoji: '🔑',
     forms: {
       en: { base: 'important' },
@@ -667,7 +674,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'QUICK',
     role: 'adjective',
     description: 'moving or capable of moving fast',
-    definition: dimGloss('SPEED', 'HIGH'),
+    definition: '/subj ( SPEED /adj HIGH /zero /gloss dimension )',
     emoji: '⚡',
     forms: {
       en: { base: 'quick' },
@@ -736,7 +743,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DARK',
     role: 'adjective',
     description: 'with little or no light',
-    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'LIGHT', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( HAVE /not ) /obj ( LIGHT /zero )
+    `,
     emoji: '🌑',
     forms: {
       en: { base: 'dark' },
@@ -755,7 +765,10 @@ export const adjectives: ConceptSeed[] = [
     // "That lives in nature" would say "in the nature" in English, and "that does not live with
     // people" hits French's unelided "ne habite"; the description's own "not tamed" renders in all
     // seven.
-    definition: stateGloss('BEING', 'TAME', { voice: 'passive', negative: true }),
+    definition: `
+      /subj ( BEING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( TAME /result /passive /not ) /obj ( BEING )
+    `,
     emoji: '🌿',
     forms: {
       en: { base: 'wild' },
@@ -774,9 +787,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DOMESTIC',
     role: 'adjective',
     description: 'kept by or living with people',
-    definition: subjectGapGloss('BEING', 'LIVE', {
-      complements: { comitative: { phrase: { concept: 'PERSON', definiteness: 'bare', number: 'plural' } } },
-    }),
+    definition: `
+      /subj ( BEING /a /rel #2.subj /headless )
+      /subj ( BEING ) /verb ( LIVE ) /with ( PERSON /pl /zero )
+    `,
     emoji: '🏠',
     forms: {
       en: { base: 'domestic' },
@@ -808,7 +822,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'LAZY',
     role: 'adjective',
     description: 'unwilling to work or use energy',
-    definition: dimGloss('CARE', 'LOW'),
+    definition: '/subj ( CARE /adj LOW /zero /gloss dimension )',
     emoji: '🦥',
     forms: {
       en: { base: 'lazy' },
@@ -824,7 +838,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'CAREFUL',
     role: 'adjective',
     description: 'taking care to avoid harm or mistakes',
-    definition: dimGloss('CARE', 'HIGH'),
+    definition: '/subj ( CARE /adj HIGH /zero /gloss dimension )',
     emoji: '⚠️',
     forms: {
       en: { base: 'careful' },
@@ -872,7 +886,7 @@ export const adjectives: ConceptSeed[] = [
     // It governs the infinitive a predicate says it of — "able to act" (P13).
     clauseObject: 'infinitive',
     description: 'having the power or the skill to do something',
-    definition: dimGloss('ABILITY', 'HIGH'),
+    definition: '/subj ( ABILITY /adj HIGH /zero /gloss dimension )',
     emoji: '🦾',
     forms: {
       en: { base: 'able' },
@@ -892,7 +906,7 @@ export const adjectives: ConceptSeed[] = [
     // Bound by a duty that holds for now, not a trait: es/pt say it with estar ("estar obligado a").
     transient: true,
     description: 'bound to do something by a duty or a rule',
-    definition: dimGloss('DUTY', 'HIGH'),
+    definition: '/subj ( DUTY /adj HIGH /zero /gloss dimension )',
     emoji: '📜',
     forms: {
       en: { base: 'obliged' },
@@ -937,7 +951,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'WHOLE',
     role: 'adjective',
     description: 'complete, with no part missing',
-    definition: stateGloss('OBJECT_THING', 'DIVIDE', { voice: 'passive', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( DIVIDE /result /passive /not ) /obj ( OBJECT_THING )
+    `,
     emoji: '⭕',
     forms: {
       en: { base: 'whole' },
@@ -954,12 +971,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'shaped like a circle or ball',
     // The genitive relative HYPERNYM uses: "whose shape is a circle", de "dessen Form ein Kreis ist".
-    definition: relativeGloss('OBJECT_THING', {
-      headRole: 'possessor',
-      subject: { concept: 'SHAPE', definiteness: 'definite' },
-      verbPhrase: { verb: 'BE' },
-      complements: { predicative: { phrase: { concept: 'CIRCLE', definiteness: 'indefinite' } } },
-    }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj.poss /headless )
+      /subj ( SHAPE /poss [ OBJECT_THING ] ) /verb ( BE ) /pred ( CIRCLE )
+    `,
     emoji: '⭕',
     forms: {
       en: { base: 'round' },
@@ -981,7 +996,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'having an edge that cuts easily',
-    definition: subjectGapGloss('OBJECT_THING', 'CUT', { modifier: 'WELL' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( CUT /adv WELL )
+    `,
     emoji: '🔪',
     forms: {
       en: { base: 'sharp' },
@@ -999,7 +1017,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'LOUD',
     role: 'adjective',
     description: 'producing much sound',
-    definition: dimGloss('SOUND', 'GREAT'),
+    definition: '/subj ( SOUND /adj GREAT /zero /gloss dimension )',
     emoji: '📣',
     forms: {
       en: { base: 'loud' },
@@ -1018,7 +1036,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'set down in words',
-    definition: stateGloss('OBJECT_THING', 'WRITE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( WRITE /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '✍️',
     forms: {
       en: { base: 'written' },
@@ -1035,7 +1056,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'brought in from storage and ready to use',
-    definition: stateGloss('OBJECT_THING', 'LOAD'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( LOAD /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '📂',
     forms: {
       en: { base: 'loaded' },
@@ -1053,7 +1077,10 @@ export const adjectives: ConceptSeed[] = [
     transient: true, // a state a thing is put into, not a property it has → es/pt estar (A47)
     description: 'arranged in order',
     // ARRANGE, "to put things in an order", and not TIDY_UP: its gloss is "to cause objects to be tidy".
-    definition: stateGloss('OBJECT_THING', 'ARRANGE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( ARRANGE /result ) /obj ( OBJECT_THING )
+    `,
     synonym: 'in order',
     emoji: '🧹',
     forms: {
@@ -1072,7 +1099,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'stored so it can be retrieved later',
-    definition: stateGloss('OBJECT_THING', 'SAVE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( SAVE /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '💾',
     forms: {
       en: { base: 'saved' },
@@ -1091,7 +1121,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'put in with the others',
-    definition: stateGloss('OBJECT_THING', 'ADD'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( ADD /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '➕',
     forms: {
       en: { base: 'added' },
@@ -1113,7 +1146,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'taken away from the others',
-    definition: stateGloss('OBJECT_THING', 'REMOVE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( REMOVE /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '➖',
     forms: {
       en: { base: 'removed' },
@@ -1133,7 +1169,10 @@ export const adjectives: ConceptSeed[] = [
     description: 'that did not succeed',
     // The resultative, not the past: Italian and French would say the simple past, "che non
     // funzionò", "qui ne fonctionna pas", which a status line never does.
-    definition: subjectGapGloss('OBJECT_THING', 'WORK', { aspect: 'resultative', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( WORK /result /not )
+    `,
     emoji: '❌',
     forms: {
       en: { base: 'failed' },
@@ -1151,7 +1190,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'duplicated, as to the clipboard',
-    definition: stateGloss('OBJECT_THING', 'COPY'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( COPY /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '✅',
     forms: {
       en: { base: 'copied' },
@@ -1170,7 +1212,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // a state a thing is put into and taken out of, like COPIED (A47)
     description: 'joined to another by a link',
-    definition: stateGloss('OBJECT_THING', 'LINK'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( LINK /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '🔗',
     forms: {
       en: { base: 'linked' },
@@ -1190,7 +1235,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'kept at the top of a list',
-    definition: stateGloss('OBJECT_THING', 'PIN'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( PIN /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '📌',
     forms: {
       en: { base: 'pinned' },
@@ -1211,7 +1259,10 @@ export const adjectives: ConceptSeed[] = [
     description: 'no longer kept at the top of a list',
     // The state UNPIN leaves, so it says UNPIN's own verbs: it "che si è sbloccato", de "den man
     // gelöst hat" — the ones the comment above keeps out of the adjective.
-    definition: stateGloss('OBJECT_THING', 'UNPIN'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( UNPIN /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '📍',
     forms: {
       en: { base: 'unpinned' },
@@ -1251,7 +1302,10 @@ export const adjectives: ConceptSeed[] = [
     transient: true,
     description: 'marked with a number',
     // NUMBER_LABEL, not NUMBER: fr "un nombre", de "eine Zahl", ja 数 are a count, not a row's number.
-    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'NUMBER_LABEL', definiteness: 'indefinite' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( HAVE ) /obj ( NUMBER_LABEL /a )
+    `,
     emoji: '🔢',
     forms: {
       en: { base: 'numbered' },
@@ -1272,7 +1326,10 @@ export const adjectives: ConceptSeed[] = [
     transient: true,
     synonym: 'running',
     description: 'in operation, as a running program or machine',
-    definition: subjectGapGloss('OBJECT_THING', 'WORK', { aspect: 'progressive' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( WORK /prog )
+    `,
     emoji: '🟢',
     forms: {
       en: { base: 'active' },
@@ -1292,7 +1349,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'having no name or title',
-    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'TITLE', definiteness: 'indefinite', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( HAVE /not ) /obj ( TITLE /a )
+    `,
     emoji: '🏷️',
     forms: {
       en: { base: 'untitled' },
@@ -1309,7 +1369,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'containing nothing',
-    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'CONTENT', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( HAVE /not ) /obj ( CONTENT /zero )
+    `,
     emoji: '🫙',
     forms: {
       en: { base: 'empty' },
@@ -1326,7 +1389,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'VALID',
     role: 'adjective',
     description: 'correctly formed and accepted',
-    definition: stateGloss('OBJECT_THING', 'ACCEPT', { aspect: 'neutral' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( ACCEPT ) /obj ( OBJECT_THING )
+    `,
     emoji: '✔️',
     forms: {
       en: { base: 'valid' },
@@ -1347,7 +1413,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // a state a thing is in, not a quality it has → es/pt predicate with estar (A47)
     description: 'not present where it is expected',
-    definition: stateGloss('OBJECT_THING', 'FIND', { aspect: 'neutral', modals: [{ verb: 'CAN', negative: true }] }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( FIND /modal ( CAN /not ) ) /obj ( OBJECT_THING )
+    `,
     emoji: '🕳️',
     forms: {
       en: { base: 'missing' },
@@ -1366,7 +1435,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'UNKNOWN',
     role: 'adjective',
     description: 'not known',
-    definition: stateGloss('OBJECT_THING', 'KNOW', { aspect: 'neutral', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( KNOW /not ) /obj ( OBJECT_THING )
+    `,
     emoji: '❓',
     forms: {
       en: { base: 'unknown' },
@@ -1387,7 +1459,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'KNOWN',
     role: 'adjective',
     description: 'already known to whoever hears or reads it',
-    definition: stateGloss('OBJECT_THING', 'KNOW', { aspect: 'neutral' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( KNOW ) /obj ( OBJECT_THING )
+    `,
     emoji: '💡',
     forms: {
       en: { base: 'known' },
@@ -1406,7 +1481,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'UNEXPECTED',
     role: 'adjective',
     description: 'not expected',
-    definition: stateGloss('OBJECT_THING', 'EXPECT', { aspect: 'neutral', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( EXPECT /not ) /obj ( OBJECT_THING )
+    `,
     emoji: '⁉️',
     forms: {
       en: { base: 'unexpected' },
@@ -1424,7 +1502,10 @@ export const adjectives: ConceptSeed[] = [
     description: 'referring to one (grammar)',
     // The number values are said of a WORD. SOLE, not SINGULAR: "a singular object" would say the
     // word with itself (B58).
-    definition: subjectGapGloss('WORD', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['SOLE'] }),
+    definition: `
+      /subj ( WORD /a /rel #2.subj /headless )
+      /subj ( WORD ) /verb ( INDICATE ) /obj ( OBJECT_THING /adj SOLE /a )
+    `,
     emoji: '1️⃣',
     forms: {
       en: { base: 'singular' },
@@ -1441,16 +1522,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'referring to more than one (grammar)',
     // "One and others", not MANIFOLD: Japanese spells MANIFOLD 複数の, PLURAL's own word.
-    definition: relativeGloss('WORD', {
-      verbPhrase: { verb: 'INDICATE' },
-      directObject: {
-        conjuncts: [
-          { concept: 'OBJECT_THING', definiteness: 'indefinite' },
-          { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] },
-        ],
-        conjunction: 'and',
-      },
-    }),
+    definition: `
+      /subj ( WORD /a /rel #2.subj /headless )
+      /subj ( WORD ) /verb ( INDICATE ) /obj ( OBJECT_THING /a /and [ OBJECT_THING /adj OTHER /pl /zero ] )
+    `,
     emoji: '🔢',
     forms: {
       en: { base: 'plural' },
@@ -1466,10 +1541,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'NEUTER',
     role: 'adjective',
     description: 'of the gender that is neither masculine nor feminine (grammar)',
-    definition: relativeGloss('WORD', {
-      verbPhrase: { verb: 'BE', negative: true },
-      complements: { predicative: { phrase: { conjuncts: [{ concept: 'MALE' }, { concept: 'FEMALE' }], conjunction: 'or' } } },
-    }),
+    definition: `
+      /subj ( WORD /a /rel #2.subj /headless )
+      /subj ( WORD ) /verb ( BE /not ) /pred ( MALE /or FEMALE )
+    `,
     emoji: '⚪',
     forms: {
       en: { base: 'neuter' },
@@ -1497,7 +1572,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'pointing at a referent the hearer can already identify (grammar)',
     // The determiner values are said of a DETERMINER. Identifiability is whether the object is known.
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['KNOWN'] }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /adj KNOWN /a )
+    `,
     emoji: '🎯',
     forms: {
       en: { base: 'definite' },
@@ -1513,7 +1591,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'INDEFINITE',
     role: 'adjective',
     description: 'pointing at a referent the hearer cannot yet identify (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['UNKNOWN'] }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /adj UNKNOWN /a )
+    `,
     emoji: '❓',
     forms: {
       en: { base: 'indefinite' },
@@ -1531,7 +1612,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'ZERO',
     role: 'adjective',
     description: 'spelled with no article at all, meaningfully (grammar)',
-    definition: stateGloss('DETERMINER', 'WRITE', { aspect: 'neutral', negative: true }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( WRITE /not ) /obj ( DETERMINER )
+    `,
     emoji: '⃠',
     forms: {
       en: { base: 'zero' },
@@ -1547,7 +1631,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PROXIMAL',
     role: 'adjective',
     description: 'pointing at what is near the speaker (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['NEAR'] }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /adj NEAR /a )
+    `,
     emoji: '👉',
     forms: {
       en: { base: 'proximal' },
@@ -1563,7 +1650,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DISTAL',
     role: 'adjective',
     description: 'pointing at what is far from the speaker (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['FAR'] }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /adj FAR /a )
+    `,
     emoji: '🔭',
     forms: {
       en: { base: 'distal' },
@@ -1579,7 +1669,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PARTITIVE',
     role: 'adjective',
     description: 'naming a part of a whole, an unspecified some of it (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'PART', definiteness: 'indefinite' }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( PART /a )
+    `,
     emoji: '🍰',
     forms: {
       en: { base: 'partitive' },
@@ -1615,7 +1708,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'MULTAL',
     role: 'adjective',
     description: 'naming a large quantity, without claiming most (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'QUANTITY', definiteness: 'indefinite', adjectives: ['GREAT'] }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( QUANTITY /adj GREAT /a )
+    `,
     emoji: '🔺',
     forms: {
       en: { base: 'multal' },
@@ -1631,7 +1727,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PAUCAL',
     role: 'adjective',
     description: 'naming a small quantity, without claiming a minority (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'QUANTITY', definiteness: 'indefinite', adjectives: ['SMALL'] }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( QUANTITY /adj SMALL /a )
+    `,
     emoji: '🔻',
     forms: {
       en: { base: 'paucal' },
@@ -1647,7 +1746,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'UNIVERSAL',
     role: 'adjective',
     description: 'taking in every one of them, with no exception (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'QUANTITY', definiteness: 'definite', adjectives: ['WHOLE'] }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( QUANTITY /adj WHOLE )
+    `,
     emoji: '🌐',
     forms: {
       en: { base: 'universal' },
@@ -1666,7 +1768,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DISTRIBUTIVE',
     role: 'adjective',
     description: 'taking the members of a set one at a time (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'each' }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /each )
+    `,
     emoji: '🍱',
     forms: {
       en: { base: 'distributive' },
@@ -1684,7 +1789,10 @@ export const adjectives: ConceptSeed[] = [
     description: 'taking every member of a set one at a time, leaving none out (grammar)',
     // Not "every object": five languages spell every as each (ogni, chaque, jeder, cada), and the two
     // glosses would read alike. The exhaustive reading is "all objects".
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'all' }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /all )
+    `,
     emoji: '🧮',
     forms: {
       en: { base: 'exhaustive' },
@@ -1700,7 +1808,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DUAL',
     role: 'adjective',
     description: 'taking the two members of a pair together (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'both' }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /both )
+    `,
     emoji: '👯',
     forms: {
       en: { base: 'dual' },
@@ -1716,7 +1827,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PROPORTIONAL',
     role: 'adjective',
     description: 'taking a share of a set, as most of it (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'most' }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /mostof )
+    `,
     emoji: '🥧',
     forms: {
       en: { base: 'proportional' },
@@ -1732,7 +1846,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'MULTIPLE',
     role: 'adjective',
     description: 'naming more than one or two, but not many (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'several' }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /several )
+    `,
     emoji: '🎲',
     forms: {
       en: { base: 'multiple' },
@@ -1748,7 +1865,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'SUFFICIENT',
     role: 'adjective',
     description: 'as much or as many as is needed',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'enough' }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /enough )
+    `,
     emoji: '🆗',
     forms: {
       en: { base: 'sufficient' },
@@ -1764,7 +1884,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'SIMILATIVE',
     role: 'adjective',
     description: 'naming something of the kind already meant (grammar)',
-    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'such' }),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj /headless )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /such )
+    `,
     emoji: '🪞',
     forms: {
       en: { base: 'similative' },
@@ -1789,7 +1912,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'FIRST',
     role: 'adjective',
     description: 'coming before all others in a sequence',
-    definition: namedAgentGloss('OBJECT_THING', 'FOLLOW', { concept: 'OBJECT_THING', definiteness: 'all', number: 'plural', adjectives: ['OTHER'] }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( OBJECT_THING /adj OTHER /pl /all ) /verb ( FOLLOW ) /obj ( OBJECT_THING )
+    `,
     emoji: '🥇',
     forms: {
       en: { base: 'first' },
@@ -1805,7 +1931,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'SECOND',
     role: 'adjective',
     description: 'coming after the first in a sequence',
-    definition: subjectGapGloss('OBJECT_THING', 'FOLLOW', { object: 'OBJECT_THING', definiteness: 'definite', adjectives: ['FIRST'] }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( FOLLOW ) /obj ( OBJECT_THING /adj FIRST )
+    `,
     emoji: '🥈',
     forms: {
       en: { base: 'second' },
@@ -1821,7 +1950,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'THIRD',
     role: 'adjective',
     description: 'coming after the second in a sequence',
-    definition: subjectGapGloss('OBJECT_THING', 'FOLLOW', { object: 'OBJECT_THING', definiteness: 'definite', adjectives: ['SECOND'] }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( FOLLOW ) /obj ( OBJECT_THING /adj SECOND )
+    `,
     emoji: '🥉',
     forms: {
       en: { base: 'third' },
@@ -1842,7 +1974,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'NEXT',
     role: 'adjective',
     description: 'coming straight after in a sequence',
-    definition: subjectGapGloss('OBJECT_THING', 'FOLLOW'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( FOLLOW )
+    `,
     emoji: '⏭️',
     forms: {
       en: { base: 'next' },
@@ -1858,7 +1993,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PREVIOUS',
     role: 'adjective',
     description: 'coming straight before in a sequence',
-    definition: subjectGapGloss('OBJECT_THING', 'PRECEDE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( PRECEDE )
+    `,
     emoji: '⏮️',
     forms: {
       en: { base: 'previous' },
@@ -1885,7 +2023,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'LAST_FINAL',
     role: 'adjective',
     description: 'coming after all others in a sequence',
-    definition: subjectGapGloss('OBJECT_THING', 'FOLLOW', { object: 'OBJECT_THING', definiteness: 'all', number: 'plural', adjectives: ['OTHER'] }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( FOLLOW ) /obj ( OBJECT_THING /adj OTHER /pl /all )
+    `,
     emoji: '🏁',
     synonym: 'final',
     forms: {
@@ -1902,7 +2043,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'LAST_PREVIOUS',
     role: 'adjective',
     description: 'the one before this one, of a period of time',
-    definition: namedAgentGloss('PERIOD_TIME', 'FOLLOW', { concept: 'PERIOD_TIME', definiteness: 'this' }),
+    definition: `
+      /subj ( PERIOD_TIME /a /rel #2.obj /headless )
+      /subj ( PERIOD_TIME /this ) /verb ( FOLLOW ) /obj ( PERIOD_TIME )
+    `,
     emoji: '⏪',
     synonym: 'most recent',
     forms: {
@@ -1922,7 +2066,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'NEXT_COMING',
     role: 'adjective',
     description: 'the one after this one, of a period of time',
-    definition: subjectGapGloss('PERIOD_TIME', 'FOLLOW', { object: 'PERIOD_TIME', definiteness: 'this' }),
+    definition: `
+      /subj ( PERIOD_TIME /a /rel #2.subj /headless )
+      /subj ( PERIOD_TIME ) /verb ( FOLLOW ) /obj ( PERIOD_TIME /this )
+    `,
     emoji: '🔜',
     synonym: 'coming',
     forms: {
@@ -1946,10 +2093,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'SAME',
     role: 'adjective',
     description: 'not different; the one already named',
-    definition: subjectGapGloss('OBJECT_THING', 'BE', {
-      complements: { predicative: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
-      negative: true,
-    }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( BE /not ) /pred ( OBJECT_THING /adj OTHER )
+    `,
     emoji: '🟰',
     forms: {
       en: { base: 'same', predicate_article: '1' },
@@ -1970,7 +2117,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DIFFERENT',
     role: 'adjective',
     description: 'not the same; unlike',
-    definition: subjectGapGloss('OBJECT_THING', 'BE', { predicate: 'SAME', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( BE /not ) /pred ( SAME )
+    `,
     emoji: '🔀',
     forms: {
       en: { base: 'different' },
@@ -1991,7 +2141,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'certain; having no doubt',
-    definition: subjectGapGloss('PERSON', 'KNOW', { modifier: 'WELL' }),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj /headless )
+      /subj ( PERSON ) /verb ( KNOW /adv WELL )
+    `,
     emoji: '👍',
     forms: {
       en: { base: 'sure' },
@@ -2013,9 +2166,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'REAL_EXISTING',
     role: 'adjective',
     description: 'existing in fact, not imagined',
-    definition: subjectGapGloss('OBJECT_THING', 'BE', {
-      complements: { locative: { phrase: { concept: 'REALITY', definiteness: 'bare' } } },
-    }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( BE ) /loc ( REALITY /zero )
+    `,
     emoji: '🌍',
     synonym: 'existing',
     forms: {
@@ -2079,7 +2233,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'RIGHT_CORRECT',
     role: 'adjective',
     description: 'correct; without error',
-    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'ERROR', number: 'plural', negative: true }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( HAVE /not ) /obj ( ERROR /pl /zero )
+    `,
     emoji: '🎯',
     synonym: 'correct',
     // Evaluative: the clause it is said of goes into the Romance subjunctive — "è giusto che si
@@ -2120,7 +2277,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'not standing for any particular person (grammar)',
     // The generic "one" stands for no one person, which is to say for anyone: people at large.
-    definition: subjectGapGloss('PRONOUN', 'INDICATE', { object: 'PERSON', definiteness: 'all', number: 'plural' }),
+    definition: `
+      /subj ( PRONOUN /a /rel #2.subj /headless )
+      /subj ( PRONOUN ) /verb ( INDICATE ) /obj ( PERSON /pl /all )
+    `,
     emoji: '🫥',
     forms: {
       en: { base: 'impersonal' },
@@ -2187,7 +2347,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'not depending on any other clause (grammar)',
     // Italian "reggere" is the grammar's verb for it: the main clause is the "proposizione reggente".
-    definition: subjectGapGloss('CLAUSE', 'GOVERN', { object: 'CLAUSE', number: 'plural', adjectives: ['OTHER'] }),
+    definition: `
+      /subj ( CLAUSE /a /rel #2.subj /headless )
+      /subj ( CLAUSE ) /verb ( GOVERN ) /obj ( CLAUSE /adj OTHER /pl /zero )
+    `,
     emoji: '👑',
     forms: {
       en: { base: 'main' },
@@ -2206,7 +2369,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'CONDITIONAL',
     role: 'adjective',
     description: 'setting the condition another clause depends on (grammar)',
-    definition: namedAgentGloss('CLAUSE', 'DEPEND', { concept: 'CLAUSE', adjectives: ['OTHER'] }),
+    definition: `
+      /subj ( CLAUSE /a /rel #2.obj /headless )
+      /subj ( CLAUSE /adj OTHER /a ) /verb ( DEPEND ) /obj ( CLAUSE )
+    `,
     emoji: '🔀',
     forms: {
       en: { base: 'conditional' },
@@ -2222,9 +2388,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'COORDINATED',
     role: 'adjective',
     description: 'joined to another clause or phrase of equal rank (grammar)',
-    definition: namedAgentGloss('CLAUSE', 'LINK', 'CONJUNCTION', {
-      complements: { terminus: { phrase: { concept: 'CLAUSE', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
-    }),
+    definition: `
+      /subj ( CLAUSE /a /rel #2.obj /headless )
+      /subj ( CONJUNCTION /a ) /verb ( LINK ) /obj ( CLAUSE ) /term ( CLAUSE /adj OTHER /a )
+    `,
     emoji: '🔗',
     forms: {
       en: { base: 'coordinated' },
@@ -2244,7 +2411,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'SUBORDINATE',
     role: 'adjective',
     description: 'depending on another clause (grammar)',
-    definition: subjectGapGloss('CLAUSE', 'DEPEND', { object: 'CLAUSE', adjectives: ['OTHER'] }),
+    definition: `
+      /subj ( CLAUSE /a /rel #2.subj /headless )
+      /subj ( CLAUSE ) /verb ( DEPEND ) /obj ( CLAUSE /adj OTHER /zero )
+    `,
     emoji: '🪜',
     forms: {
       en: { base: 'subordinate' },
@@ -2267,11 +2437,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'adding one thing to another, like "and" (grammar)',
     // The kinds of conjunction are said of a CONJUNCTION, feminine in German ("die").
-    definition: subjectGapGloss('CONJUNCTION', 'ADD', {
-      object: 'PHRASE',
-      definiteness: 'indefinite',
-      complements: { terminus: { phrase: { concept: 'PHRASE', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
-    }),
+    definition: `
+      /subj ( CONJUNCTION /a /rel #2.subj /headless )
+      /subj ( CONJUNCTION ) /verb ( ADD ) /obj ( PHRASE /a ) /term ( PHRASE /adj OTHER /a )
+    `,
     emoji: '➕',
     forms: {
       en: { base: 'copulative' },
@@ -2287,7 +2456,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DISJUNCTIVE',
     role: 'adjective',
     description: 'offering a choice between things, like "or" (grammar)',
-    definition: subjectGapGloss('CONJUNCTION', 'LINK', { object: 'OPTION', number: 'plural' }),
+    definition: `
+      /subj ( CONJUNCTION /a /rel #2.subj /headless )
+      /subj ( CONJUNCTION ) /verb ( LINK ) /obj ( OPTION /pl /zero )
+    `,
     emoji: '🔀',
     forms: {
       en: { base: 'disjunctive' },
@@ -2303,7 +2475,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'ADVERSATIVE',
     role: 'adjective',
     description: 'setting one thing against another, like "but" (grammar)',
-    definition: subjectGapGloss('CONJUNCTION', 'LINK', { object: 'CLAUSE', number: 'plural', adjectives: ['OPPOSITE'] }),
+    definition: `
+      /subj ( CONJUNCTION /a /rel #2.subj /headless )
+      /subj ( CONJUNCTION ) /verb ( LINK ) /obj ( CLAUSE /adj OPPOSITE /pl /zero )
+    `,
     emoji: '↔️',
     forms: {
       en: { base: 'adversative' },
@@ -2319,12 +2494,11 @@ export const adjectives: ConceptSeed[] = [
     id: 'EXPLICATIVE',
     role: 'adjective',
     description: 'explaining what came before, like "that is" (grammar)',
-    definition: subjectGapGloss('CONJUNCTION', 'EXPRESS', {
-      object: 'CLAUSE',
-      definiteness: 'definite',
-      adjectives: ['PREVIOUS'],
-      complements: { instrumental: { phrase: { concept: 'WORD', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] } } },
-    }),
+    definition: `
+      /subj ( CONJUNCTION /a /rel #2.subj /headless )
+      /subj ( CONJUNCTION ) /verb ( EXPRESS ) /obj ( CLAUSE /adj PREVIOUS ) /inst #3
+      /subj ( WORD /adj OTHER /pl /zero )
+    `,
     emoji: '💬',
     forms: {
       en: { base: 'explicative' },
@@ -2340,14 +2514,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'CONCLUSIVE',
     role: 'adjective',
     description: 'drawing a conclusion from what came before, like "therefore" (grammar)',
-    definition: subjectGapGloss('CONJUNCTION', 'USE', {
-      object: 'CLAUSE',
-      definiteness: 'definite',
-      adjectives: ['PREVIOUS'],
-      complements: {
-        objectPredicative: { phrase: { concept: 'CAUSE', definiteness: 'indefinite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
-      },
-    }),
+    definition: `
+      /subj ( CONJUNCTION /a /rel #2.subj /headless )
+      /subj ( CONJUNCTION ) /verb ( USE ) /obj ( CLAUSE /adj PREVIOUS ) /objpred ( CAUSE )
+    `,
     emoji: '🏁',
     forms: {
       en: { base: 'conclusive' },
@@ -2363,7 +2533,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'TEMPORAL',
     role: 'adjective',
     description: 'relating things by their order in time, like "then"',
-    definition: subjectGapGloss('CONJUNCTION', 'INDICATE', { object: 'ACTION', definiteness: 'definite', adjectives: ['NEXT'] }),
+    definition: `
+      /subj ( CONJUNCTION /a /rel #2.subj /headless )
+      /subj ( CONJUNCTION ) /verb ( INDICATE ) /obj ( ACTION /adj NEXT )
+    `,
     emoji: '🕰️',
     forms: {
       en: { base: 'temporal' },
@@ -2382,10 +2555,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'having to do with place',
     // What the /in … /front relations set: how a place stands to the object it is the place of.
-    definition: relativeGloss('RELATIONSHIP', {
-      verbPhrase: { verb: 'INDICATE' },
-      directObject: { concept: 'PLACE', definiteness: 'definite', possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' } },
-    }),
+    definition: `
+      /subj ( RELATIONSHIP /a /rel #2.subj /headless )
+      /subj ( RELATIONSHIP ) /verb ( INDICATE ) /obj ( PLACE /poss [ OBJECT_THING /a ] )
+    `,
     emoji: '📐',
     forms: {
       en: { base: 'spatial' },
@@ -2405,7 +2578,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'NATIONAL',
     role: 'adjective',
     description: 'of or belonging to a whole nation',
-    definition: subjectGapGloss('OBJECT_THING', 'INDICATE', { object: 'NATION', definiteness: 'indefinite' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( INDICATE ) /obj ( NATION /a )
+    `,
     emoji: '🏳️',
     forms: {
       en: { base: 'national' },
@@ -2424,7 +2600,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'SOCIAL',
     role: 'adjective',
     description: 'of society, of people living together',
-    definition: subjectGapGloss('OBJECT_THING', 'INDICATE', { object: 'COMMUNITY', definiteness: 'indefinite' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( INDICATE ) /obj ( COMMUNITY /a )
+    `,
     emoji: '👥',
     forms: {
       en: { base: 'social' },
@@ -2441,7 +2620,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'POLITICAL',
     role: 'adjective',
     description: 'of government and the state',
-    definition: subjectGapGloss('OBJECT_THING', 'INDICATE', { object: 'GOVERNMENT', definiteness: 'indefinite' }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( INDICATE ) /obj ( GOVERNMENT /a )
+    `,
     emoji: '🏛️',
     forms: {
       en: { base: 'political' },
@@ -2459,10 +2641,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PUBLIC',
     role: 'adjective',
     description: 'open to or shared by all people',
-    definition: subjectGapGloss('OBJECT_THING', 'BE', {
-      predicate: 'OPEN_ADJECTIVE',
-      complements: { purpose: { phrase: { concept: 'PERSON', definiteness: 'all', number: 'plural' } } },
-    }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj /headless )
+      /subj ( OBJECT_THING ) /verb ( BE ) /pred ( OPEN_ADJECTIVE ) /for ( PERSON /pl /all )
+    `,
     emoji: '🏞️',
     forms: {
       en: { base: 'public' },
@@ -2483,10 +2665,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'NEUTRAL',
     role: 'adjective',
     description: 'taking neither one side nor the other',
-    definition: relativeGloss('WORD', {
-      verbPhrase: { verb: 'BE', negative: true },
-      complements: { predicative: { phrase: { conjuncts: [{ concept: 'POSITIVE' }, { concept: 'NEGATIVE' }], conjunction: 'or' } } },
-    }),
+    definition: `
+      /subj ( WORD /a /rel #2.subj /headless )
+      /subj ( WORD ) /verb ( BE /not ) /pred ( POSITIVE /or NEGATIVE )
+    `,
     emoji: '⚖️',
     forms: {
       en: { base: 'neutral' },
@@ -2508,13 +2690,10 @@ export const adjectives: ConceptSeed[] = [
     synonym: 'grammar',
     description: 'presenting the agent of an event as the subject (grammar)',
     // The voices are said of a CLAUSE (VOICE: which participant a clause makes its subject).
-    definition: subjectGapGloss('CLAUSE', 'USE', {
-      object: 'AGENT_GRAMMAR',
-      definiteness: 'definite',
-      complements: {
-        objectPredicative: { phrase: { concept: 'SUBJECT_GRAMMAR', definiteness: 'definite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
-      },
-    }),
+    definition: `
+      /subj ( CLAUSE /a /rel #2.subj /headless )
+      /subj ( CLAUSE ) /verb ( USE ) /obj ( AGENT_GRAMMAR ) /objpred ( SUBJECT_GRAMMAR /the )
+    `,
     emoji: '➡️',
     forms: {
       en: { base: 'active' },
@@ -2533,14 +2712,10 @@ export const adjectives: ConceptSeed[] = [
     synonym: 'grammar',
     description: 'presenting the patient of an event as the subject (grammar)',
     // The *direct* object: Spanish OBJECT_GRAMMAR alone is "complemento", which reads as any complement.
-    definition: subjectGapGloss('CLAUSE', 'USE', {
-      object: 'OBJECT_GRAMMAR',
-      definiteness: 'definite',
-      adjectives: ['DIRECT'],
-      complements: {
-        objectPredicative: { phrase: { concept: 'SUBJECT_GRAMMAR', definiteness: 'definite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
-      },
-    }),
+    definition: `
+      /subj ( CLAUSE /a /rel #2.subj /headless )
+      /subj ( CLAUSE ) /verb ( USE ) /obj ( OBJECT_GRAMMAR /adj DIRECT ) /objpred ( SUBJECT_GRAMMAR /the )
+    `,
     emoji: '⬅️',
     forms: {
       en: { base: 'passive' },
@@ -2557,13 +2732,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'presenting an event as in progress (grammar)',
     // The aspects are said of a VERB, and each is how it shows its action.
-    definition: subjectGapGloss('VERB', 'SHOW', {
-      object: 'ACTION',
-      definiteness: 'indefinite',
-      complements: {
-        objectPredicative: { phrase: { concept: 'PROCESS', definiteness: 'indefinite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
-      },
-    }),
+    definition: `
+      /subj ( VERB /a /rel #2.subj /headless )
+      /subj ( VERB ) /verb ( SHOW ) /obj ( ACTION /a ) /objpred ( PROCESS )
+    `,
     emoji: '▶️',
     forms: {
       en: { base: 'progressive' },
@@ -2579,10 +2751,11 @@ export const adjectives: ConceptSeed[] = [
     id: 'PROSPECTIVE',
     role: 'adjective',
     description: 'presenting an event as about to happen (grammar)',
-    definition: relativeGloss('VERB', {
-      verbPhrase: { verb: 'SHOW' },
-      directObject: { concept: 'ACTION', definiteness: 'indefinite', relative: { verbPhrase: { verb: 'BEGIN', aspect: 'prospective' } } },
-    }),
+    definition: `
+      /subj ( VERB /a /rel #2.subj /headless )
+      /subj ( VERB ) /verb ( SHOW ) /obj ( ACTION /a /rel #3.subj )
+      /subj ( ACTION ) /verb ( BEGIN /prosp )
+    `,
     emoji: '⏩',
     forms: {
       en: { base: 'prospective' },
@@ -2598,13 +2771,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'RESULTATIVE',
     role: 'adjective',
     description: 'presenting the state an event has left behind (grammar)',
-    definition: subjectGapGloss('VERB', 'SHOW', {
-      object: 'ACTION',
-      definiteness: 'indefinite',
-      complements: {
-        objectPredicative: { phrase: { concept: 'STATE', definiteness: 'indefinite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
-      },
-    }),
+    definition: `
+      /subj ( VERB /a /rel #2.subj /headless )
+      /subj ( VERB ) /verb ( SHOW ) /obj ( ACTION /a ) /objpred ( STATE )
+    `,
     emoji: '✅',
     forms: {
       en: { base: 'resultative' },
@@ -2622,7 +2792,10 @@ export const adjectives: ConceptSeed[] = [
     description: 'affirming, not negating (grammar)',
     // Not the reverse: NEGATE is glossed "to cause a clause to be negative", so NEGATIVE cannot be
     // "that negates".
-    definition: subjectGapGloss('WORD', 'NEGATE', { negative: true }),
+    definition: `
+      /subj ( WORD /a /rel #2.subj /headless )
+      /subj ( WORD ) /verb ( NEGATE /not )
+    `,
     emoji: '👍',
     forms: {
       en: { base: 'positive' },
@@ -2639,10 +2812,11 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'relating to meaning in language',
     // As the app's "semantic phrase creator" means it: phrases built out of meanings, not out of words.
-    definition: stateGloss('PHRASE', 'MAKE', {
-      aspect: 'neutral',
-      complements: { instrumental: { phrase: { concept: 'MEANING', definiteness: 'bare', number: 'plural' } } },
-    }),
+    definition: `
+      /subj ( PHRASE /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( MAKE ) /obj ( PHRASE ) /inst #3
+      /subj ( MEANING /pl /zero )
+    `,
     emoji: '🔤',
     forms: {
       en: { base: 'semantic' },
@@ -2658,10 +2832,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DIRECT',
     role: 'adjective',
     description: 'reaching its end with nothing in between',
-    definition: subjectGapGloss('PATH', 'GO', {
-      negative: true,
-      complements: { route: { phrase: { concept: 'PLACE', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
-    }),
+    definition: `
+      /subj ( PATH /a /rel #2.subj /headless )
+      /subj ( PATH ) /verb ( GO /not ) /route ( PLACE /adj OTHER /a )
+    `,
     emoji: '➡️',
     forms: {
       en: { base: 'direct' },
@@ -2677,9 +2851,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'INDIRECT',
     role: 'adjective',
     description: 'reaching its end through something in between',
-    definition: subjectGapGloss('PATH', 'GO', {
-      complements: { route: { phrase: { concept: 'PLACE', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
-    }),
+    definition: `
+      /subj ( PATH /a /rel #2.subj /headless )
+      /subj ( PATH ) /verb ( GO ) /route ( PLACE /adj OTHER /a )
+    `,
     emoji: '↪️',
     forms: {
       en: { base: 'indirect' },
@@ -2699,7 +2874,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'joined to nothing else',
     // The word map's edges are RELATIONSHIPs: an unconnected word is one no edge reaches.
-    definition: subjectGapGloss('WORD', 'HAVE', { object: 'RELATIONSHIP', definiteness: 'no', number: 'plural' }),
+    definition: `
+      /subj ( WORD /a /rel #2.subj /headless )
+      /subj ( WORD ) /verb ( HAVE ) /obj ( RELATIONSHIP /pl /no )
+    `,
     emoji: '⚪',
     forms: {
       en: { base: 'unconnected' },
@@ -2719,7 +2897,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'kept out of sight',
-    definition: stateGloss('OBJECT_THING', 'HIDE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( HIDE /result ) /obj ( OBJECT_THING )
+    `,
     emoji: '🙈',
     forms: {
       en: { base: 'hidden' },
@@ -2779,7 +2960,10 @@ export const adjectives: ConceptSeed[] = [
     transient: true, // a state a thing comes into, like HIDDEN → es/pt predicate with estar (A47)
     description: 'able to be seen',
     // SEE, not APPEAR or HIDE: their glosses are "to become visible" and "to cause an object not to be visible".
-    definition: stateGloss('OBJECT_THING', 'SEE', { aspect: 'neutral', modals: ['CAN'] }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( one ) /verb ( SEE /modal CAN ) /obj ( OBJECT_THING )
+    `,
     emoji: '👓',
     forms: {
       en: { base: 'visible' },
@@ -2796,7 +2980,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'SWEET',
     role: 'adjective',
     description: 'tasting of sugar',
-    definition: subjectGapGloss('FOOD', 'HAVE', { object: 'SUGAR' }),
+    definition: `
+      /subj ( FOOD /a /rel #2.subj /headless )
+      /subj ( FOOD ) /verb ( HAVE ) /obj ( SUGAR /zero )
+    `,
     emoji: '🍬',
     forms: {
       en: { base: 'sweet' },
@@ -2813,7 +3000,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'keeping its shape, neither liquid nor gas',
     // What neither a liquid nor a gas can say. Not on GROUND, whose gloss is "solid substance".
-    definition: subjectGapGloss('SUBSTANCE', 'FLOW', { negative: true }),
+    definition: `
+      /subj ( SUBSTANCE /a /rel #2.subj /headless )
+      /subj ( SUBSTANCE ) /verb ( FLOW /not )
+    `,
     emoji: '🧱',
     forms: {
       en: { base: 'solid' },
@@ -2834,7 +3024,10 @@ export const adjectives: ConceptSeed[] = [
     // The three time words differ by HAPPEN's tense and aspect alone, said of a PROCESS (masculine in
     // the five that agree, so it "è successo", fr "est arrivé" read as "what has happened"). None
     // routes back through the tense nouns (PRESENT_TENSE, …) whose glosses stand on them.
-    definition: subjectGapGloss('PROCESS', 'HAPPEN', { modifier: 'NOW' }),
+    definition: `
+      /subj ( PROCESS /a /rel #2.subj /headless )
+      /subj ( PROCESS ) /verb ( HAPPEN /adv NOW )
+    `,
     emoji: '⌚',
     synonym: 'current',
     forms: {
@@ -2851,7 +3044,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PAST',
     role: 'adjective',
     description: 'already happened',
-    definition: subjectGapGloss('PROCESS', 'HAPPEN', { aspect: 'resultative' }),
+    definition: `
+      /subj ( PROCESS /a /rel #2.subj /headless )
+      /subj ( PROCESS ) /verb ( HAPPEN /result )
+    `,
     emoji: '📜',
     forms: {
       en: { base: 'past' },
@@ -2867,7 +3063,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'FUTURE',
     role: 'adjective',
     description: 'yet to happen',
-    definition: subjectGapGloss('PROCESS', 'HAPPEN', { tense: 'future' }),
+    definition: `
+      /subj ( PROCESS /a /rel #2.subj /headless )
+      /subj ( PROCESS ) /verb ( HAPPEN /future )
+    `,
     emoji: '🔮',
     forms: {
       en: { base: 'future' },
@@ -2897,7 +3096,10 @@ export const adjectives: ConceptSeed[] = [
     // What "my own" adds to "my": nobody else owns it. A headless relative on the owning verb with a
     // negated agent (C23's shape), which is the only construct-free lead that does not define
     // *owned* instead — "that a possessor owns" says the wrong word twice over.
-    definition: namedAgentGloss('OBJECT_THING', 'OWN', { concept: 'PERSON', definiteness: 'no', adjectives: ['OTHER'] }),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj /headless )
+      /subj ( PERSON /adj OTHER /no ) /verb ( OWN ) /obj ( OBJECT_THING )
+    `,
     synonym: 'own',
     emoji: '🫱',
     forms: {

@@ -7,10 +7,12 @@ console prints and applies, instead of being assembled in TypeScript from the gl
 
 ```ts
 // before
-definition: causativeGloss({ object: 'PERSON', definiteness: 'indefinite' },
-                           { verb: 'SEE', object: 'OBJECT_THING', number: 'plural' }),
-// after
-definition: '/inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to { /verb ( SEE ) /obj ( OBJECT_THING /pl ) /control obj }',
+definition: causativeGloss({ object: 'PERSON', definiteness: 'indefinite' }, { verb: 'COME' }),
+// after (CALL, "to cause a person to come")
+definition: `
+  /inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to #2 /objctl
+  /inf /verb ( COME )
+`,
 ```
 
 A definition can then be pasted into the console and opened on the canvas, and anything built on
@@ -23,8 +25,8 @@ use today, and every seeded definition is migrated to text.
 views of one phrase. P13 makes them the authoring form of the seed too. It keeps P02's invariant:
 every construct the language says, the canvas shows, and printing then applying returns the same
 workspace.
-**Status:** phases 1–3 landed, 2026-09-24. 324 of the 573 definitions already go through their text
-unchanged; the other 249 wait on the constructs of phase 4, which `definitionText.test.ts` names.
+**Status:** phases 1–5 landed, 2026-09-25: every one of the 573 definitions is written in the phrase
+language, and renders as it did. Phase 6 retires the exported gloss helpers.
 
 ---
 
@@ -196,10 +198,20 @@ allow-list that each phase shrinks; phase 4 ends with it empty.
 | **2 · Inverse** ✅ | `planToWorkspace`, and the all-definitions round-trip test with its allow-list. | Every definition outside the allow-list round-trips; the allow-list is grouped by the construct it waits on. |
 | **3 · Seeds take text** ✅ | Seed vocabulary (ids), `compileDefinition`; `ConceptSeed.definition` accepts a string, compiled when the seed is assembled (decision 7); a diagnostic fails the import, and so the boot. | A string definition renders exactly like its plan in all seven languages; a broken one stops the boot naming concept and diagnostic. |
 | **4 · Constructs** ✅ | §1's gaps, one at a time. Each ships its selection field, reducer, plan build, canvas control, console command, printer case, golden/help/coverage entries and a round-trip walk op. | The allow-list is empty. |
-| **5 · Migrate** | Every seed definition rewritten as text by a one-off script (print through the inverse), reviewed by hand where the printer's form reads poorly. | The rendered definitions of all concepts in all seven languages are byte-identical before and after (snapshot). |
+| **5 · Migrate** ✅ | Every seed definition rewritten as text by a one-off script (print through the inverse), reviewed by hand where the printer's form reads poorly. | The rendered definitions of all concepts in all seven languages are byte-identical before and after (snapshot). |
 | **6 · Retire and tool** | Gloss helpers and their tests deleted; the `seed` and `localize-seed` skills and the localization task template author text; a console command opens a concept's definition on the canvas. | No import of the helpers remains; `/localize-seed` produces a text definition. |
 
 Phases 4 and 5 can interleave: a definition migrates as soon as the constructs it needs have landed.
+
+**Phase 5, as it ran.** A one-off script (TypeScript's parser over the seed files) replaced each
+`definition:` initializer with the text its plan prints to: 573 of 573, none by hand. Before and
+after, every definition's seven renders were snapshotted and compared: byte-identical. The printer's
+form is kept as it is, one period a line with the links as references (`/rel #2.subj`, `/inst #2`),
+because it is what the console's source strip shows: a definition copied off the canvas reads the same
+as one in a seed. A linked definition is a template literal indented with the code, which
+`definitionLines` strips before compiling. `ConceptSeed.definition` is now `string`, so a plan literal
+no longer type-checks. The seed files' local gloss helpers went with it, and their doc comments were
+kept as prose over the entries, each example rewritten as its text.
 
 ## 4. Testing
 

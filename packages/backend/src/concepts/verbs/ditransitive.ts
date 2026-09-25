@@ -1,5 +1,4 @@
 import type { ConceptSeed } from '../types.js';
-import { causativeGloss, infinitiveGloss } from './gloss.js';
 
 // Ditransitive verbs (license a recipient/theme). The recipient is the `terminus` complement
 // — the dative "to whom" — which these verbs declare like any other complement-taking verb.
@@ -10,11 +9,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to hand something to someone',
-    definition: infinitiveGloss('TRANSFER', {
-      object: 'OBJECT_THING',
-      number: 'plural',
-      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( TRANSFER ) /obj ( OBJECT_THING /pl /zero ) /term ( PERSON /a )',
     emoji: '🎁',
     isA: 'TRANSFER',
     forms: {
@@ -89,11 +84,10 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause', 'locative'],
     description: 'to give something to someone in exchange for money',
-    definition: infinitiveGloss('GIVE', {
-      object: 'OBJECT_THING',
-      number: 'plural',
-      purpose: { verb: 'ACQUIRE', object: 'MONEY' },
-    }),
+    definition: `
+      /inf /verb ( GIVE ) /obj ( OBJECT_THING /pl /zero ) /so #2
+      /inf /verb ( ACQUIRE ) /obj ( MONEY /zero )
+    `,
     emoji: '🏷️',
     forms: {
       en: {
@@ -167,10 +161,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to give money in return for something',
-    definition: infinitiveGloss('GIVE', {
-      object: 'MONEY',
-      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( GIVE ) /obj ( MONEY /zero ) /term ( PERSON /a )',
     emoji: '💳',
     forms: {
       en: {
@@ -242,7 +233,10 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to make something available to someone',
-    definition: causativeGloss({ object: 'PERSON', definiteness: 'indefinite' }, { verb: 'HAVE', object: 'OBJECT_THING', number: 'plural' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to #2 /objctl
+      /inf /verb ( HAVE ) /obj ( OBJECT_THING /pl /zero )
+    `,
     synonym: 'supply',
     emoji: '📦',
     forms: {
@@ -386,10 +380,10 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     // The causative of seeing: what SHOW adds to SEE is that someone *else* does the seeing, which
     // is the object-controlled infinitive complement (localization C08). Japanese says it as
     // 人が物体を見るようにする — 見る, not the 見せる this defines.
-    definition: causativeGloss(
-      { object: 'PERSON', definiteness: 'indefinite' },
-      { verb: 'SEE', object: 'OBJECT_THING', number: 'plural' },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to #2 /objctl
+      /inf /verb ( SEE ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '👁️',
     forms: {
       en: {
@@ -456,11 +450,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to dispatch something to someone',
-    definition: infinitiveGloss('TRANSFER', {
-      object: 'OBJECT_THING',
-      number: 'plural',
-      complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( TRANSFER ) /obj ( OBJECT_THING /pl /zero ) /dir ( PLACE /a )',
     emoji: '📨',
     isA: 'TRANSFER',
     forms: {
@@ -537,11 +527,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     description: 'to relate something to someone',
     // "to say facts to a person", GIVE's recipient frame on SAY. A lie or a joke is told too; "words"
     // would read as merely addressing someone, and is the frame ANSWER takes.
-    definition: infinitiveGloss('SAY', {
-      object: 'FACT',
-      number: 'plural',
-      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( SAY ) /obj ( FACT /pl /zero ) /term ( PERSON /a )',
     emoji: '🗣️',
     isA: 'SAY',
     forms: {
@@ -707,11 +693,10 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     // "to say words to know the facts": the purpose says what asking is for without a question noun.
     // KNOW with a noun object takes KNOW_ACQUAINTED's verb (conoscere, kennen, A131), right with the
     // definite; the purpose clause's unspoken subject is the asker.
-    definition: infinitiveGloss('SAY', {
-      object: 'WORD',
-      number: 'plural',
-      purpose: { verb: 'KNOW', object: 'FACT', number: 'plural', definiteness: 'definite' },
-    }),
+    definition: `
+      /inf /verb ( SAY ) /obj ( WORD /pl /zero ) /so #2
+      /inf /verb ( KNOW ) /obj ( FACT /pl )
+    `,
     emoji: '🙋',
     isA: 'SAY',
     forms: {

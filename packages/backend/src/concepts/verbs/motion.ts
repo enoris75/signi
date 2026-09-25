@@ -1,5 +1,4 @@
 import type { ConceptSeed } from '../types.js';
-import { infinitiveGloss } from './gloss.js';
 
 // Motion & copular verbs (license locative / direction / source / route).
 export const motionVerbs: ConceptSeed[] = [
@@ -12,12 +11,7 @@ export const motionVerbs: ConceptSeed[] = [
     description: 'to move or travel from one place to another',
     // "to move from a place to another place": the source and the goal are both a place, the goal
     // another one (localization C17).
-    definition: infinitiveGloss('MOVE_ONESELF', {
-      complements: {
-        source: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } },
-        direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite', adjectives: ['OTHER'] } },
-      },
-    }),
+    definition: '/inf /verb ( MOVE_ONESELF ) /src ( PLACE /a ) /dir ( PLACE /adj OTHER /a )',
     emoji: '🚶',
     isA: 'MOVE_ONESELF',
     forms: {
@@ -98,7 +92,7 @@ export const motionVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to go back to a place',
-    definition: infinitiveGloss('GO', { modifier: 'BACKWARDS' }),
+    definition: '/inf /verb ( GO /adv BACKWARDS )',
     emoji: '🔙',
     isA: 'GO',
     // COME_BACK is folded into RETURN (P09 §2), so *come back* finds it (P09-E23).
@@ -179,14 +173,7 @@ export const motionVerbs: ConceptSeed[] = [
     description: 'to move around a centre or an axis',
     // "to move around a point" (localization B61): MOVE_ONESELF with the `around` route, the first in
     // a verb gloss.
-    definition: infinitiveGloss('MOVE_ONESELF', {
-      complements: {
-        route: {
-          phrase: { concept: 'POINT_NOUN', definiteness: 'indefinite' },
-          specifiers: [{ kind: 'path', value: 'around' }],
-        },
-      },
-    }),
+    definition: '/inf /verb ( MOVE_ONESELF ) /route ( POINT_NOUN /a /around )',
     emoji: '🔄',
     isA: 'MOVE_ONESELF',
     synonym: 'rotate',
@@ -260,7 +247,10 @@ export const motionVerbs: ConceptSeed[] = [
     complements: ['manner', 'source', 'cause'],
     description: 'to go away; to set off',
     // "to begin to go" (localization B61): ACQUIRE's inchoative ("to begin to have") on GO.
-    definition: infinitiveGloss('BEGIN', { infinitive: 'GO' }),
+    definition: `
+      /inf /verb ( BEGIN ) /to #2
+      /inf /verb ( GO )
+    `,
     emoji: '🛫',
     isA: 'GO',
     synonym: 'depart',
@@ -336,7 +326,7 @@ export const motionVerbs: ConceptSeed[] = [
     complements: ['manner', 'source', 'cause'],
     description: 'to leave quickly in order to escape',
     // "to leave fast" (localization B83): LEAVE_DEPART with FAST, as RUN is "to move fast".
-    definition: infinitiveGloss('LEAVE_DEPART', { modifier: 'FAST' }),
+    definition: '/inf /verb ( LEAVE_DEPART /adv FAST )',
     emoji: '🏃',
     isA: 'LEAVE_DEPART',
     synonym: 'flee',
@@ -411,7 +401,7 @@ export const motionVerbs: ConceptSeed[] = [
     description: 'to go outside',
     // "to go outside" (localization B61): GO with the direction adverb its particle says, as Duden
     // glosses hinausgehen "nach draußen gehen".
-    definition: infinitiveGloss('GO', { modifier: 'OUTSIDE' }),
+    definition: '/inf /verb ( GO /adv OUTSIDE )',
     emoji: '🚶‍➡️',
     isA: 'GO',
     forms: {
@@ -858,18 +848,7 @@ export const motionVerbs: ConceptSeed[] = [
     // complement's article ("as an object"); the essive drops it elsewhere ("come oggetto", de
     // "als Gegenstand empfunden werden", ja 物体として知覚される). Inline, because GlossParts has no
     // `voice`. PERCEIVE, not SEE: SEE is "to perceive light", and seeming is not only sight.
-    definition: {
-      subject: { concept: 'GENERIC_PERSON' },
-      verbPhrase: { verb: 'PERCEIVE', voice: 'passive' },
-      directObject: { concept: 'OBJECT_THING' },
-      complements: {
-        objectPredicative: {
-          phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
-          specifiers: [{ kind: 'predication', value: 'essive' }],
-        },
-      },
-      infinitive: true,
-    },
+    definition: '/inf /verb ( PERCEIVE /passive ) /obj ( OBJECT_THING ) /objpred ( OBJECT_THING )',
     synonym: 'look like',
     emoji: '🤔',
     forms: {
@@ -947,7 +926,7 @@ export const motionVerbs: ConceptSeed[] = [
     // The second half of the description, composed: BECOME + VISIBLE, the state coming into view
     // leaves the thing in (localization C08). No language's word for it echoes its own lemma —
     // "diventare visibile" for apparire, 可視になる for 現れる.
-    definition: infinitiveGloss('BECOME', { predicate: 'VISIBLE' }),
+    definition: '/inf /verb ( BECOME ) /pred ( VISIBLE )',
     synonym: 'come into view',
     emoji: '👀',
     forms: {
@@ -1169,9 +1148,7 @@ export const motionVerbs: ConceptSeed[] = [
     // "sich durch die Luft bewegen", es "moverse por el aire", ja 空気を移動する — the を of the space
     // moved through, as 大辞林 glosses 飛ぶ (空中を移動する). Definite, the one air there is; JUMP's
     // "to move into the air" is the same noun as a direction, so the two stay apart in all seven.
-    definition: infinitiveGloss('MOVE_ONESELF', {
-      complements: { route: { phrase: { concept: 'AIR', definiteness: 'definite' } } },
-    }),
+    definition: '/inf /verb ( MOVE_ONESELF ) /route ( AIR )',
     emoji: '🕊️',
     isA: 'MOVE_ONESELF',
     forms: {

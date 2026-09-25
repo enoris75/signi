@@ -56,7 +56,7 @@ import type {
   Tense,
   VerbPhrase,
 } from '@signi/shared';
-import type { ConceptSeed } from '../../../backend/src/concepts/types.js';
+import type { DefinedConceptSeed } from '../../../backend/src/concepts/index.js';
 import { concepts } from '../../../backend/src/concepts/index.js';
 import { translateAll } from '../harness.js';
 
@@ -138,7 +138,7 @@ function nounPhrase(r: Random, depth: number, opts: NounOptions = {}): NounPhras
     };
   }
   const concept = r.pick(nouns);
-  const seed = byId.get(concept) as ConceptSeed;
+  const seed = byId.get(concept) as DefinedConceptSeed;
   const np: NounPhrase = { concept };
   // A mass noun has no plural, and the builder does not offer one.
   if (seed.countable !== false && r.chance(0.35)) np.number = 'plural';
@@ -179,7 +179,7 @@ function nounPhrase(r: Random, depth: number, opts: NounOptions = {}): NounPhras
 function nounModifier(r: Random, head: string): NounModifier {
   const concept = r.pick(nouns.filter((id) => id !== head));
   const modifier: NounModifier = { concept, relation: r.pick(MODIFIER_RELATIONS) };
-  if ((byId.get(concept) as ConceptSeed).countable !== false && r.chance(0.25)) modifier.number = 'plural';
+  if ((byId.get(concept) as DefinedConceptSeed).countable !== false && r.chance(0.25)) modifier.number = 'plural';
   if (r.chance(0.2)) modifier.adjectives = [r.pick(adjectives)];
   return modifier;
 }
@@ -200,7 +200,7 @@ function nounElement(r: Random, depth: number, opts: NounOptions = {}): NounElem
 // now and then one more that it licenses.
 function clauseArguments(
   r: Random,
-  verb: ConceptSeed,
+  verb: DefinedConceptSeed,
   depth: number,
   objectPronoun: number,
 ): Pick<PhrasePlan, 'directObject' | 'complements'> {
@@ -253,7 +253,7 @@ function relativeClause(r: Random, depth: number): RelativeClause {
   return rc;
 }
 
-function verbPhrase(r: Random, verb: ConceptSeed, weight = 1): VerbPhrase {
+function verbPhrase(r: Random, verb: DefinedConceptSeed, weight = 1): VerbPhrase {
   const vp: VerbPhrase = { verb: verb.id };
   if (r.chance(0.6)) vp.tense = r.pick(TENSES);
   if (r.chance(0.45 * weight)) vp.aspect = r.pick(MARKED_ASPECTS);
@@ -270,7 +270,7 @@ function verbPhrase(r: Random, verb: ConceptSeed, weight = 1): VerbPhrase {
 
 // The verb of a clause that renders as an infinitive — a governed one, or a clause of purpose — has
 // no tense, aspect or modals of its own; it may be negated and take an adverb.
-function nonfiniteVerbPhrase(r: Random, verb: ConceptSeed): VerbPhrase {
+function nonfiniteVerbPhrase(r: Random, verb: DefinedConceptSeed): VerbPhrase {
   const vp: VerbPhrase = { verb: verb.id };
   if (r.chance(0.2)) vp.negative = true;
   if (r.chance(0.3)) vp.modifier = r.pick(adverbs);
@@ -299,7 +299,7 @@ function complement(r: Random, type: ComplementType, depth: number): Complement 
 // in turn ("to desire to be able to act").
 function infinitiveComplement(r: Random, depth: number, objectControl: boolean): InfinitiveComplement {
   const governor = depth < MAX_DEPTH && r.chance(0.2) ? r.pick(GOVERNORS.filter((g) => !g.causative)) : undefined;
-  const verb = byId.get(governor?.verb ?? r.pick(verbs).id) as ConceptSeed;
+  const verb = byId.get(governor?.verb ?? r.pick(verbs).id) as DefinedConceptSeed;
   const ic: InfinitiveComplement = { verbPhrase: nonfiniteVerbPhrase(r, verb) };
   if (governor) {
     if (governor.predicate) ic.complements = { predicative: { phrase: { concept: governor.predicate } } };
@@ -320,7 +320,7 @@ function purposeClause(r: Random, depth: number): PurposeClause {
 function plan(r: Random, extras = true): PhrasePlan {
   // Now and then the clause is built on a word that governs an infinitive, and takes one.
   const governor = r.chance(0.12) ? r.pick(GOVERNORS) : undefined;
-  const verb = governor ? (byId.get(governor.verb) as ConceptSeed) : r.pick(verbs);
+  const verb = governor ? (byId.get(governor.verb) as DefinedConceptSeed) : r.pick(verbs);
   const p: PhrasePlan = {
     subject: nounElement(r, 0, { pronoun: true, relative: true }),
     verbPhrase: verbPhrase(r, verb),

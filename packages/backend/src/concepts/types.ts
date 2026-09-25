@@ -12,10 +12,11 @@ export interface ConceptSeed {
    * Shaped as a bare/indefinite noun phrase — a genus-differentia gloss ("a small mammal").
    *
    * Written in the phrase language (P13), the line the console prints and applies, with every word
-   * named by its concept id — `'/subj ( MAMMAL /a /adj SMALL )'` — and compiled to its plan when the
-   * seed is assembled (see compileSeedDefinitions). A plan literal is still taken as it is.
+   * named by its concept id — `'/subj ( MAMMAL /adj SMALL /a )'` — and compiled to its plan when the
+   * seed is assembled (see compileSeedDefinitions). A definition with linked periods writes one a
+   * line, in a template literal indented with the code around it.
    */
-  definition?: PhrasePlan | string;
+  definition?: string;
   emoji?: string;
   transitivity?: string; // only for verbs
   modal?: boolean; // verb that governs another verb's infinitive rather than heading a clause

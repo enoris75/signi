@@ -20,8 +20,11 @@ import type { ConceptSeed } from './types.js';
  * distinct levels. Do not add a level because the taxonomy looks tidier with it.
  */
 
+/** What the walks read of a seed: its id and its parent. */
+type Node = Pick<ConceptSeed, 'id' | 'isA'>;
+
 /** Index the seeds by id, for the walks below. */
-export function conceptIndex(seeds: ConceptSeed[]): Map<string, ConceptSeed> {
+export function conceptIndex(seeds: Node[]): Map<string, Node> {
   return new Map(seeds.map((s) => [s.id, s]));
 }
 
@@ -33,7 +36,7 @@ export function conceptIndex(seeds: ConceptSeed[]): Map<string, ConceptSeed> {
  * so a cycle can only reach here through a hand-edited database — but a hung request is a far
  * worse failure than a loud one, so the guard stays.
  */
-export function ancestors(id: string, byId: Map<string, ConceptSeed>): string[] {
+export function ancestors(id: string, byId: Map<string, Node>): string[] {
   const chain: string[] = [];
   const seen = new Set<string>([id]);
   let parent = byId.get(id)?.isA;
@@ -53,7 +56,7 @@ export function ancestors(id: string, byId: Map<string, ConceptSeed>): string[] 
  * seeded, or a cycle. Called by the seed before it writes anything, so bad data fails at build
  * time with the offending path named, rather than at request time as a spin.
  */
-export function assertValidHierarchy(seeds: ConceptSeed[]): void {
+export function assertValidHierarchy(seeds: Node[]): void {
   const byId = conceptIndex(seeds);
 
   for (const s of seeds) {

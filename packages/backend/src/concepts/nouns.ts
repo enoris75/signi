@@ -1,213 +1,72 @@
 import type { ConceptSeed } from './types.js';
-import type { Definiteness, PhrasePlan } from '@signi/shared';
 
-// A genus-differentia gloss the engine renders into every language: an indefinite noun phrase
-// whose head is the genus (usually the concept's own hypernym) carrying differentia adjectives —
-// glossOf('MAMMAL', 'SMALL') → en "a small mammal", it "un piccolo mammifero", de "ein kleines
-// Säugetier", ja "小さい哺乳類". Set as a concept's `definition` to localize its picker tooltip
-// without hand-writing a literal per language (see ConceptSeed.definition).
-const glossOf = (genus: string, ...adjectives: string[]): PhrasePlan => ({
-  subject: { concept: genus, definiteness: 'indefinite', adjectives },
-});
-
-// A genus-differentia gloss on a **mass** genus: the same shape glossOf builds, with the bare
-// determiner a mass noun takes instead of the indefinite that counts it — massGlossOf('SUBSTANCE',
-// 'SOLID') → en "solid substance", de "fester Stoff", fr "substance solide", ja "固体の物質", where
-// glossOf would say *a solid substance*. Localization A23 (TEXT), B53 (GROUND), B56 (CONTINENT).
-const massGlossOf = (genus: string, ...adjectives: string[]): PhrasePlan => ({
-  subject: { concept: genus, definiteness: 'bare', adjectives },
-});
-
-// A genus + subject-gap relative-clause gloss: an indefinite head noun restricted by a relative
-// clause whose subject the head fills — whoGloss('PERSON', 'MAKE', 'OBJECT_THING') → en "a person
-// who makes objects", it "una persona che fa oggetti", de "eine Person, die Gegenstände macht", ja
-// "物体を作る人". The optional object renders as a bare plural ("objects", not "the objects").
-const whoGloss = (
-  genus: string,
-  verb: string,
-  object?: string,
-  // A **mass** object reads bare in the singular, not the plural: LOADING is a process that loads
-  // content, not *contents* (localization B57). CONTENT is a count noun elsewhere in the corpus
-  // (B10 pins "die Inhalte"), so the number is the gloss's choice, not the lexeme's.
-  objectNumber: 'singular' | 'plural' = 'plural',
-): PhrasePlan => ({
-  subject: {
-    concept: genus,
-    definiteness: 'indefinite',
-    relative: {
-      verbPhrase: { verb },
-      ...(object
-        ? { directObject: { concept: object, definiteness: 'bare', ...(objectNumber === 'plural' ? { number: 'plural' as const } : {}) } }
-        : {}),
-    },
-  },
-});
-
-// A patient gloss: a genus restricted by an object-gap relative clause whose subject is the
-// generic/impersonal "one" — the head is what the action is done *to*, not what does it.
-// patientGloss('OBJECT_THING', 'EAT') → en "an object that one eats", it "un oggetto che si
-// mangia", fr "un objet qu'on mange", de "ein Gegenstand, den man isst", ja "食べる物体". The
-// GENERIC_PERSON subject renders as a placed word (en/de/fr) or an impersonal clitic (it/es/pt),
-// and drops in Japanese — see its seed and isGenericSubject in the engine.
+// Each noun below is defined by the phrase it is short for (P13: written in the phrase language).
+// The shapes they take, each with the localization task that settled it:
 //
-// A **mass** genus takes `bare` instead: *a content* counts what cannot be counted, so HELP is
-// patientGloss('CONTENT', 'SHOW', 'bare') → en "content that one shows", de "Inhalt, den man
-// zeigt", while French still writes the partitive its grammar requires (*du contenu qu'on
-// montre*). Localization A23.
-const patientGloss = (genus: string, verb: string, definiteness: Definiteness = 'indefinite'): PhrasePlan => ({
-  subject: {
-    concept: genus,
-    definiteness,
-    relative: {
-      headRole: 'directObject',
-      subject: { concept: 'GENERIC_PERSON' },
-      verbPhrase: { verb },
-    },
-  },
-});
-
-// A patient gloss whose agent is **named** rather than generic: the same object-gap relative clause
-// patientGloss builds, with an indefinite noun in the subject where "one" would stand —
-// patientOfGloss('PARTICIPANT_GRAMMAR', 'GOVERN', 'VERB') → en "a participant that a verb governs",
-// de "ein Partizipant, den ein Verb regiert", ja "動詞が支配する参与者". It is what says a
-// grammatical object (the verb governs its case) beside a subject, which whoGloss says the other way
-// round — "a participant that governs verbs". Localization A27; B56 glosses COUNTRY with it.
-const patientOfGloss = (genus: string, verb: string, agent: string, definiteness: Definiteness = 'indefinite'): PhrasePlan => ({
-  subject: {
-    concept: genus,
-    definiteness,
-    relative: {
-      headRole: 'directObject',
-      subject: { concept: agent, definiteness: 'indefinite' },
-      verbPhrase: { verb },
-    },
-  },
-});
-
-// A place gloss: a genus restricted by a *locative*-gap relative clause — the head is where the
-// action happens, not who does it or what it is done to, and the clause carries its own generic
-// subject. whereGloss('PLACE', 'EAT') → en "a place where one eats", it "un luogo dove si mangia",
-// fr "un lieu où l'on mange", de "ein Ort, an dem man isst", ja "食べる場所". The verb must license a
-// `locative` complement. The optional object renders as a bare plural, as in whoGloss. Added for
-// B32; the engine side that renders the relative adverb is C07.
-const whereGloss = (genus: string, verb: string, object?: string): PhrasePlan => ({
-  subject: {
-    concept: genus,
-    definiteness: 'indefinite',
-    relative: {
-      headRole: 'locative',
-      subject: { concept: 'GENERIC_PERSON' },
-      verbPhrase: { verb },
-      ...(object ? { directObject: { concept: object, definiteness: 'bare', number: 'plural' } } : {}),
-    },
-  },
-});
-
-// An instrument gloss: a genus restricted by an *instrumental*-gap relative clause — the head is
-// what the action is done **with**, not who does it or what it is done to, and the clause carries
-// the generic subject patientGloss and whereGloss use. instrumentGloss('ORGAN', 'SEE') → en "an
-// organ with which one sees", it "un organo con il quale si vede", fr "un organe avec lequel on
-// voit", de "ein Organ, mit dem man sieht", ja "見る器官". The optional object is an indefinite
-// singular, "makes **an** object": a bare plural (whereGloss's) would meet the Portuguese impersonal
-// *se*, which does not yet agree with a plural object (A206 — "se faz objetos"). A mass genus takes
-// `bare`, as in patientGloss. Localization C26 (EYE, MATERIAL).
-const instrumentGloss = (genus: string, verb: string, object?: string, definiteness: Definiteness = 'indefinite'): PhrasePlan => ({
-  subject: {
-    concept: genus,
-    definiteness,
-    relative: {
-      headRole: 'instrumental',
-      subject: { concept: 'GENERIC_PERSON' },
-      verbPhrase: { verb },
-      ...(object ? { directObject: { concept: object, definiteness: 'indefinite' } } : {}),
-    },
-  },
-});
-
-// A part-whole gloss: PART with the **whole** it is a part of as its genitive — partOfGloss('KEYBOARD')
-// → en "a part of a keyboard", it "una parte di una tastiera", fr "une partie d'un clavier", de "ein
-// Teil einer Tastatur", ja "キーボードの部分". The whole is a `possessor` flagged `possessorRole:
-// 'whole'`, which the six other languages render as the genitive they already had and English
-// turns from the Saxon "a keyboard's part" (a part the keyboard owns) into an of-phrase.
-// Localization C26 (KEY, ROW, REGION, ORGAN); FLAME, DEATH and BLADE write the same relation out,
-// on a definite head.
-const partOfGloss = (whole: string): PhrasePlan => ({
-  subject: {
-    concept: 'PART',
-    definiteness: 'indefinite',
-    possessor: { concept: whole, definiteness: 'indefinite' },
-    possessorRole: 'whole',
-  },
-});
-
-// A period of time counted in smaller ones: C26's `parts` possessor under C31's cardinal —
-// countedPeriod('HOUR', 24) → en "a period of twenty-four hours", it "un periodo di ventiquattro
-// ore", de "ein Zeitraum von vierundzwanzig Stunden", ja 二十四時間の期間. The cardinal pluralises the
-// unit and takes the Japanese counter the noun names (localization C31).
-const countedPeriod = (unit: string, count: number): PhrasePlan => ({
-  subject: {
-    concept: 'PERIOD_TIME',
-    definiteness: 'indefinite',
-    possessor: { concept: unit, definiteness: 'indefinite', numeral: count },
-    possessorRole: 'parts',
-  },
-});
-
-// A language's gloss: the definite LANGUAGE with its country as the genitive possessor —
-// languageOf('ITALY') → en "Italy's language", it "la lingua dell'Italia", de "die Sprache Italiens",
-// ja "イタリアの言語" (localization B36). Definite, because "a language of Italy" says one of several.
-const languageOf = (country: string): PhrasePlan => ({
-  subject: { concept: 'LANGUAGE', definiteness: 'definite', possessor: { concept: country } },
-});
-
-// A kin gloss: the relative one is to somebody else, said as the genitive the languages already
-// have — kinGloss('BROTHER', 'PARENT') → en "a parent's brother", it "un fratello di un genitore",
-// de "ein Bruder eines Elternteils", ja 親の兄弟. The head takes `definite` where the relation is
-// unique (one father per parent, one mother per spouse): "the father of a parent", which English
-// still writes as the Saxon genitive, since that takes the possessor's determiner. The plain
-// `owner` role, not C26's part-whole: a father is not a part of a parent (localization B71–B73).
-const kinGloss = (head: string, whose: string, definiteness: Definiteness = 'indefinite'): PhrasePlan => ({
-  subject: {
-    concept: head,
-    definiteness,
-    possessor: { concept: whose, definiteness: 'indefinite' },
-  },
-});
-
-// The sibling gloss: a person who has the same parents, with an optional sex adjective on the head —
-// sameParentsGloss('MALE') → en "a male person who has the same parents", de "eine männliche Person,
-// die die gleichen Eltern hat", ja 同じ親を持つ男性の人. The head is PERSON rather than the genus
-// SIBLING because Romance has no neutral word for a sibling to modify ("una sorella femminile" for
-// SISTER), where PERSON is neutral in all seven (localization B69).
-const sameParentsGloss = (...adjectives: string[]): PhrasePlan => ({
-  subject: {
-    concept: 'PERSON',
-    definiteness: 'indefinite',
-    ...(adjectives.length ? { adjectives } : {}),
-    relative: {
-      verbPhrase: { verb: 'HAVE' },
-      directObject: { concept: 'PARENT', definiteness: 'definite', number: 'plural', adjectives: ['SAME'] },
-    },
-  },
-});
-
-// A step-parent gloss: a parent's spouse who is not the parent — kinGloss's genitive with a negated
-// copular relative beside it, because "a mother's husband" is true of every father —
-// stepParentGloss('HUSBAND', 'MOTHER', 'FATHER') → en "a mother's husband who is not a father", de
-// "ein Ehemann einer Mutter, der kein Vater ist", ja 父ではない母親の夫. One head carrying both a
-// genitive and a relative clause is BLADE's shape ("the part of an object that cuts").
-// Localization B73.
-const stepParentGloss = (head: string, whose: string, notA: string): PhrasePlan => ({
-  subject: {
-    concept: head,
-    definiteness: 'indefinite',
-    possessor: { concept: whose, definiteness: 'indefinite' },
-    relative: {
-      verbPhrase: { verb: 'BE', negative: true },
-      complements: { predicative: { phrase: { concept: notA, definiteness: 'indefinite' } } },
-    },
-  },
-});
+//  - **Genus and differentia** — an indefinite noun phrase whose head is the genus (usually the
+//    concept's own hypernym) carrying differentia adjectives: `/subj ( MAMMAL /adj SMALL /a )` → en
+//    "a small mammal", it "un piccolo mammifero", de "ein kleines Säugetier", ja "小さい哺乳類". A
+//    **mass** genus takes the bare determiner (`/zero`) instead of the indefinite that counts it:
+//    `/subj ( SUBSTANCE /adj SOLID /zero )` → en "solid substance", de "fester Stoff", fr "substance
+//    solide", ja "固体の物質", not *a solid substance*. Localization A23 (TEXT), B53 (GROUND), B56
+//    (CONTINENT).
+//  - **Who does it** — a subject-gap relative clause on an indefinite genus: `/subj ( PERSON /a /rel
+//    #2.subj )` over `/subj ( PERSON ) /verb ( MAKE ) /obj ( OBJECT_THING /pl /zero )` → en "a person
+//    who makes objects", it "una persona che fa oggetti", de "eine Person, die Gegenstände macht", ja
+//    "物体を作る人". The object reads as a bare plural ("objects", not "the objects"); a **mass** one
+//    reads bare in the singular: LOADING is a process that loads content, not *contents* (B57).
+//    CONTENT is a count noun elsewhere in the corpus (B10 pins "die Inhalte"), so the number is the
+//    gloss's choice, not the lexeme's.
+//  - **What one does it to** — an object-gap relative clause whose subject is the generic "one": `/subj
+//    ( OBJECT_THING /a /rel #2.obj )` over `/subj ( one ) /verb ( EAT ) /obj ( OBJECT_THING )` → en
+//    "an object that one eats", it "un oggetto che si mangia", fr "un objet qu'on mange", de "ein
+//    Gegenstand, den man isst", ja "食べる物体". The generic subject renders as a placed word
+//    (en/de/fr) or an impersonal clitic (it/es/pt), and drops in Japanese — see its seed and
+//    isGenericSubject in the engine. A **mass** genus is bare: HELP is "content that one shows", de
+//    "Inhalt, den man zeigt", while French still writes the partitive its grammar requires (*du
+//    contenu qu'on montre*). Localization A23. With a **named** agent instead of "one", `/subj (
+//    PARTICIPANT_GRAMMAR /a /rel #2.obj )` over `/subj ( VERB /a ) /verb ( GOVERN ) …` → en "a
+//    participant that a verb governs", de "ein Partizipant, den ein Verb regiert", ja
+//    "動詞が支配する参与者": a grammatical object (the verb governs its case) said beside a subject,
+//    which the subject gap says the other way round. Localization A27; B56 glosses COUNTRY with it.
+//  - **Where one does it** — a locative-gap relative clause, `/rel #2.loc`, with its own generic
+//    subject: en "a place where one eats", it "un luogo dove si mangia", fr "un lieu où l'on mange",
+//    de "ein Ort, an dem man isst", ja "食べる場所". The verb must license a `locative`. Added for B32;
+//    the engine side that renders the relative adverb is C07.
+//  - **What one does it with** — an instrumental-gap relative clause, `/rel #2.inst`: `/subj ( ORGAN
+//    /a /rel #2.inst )` over `/subj ( one ) /verb ( SEE )` → en "an organ with which one sees", it "un
+//    organo con il quale si vede", fr "un organe avec lequel on voit", de "ein Organ, mit dem man
+//    sieht", ja "見る器官". An object is an indefinite singular, "makes **an** object": a bare plural
+//    would meet the Portuguese impersonal *se*, which does not yet agree with a plural object (A206 —
+//    "se faz objetos"). Localization C26 (EYE, MATERIAL).
+//  - **A part of a whole** — PART with the whole as its genitive, `/whole`: `/subj ( PART /a /poss [
+//    KEYBOARD /a ] /whole )` → en "a part of a keyboard", it "una parte di una tastiera", fr "une
+//    partie d'un clavier", de "ein Teil einer Tastatur", ja "キーボードの部分". The six other
+//    languages render the genitive they already had; English turns from the Saxon "a keyboard's part"
+//    (a part the keyboard owns) into an of-phrase. Localization C26 (KEY, ROW, REGION, ORGAN); FLAME,
+//    DEATH and BLADE write the same relation out, on a definite head.
+//  - **A period counted in smaller ones** — C26's `/parts` possessor under C31's cardinal: `/subj (
+//    PERIOD_TIME /a /poss [ HOUR /a /num 24 ] /parts )` → en "a period of twenty-four hours", it "un
+//    periodo di ventiquattro ore", de "ein Zeitraum von vierundzwanzig Stunden", ja 二十四時間の期間.
+//    The cardinal pluralises the unit and takes the Japanese counter the noun names (C31).
+//  - **A language** — the definite LANGUAGE with its country as the genitive: `/subj ( LANGUAGE /poss
+//    [ ITALY ] )` → en "Italy's language", it "la lingua dell'Italia", de "die Sprache Italiens", ja
+//    "イタリアの言語" (B36). Definite, because "a language of Italy" says one of several.
+//  - **Kin** — the relative one is to somebody else, said as the genitive the languages already have:
+//    `/subj ( BROTHER /a /poss [ PARENT /a ] )` → en "a parent's brother", it "un fratello di un
+//    genitore", de "ein Bruder eines Elternteils", ja 親の兄弟. The head is definite where the relation
+//    is unique (one father per parent, one mother per spouse): "the father of a parent", which English
+//    still writes as the Saxon genitive, since that takes the possessor's determiner. The plain owner
+//    role, not C26's part-whole: a father is not a part of a parent (B71–B73). A **sibling** is a
+//    person who has the same parents, with an optional sex adjective on the head: en "a male person
+//    who has the same parents", de "eine männliche Person, die die gleichen Eltern hat", ja
+//    同じ親を持つ男性の人. The head is PERSON rather than the genus SIBLING because Romance has no
+//    neutral word for a sibling to modify ("una sorella femminile" for SISTER), where PERSON is
+//    neutral in all seven (B69). A **step-parent** is a parent's spouse who is not the parent — the
+//    genitive with a negated copular relative beside it, because "a mother's husband" is true of every
+//    father: en "a mother's husband who is not a father", de "ein Ehemann einer Mutter, der kein Vater
+//    ist", ja 父ではない母親の夫. One head carrying both a genitive and a relative clause is BLADE's
+//    shape ("the part of an object that cuts"). B73.
 
 // A German noun's `compound` form is the stem it takes as the first element of a compound, its
 // linking element (Fugenelement) included: "Hunde" (Hundebuch), "Lebens", "Kinder", "Sprach". It is
@@ -220,7 +79,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ANIMAL',
     role: 'noun',
     description: 'a living creature other than a person',
-    definition: whoGloss('BEING', 'MOVE_ONESELF'),
+    definition: `
+      /subj ( BEING /a /rel #2.subj )
+      /subj ( BEING ) /verb ( MOVE_ONESELF )
+    `,
     emoji: '🐾',
     animate: true,
     forms: {
@@ -238,7 +100,10 @@ export const nouns: ConceptSeed[] = [
     id: 'MAMMAL',
     role: 'noun',
     description: 'a warm-blooded animal that suckles its young',
-    definition: whoGloss('ANIMAL', 'PRODUCE', 'MILK'),
+    definition: `
+      /subj ( ANIMAL /a /rel #2.subj )
+      /subj ( ANIMAL ) /verb ( PRODUCE ) /obj ( MILK /pl /zero )
+    `,
     emoji: '🐘',
     animate: true,
     isA: 'ANIMAL',
@@ -256,7 +121,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CAT',
     role: 'noun',
     description: 'domestic feline animal',
-    definition: glossOf('MAMMAL', 'SMALL'),
+    definition: '/subj ( MAMMAL /adj SMALL /a )',
     emoji: '🐱',
     animate: true,
     isA: 'MAMMAL',
@@ -274,7 +139,7 @@ export const nouns: ConceptSeed[] = [
     id: 'DOG',
     role: 'noun',
     description: 'domestic canine animal',
-    definition: glossOf('MAMMAL', 'DOMESTIC', 'CANINE'),
+    definition: '/subj ( MAMMAL /adj DOMESTIC /adj CANINE /a )',
     emoji: '🐶',
     animate: true,
     isA: 'MAMMAL',
@@ -292,7 +157,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BOOK',
     role: 'noun',
     description: 'a written or printed work',
-    definition: glossOf('OBJECT_THING', 'WRITTEN'),
+    definition: '/subj ( OBJECT_THING /adj WRITTEN /a )',
     emoji: '📚',
     isA: 'OBJECT_THING',
     forms: {
@@ -309,7 +174,10 @@ export const nouns: ConceptSeed[] = [
     id: 'AIR',
     role: 'noun',
     description: 'the gas that surrounds the earth',
-    definition: patientGloss('GAS', 'BREATHE', 'bare'),
+    definition: `
+      /subj ( GAS /zero /rel #2.obj )
+      /subj ( one ) /verb ( BREATHE ) /obj ( GAS )
+    `,
     emoji: '💨',
     countable: false,
     forms: {
@@ -329,7 +197,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GROUND',
     role: 'noun',
     description: 'the solid surface of the earth',
-    definition: massGlossOf('SUBSTANCE', 'SOLID'),
+    definition: '/subj ( SUBSTANCE /adj SOLID /zero )',
     emoji: '🟫',
     forms: {
       en: { base: 'ground', plural: 'grounds', count: 'singular' },
@@ -346,7 +214,10 @@ export const nouns: ConceptSeed[] = [
     id: 'WATER',
     role: 'noun',
     description: 'the liquid H₂O',
-    definition: patientGloss('LIQUID', 'DRINK', 'bare'),
+    definition: `
+      /subj ( LIQUID /zero /rel #2.obj )
+      /subj ( one ) /verb ( DRINK ) /obj ( LIQUID )
+    `,
     emoji: '💧',
     countable: false,
     isA: 'LIQUID',
@@ -387,7 +258,10 @@ export const nouns: ConceptSeed[] = [
     id: 'LIGHT',
     role: 'noun',
     description: 'the natural agent that makes things visible',
-    definition: patientGloss('CONCEPT', 'SEE'),
+    definition: `
+      /subj ( CONCEPT /a /rel #2.obj )
+      /subj ( one ) /verb ( SEE ) /obj ( CONCEPT )
+    `,
     emoji: '💡',
     forms: {
       en: { base: 'light', plural: 'lights', count: 'singular' },
@@ -405,7 +279,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SOUND',
     role: 'noun',
     description: 'something that can be heard',
-    definition: patientGloss('CONCEPT', 'HEAR'),
+    definition: `
+      /subj ( CONCEPT /a /rel #2.obj )
+      /subj ( one ) /verb ( HEAR ) /obj ( CONCEPT )
+    `,
     emoji: '🔊',
     forms: {
       en: { base: 'sound', plural: 'sounds', count: 'singular' },
@@ -666,7 +543,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LINE_MARK',
     role: 'noun',
     description: 'a long thin mark drawn or printed on a surface',
-    definition: glossOf('SHAPE', 'LONG'),
+    definition: '/subj ( SHAPE /adj LONG /a )',
     emoji: '➖',
     isA: 'SHAPE',
     synonym: 'stroke',
@@ -684,7 +561,10 @@ export const nouns: ConceptSeed[] = [
     id: 'MONEY',
     role: 'noun',
     description: 'a medium of exchange',
-    definition: patientGloss('OBJECT_THING', 'EXCHANGE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj )
+      /subj ( one ) /verb ( EXCHANGE ) /obj ( OBJECT_THING )
+    `,
     emoji: '💰',
     countable: false,
     forms: {
@@ -701,7 +581,10 @@ export const nouns: ConceptSeed[] = [
     id: 'FOOD',
     role: 'noun',
     description: 'nourishment, something to eat',
-    definition: patientGloss('OBJECT_THING', 'EAT'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj )
+      /subj ( one ) /verb ( EAT ) /obj ( OBJECT_THING )
+    `,
     emoji: '🍽️',
     countable: false,
     forms: {
@@ -721,7 +604,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ICE_CREAM',
     role: 'noun',
     description: 'a sweet frozen dessert made from milk or cream',
-    definition: glossOf('FOOD', 'COLD', 'SWEET'),
+    definition: '/subj ( FOOD /adj COLD /adj SWEET /a )',
     emoji: '🍨',
     isA: 'FOOD',
     forms: {
@@ -761,7 +644,10 @@ export const nouns: ConceptSeed[] = [
     id: 'LIQUID',
     role: 'noun',
     description: 'a fluid substance, something to drink',
-    definition: patientGloss('SUBSTANCE', 'POUR', 'bare'),
+    definition: `
+      /subj ( SUBSTANCE /zero /rel #2.obj )
+      /subj ( one ) /verb ( POUR ) /obj ( SUBSTANCE )
+    `,
     emoji: '💧',
     countable: false,
     forms: {
@@ -781,7 +667,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CONTENT',
     role: 'noun',
     description: 'what something holds or contains',
-    definition: patientGloss('OBJECT_THING', 'INCLUDE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj )
+      /subj ( one ) /verb ( INCLUDE ) /obj ( OBJECT_THING )
+    `,
     emoji: '🗃️',
     forms: {
       en: { base: 'content', plural: 'contents', count: 'singular' },
@@ -821,13 +710,10 @@ export const nouns: ConceptSeed[] = [
     id: 'POINT_NOUN',
     role: 'noun',
     description: 'a position with no size',
-    definition: {
-      subject: {
-        concept: 'PLACE',
-        definiteness: 'indefinite',
-        relative: { verbPhrase: { verb: 'HAVE', negative: true }, directObject: { concept: 'SIZE', definiteness: 'bare' } },
-      },
-    },
+    definition: `
+      /subj ( PLACE /a /rel #2.subj )
+      /subj ( PLACE ) /verb ( HAVE /not ) /obj ( SIZE /zero )
+    `,
     emoji: '🔸',
     isA: 'PLACE',
     forms: {
@@ -847,7 +733,7 @@ export const nouns: ConceptSeed[] = [
     id: 'AREA',
     role: 'noun',
     description: 'a part of a place, a town or a country',
-    definition: partOfGloss('PLACE'),
+    definition: '/subj ( PART /a /poss [ PLACE /a ] /whole )',
     emoji: '🗾',
     isA: 'PLACE',
     forms: {
@@ -888,18 +774,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SIDE',
     role: 'noun',
     description: 'a part of a thing away from its middle; a face or edge of it',
-    definition: {
-      subject: {
-        concept: 'PART',
-        definiteness: 'indefinite',
-        possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-        relative: {
-          verbPhrase: { verb: 'BE', negative: true },
-          complements: { predicative: { phrase: { concept: 'CENTER', definiteness: 'definite' } } },
-        },
-      },
-    },
+    definition: `
+      /subj ( PART /a /poss [ OBJECT_THING /a ] /whole /rel #2.subj )
+      /subj ( PART ) /verb ( BE /not ) /pred ( CENTER /the )
+    `,
     emoji: '🔲',
     isA: 'PART',
     forms: {
@@ -997,7 +875,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BUILDING',
     role: 'noun',
     description: 'a structure with walls and a roof',
-    definition: whoGloss('PLACE', 'HAVE', 'WALL'),
+    definition: `
+      /subj ( PLACE /a /rel #2.subj )
+      /subj ( PLACE ) /verb ( HAVE ) /obj ( WALL /pl /zero )
+    `,
     emoji: '🏢',
     isA: 'PLACE',
     forms: {
@@ -1017,7 +898,10 @@ export const nouns: ConceptSeed[] = [
     id: 'WALL',
     role: 'noun',
     description: 'an upright structure that encloses or divides a space',
-    definition: whoGloss('OBJECT_THING', 'ENCLOSE', 'PLACE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj )
+      /subj ( OBJECT_THING ) /verb ( ENCLOSE ) /obj ( PLACE /pl /zero )
+    `,
     emoji: '🧱',
     forms: {
       en: { base: 'wall', plural: 'walls', count: 'singular' },
@@ -1033,7 +917,10 @@ export const nouns: ConceptSeed[] = [
     id: 'HOUSE',
     role: 'noun',
     description: 'a building used as a dwelling',
-    definition: whereGloss('BUILDING', 'LIVE'),
+    definition: `
+      /subj ( BUILDING /a /rel #2.loc )
+      /subj ( one ) /verb ( LIVE ) /loc ( BUILDING )
+    `,
     emoji: '🏠',
     isA: 'BUILDING',
     forms: {
@@ -1050,7 +937,10 @@ export const nouns: ConceptSeed[] = [
     id: 'HOME',
     role: 'noun',
     description: 'the place where one lives',
-    definition: whereGloss('PLACE', 'LIVE'),
+    definition: `
+      /subj ( PLACE /a /rel #2.loc )
+      /subj ( one ) /verb ( LIVE ) /loc ( PLACE )
+    `,
     emoji: '🏡',
     isA: 'PLACE',
     forms: {
@@ -1071,7 +961,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ROOM',
     role: 'noun',
     description: 'a part of a building enclosed by walls',
-    definition: partOfGloss('BUILDING'),
+    definition: '/subj ( PART /a /poss [ BUILDING /a ] /whole )',
     emoji: '🛋️',
     isA: 'PLACE',
     forms: {
@@ -1090,7 +980,10 @@ export const nouns: ConceptSeed[] = [
     id: 'OFFICE',
     role: 'noun',
     description: 'a room where people work',
-    definition: whereGloss('ROOM', 'WORK_LABOUR'),
+    definition: `
+      /subj ( ROOM /a /rel #2.loc )
+      /subj ( one ) /verb ( WORK_LABOUR ) /loc ( ROOM )
+    `,
     emoji: '🗄️',
     isA: 'ROOM',
     forms: {
@@ -1109,15 +1002,10 @@ export const nouns: ConceptSeed[] = [
     id: 'DOOR',
     role: 'noun',
     description: 'a panel in a wall that opens and closes',
-    definition: {
-      subject: {
-        concept: 'PART',
-        definiteness: 'indefinite',
-        possessor: { concept: 'WALL', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-        relative: { headRole: 'directObject', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'OPEN' } },
-      },
-    },
+    definition: `
+      /subj ( PART /a /poss [ WALL /a ] /whole /rel #2.obj )
+      /subj ( one ) /verb ( OPEN ) /obj ( PART )
+    `,
     emoji: '🚪',
     forms: {
       en: { base: 'door', plural: 'doors', count: 'singular' },
@@ -1137,18 +1025,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CAR',
     role: 'noun',
     description: 'a road vehicle with an engine, for a few people',
-    definition: {
-      subject: {
-        concept: 'OBJECT_THING',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'instrumental',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'GO' },
-          complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
-        },
-      },
-    },
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.inst )
+      /subj ( one ) /verb ( GO ) /dir ( PLACE /a )
+    `,
     emoji: '🚗',
     isA: 'OBJECT_THING',
     forms: {
@@ -1165,7 +1045,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CHILD',
     role: 'noun',
     description: 'a young human being',
-    definition: glossOf('PERSON', 'YOUNG'),
+    definition: '/subj ( PERSON /adj YOUNG /a )',
     emoji: '👦',
     animate: true,
     human: true,
@@ -1227,7 +1107,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SPEAKER',
     role: 'noun',
     description: 'the person who is speaking',
-    definition: whoGloss('PERSON', 'SPEAK'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( SPEAK )
+    `,
     emoji: '🗣️',
     animate: true,
     human: true,
@@ -1248,7 +1131,10 @@ export const nouns: ConceptSeed[] = [
     id: 'COMPANION',
     role: 'noun',
     description: 'one who does something together with another',
-    definition: whoGloss('PERSON', 'ACCOMPANY', 'PERSON'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( ACCOMPANY ) /obj ( PERSON /pl /zero )
+    `,
     emoji: '👯',
     animate: true,
     human: true,
@@ -1267,7 +1153,10 @@ export const nouns: ConceptSeed[] = [
     id: 'RECIPIENT',
     role: 'noun',
     description: 'one who receives something',
-    definition: whoGloss('PERSON', 'ACQUIRE', 'OBJECT_THING'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( ACQUIRE ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '📬',
     animate: true,
     human: true,
@@ -1286,7 +1175,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FOX',
     role: 'noun',
     description: 'a carnivorous mammal with reddish fur',
-    definition: glossOf('MAMMAL', 'BROWN'),
+    definition: '/subj ( MAMMAL /adj BROWN /a )',
     emoji: '🦊',
     animate: true,
     isA: 'MAMMAL',
@@ -1304,7 +1193,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BOY',
     role: 'noun',
     description: 'a young male human',
-    definition: glossOf('PERSON', 'YOUNG', 'MALE'),
+    definition: '/subj ( PERSON /adj YOUNG /adj MALE /a )',
     emoji: '👦',
     animate: true,
     human: true,
@@ -1328,7 +1217,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GIRL',
     role: 'noun',
     description: 'a young female human',
-    definition: glossOf('PERSON', 'YOUNG', 'FEMALE'),
+    definition: '/subj ( PERSON /adj YOUNG /adj FEMALE /a )',
     emoji: '👧',
     animate: true,
     human: true,
@@ -1349,7 +1238,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MAN',
     role: 'noun',
     description: 'an adult male human',
-    definition: glossOf('PERSON', 'ADULT', 'MALE'),
+    definition: '/subj ( PERSON /adj ADULT /adj MALE /a )',
     emoji: '👨',
     animate: true,
     human: true,
@@ -1394,7 +1283,7 @@ export const nouns: ConceptSeed[] = [
     id: 'WOMAN',
     role: 'noun',
     description: 'an adult female human',
-    definition: glossOf('PERSON', 'ADULT', 'FEMALE'),
+    definition: '/subj ( PERSON /adj ADULT /adj FEMALE /a )',
     emoji: '👩',
     animate: true,
     human: true,
@@ -1414,7 +1303,7 @@ export const nouns: ConceptSeed[] = [
     id: 'WOLF',
     role: 'noun',
     description: 'a wild canine animal',
-    definition: glossOf('MAMMAL', 'WILD', 'CANINE'),
+    definition: '/subj ( MAMMAL /adj WILD /adj CANINE /a )',
     emoji: '🐺',
     animate: true,
     alarm: true, // "cry wolf": gridare al lupo, crier au loup
@@ -1433,7 +1322,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BOVINE',
     role: 'noun',
     description: 'a large ruminant mammal of the cattle kind',
-    definition: whoGloss('MAMMAL', 'EAT_ANIMAL', 'GRASS'),
+    definition: `
+      /subj ( MAMMAL /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( EAT_ANIMAL ) /obj ( GRASS /pl /zero )
+    `,
     emoji: '🐄',
     animate: true,
     isA: 'MAMMAL',
@@ -1451,7 +1343,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COW',
     role: 'noun',
     description: 'an adult female bovine kept for milk or meat',
-    definition: glossOf('MAMMAL', 'BIG'),
+    definition: '/subj ( MAMMAL /adj BIG /a )',
     emoji: '🐄',
     animate: true,
     isA: 'BOVINE',
@@ -1469,7 +1361,7 @@ export const nouns: ConceptSeed[] = [
     id: 'OX',
     role: 'noun',
     description: 'a castrated adult male bovine used as a draft animal',
-    definition: glossOf('BOVINE', 'CASTRATED', 'ADULT', 'MALE'),
+    definition: '/subj ( BOVINE /adj CASTRATED /adj ADULT /adj MALE /a )',
     emoji: '🐂',
     animate: true,
     isA: 'BOVINE',
@@ -1487,7 +1379,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BUTCHER',
     role: 'noun',
     description: 'a person who slaughters animals or sells meat',
-    definition: whoGloss('PERSON', 'KILL', 'ANIMAL'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( KILL ) /obj ( ANIMAL /pl /zero )
+    `,
     emoji: '🔪',
     animate: true,
     human: true,
@@ -1531,14 +1426,10 @@ export const nouns: ConceptSeed[] = [
     id: 'LIFE',
     role: 'noun',
     description: 'the condition of being alive',
-    definition: {
-      subject: {
-        concept: 'STATE',
-        definiteness: 'definite',
-        possessor: { concept: 'BEING', definiteness: 'indefinite', relative: { verbPhrase: { verb: 'LIVE_ALIVE' } } },
-        possessorRole: 'whole',
-      },
-    },
+    definition: `
+      /subj ( STATE /poss [ BEING /a /rel #2.subj ] /whole )
+      /subj ( BEING ) /verb ( LIVE_ALIVE )
+    `,
     emoji: '🌱',
     forms: {
       en: { base: 'life', plural: 'lives', count: 'singular' },
@@ -1578,14 +1469,7 @@ export const nouns: ConceptSeed[] = [
     id: 'DEATH',
     role: 'noun',
     description: 'the end of life; the state of being dead',
-    definition: {
-      subject: {
-        concept: 'END',
-        definiteness: 'definite',
-        possessor: { concept: 'LIFE', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-      },
-    },
+    definition: '/subj ( END /poss [ LIFE /a ] /whole )',
     emoji: '💀',
     forms: {
       en: { base: 'death', plural: 'deaths', count: 'singular' },
@@ -1606,7 +1490,10 @@ export const nouns: ConceptSeed[] = [
     id: 'FEELING',
     role: 'noun',
     description: 'an emotion or sensation one feels',
-    definition: patientGloss('STATE', 'FEEL'),
+    definition: `
+      /subj ( STATE /a /rel #2.obj )
+      /subj ( one ) /verb ( FEEL ) /obj ( STATE )
+    `,
     emoji: '💗',
     forms: {
       en: { base: 'feeling', plural: 'feelings', count: 'singular' },
@@ -1624,7 +1511,7 @@ export const nouns: ConceptSeed[] = [
     id: 'AFFECTION',
     role: 'noun',
     description: 'a warm feeling of fondness toward someone',
-    definition: glossOf('FEELING', 'WARM'),
+    definition: '/subj ( FEELING /adj WARM /a )',
     emoji: '🥰',
     countable: false,
     isA: 'FEELING',
@@ -1642,7 +1529,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MOUSE',
     role: 'noun',
     description: 'a small rodent',
-    definition: glossOf('MAMMAL', 'SMALL'),
+    definition: '/subj ( MAMMAL /adj SMALL /a )',
     emoji: '🐭',
     animate: true,
     synonym: 'rodent',
@@ -1664,7 +1551,10 @@ export const nouns: ConceptSeed[] = [
     id: 'FLY_INSECT',
     role: 'noun',
     description: 'a small winged insect',
-    definition: whoGloss('ANIMAL', 'FLY'),
+    definition: `
+      /subj ( ANIMAL /a /rel #2.subj )
+      /subj ( ANIMAL ) /verb ( FLY )
+    `,
     emoji: '🪰',
     animate: true,
     synonym: 'insect',
@@ -1686,13 +1576,7 @@ export const nouns: ConceptSeed[] = [
     id: 'STICK',
     role: 'noun',
     description: 'a thin elongated piece of wood',
-    definition: {
-      subject: {
-        concept: 'OBJECT_THING',
-        definiteness: 'indefinite',
-        nounModifiers: [{ concept: 'WOOD', relation: 'material' }],
-      },
-    },
+    definition: '/subj ( OBJECT_THING /adj ( WOOD /material ) /a )',
     emoji: '🥢',
     synonym: 'rod',
     forms: {
@@ -1712,7 +1596,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ARROW_PROJECTILE',
     role: 'noun',
     description: 'a pointed shaft shot from a bow',
-    definition: glossOf('STICK', 'SHARP'),
+    definition: '/subj ( STICK /adj SHARP /a )',
     emoji: '🏹',
     synonym: 'projectile',
     isA: 'STICK',
@@ -1735,15 +1619,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BLADE',
     role: 'noun',
     description: 'the flat cutting part of a knife or tool',
-    definition: {
-      subject: {
-        concept: 'PART',
-        definiteness: 'definite',
-        relative: { verbPhrase: { verb: 'CUT' } },
-        possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-      },
-    },
+    definition: `
+      /subj ( PART /poss [ OBJECT_THING /a ] /whole /rel #2.subj )
+      /subj ( PART ) /verb ( CUT )
+    `,
     emoji: '🗡️',
     forms: {
       en: { base: 'blade', plural: 'blades', count: 'singular' },
@@ -1759,7 +1638,10 @@ export const nouns: ConceptSeed[] = [
     id: 'FIRE',
     role: 'noun',
     description: 'the phenomenon of combustion; flame',
-    definition: whoGloss('PROCESS', 'PRODUCE', 'HEAT'),
+    definition: `
+      /subj ( PROCESS /a /rel #2.subj )
+      /subj ( PROCESS ) /verb ( PRODUCE ) /obj ( HEAT /pl /zero )
+    `,
     emoji: '🔥',
     alarm: true, // "cry fire": gridare al fuoco, crier au feu
     forms: {
@@ -1781,15 +1663,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FLAME',
     role: 'noun',
     description: 'the visible, glowing part of a fire',
-    definition: {
-      subject: {
-        concept: 'PART',
-        definiteness: 'definite',
-        adjectives: ['VISIBLE'],
-        possessor: { concept: 'FIRE', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-      },
-    },
+    definition: '/subj ( PART /adj VISIBLE /poss [ FIRE /a ] /whole )',
     emoji: '🕯️',
     forms: {
       en: { base: 'flame', plural: 'flames', count: 'singular' },
@@ -1811,7 +1685,10 @@ export const nouns: ConceptSeed[] = [
     description: 'one who has a child',
     // CHILD_OFFSPRING, not CHILD: a parent has sons and daughters of any age, where CHILD is a young
     // person — "una persona che ha figli", not "che ha bambini" (P11 D11, localization B68).
-    definition: whoGloss('PERSON', 'HAVE', 'CHILD_OFFSPRING'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( HAVE ) /obj ( CHILD_OFFSPRING /pl /zero )
+    `,
     emoji: '🧑‍🍼',
     animate: true,
     human: true,
@@ -1838,7 +1715,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FATHER',
     role: 'noun',
     description: 'a male parent',
-    definition: glossOf('PARENT', 'MALE'),
+    definition: '/subj ( PARENT /adj MALE /a )',
     emoji: '👨',
     animate: true,
     human: true,
@@ -1875,14 +1752,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a person one is related to',
     // A part-whole possessor read from the member's end (C26): what makes a relative a relative is
     // being of the one family, as FAMILY's own gloss is that family read from the group's end.
-    definition: {
-      subject: {
-        concept: 'PERSON',
-        definiteness: 'indefinite',
-        possessor: { concept: 'FAMILY', definiteness: 'definite', adjectives: ['SAME'] },
-        possessorRole: 'whole',
-      },
-    },
+    definition: '/subj ( PERSON /a /poss [ FAMILY /adj SAME ] /whole )',
     emoji: '👪',
     animate: true,
     human: true,
@@ -1905,14 +1775,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FAMILY',
     role: 'noun',
     description: 'a group of people related to one another',
-    definition: {
-      subject: {
-        concept: 'GROUP',
-        definiteness: 'indefinite',
-        possessor: { concept: 'RELATIVE', definiteness: 'bare', number: 'plural' },
-        possessorRole: 'parts',
-      },
-    },
+    definition: '/subj ( GROUP /a /poss [ RELATIVE /pl /zero ] /parts )',
     emoji: '👨‍👩‍👧‍👦',
     isA: 'GROUP',
     forms: {
@@ -1932,7 +1795,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MOTHER',
     role: 'noun',
     description: 'a female parent',
-    definition: { subject: { concept: 'PARENT', definiteness: 'indefinite', gender: 'fem', adjectives: ['FEMALE'] } },
+    definition: '/subj ( PARENT /adj FEMALE /fem /a )',
     emoji: '👩',
     animate: true,
     human: true,
@@ -1959,15 +1822,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CHILD_OFFSPRING',
     role: 'noun',
     description: 'a son or daughter of a parent',
-    definition: {
-      subject: {
-        conjuncts: [
-          { concept: 'SON', definiteness: 'indefinite' },
-          { concept: 'DAUGHTER', definiteness: 'indefinite' },
-        ],
-        conjunction: 'or',
-      },
-    },
+    definition: '/subj ( SON /a /or [ DAUGHTER /a ] )',
     emoji: '🧒',
     animate: true,
     human: true,
@@ -2032,7 +1887,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SIBLING',
     role: 'noun',
     description: 'a person who has the same parents as another',
-    definition: sameParentsGloss(),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( HAVE ) /obj ( PARENT /adj SAME /pl )
+    `,
     emoji: '👫',
     animate: true,
     human: true,
@@ -2057,7 +1915,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BROTHER',
     role: 'noun',
     description: 'a male sibling',
-    definition: sameParentsGloss('MALE'),
+    definition: `
+      /subj ( PERSON /adj MALE /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( HAVE ) /obj ( PARENT /adj SAME /pl )
+    `,
     emoji: '👦',
     animate: true,
     human: true,
@@ -2082,7 +1943,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SISTER',
     role: 'noun',
     description: 'a female sibling',
-    definition: sameParentsGloss('FEMALE'),
+    definition: `
+      /subj ( PERSON /adj FEMALE /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( HAVE ) /obj ( PARENT /adj SAME /pl )
+    `,
     emoji: '👧',
     animate: true,
     human: true,
@@ -2109,7 +1973,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SPOUSE',
     role: 'noun',
     description: 'a person one is married to',
-    definition: patientGloss('PERSON', 'MARRY'),
+    definition: `
+      /subj ( PERSON /a /rel #2.obj )
+      /subj ( one ) /verb ( MARRY ) /obj ( PERSON )
+    `,
     emoji: '💍',
     animate: true,
     human: true,
@@ -2130,7 +1997,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HUSBAND',
     role: 'noun',
     description: 'a male spouse',
-    definition: glossOf('SPOUSE', 'MALE'),
+    definition: '/subj ( SPOUSE /adj MALE /a )',
     emoji: '🤵',
     animate: true,
     human: true,
@@ -2150,7 +2017,7 @@ export const nouns: ConceptSeed[] = [
     id: 'WIFE',
     role: 'noun',
     description: 'a female spouse',
-    definition: { subject: { concept: 'SPOUSE', definiteness: 'indefinite', gender: 'fem', adjectives: ['FEMALE'] } },
+    definition: '/subj ( SPOUSE /adj FEMALE /fem /a )',
     emoji: '👰',
     animate: true,
     human: true,
@@ -2172,7 +2039,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDPARENT',
     role: 'noun',
     description: 'a parent of a parent',
-    definition: kinGloss('PARENT', 'PARENT'),
+    definition: '/subj ( PARENT /a /poss [ PARENT /a ] )',
     emoji: '👴',
     animate: true,
     human: true,
@@ -2193,7 +2060,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDFATHER',
     role: 'noun',
     description: 'a father of a parent',
-    definition: kinGloss('FATHER', 'PARENT', 'definite'),
+    definition: '/subj ( FATHER /poss [ PARENT /a ] )',
     emoji: '👴',
     animate: true,
     human: true,
@@ -2213,7 +2080,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDMOTHER',
     role: 'noun',
     description: 'a mother of a parent',
-    definition: kinGloss('MOTHER', 'PARENT', 'definite'),
+    definition: '/subj ( MOTHER /poss [ PARENT /a ] )',
     emoji: '👵',
     animate: true,
     human: true,
@@ -2235,7 +2102,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDCHILD',
     role: 'noun',
     description: 'a child of a child',
-    definition: kinGloss('CHILD_OFFSPRING', 'CHILD_OFFSPRING'),
+    definition: '/subj ( CHILD_OFFSPRING /a /poss [ CHILD_OFFSPRING /a ] )',
     emoji: '🧒',
     animate: true,
     human: true,
@@ -2257,7 +2124,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDSON',
     role: 'noun',
     description: 'a male grandchild',
-    definition: glossOf('GRANDCHILD', 'MALE'),
+    definition: '/subj ( GRANDCHILD /adj MALE /a )',
     emoji: '👦',
     animate: true,
     human: true,
@@ -2277,7 +2144,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDDAUGHTER',
     role: 'noun',
     description: 'a female grandchild',
-    definition: { subject: { concept: 'GRANDCHILD', definiteness: 'indefinite', gender: 'fem', adjectives: ['FEMALE'] } },
+    definition: '/subj ( GRANDCHILD /adj FEMALE /fem /a )',
     emoji: '👧',
     animate: true,
     human: true,
@@ -2300,7 +2167,7 @@ export const nouns: ConceptSeed[] = [
     id: 'UNCLE',
     role: 'noun',
     description: 'a brother of a parent',
-    definition: kinGloss('BROTHER', 'PARENT'),
+    definition: '/subj ( BROTHER /a /poss [ PARENT /a ] )',
     emoji: '👨',
     animate: true,
     human: true,
@@ -2320,7 +2187,7 @@ export const nouns: ConceptSeed[] = [
     id: 'AUNT',
     role: 'noun',
     description: 'a sister of a parent',
-    definition: kinGloss('SISTER', 'PARENT'),
+    definition: '/subj ( SISTER /a /poss [ PARENT /a ] )',
     emoji: '👩',
     animate: true,
     human: true,
@@ -2343,17 +2210,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COUSIN',
     role: 'noun',
     description: 'a child of an uncle or an aunt',
-    definition: {
-      subject: {
-        concept: 'CHILD_OFFSPRING',
-        definiteness: 'indefinite',
-        possessor: {
-          concept: 'SIBLING',
-          definiteness: 'indefinite',
-          possessor: { concept: 'PARENT', definiteness: 'indefinite' },
-        },
-      },
-    },
+    definition: '/subj ( CHILD_OFFSPRING /a /poss [ SIBLING /a /poss [ PARENT /a ] ] )',
     emoji: '🧑',
     animate: true,
     human: true,
@@ -2373,7 +2230,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NEPHEW',
     role: 'noun',
     description: 'a son of a sibling',
-    definition: kinGloss('SON', 'SIBLING'),
+    definition: '/subj ( SON /a /poss [ SIBLING /a ] )',
     emoji: '👦',
     animate: true,
     human: true,
@@ -2393,7 +2250,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NIECE',
     role: 'noun',
     description: 'a daughter of a sibling',
-    definition: kinGloss('DAUGHTER', 'SIBLING'),
+    definition: '/subj ( DAUGHTER /a /poss [ SIBLING /a ] )',
     emoji: '👧',
     animate: true,
     human: true,
@@ -2416,7 +2273,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MOTHER_IN_LAW',
     role: 'noun',
     description: 'a mother of a spouse',
-    definition: kinGloss('MOTHER', 'SPOUSE', 'definite'),
+    definition: '/subj ( MOTHER /poss [ SPOUSE /a ] )',
     emoji: '👵',
     animate: true,
     human: true,
@@ -2436,7 +2293,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FATHER_IN_LAW',
     role: 'noun',
     description: 'a father of a spouse',
-    definition: kinGloss('FATHER', 'SPOUSE', 'definite'),
+    definition: '/subj ( FATHER /poss [ SPOUSE /a ] )',
     emoji: '👴',
     animate: true,
     human: true,
@@ -2456,7 +2313,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SON_IN_LAW',
     role: 'noun',
     description: 'a husband of a child',
-    definition: kinGloss('HUSBAND', 'CHILD_OFFSPRING', 'definite'),
+    definition: '/subj ( HUSBAND /poss [ CHILD_OFFSPRING /a ] )',
     emoji: '🤵',
     animate: true,
     human: true,
@@ -2476,7 +2333,7 @@ export const nouns: ConceptSeed[] = [
     id: 'DAUGHTER_IN_LAW',
     role: 'noun',
     description: 'a wife of a child',
-    definition: kinGloss('WIFE', 'CHILD_OFFSPRING', 'definite'),
+    definition: '/subj ( WIFE /poss [ CHILD_OFFSPRING /a ] )',
     emoji: '👰',
     animate: true,
     human: true,
@@ -2497,7 +2354,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BROTHER_IN_LAW',
     role: 'noun',
     description: 'a brother of a spouse',
-    definition: kinGloss('BROTHER', 'SPOUSE', 'definite'),
+    definition: '/subj ( BROTHER /poss [ SPOUSE /a ] )',
     emoji: '👨',
     animate: true,
     human: true,
@@ -2521,7 +2378,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SISTER_IN_LAW',
     role: 'noun',
     description: 'a sister of a spouse',
-    definition: kinGloss('SISTER', 'SPOUSE', 'definite'),
+    definition: '/subj ( SISTER /poss [ SPOUSE /a ] )',
     emoji: '👩',
     animate: true,
     human: true,
@@ -2548,7 +2405,10 @@ export const nouns: ConceptSeed[] = [
     id: 'STEPFATHER',
     role: 'noun',
     description: "a husband of one's mother who is not one's father",
-    definition: stepParentGloss('HUSBAND', 'MOTHER', 'FATHER'),
+    definition: `
+      /subj ( HUSBAND /a /poss [ MOTHER /a ] /rel #2.subj )
+      /subj ( HUSBAND ) /verb ( BE /not ) /pred ( FATHER )
+    `,
     emoji: '👨',
     animate: true,
     human: true,
@@ -2568,7 +2428,10 @@ export const nouns: ConceptSeed[] = [
     id: 'STEPMOTHER',
     role: 'noun',
     description: "a wife of one's father who is not one's mother",
-    definition: stepParentGloss('WIFE', 'FATHER', 'MOTHER'),
+    definition: `
+      /subj ( WIFE /a /poss [ FATHER /a ] /rel #2.subj )
+      /subj ( WIFE ) /verb ( BE /not ) /pred ( MOTHER )
+    `,
     emoji: '👩',
     animate: true,
     human: true,
@@ -2645,17 +2508,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PARTNER',
     role: 'noun',
     description: 'a person one shares one\'s life with',
-    definition: {
-      subject: {
-        concept: 'PERSON',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'comitative',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'LIVE', modifier: 'TOGETHER' },
-        },
-      },
-    },
+    definition: `
+      /subj ( PERSON /a /rel #2.with )
+      /subj ( one ) /verb ( LIVE /adv TOGETHER ) /with ( PERSON )
+    `,
     emoji: '🧑‍🤝‍🧑',
     animate: true,
     human: true,
@@ -2680,7 +2536,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BOYFRIEND',
     role: 'noun',
     description: 'a male romantic partner',
-    definition: glossOf('PARTNER', 'MALE'),
+    definition: '/subj ( PARTNER /adj MALE /a )',
     emoji: '👦',
     animate: true,
     human: true,
@@ -2701,7 +2557,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GIRLFRIEND',
     role: 'noun',
     description: 'a female romantic partner',
-    definition: { subject: { concept: 'PARTNER', definiteness: 'indefinite', gender: 'fem', adjectives: ['FEMALE'] } },
+    definition: '/subj ( PARTNER /adj FEMALE /fem /a )',
     emoji: '👧',
     animate: true,
     human: true,
@@ -2725,17 +2581,10 @@ export const nouns: ConceptSeed[] = [
     id: 'FIANCE',
     role: 'noun',
     description: 'a person one is engaged to marry',
-    definition: {
-      subject: {
-        concept: 'PERSON',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'directObject',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'MARRY', aspect: 'prospective' },
-        },
-      },
-    },
+    definition: `
+      /subj ( PERSON /a /rel #2.obj )
+      /subj ( one ) /verb ( MARRY /prosp ) /obj ( PERSON )
+    `,
     emoji: '💍',
     animate: true,
     human: true,
@@ -2758,17 +2607,10 @@ export const nouns: ConceptSeed[] = [
     id: 'FRIEND',
     role: 'noun',
     description: 'a person one knows well and likes',
-    definition: {
-      subject: {
-        concept: 'PERSON',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'directObject',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'KNOW', modifier: 'WELL' },
-        },
-      },
-    },
+    definition: `
+      /subj ( PERSON /a /rel #2.obj )
+      /subj ( one ) /verb ( KNOW /adv WELL ) /obj ( PERSON )
+    `,
     emoji: '🧑‍🤝‍🧑',
     animate: true,
     human: true,
@@ -2790,7 +2632,10 @@ export const nouns: ConceptSeed[] = [
     id: 'MARKET',
     role: 'noun',
     description: 'a place where goods are bought and sold',
-    definition: whereGloss('PLACE', 'TRADE'),
+    definition: `
+      /subj ( PLACE /a /rel #2.loc )
+      /subj ( one ) /verb ( TRADE ) /loc ( PLACE )
+    `,
     emoji: '🏪',
     isA: 'PLACE',
     forms: {
@@ -2807,7 +2652,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COIN',
     role: 'noun',
     description: 'a small round piece of metal used as money',
-    definition: glossOf('OBJECT_THING', 'SMALL', 'ROUND'),
+    definition: '/subj ( OBJECT_THING /adj SMALL /adj ROUND /a )',
     emoji: '🪙',
     isA: 'OBJECT_THING',
     forms: {
@@ -2824,7 +2669,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LEGEND',
     role: 'noun',
     description: 'a traditional story or a famous person',
-    definition: glossOf('STORY', 'OLD'),
+    definition: '/subj ( STORY /adj OLD /a )',
     emoji: '📜',
     forms: {
       en: { base: 'legend', plural: 'legends', count: 'singular' },
@@ -2841,7 +2686,10 @@ export const nouns: ConceptSeed[] = [
     id: 'WING',
     role: 'noun',
     description: 'a limb or organ used for flight',
-    definition: whoGloss('ORGAN', 'FLY'),
+    definition: `
+      /subj ( ORGAN /a /rel #2.subj )
+      /subj ( ORGAN ) /verb ( FLY )
+    `,
     emoji: '🪽',
     forms: {
       en: { base: 'wing', plural: 'wings', count: 'singular' },
@@ -2859,7 +2707,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TOOTH',
     role: 'noun',
     description: 'a hard structure in the mouth used for biting',
-    definition: whoGloss('ORGAN', 'BITE'),
+    definition: `
+      /subj ( ORGAN /a /rel #2.subj )
+      /subj ( ORGAN ) /verb ( BITE )
+    `,
     emoji: '🦷',
     forms: {
       en: { base: 'tooth', plural: 'teeth', count: 'singular' },
@@ -2876,18 +2727,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TEAR',
     role: 'noun',
     description: 'a drop of liquid from the eye',
-    definition: {
-      subject: {
-        concept: 'LIQUID',
-        definiteness: 'bare',
-        relative: {
-          headRole: 'directObject',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'SHED' },
-          complements: { source: { phrase: { concept: 'EYE', definiteness: 'definite' } } },
-        },
-      },
-    },
+    definition: `
+      /subj ( LIQUID /zero /rel #2.obj )
+      /subj ( one ) /verb ( SHED ) /obj ( LIQUID ) /src ( EYE )
+    `,
     emoji: '🥲',
     synonym: 'teardrop',
     forms: {
@@ -2904,7 +2747,7 @@ export const nouns: ConceptSeed[] = [
     id: 'YOUNG_MAN',
     role: 'noun',
     description: 'a young male person',
-    definition: glossOf('PERSON', 'YOUNG', 'MALE'),
+    definition: '/subj ( PERSON /adj YOUNG /adj MALE /a )',
     emoji: '👱‍♂️',
     animate: true,
     human: true,
@@ -2925,7 +2768,7 @@ export const nouns: ConceptSeed[] = [
     id: 'YOUNG_WOMAN',
     role: 'noun',
     description: 'a young female person',
-    definition: glossOf('PERSON', 'YOUNG', 'FEMALE'),
+    definition: '/subj ( PERSON /adj YOUNG /adj FEMALE /a )',
     emoji: '👱‍♀️',
     animate: true,
     human: true,
@@ -2954,7 +2797,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PRISON',
     role: 'noun',
     description: 'a building where people are confined as punishment',
-    definition: whereGloss('BUILDING', 'CONFINE', 'PERSON'),
+    definition: `
+      /subj ( BUILDING /a /rel #2.loc )
+      /subj ( one ) /verb ( CONFINE ) /obj ( PERSON /pl /zero ) /loc ( BUILDING )
+    `,
     emoji: '🔒',
     isA: 'BUILDING',
     forms: {
@@ -2971,7 +2817,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BUILDER',
     role: 'noun',
     description: 'a person who constructs things',
-    definition: whoGloss('PERSON', 'MAKE', 'OBJECT_THING'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( MAKE ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '👷',
     animate: true,
     human: true,
@@ -2990,7 +2839,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CREATOR',
     role: 'noun',
     description: 'someone or something that creates things',
-    definition: whoGloss('PERSON', 'MAKE', 'OBJECT_THING'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( MAKE ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '✨',
     animate: true,
     isA: 'PERSON',
@@ -3123,16 +2975,10 @@ export const nouns: ConceptSeed[] = [
     id: 'REASON',
     role: 'noun',
     description: 'why someone does something',
-    definition: {
-      subject: {
-        concept: 'FACT',
-        definiteness: 'indefinite',
-        relative: {
-          verbPhrase: { verb: 'CAUSE_VERB' },
-          directObject: { concept: 'ACTION', definiteness: 'indefinite' },
-        },
-      },
-    },
+    definition: `
+      /subj ( FACT /a /rel #2.subj )
+      /subj ( FACT ) /verb ( CAUSE_VERB ) /obj ( ACTION /a )
+    `,
     emoji: '🤔',
     synonym: 'motive',
     forms: {
@@ -3151,7 +2997,10 @@ export const nouns: ConceptSeed[] = [
     id: 'INFORMATION',
     role: 'noun',
     description: 'facts told or learned about something',
-    definition: patientGloss('CONTENT', 'LEARN', 'bare'),
+    definition: `
+      /subj ( CONTENT /zero /rel #2.obj )
+      /subj ( one ) /verb ( LEARN ) /obj ( CONTENT )
+    `,
     emoji: 'ℹ️',
     countable: false,
     forms: {
@@ -3209,7 +3058,10 @@ export const nouns: ConceptSeed[] = [
     id: 'QUESTION',
     role: 'noun',
     description: 'words said to learn something',
-    definition: instrumentGloss('PHRASE', 'ASK'),
+    definition: `
+      /subj ( PHRASE /a /rel #2.inst )
+      /subj ( one ) /verb ( ASK )
+    `,
     emoji: '❔',
     isA: 'PHRASE',
     forms: {
@@ -3229,7 +3081,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TELEPHONE',
     role: 'noun',
     description: 'a device for speaking with someone far away',
-    definition: instrumentGloss('OBJECT_THING', 'SPEAK'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.inst )
+      /subj ( one ) /verb ( SPEAK )
+    `,
     emoji: '☎️',
     isA: 'OBJECT_THING',
     forms: {
@@ -3267,7 +3122,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CONTINENT',
     role: 'noun',
     description: 'one of the earth’s great landmasses',
-    definition: massGlossOf('LAND', 'GREAT'),
+    definition: '/subj ( LAND /adj GREAT /zero )',
     emoji: '🗺️',
     // The hypernym of AFRICA. An ordinary common noun — countable, and it takes articles the
     // normal way ("a continent", "the continents"), where its proper-noun child does not. That
@@ -3290,7 +3145,7 @@ export const nouns: ConceptSeed[] = [
     description: 'the continent south of the Mediterranean',
     // The hottest continent (localization B48), A17's superlative on the climate sense of HOT: ja
     // 最も暑い大陸, es "el continente más caluroso", where HOT is 熱い to the touch and caliente.
-    definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['HOT_CLIMATE'], adjectiveDegrees: ['most'] } },
+    definition: '/subj ( CONTINENT /adj ( HOT_CLIMATE /most ) )',
     emoji: '🌍',
     // A proper noun: no plural, and the article is the language's to fix — English, German,
     // Spanish and Japanese take none; Italian, French and Portuguese take the definite one.
@@ -3413,7 +3268,7 @@ export const nouns: ConceptSeed[] = [
     // A superlative is what tells one continent from the others, where "a continent" did not
     // (localization A17): de "der größte Kontinent", ja 最も大きい大陸, pt "o maior continente"
     // — prenominal since A178 was fixed, where it shipped as "o continente maior".
-    definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['BIG'], adjectiveDegrees: ['most'] } },
+    definition: '/subj ( CONTINENT /adj ( BIG /most ) )',
     emoji: '🌏',
     proper: true,
     countable: false,
@@ -3433,7 +3288,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the continent of Australia and the Pacific islands',
     // Australia's continent, the smallest: "the smallest continent" (localization A17, as ASIA).
-    definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['SMALL'], adjectiveDegrees: ['most'] } },
+    definition: '/subj ( CONTINENT /adj ( SMALL /most ) )',
     emoji: '🏝️',
     proper: true,
     countable: false,
@@ -3490,7 +3345,7 @@ export const nouns: ConceptSeed[] = [
     description: 'the continent at the south pole',
     // The coldest continent (localization B48), as AFRICA is the hottest: ja 最も寒い大陸, where COLD
     // is 冷たい, cold to the touch. German umlauts it, "der kälteste Kontinent".
-    definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['COLD_CLIMATE'], adjectiveDegrees: ['most'] } },
+    definition: '/subj ( CONTINENT /adj ( COLD_CLIMATE /most ) )',
     emoji: '🧊',
     proper: true,
     countable: false,
@@ -3527,7 +3382,10 @@ export const nouns: ConceptSeed[] = [
     id: 'COUNTRY',
     role: 'noun',
     description: 'a nation with its own territory and government',
-    definition: patientOfGloss('LAND', 'GOVERN_STATE', 'NATION', 'bare'),
+    definition: `
+      /subj ( LAND /zero /rel #2.obj )
+      /subj ( NATION /a ) /verb ( GOVERN_STATE ) /obj ( LAND )
+    `,
     emoji: '🏳️',
     isA: 'PLACE',
     forms: {
@@ -3547,18 +3405,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CITY',
     role: 'noun',
     description: 'a large town; a big place where many people live',
-    definition: {
-      subject: {
-        concept: 'PLACE',
-        definiteness: 'indefinite',
-        adjectives: ['BIG'],
-        relative: {
-          headRole: 'locative',
-          subject: { concept: 'PERSON', definiteness: 'many', number: 'plural' },
-          verbPhrase: { verb: 'LIVE' },
-        },
-      },
-    },
+    definition: `
+      /subj ( PLACE /adj BIG /a /rel #2.loc )
+      /subj ( PERSON /pl /many ) /verb ( LIVE ) /loc ( PLACE )
+    `,
     emoji: '🏙️',
     isA: 'PLACE',
     forms: {
@@ -3733,12 +3583,12 @@ export const nouns: ConceptSeed[] = [
   // Spanish does too ("el italiano es un idioma"), unlike its bare continents, so its forms
   // carry takes_article as ANTARCTICA's does.
   // "A language" is the same for all seven, so each is glossed by its country: "Italy's language",
-  // de "die Sprache Italiens" (`languageOf`, localization B36).
+  // de "die Sprache Italiens" (localization B36).
   {
     id: 'ENGLISH',
     role: 'noun',
     description: 'the English language',
-    definition: languageOf('ENGLAND'),
+    definition: '/subj ( LANGUAGE /poss [ ENGLAND ] )',
     emoji: '🇬🇧',
     proper: true,
     countable: false,
@@ -3759,7 +3609,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ITALIAN',
     role: 'noun',
     description: 'the Italian language',
-    definition: languageOf('ITALY'),
+    definition: '/subj ( LANGUAGE /poss [ ITALY ] )',
     emoji: '🇮🇹',
     proper: true,
     countable: false,
@@ -3778,7 +3628,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FRENCH',
     role: 'noun',
     description: 'the French language',
-    definition: languageOf('FRANCE'),
+    definition: '/subj ( LANGUAGE /poss [ FRANCE ] )',
     emoji: '🇫🇷',
     proper: true,
     countable: false,
@@ -3797,7 +3647,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GERMAN',
     role: 'noun',
     description: 'the German language',
-    definition: languageOf('GERMANY'),
+    definition: '/subj ( LANGUAGE /poss [ GERMANY ] )',
     emoji: '🇩🇪',
     proper: true,
     countable: false,
@@ -3816,7 +3666,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SPANISH',
     role: 'noun',
     description: 'the Spanish language',
-    definition: languageOf('SPAIN'),
+    definition: '/subj ( LANGUAGE /poss [ SPAIN ] )',
     emoji: '🇪🇸',
     proper: true,
     countable: false,
@@ -3835,7 +3685,7 @@ export const nouns: ConceptSeed[] = [
     id: 'JAPANESE',
     role: 'noun',
     description: 'the Japanese language',
-    definition: languageOf('JAPAN'),
+    definition: '/subj ( LANGUAGE /poss [ JAPAN ] )',
     emoji: '🇯🇵',
     proper: true,
     countable: false,
@@ -3855,7 +3705,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the Portuguese language',
     // "a língua de Portugal", bare: the one country name Portuguese does not article.
-    definition: languageOf('PORTUGAL'),
+    definition: '/subj ( LANGUAGE /poss [ PORTUGAL ] )',
     emoji: '🇵🇹',
     proper: true,
     countable: false,
@@ -3915,7 +3765,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the period of twenty-four hours from one midnight to the next',
     // C26's part-whole possessor with C31's cardinal: what the period is made up of.
-    definition: countedPeriod('HOUR', 24),
+    definition: '/subj ( PERIOD_TIME /a /poss [ HOUR /a /num 24 ] /parts )',
     emoji: '📅',
     isA: 'PERIOD_TIME',
     forms: {
@@ -3960,7 +3810,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MINUTE',
     role: 'noun',
     description: 'a period of sixty seconds; a sixtieth of an hour',
-    definition: partOfGloss('HOUR'),
+    definition: '/subj ( PART /a /poss [ HOUR /a ] /whole )',
     emoji: '⏲️',
     isA: 'PERIOD_TIME',
     forms: {
@@ -3993,7 +3843,7 @@ export const nouns: ConceptSeed[] = [
     id: 'WEEK',
     role: 'noun',
     description: 'a period of seven days',
-    definition: countedPeriod('DAY', 7),
+    definition: '/subj ( PERIOD_TIME /a /poss [ DAY /a /num 7 ] /parts )',
     emoji: '🗓️',
     isA: 'PERIOD_TIME',
     forms: {
@@ -4017,15 +3867,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NIGHT',
     role: 'noun',
     description: 'the time from sunset to sunrise, when it is dark',
-    definition: {
-      subject: {
-        concept: 'PART',
-        definiteness: 'definite',
-        adjectives: ['DARK'],
-        possessor: { concept: 'DAY', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-      },
-    },
+    definition: '/subj ( PART /adj DARK /poss [ DAY /a ] /whole )',
     emoji: '🌙',
     isA: 'PERIOD_TIME',
     forms: {
@@ -4045,15 +3887,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MORNING',
     role: 'noun',
     description: 'the early part of the day, from sunrise to noon',
-    definition: {
-      subject: {
-        concept: 'PART',
-        definiteness: 'definite',
-        adjectives: ['FIRST'],
-        possessor: { concept: 'DAY', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-      },
-    },
+    definition: '/subj ( PART /adj FIRST /poss [ DAY /a ] /whole )',
     emoji: '🌄',
     isA: 'PERIOD_TIME',
     forms: {
@@ -4082,7 +3916,7 @@ export const nouns: ConceptSeed[] = [
     description: 'the period of about 365 days the earth takes to go around the sun',
     // Twelve months rather than 365 days: a number the cardinal table spells, and the unit a year
     // is actually divided into.
-    definition: countedPeriod('MONTH', 12),
+    definition: '/subj ( PERIOD_TIME /a /poss [ MONTH /a /num 12 ] /parts )',
     emoji: '📆',
     isA: 'PERIOD_TIME',
     forms: {
@@ -4114,7 +3948,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PARTICIPANT_GRAMMAR',
     role: 'noun',
     description: 'one of the entities an event involves (grammar)',
-    definition: patientOfGloss('CONCEPT', 'INCLUDE', 'ACTION'),
+    definition: `
+      /subj ( CONCEPT /a /rel #2.obj )
+      /subj ( ACTION /a ) /verb ( INCLUDE ) /obj ( CONCEPT )
+    `,
     emoji: '👥',
     synonym: 'grammar',
     forms: {
@@ -4138,7 +3975,10 @@ export const nouns: ConceptSeed[] = [
     id: 'AGENT_GRAMMAR',
     role: 'noun',
     description: 'the participant that carries out the event (grammar)',
-    definition: whoGloss('PARTICIPANT_GRAMMAR', 'ACT'),
+    definition: `
+      /subj ( PARTICIPANT_GRAMMAR /a /rel #2.subj )
+      /subj ( PARTICIPANT_GRAMMAR ) /verb ( ACT )
+    `,
     emoji: '🫱',
     synonym: 'grammar',
     isA: 'PARTICIPANT_GRAMMAR',
@@ -4157,7 +3997,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SUBJECT_GRAMMAR',
     role: 'noun',
     description: 'the noun phrase a clause predicates something of (grammar)',
-    definition: whoGloss('PARTICIPANT_GRAMMAR', 'GOVERN', 'VERB'),
+    definition: `
+      /subj ( PARTICIPANT_GRAMMAR /a /rel #2.subj )
+      /subj ( PARTICIPANT_GRAMMAR ) /verb ( GOVERN ) /obj ( VERB /pl /zero )
+    `,
     emoji: '🎯',
     synonym: 'grammar',
     forms: {
@@ -4177,7 +4020,10 @@ export const nouns: ConceptSeed[] = [
     id: 'OBJECT_GRAMMAR',
     role: 'noun',
     description: 'the noun phrase a verb\'s action falls on (grammar)',
-    definition: patientOfGloss('PARTICIPANT_GRAMMAR', 'GOVERN', 'VERB'),
+    definition: `
+      /subj ( PARTICIPANT_GRAMMAR /a /rel #2.obj )
+      /subj ( VERB /a ) /verb ( GOVERN ) /obj ( PARTICIPANT_GRAMMAR )
+    `,
     emoji: '🥅',
     synonym: 'grammar',
     forms: {
@@ -4200,7 +4046,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SUBJECT_COMPLEMENT',
     role: 'noun',
     description: 'the complement a copular verb predicates of its subject (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'DESCRIBE', 'SUBJECT_GRAMMAR'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( DESCRIBE ) /obj ( SUBJECT_GRAMMAR /pl /zero )
+    `,
     emoji: '🪞',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4222,7 +4071,10 @@ export const nouns: ConceptSeed[] = [
     id: 'OBJECT_COMPLEMENT',
     role: 'noun',
     description: 'the complement a verb predicates of its direct object (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'DESCRIBE', 'OBJECT_GRAMMAR'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( DESCRIBE ) /obj ( OBJECT_GRAMMAR /pl /zero )
+    `,
     emoji: '🎯',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4244,7 +4096,10 @@ export const nouns: ConceptSeed[] = [
     id: 'INSTRUMENTAL',
     role: 'noun',
     description: 'the complement naming the means an action is carried out with (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'MEANS'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( MEANS /pl /zero )
+    `,
     emoji: '🔧',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4266,7 +4121,10 @@ export const nouns: ConceptSeed[] = [
     id: 'COMITATIVE',
     role: 'noun',
     description: 'the complement naming the companion an action is carried out with (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'COMPANION'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( COMPANION /pl /zero )
+    `,
     emoji: '🤝',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4288,7 +4146,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ADVERBIAL_OF_MANNER',
     role: 'noun',
     description: 'the complement naming the manner in which an action is carried out (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'WAY'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( WAY /pl /zero )
+    `,
     emoji: '🎭',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4309,7 +4170,10 @@ export const nouns: ConceptSeed[] = [
     id: 'COMPLEMENT_GRAMMAR',
     role: 'noun',
     description: 'a phrase that completes the meaning of a verb (grammar)',
-    definition: whoGloss('PHRASE', 'MODIFY', 'VERB'),
+    definition: `
+      /subj ( PHRASE /a /rel #2.subj )
+      /subj ( PHRASE ) /verb ( MODIFY ) /obj ( VERB /pl /zero )
+    `,
     emoji: '🧩',
     synonym: 'grammar',
     isA: 'PHRASE',
@@ -4336,7 +4200,10 @@ export const nouns: ConceptSeed[] = [
     id: 'LOCATIVE',
     role: 'noun',
     description: 'the complement naming the place where something happens (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'PLACE'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( PLACE /pl /zero )
+    `,
     emoji: '📍',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4357,7 +4224,10 @@ export const nouns: ConceptSeed[] = [
     // "a complement that indicates destinations" (localization B37): the place reached, where
     // LOCATIVE's "places" is where it happens. SOURCE and ROUTE take the place left and the place
     // crossed, so the siblings differ only in the noun.
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'DESTINATION'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( DESTINATION /pl /zero )
+    `,
     emoji: '➡️',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4375,7 +4245,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SOURCE',
     role: 'noun',
     description: 'the complement naming the place something moves away from (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'ORIGIN'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( ORIGIN /pl /zero )
+    `,
     emoji: '⬅️',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4393,7 +4266,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ROUTE',
     role: 'noun',
     description: 'the complement naming the place something moves through (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'PATH'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( PATH /pl /zero )
+    `,
     emoji: '🛤️',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4413,7 +4289,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CAUSE_COMPLEMENT',
     role: 'noun',
     description: 'the complement naming the reason something happens (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'CAUSE'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( CAUSE /pl /zero )
+    `,
     emoji: '❔',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4435,7 +4314,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TEMPORAL_COMPLEMENT',
     role: 'noun',
     description: 'the complement naming the time something happens (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'TIME'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( TIME /pl /zero )
+    `,
     emoji: '⏳',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4457,7 +4339,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PURPOSE_COMPLEMENT',
     role: 'noun',
     description: 'the complement naming what or whom something is done for (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'PURPOSE'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( PURPOSE /pl /zero )
+    `,
     emoji: '🏁',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4542,7 +4427,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TERMINUS',
     role: 'noun',
     description: 'the complement naming the recipient or goal of an action (grammar)',
-    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'RECIPIENT'),
+    definition: `
+      /subj ( COMPLEMENT_GRAMMAR /a /rel #2.subj )
+      /subj ( COMPLEMENT_GRAMMAR ) /verb ( INDICATE ) /obj ( RECIPIENT /pl /zero )
+    `,
     emoji: '🎁',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -4560,7 +4448,10 @@ export const nouns: ConceptSeed[] = [
     id: 'NOUN',
     role: 'noun',
     description: 'a word naming a person, place or thing (grammar)',
-    definition: whoGloss('WORD', 'NAME', 'OBJECT_THING'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( NAME ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '🏷️',
     isA: 'WORD',
     forms: {
@@ -4577,7 +4468,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PRONOUN',
     role: 'noun',
     description: 'a word standing in for a noun phrase (grammar)',
-    definition: whoGloss('WORD', 'REPLACE', 'NOUN'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( REPLACE ) /obj ( NOUN /pl /zero )
+    `,
     emoji: '👉',
     isA: 'WORD',
     forms: {
@@ -4594,7 +4488,10 @@ export const nouns: ConceptSeed[] = [
     id: 'VERB',
     role: 'noun',
     description: 'a word expressing an action or a state (grammar)',
-    definition: whoGloss('WORD', 'EXPRESS', 'ACTION'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( EXPRESS ) /obj ( ACTION /pl /zero )
+    `,
     emoji: '⚡',
     isA: 'WORD',
     forms: {
@@ -4611,7 +4508,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ADVERB',
     role: 'noun',
     description: 'a word modifying a verb, an adjective or another adverb (grammar)',
-    definition: whoGloss('WORD', 'MODIFY', 'VERB'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( MODIFY ) /obj ( VERB /pl /zero )
+    `,
     emoji: '💨',
     isA: 'WORD',
     forms: {
@@ -4628,7 +4528,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ADJECTIVE',
     role: 'noun',
     description: 'a word describing a noun (grammar)',
-    definition: whoGloss('WORD', 'DESCRIBE', 'NOUN'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( DESCRIBE ) /obj ( NOUN /pl /zero )
+    `,
     emoji: '🎨',
     isA: 'WORD',
     forms: {
@@ -4650,7 +4553,10 @@ export const nouns: ConceptSeed[] = [
     id: 'INFINITIVE_PHRASE',
     role: 'noun',
     description: 'a verb phrase in its dictionary citation form — "to consume food" (grammar)',
-    definition: whoGloss('PHRASE', 'NAME', 'ACTION'),
+    definition: `
+      /subj ( PHRASE /a /rel #2.subj )
+      /subj ( PHRASE ) /verb ( NAME ) /obj ( ACTION /pl /zero )
+    `,
     emoji: '♾️',
     isA: 'PHRASE',
     forms: {
@@ -4672,7 +4578,10 @@ export const nouns: ConceptSeed[] = [
     description: 'a verb together with its objects and modifiers (grammar)',
     // "a phrase that indicates actions" (localization A18). INDICATE, the grammatical verb in de
     // (bezeichnet) and ja (示す), as B31 found; VERB's own gloss takes EXPRESS (de vermittelt).
-    definition: whoGloss('PHRASE', 'INDICATE', 'ACTION'),
+    definition: `
+      /subj ( PHRASE /a /rel #2.subj )
+      /subj ( PHRASE ) /verb ( INDICATE ) /obj ( ACTION /pl /zero )
+    `,
     emoji: '🧬',
     isA: 'PHRASE',
     forms: {
@@ -4693,7 +4602,10 @@ export const nouns: ConceptSeed[] = [
     id: 'NOUN_PHRASE',
     role: 'noun',
     description: 'a noun together with its determiner and modifiers (grammar)',
-    definition: whoGloss('PHRASE', 'HAVE', 'NOUN'),
+    definition: `
+      /subj ( PHRASE /a /rel #2.subj )
+      /subj ( PHRASE ) /verb ( HAVE ) /obj ( NOUN /pl /zero )
+    `,
     emoji: '🧩',
     isA: 'PHRASE',
     forms: {
@@ -4718,18 +4630,12 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'a unit of grammar with a verb of its own (grammar)',
     // "a phrase that has a subject" (localization A18) — what a VERB_PHRASE does not. The object is
-    // one subject, indefinite and singular, which whoGloss's bare plural cannot give. Japanese says
+    // one subject, indefinite and singular, which the usual bare plural object cannot give. Japanese says
     // the inanimate HAVE with ある: 主語があるフレーズ (A150).
-    definition: {
-      subject: {
-        concept: 'PHRASE',
-        definiteness: 'indefinite',
-        relative: {
-          verbPhrase: { verb: 'HAVE' },
-          directObject: { concept: 'SUBJECT_GRAMMAR', definiteness: 'indefinite' },
-        },
-      },
-    },
+    definition: `
+      /subj ( PHRASE /a /rel #2.subj )
+      /subj ( PHRASE ) /verb ( HAVE ) /obj ( SUBJECT_GRAMMAR /a )
+    `,
     emoji: '🧱',
     isA: 'PHRASE',
     forms: {
@@ -4748,7 +4654,10 @@ export const nouns: ConceptSeed[] = [
     id: 'RELATIVE_CLAUSE',
     role: 'noun',
     description: 'a clause that describes a noun (grammar)',
-    definition: whoGloss('CLAUSE', 'DESCRIBE', 'NOUN'),
+    definition: `
+      /subj ( CLAUSE /a /rel #2.subj )
+      /subj ( CLAUSE ) /verb ( DESCRIBE ) /obj ( NOUN /pl /zero )
+    `,
     emoji: '🪝',
     isA: 'CLAUSE',
     forms: {
@@ -4769,7 +4678,10 @@ export const nouns: ConceptSeed[] = [
     id: 'STATEMENT',
     role: 'noun',
     description: 'a clause that asserts something (grammar)',
-    definition: whoGloss('CLAUSE', 'ASSERT', 'FACT'),
+    definition: `
+      /subj ( CLAUSE /a /rel #2.subj )
+      /subj ( CLAUSE ) /verb ( ASSERT ) /obj ( FACT /pl /zero )
+    `,
     emoji: '💬',
     isA: 'CLAUSE',
     forms: {
@@ -4786,7 +4698,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CONDITION',
     role: 'noun',
     description: 'what must be true for something else to happen',
-    definition: glossOf('CLAUSE', 'CONDITIONAL'),
+    definition: '/subj ( CLAUSE /adj CONDITIONAL /a )',
     emoji: '🔀',
     forms: {
       en: { base: 'condition', plural: 'conditions', count: 'singular' },
@@ -4804,7 +4716,10 @@ export const nouns: ConceptSeed[] = [
     id: 'COORDINATION',
     role: 'noun',
     description: 'the joining of clauses or phrases of equal rank (grammar)',
-    definition: whoGloss('RELATIONSHIP', 'LINK', 'CLAUSE'),
+    definition: `
+      /subj ( RELATIONSHIP /a /rel #2.subj )
+      /subj ( RELATIONSHIP ) /verb ( LINK ) /obj ( CLAUSE /pl /zero )
+    `,
     emoji: '🔗',
     forms: {
       en: { base: 'coordination', plural: 'coordinations', count: 'singular' },
@@ -4828,17 +4743,10 @@ export const nouns: ConceptSeed[] = [
     // active "eine Phrase, die eine Konjunktion verbindet" neither the relative pronoun nor the article
     // shows which is the subject, and it reads first as the phrase linking the conjunction. The
     // passive says it once: "die von einer Konjunktion verbunden wird", ja 接続詞につながれるフレーズ.
-    definition: {
-      subject: {
-        concept: 'PHRASE',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'directObject',
-          subject: { concept: 'CONJUNCTION', definiteness: 'indefinite' },
-          verbPhrase: { verb: 'LINK', voice: 'passive' },
-        },
-      },
-    },
+    definition: `
+      /subj ( PHRASE /a /rel #2.obj )
+      /subj ( CONJUNCTION /a ) /verb ( LINK /passive ) /obj ( PHRASE )
+    `,
     emoji: '🧷',
     isA: 'PHRASE',
     forms: {
@@ -4857,7 +4765,10 @@ export const nouns: ConceptSeed[] = [
     description: 'a word that joins clauses or phrases — and, or, but (grammar)',
     // "a word that links clauses" (localization B38). LINK, not COORDINATE: that one is people acting
     // together, and its Japanese 調整する is to adjust.
-    definition: whoGloss('WORD', 'LINK', 'CLAUSE'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( LINK ) /obj ( CLAUSE /pl /zero )
+    `,
     emoji: '➕',
     isA: 'WORD',
     forms: {
@@ -4878,16 +4789,10 @@ export const nouns: ConceptSeed[] = [
     description: 'a word that qualifies another word (grammar)',
     // "a word that modifies other words" (localization A18). OTHER keeps it from reading as though a
     // word could modify itself, which "a word that modifies words" does.
-    definition: {
-      subject: {
-        concept: 'WORD',
-        definiteness: 'indefinite',
-        relative: {
-          verbPhrase: { verb: 'MODIFY' },
-          directObject: { concept: 'WORD', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] },
-        },
-      },
-    },
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( MODIFY ) /obj ( WORD /adj OTHER /pl /zero )
+    `,
     emoji: '🪄',
     isA: 'WORD',
     forms: {
@@ -4908,22 +4813,10 @@ export const nouns: ConceptSeed[] = [
     description: 'a word whose meaning includes that of another word (grammar)',
     // Its own description, word for word (localization B50): the genitive relative, headed on the
     // possessor (C12). de "ein Wort, dessen Bedeutung die Bedeutung eines anderen Wortes umfasst".
-    definition: {
-      subject: {
-        concept: 'WORD',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'possessor',
-          subject: { concept: 'MEANING', definiteness: 'definite' },
-          verbPhrase: { verb: 'INCLUDE' },
-          directObject: {
-            concept: 'MEANING',
-            definiteness: 'definite',
-            possessor: { concept: 'WORD', definiteness: 'indefinite', adjectives: ['OTHER'] },
-          },
-        },
-      },
-    },
+    definition: `
+      /subj ( WORD /a /rel #2.subj.poss )
+      /subj ( MEANING /poss [ WORD ] ) /verb ( INCLUDE ) /obj ( MEANING /poss [ WORD /adj OTHER /a ] )
+    `,
     emoji: '🌳',
     isA: 'WORD',
     forms: {
@@ -4942,7 +4835,10 @@ export const nouns: ConceptSeed[] = [
     description: 'a word fixing the reference of a noun — the, a, this, some (grammar)',
     // "A word that specifies nouns" (localization B51): de "ein Wort, das Substantive bestimmt", the
     // grammar's own verb (Bestimmungswort, bestimmter Artikel). INDICATE would say it stands for them.
-    definition: whoGloss('WORD', 'SPECIFY', 'NOUN'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( SPECIFY ) /obj ( NOUN /pl /zero )
+    `,
     emoji: '🔖',
     isA: 'WORD',
     forms: {
@@ -4979,7 +4875,10 @@ export const nouns: ConceptSeed[] = [
     id: 'DEMONSTRATIVE',
     role: 'noun',
     description: 'the determiner that points — this, that (grammar)',
-    definition: whoGloss('DETERMINER', 'INDICATE'),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj )
+      /subj ( DETERMINER ) /verb ( INDICATE )
+    `,
     emoji: '👆',
     isA: 'DETERMINER',
     forms: {
@@ -4998,7 +4897,10 @@ export const nouns: ConceptSeed[] = [
     description: 'the determiner of amount — some, many, few, all, no (grammar)',
     // "a determiner that indicates quantities" (localization B39). Plural on purpose: French gives a
     // bare mass object the partitive, "qui indique de la quantité" (A149); "des quantités" reads right.
-    definition: whoGloss('DETERMINER', 'INDICATE', 'QUANTITY'),
+    definition: `
+      /subj ( DETERMINER /a /rel #2.subj )
+      /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( QUANTITY /pl /zero )
+    `,
     emoji: '🔢',
     isA: 'DETERMINER',
     forms: {
@@ -5015,7 +4917,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PERIOD_SENTENCE',
     role: 'noun',
     description: 'a complete sentence built of one or more clauses (grammar)',
-    definition: whoGloss('PHRASE', 'HAVE', 'CLAUSE'),
+    definition: `
+      /subj ( PHRASE /a /rel #2.subj )
+      /subj ( PHRASE ) /verb ( HAVE ) /obj ( CLAUSE /pl /zero )
+    `,
     emoji: '📝',
     synonym: 'sentence',
     forms: {
@@ -5053,7 +4958,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BRACKET',
     role: 'noun',
     description: 'one of a pair of marks that enclose a group of words',
-    definition: whoGloss('WORD', 'ENCLOSE', 'PHRASE'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( ENCLOSE ) /obj ( PHRASE /pl /zero )
+    `,
     emoji: '🔣',
     forms: {
       en: { base: 'bracket', plural: 'brackets', count: 'singular' },
@@ -5069,7 +4977,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CONTAINER',
     role: 'noun',
     description: 'an object that holds or stores things',
-    definition: whoGloss('OBJECT_THING', 'HOLD', 'OBJECT_THING'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj )
+      /subj ( OBJECT_THING ) /verb ( HOLD ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '📦',
     isA: 'OBJECT_THING',
     forms: {
@@ -5090,7 +5001,10 @@ export const nouns: ConceptSeed[] = [
     id: 'MAP',
     role: 'noun',
     description: 'a diagram showing how things are arranged or connected',
-    definition: whoGloss('PICTURE', 'SHOW', 'PLACE'),
+    definition: `
+      /subj ( PICTURE /a /rel #2.subj )
+      /subj ( PICTURE ) /verb ( SHOW ) /obj ( PLACE /pl /zero )
+    `,
     emoji: '🗺️',
     forms: {
       en: { base: 'map', plural: 'maps', count: 'singular' },
@@ -5109,7 +5023,10 @@ export const nouns: ConceptSeed[] = [
     id: 'NODE',
     role: 'noun',
     description: 'a point where the lines of a network meet',
-    definition: patientGloss('PART', 'CONNECT'),
+    definition: `
+      /subj ( PART /a /rel #2.obj )
+      /subj ( one ) /verb ( CONNECT ) /obj ( PART )
+    `,
     emoji: '⚫',
     forms: {
       en: { base: 'node', plural: 'nodes', count: 'singular' },
@@ -5146,7 +5063,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PERSON_GRAMMAR',
     role: 'noun',
     description: 'the speaker, the addressee or the one spoken about (grammar)',
-    definition: whoGloss('CATEGORY', 'INDICATE', 'SPEAKER'),
+    definition: `
+      /subj ( CATEGORY /a /rel #2.subj )
+      /subj ( CATEGORY ) /verb ( INDICATE ) /obj ( SPEAKER /pl /zero )
+    `,
     emoji: '🗣️',
     synonym: 'grammar',
     forms: {
@@ -5256,18 +5176,10 @@ export const nouns: ConceptSeed[] = [
     id: 'KIND_SORT',
     role: 'noun',
     description: 'a group of things that have something in common',
-    definition: {
-      subject: {
-        concept: 'GROUP',
-        definiteness: 'indefinite',
-        possessor: { concept: 'THING', definiteness: 'bare', number: 'plural' },
-        possessorRole: 'parts',
-        relative: {
-          verbPhrase: { verb: 'HAVE' },
-          directObject: { concept: 'FEATURE', definiteness: 'definite', number: 'plural', adjectives: ['SAME'] },
-        },
-      },
-    },
+    definition: `
+      /subj ( GROUP /a /poss [ THING /pl /zero ] /parts /rel #2.subj )
+      /subj ( GROUP ) /verb ( HAVE ) /obj ( FEATURE /adj SAME /pl )
+    `,
     emoji: '🔖',
     synonym: 'sort',
     forms: {
@@ -5290,7 +5202,10 @@ export const nouns: ConceptSeed[] = [
     description: 'whether a word refers to one or to more than one (grammar)',
     // "a category that indicates quantities" (localization B39), QUANTIFIER's differentia on the
     // CATEGORY genus: ja 数量を示す範疇, de "eine Kategorie, die Mengen bezeichnet".
-    definition: whoGloss('CATEGORY', 'INDICATE', 'QUANTITY'),
+    definition: `
+      /subj ( CATEGORY /a /rel #2.subj )
+      /subj ( CATEGORY ) /verb ( INDICATE ) /obj ( QUANTITY /pl /zero )
+    `,
     emoji: '🔢',
     synonym: 'grammar',
     isA: 'CATEGORY',
@@ -5313,7 +5228,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SINGULAR_GRAMMAR',
     role: 'noun',
     description: 'the form of a word referring to one (grammar)',
-    definition: glossOf('CATEGORY', 'SOLE'),
+    definition: '/subj ( CATEGORY /adj SOLE /a )',
     emoji: '1️⃣',
     synonym: 'grammar',
     forms: {
@@ -5330,7 +5245,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PLURAL_GRAMMAR',
     role: 'noun',
     description: 'the form of a word referring to more than one (grammar)',
-    definition: glossOf('CATEGORY', 'MANIFOLD'),
+    definition: '/subj ( CATEGORY /adj MANIFOLD /a )',
     emoji: '🔟',
     synonym: 'grammar',
     forms: {
@@ -5347,7 +5262,10 @@ export const nouns: ConceptSeed[] = [
     id: 'GENDER',
     role: 'noun',
     description: 'the class a noun belongs to — masculine, feminine, neuter (grammar)',
-    definition: whoGloss('CATEGORY', 'GOVERN', 'WORD'),
+    definition: `
+      /subj ( CATEGORY /a /rel #2.subj )
+      /subj ( CATEGORY ) /verb ( GOVERN ) /obj ( WORD /pl /zero )
+    `,
     emoji: '🚻',
     forms: {
       en: { base: 'gender', plural: 'genders', count: 'singular' },
@@ -5370,7 +5288,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TENSE',
     role: 'noun',
     description: 'the form of a verb that places an event in time (grammar)',
-    definition: whoGloss('FEATURE', 'INDICATE', 'TIME'),
+    definition: `
+      /subj ( FEATURE /a /rel #2.subj )
+      /subj ( FEATURE ) /verb ( INDICATE ) /obj ( TIME /pl /zero )
+    `,
     emoji: '⏳',
     forms: {
       en: { base: 'tense', plural: 'tenses', count: 'singular' },
@@ -5386,7 +5307,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PRESENT_TENSE',
     role: 'noun',
     description: 'the tense of what is happening now (grammar)',
-    definition: glossOf('TENSE', 'PRESENT'),
+    definition: '/subj ( TENSE /adj PRESENT /a )',
     emoji: '⏺️',
     synonym: 'grammar',
     isA: 'TENSE',
@@ -5405,7 +5326,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PAST_TENSE',
     role: 'noun',
     description: 'the tense of what has already happened (grammar)',
-    definition: glossOf('TENSE', 'PAST'),
+    definition: '/subj ( TENSE /adj PAST /a )',
     emoji: '⏮️',
     synonym: 'grammar',
     isA: 'TENSE',
@@ -5423,7 +5344,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FUTURE_TENSE',
     role: 'noun',
     description: 'the tense of what is yet to happen (grammar)',
-    definition: glossOf('TENSE', 'FUTURE'),
+    definition: '/subj ( TENSE /adj FUTURE /a )',
     emoji: '⏭️',
     synonym: 'grammar',
     isA: 'TENSE',
@@ -5443,7 +5364,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ASPECT',
     role: 'noun',
     description: 'how a verb presents an event unfolding in time (grammar)',
-    definition: whoGloss('FEATURE', 'INDICATE', 'PERIOD_TIME'),
+    definition: `
+      /subj ( FEATURE /a /rel #2.subj )
+      /subj ( FEATURE ) /verb ( INDICATE ) /obj ( PERIOD_TIME /pl /zero )
+    `,
     emoji: '🎞️',
     synonym: 'grammar',
     forms: {
@@ -5465,7 +5389,10 @@ export const nouns: ConceptSeed[] = [
     id: 'VOICE',
     role: 'noun',
     description: 'which participant of an event a clause makes its subject (grammar)',
-    definition: whoGloss('FEATURE', 'INDICATE', 'PARTICIPANT_GRAMMAR'),
+    definition: `
+      /subj ( FEATURE /a /rel #2.subj )
+      /subj ( FEATURE ) /verb ( INDICATE ) /obj ( PARTICIPANT_GRAMMAR /pl /zero )
+    `,
     emoji: '🔄',
     synonym: 'grammar',
     forms: {
@@ -5484,7 +5411,10 @@ export const nouns: ConceptSeed[] = [
     id: 'POLARITY',
     role: 'noun',
     description: 'whether a clause is affirmed or negated (grammar)',
-    definition: whoGloss('FEATURE', 'NEGATE', 'CLAUSE'),
+    definition: `
+      /subj ( FEATURE /a /rel #2.subj )
+      /subj ( FEATURE ) /verb ( NEGATE ) /obj ( CLAUSE /pl /zero )
+    `,
     emoji: '☯️',
     forms: {
       en: { base: 'polarity', plural: 'polarities', count: 'singular' },
@@ -5506,7 +5436,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SENTIMENT',
     role: 'noun',
     description: 'the positive, negative or neutral stance taken toward something',
-    definition: whoGloss('FEATURE', 'INDICATE', 'FEELING'),
+    definition: `
+      /subj ( FEATURE /a /rel #2.subj )
+      /subj ( FEATURE ) /verb ( INDICATE ) /obj ( FEELING /pl /zero )
+    `,
     emoji: '🙂',
     forms: {
       en: { base: 'sentiment', plural: 'sentiments', count: 'singular' },
@@ -5527,16 +5460,10 @@ export const nouns: ConceptSeed[] = [
     description: 'the form of a verb that shows how a clause is meant (grammar)',
     // How a clause is meant is what the speaker says it for — asserting, commanding, citing — not a
     // condition, which is CONDITION's own gloss one row away (localization C27).
-    definition: {
-      subject: {
-        concept: 'FEATURE',
-        definiteness: 'indefinite',
-        relative: {
-          verbPhrase: { verb: 'INDICATE' },
-          directObject: { concept: 'PURPOSE', definiteness: 'definite', possessor: { concept: 'SPEAKER', definiteness: 'definite' } },
-        },
-      },
-    },
+    definition: `
+      /subj ( FEATURE /a /rel #2.subj )
+      /subj ( FEATURE ) /verb ( INDICATE ) /obj ( PURPOSE /poss [ SPEAKER ] )
+    `,
     emoji: '🎭',
     synonym: 'grammar',
     forms: {
@@ -5555,7 +5482,10 @@ export const nouns: ConceptSeed[] = [
     id: 'DEGREE_GRAMMAR',
     role: 'noun',
     description: 'the level of comparison an adjective expresses (grammar)',
-    definition: whoGloss('FEATURE', 'INDICATE', 'LEVEL'),
+    definition: `
+      /subj ( FEATURE /a /rel #2.subj )
+      /subj ( FEATURE ) /verb ( INDICATE ) /obj ( LEVEL /pl /zero )
+    `,
     emoji: '📶',
     synonym: 'grammar',
     forms: {
@@ -5575,7 +5505,7 @@ export const nouns: ConceptSeed[] = [
     id: 'POSITIVE_DEGREE',
     role: 'noun',
     description: 'the plain form of an adjective, not compared (grammar)',
-    definition: glossOf('DEGREE_GRAMMAR', 'POSITIVE'),
+    definition: '/subj ( DEGREE_GRAMMAR /adj POSITIVE /a )',
     emoji: '▫️',
     synonym: 'grammar',
     isA: 'DEGREE_GRAMMAR',
@@ -5598,7 +5528,10 @@ export const nouns: ConceptSeed[] = [
     id: 'STANDARD_OF_COMPARISON',
     role: 'noun',
     description: 'what an adjective in the comparative or equative is compared to (grammar)',
-    definition: patientOfGloss('PHRASE', 'GOVERN', 'DEGREE_GRAMMAR'),
+    definition: `
+      /subj ( PHRASE /a /rel #2.obj )
+      /subj ( DEGREE_GRAMMAR /a ) /verb ( GOVERN ) /obj ( PHRASE )
+    `,
     emoji: '⚖️',
     synonym: 'grammar',
     forms: {
@@ -5619,7 +5552,10 @@ export const nouns: ConceptSeed[] = [
     description: 'a verb that expresses necessity, ability or will (grammar)',
     // "a verb that modifies verbs" (localization A18): what a modal does to the main verb, as a
     // grammar says it. The genus keeps it apart from ADVERB, "a word that modifies verbs".
-    definition: whoGloss('VERB', 'MODIFY', 'VERB'),
+    definition: `
+      /subj ( VERB /a /rel #2.subj )
+      /subj ( VERB ) /verb ( MODIFY ) /obj ( VERB /pl /zero )
+    `,
     emoji: '🎚️',
     isA: 'VERB',
     forms: {
@@ -5689,9 +5625,9 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the level of formality of a way of speaking',
     // A dimension named with no degree: FORMALITY as a noun modifier on LEVEL, "a formality level"
-    // (it "un livello di formalità", de "eine Förmlichkeitsebene"). dimGloss says a degree, and glosses
-    // adjectives (localization C27).
-    definition: { subject: { concept: 'LEVEL', definiteness: 'indefinite', nounModifiers: [{ concept: 'FORMALITY', relation: 'material' }] } },
+    // (it "un livello di formalità", de "eine Förmlichkeitsebene"). `/gloss dimension` says a degree,
+    // and glosses adjectives (localization C27).
+    definition: '/subj ( LEVEL /adj ( FORMALITY /material ) /a )',
     emoji: '🎩',
     synonym: 'linguistics',
     forms: {
@@ -5707,7 +5643,7 @@ export const nouns: ConceptSeed[] = [
   {
     // How formal a way of speaking is: the dimension REGISTER is a level on (localization C27, as
     // B57 proposed). A mass noun and a quality dimension, like ATTENTION, so a later FORMAL could be
-    // dimGloss('FORMALITY', 'HIGH'). German Förmlichkeit, the native word (Formalität is also "a
+    // `/subj ( FORMALITY /adj HIGH /zero /gloss dimension )`. German Förmlichkeit, the native word (Formalität is also "a
     // formality", the paperwork); Japanese 丁寧さ, the politeness a Japanese register is graded by.
     id: 'FORMALITY',
     role: 'noun',
@@ -5730,7 +5666,10 @@ export const nouns: ConceptSeed[] = [
     id: 'OPTION',
     role: 'noun',
     description: 'one of several possibilities to choose from',
-    definition: patientGloss('CONCEPT', 'CHOOSE'),
+    definition: `
+      /subj ( CONCEPT /a /rel #2.obj )
+      /subj ( one ) /verb ( CHOOSE ) /obj ( CONCEPT )
+    `,
     emoji: '☑️',
     forms: {
       en: { base: 'option', plural: 'options', count: 'singular' },
@@ -5749,7 +5688,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BUTTON',
     role: 'noun',
     description: 'a control that is pressed to operate something',
-    definition: patientGloss('OBJECT_THING', 'PRESS'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj )
+      /subj ( one ) /verb ( PRESS ) /obj ( OBJECT_THING )
+    `,
     emoji: '🔘',
     forms: {
       en: { base: 'button', plural: 'buttons', count: 'singular' },
@@ -5766,7 +5708,10 @@ export const nouns: ConceptSeed[] = [
     id: 'KEYBOARD',
     role: 'noun',
     description: 'a set of keys for typing',
-    definition: whoGloss('OBJECT_THING', 'HAVE', 'KEY'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj )
+      /subj ( OBJECT_THING ) /verb ( HAVE ) /obj ( KEY /pl /zero )
+    `,
     emoji: '⌨️',
     forms: {
       en: { base: 'keyboard', plural: 'keyboards', count: 'singular' },
@@ -5788,7 +5733,7 @@ export const nouns: ConceptSeed[] = [
     id: 'KEY',
     role: 'noun',
     description: 'one of the buttons of a keyboard',
-    definition: partOfGloss('KEYBOARD'),
+    definition: '/subj ( PART /a /poss [ KEYBOARD /a ] /whole )',
     emoji: '🔑',
     synonym: 'keyboard',
     forms: {
@@ -5810,17 +5755,14 @@ export const nouns: ConceptSeed[] = [
     // of the keys (it "usa le frecce", fr "les flèches"), where English, German and Japanese name
     // the key (Pfeiltaste, 矢印キー). Katakana キー, so the reading is the kanji's with it. Glossed
     // "a key that moves the cursor" (localization C26): the cursor is definite, the one the page
-    // has, where whoGloss's bare plural would say "moves cursors".
+    // has, where the usual bare plural object would say "moves cursors".
     id: 'ARROW',
     role: 'noun',
     description: 'a key marked with an arrow, that moves the cursor',
-    definition: {
-      subject: {
-        concept: 'KEY',
-        definiteness: 'indefinite',
-        relative: { verbPhrase: { verb: 'MOVE' }, directObject: { concept: 'CURSOR', definiteness: 'definite' } },
-      },
-    },
+    definition: `
+      /subj ( KEY /a /rel #2.subj )
+      /subj ( KEY ) /verb ( MOVE ) /obj ( CURSOR )
+    `,
     emoji: '⬅️',
     synonym: 'key',
     forms: {
@@ -5840,7 +5782,7 @@ export const nouns: ConceptSeed[] = [
     id: 'REGION',
     role: 'noun',
     description: 'a part of a page or a screen',
-    definition: partOfGloss('SCREEN'),
+    definition: '/subj ( PART /a /poss [ SCREEN /a ] /whole )',
     emoji: '🗺️',
     forms: {
       en: { base: 'region', plural: 'regions', count: 'singular' },
@@ -5857,7 +5799,10 @@ export const nouns: ConceptSeed[] = [
     id: 'GROUP',
     role: 'noun',
     description: 'a set of things that belong together',
-    definition: patientGloss('CONCEPT', 'CONNECT'),
+    definition: `
+      /subj ( CONCEPT /a /rel #2.obj )
+      /subj ( one ) /verb ( CONNECT ) /obj ( CONCEPT )
+    `,
     emoji: '🫂',
     forms: {
       en: { base: 'group', plural: 'groups', count: 'singular' },
@@ -5871,12 +5816,12 @@ export const nouns: ConceptSeed[] = [
   },
   {
     // P09-E24's member (localization B75), the word P08 asked for beside GROUP: "a part of a group",
-    // partOfGloss on the genus every collective hangs under. Not `human`, since a state can be a
+    // the part-whole gloss on the genus every collective hangs under. Not `human`, since a state can be a
     // member of a union too.
     id: 'MEMBER',
     role: 'noun',
     description: 'one of the persons or things a group is made of',
-    definition: partOfGloss('GROUP'),
+    definition: '/subj ( PART /a /poss [ GROUP /a ] /whole )',
     emoji: '🧩',
     forms: {
       en: { base: 'member', plural: 'members', count: 'singular' },
@@ -5895,14 +5840,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PARTY_CELEBRATION',
     role: 'noun',
     description: 'a social gathering to celebrate or have fun',
-    definition: {
-      subject: {
-        concept: 'GROUP',
-        definiteness: 'indefinite',
-        possessor: { concept: 'PERSON', definiteness: 'bare', number: 'plural', adjectives: ['HAPPY'] },
-        possessorRole: 'parts',
-      },
-    },
+    definition: '/subj ( GROUP /a /poss [ PERSON /adj HAPPY /pl /zero ] /parts )',
     emoji: '🎉',
     synonym: 'celebration',
     forms: {
@@ -5923,7 +5861,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ROW',
     role: 'noun',
     description: 'a line of items across a list or a grid',
-    definition: partOfGloss('LIST'),
+    definition: '/subj ( PART /a /poss [ LIST /a ] /whole )',
     emoji: '🟰',
     forms: {
       en: { base: 'row', plural: 'rows', count: 'singular' },
@@ -5940,7 +5878,10 @@ export const nouns: ConceptSeed[] = [
     id: 'MENU',
     role: 'noun',
     description: 'a list of commands to choose from',
-    definition: patientGloss('LIST', 'CHOOSE'),
+    definition: `
+      /subj ( LIST /a /rel #2.obj )
+      /subj ( one ) /verb ( CHOOSE ) /obj ( LIST )
+    `,
     emoji: '🍔',
     forms: {
       en: { base: 'menu', plural: 'menus', count: 'singular' },
@@ -5961,13 +5902,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TAB',
     role: 'noun',
     description: 'a label at the top of a panel that shows one of its pages',
-    definition: {
-      subject: {
-        concept: 'BUTTON',
-        definiteness: 'indefinite',
-        relative: { verbPhrase: { verb: 'SHOW' }, directObject: { concept: 'REGION', definiteness: 'indefinite' } },
-      },
-    },
+    definition: `
+      /subj ( BUTTON /a /rel #2.subj )
+      /subj ( BUTTON ) /verb ( SHOW ) /obj ( REGION /a )
+    `,
     emoji: '🗂️',
     forms: {
       en: { base: 'tab', plural: 'tabs', count: 'singular' },
@@ -5986,7 +5924,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TARGET',
     role: 'noun',
     description: 'the thing a link points to',
-    definition: patientGloss('OBJECT_THING', 'INDICATE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj )
+      /subj ( one ) /verb ( INDICATE ) /obj ( OBJECT_THING )
+    `,
     emoji: '🎯',
     forms: {
       en: { base: 'target', plural: 'targets', count: 'singular' },
@@ -6003,7 +5944,10 @@ export const nouns: ConceptSeed[] = [
     id: 'HELP',
     role: 'noun',
     description: 'information that shows how to use something',
-    definition: patientGloss('CONTENT', 'SHOW', 'bare'),
+    definition: `
+      /subj ( CONTENT /zero /rel #2.obj )
+      /subj ( one ) /verb ( SHOW ) /obj ( CONTENT )
+    `,
     emoji: '🛟',
     countable: false,
     forms: {
@@ -6024,13 +5968,10 @@ export const nouns: ConceptSeed[] = [
     id: 'NAVIGATION',
     role: 'noun',
     description: 'moving from place to place in an interface',
-    definition: {
-      subject: {
-        concept: 'ACTION',
-        definiteness: 'indefinite',
-        relative: { verbPhrase: { verb: 'MOVE' }, directObject: { concept: 'CURSOR', definiteness: 'definite' } },
-      },
-    },
+    definition: `
+      /subj ( ACTION /a /rel #2.subj )
+      /subj ( ACTION ) /verb ( MOVE ) /obj ( CURSOR )
+    `,
     emoji: '🧭',
     countable: false,
     forms: {
@@ -6072,7 +6013,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ALIAS',
     role: 'noun',
     description: 'another name a thing is also called by',
-    definition: glossOf('NAME_NOUN', 'OTHER'),
+    definition: '/subj ( NAME_NOUN /adj OTHER /a )',
     emoji: '🪪',
     isA: 'NAME_NOUN',
     forms: {
@@ -6109,7 +6050,10 @@ export const nouns: ConceptSeed[] = [
     id: 'LOADING',
     role: 'noun',
     description: 'the process of bringing data into a program',
-    definition: whoGloss('PROCESS', 'LOAD', 'CONTENT', 'singular'),
+    definition: `
+      /subj ( PROCESS /a /rel #2.subj )
+      /subj ( PROCESS ) /verb ( LOAD ) /obj ( CONTENT /zero )
+    `,
     emoji: '⏳',
     countable: false,
     isA: 'PROCESS',
@@ -6131,7 +6075,10 @@ export const nouns: ConceptSeed[] = [
     id: 'INTERFACE',
     role: 'noun',
     description: 'the part of a program a person sees and uses',
-    definition: patientGloss('SCREEN', 'SEE'),
+    definition: `
+      /subj ( SCREEN /a /rel #2.obj )
+      /subj ( one ) /verb ( SEE ) /obj ( SCREEN )
+    `,
     emoji: '🖥️',
     forms: {
       en: { base: 'interface', plural: 'interfaces', count: 'singular' },
@@ -6150,7 +6097,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SERVER',
     role: 'noun',
     description: 'a program that answers the requests of other programs',
-    definition: whoGloss('PROCESS', 'ANSWER'),
+    definition: `
+      /subj ( PROCESS /a /rel #2.subj )
+      /subj ( PROCESS ) /verb ( ANSWER )
+    `,
     emoji: '🗄️',
     forms: {
       en: { base: 'server', plural: 'servers', count: 'singular' },
@@ -6167,7 +6117,10 @@ export const nouns: ConceptSeed[] = [
     id: 'RESULT',
     role: 'noun',
     description: 'something found by a search',
-    definition: patientGloss('CONCEPT', 'SEARCH'),
+    definition: `
+      /subj ( CONCEPT /a /rel #2.obj )
+      /subj ( one ) /verb ( SEARCH ) /obj ( CONCEPT )
+    `,
     emoji: '🔎',
     forms: {
       en: { base: 'result', plural: 'results', count: 'singular' },
@@ -6184,7 +6137,10 @@ export const nouns: ConceptSeed[] = [
     id: 'IMPORT_NOUN',
     role: 'noun',
     description: 'the act of bringing data in from a file',
-    definition: whoGloss('ACTION', 'IMPORT', 'FILE'),
+    definition: `
+      /subj ( ACTION /a /rel #2.subj )
+      /subj ( ACTION ) /verb ( IMPORT ) /obj ( FILE /pl /zero )
+    `,
     emoji: '📥',
     isA: 'ACTION',
     forms: {
@@ -6202,7 +6158,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ICON',
     role: 'noun',
     description: 'a small picture on a control that shows what it does',
-    definition: glossOf('PICTURE', 'SMALL'),
+    definition: '/subj ( PICTURE /adj SMALL /a )',
     emoji: '🖼️',
     forms: {
       en: { base: 'icon', plural: 'icons', count: 'singular' },
@@ -6219,7 +6175,10 @@ export const nouns: ConceptSeed[] = [
     id: 'FILE',
     role: 'noun',
     description: 'a document stored on a computer',
-    definition: patientGloss('OBJECT_THING', 'SAVE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.obj )
+      /subj ( one ) /verb ( SAVE ) /obj ( OBJECT_THING )
+    `,
     emoji: '📄',
     forms: {
       en: { base: 'file', plural: 'files', count: 'singular' },
@@ -6237,7 +6196,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CLIPBOARD',
     role: 'noun',
     description: 'the temporary store for content that has been copied',
-    definition: whereGloss('PLACE', 'COPY'),
+    definition: `
+      /subj ( PLACE /a /rel #2.loc )
+      /subj ( one ) /verb ( COPY ) /loc ( PLACE )
+    `,
     emoji: '📋',
     forms: {
       en: { base: 'clipboard', plural: 'clipboards', count: 'singular' },
@@ -6257,7 +6219,10 @@ export const nouns: ConceptSeed[] = [
     id: 'LINE',
     role: 'noun',
     description: 'a row of text typed as one command',
-    definition: patientGloss('TEXT', 'TYPE', 'bare'),
+    definition: `
+      /subj ( TEXT /zero /rel #2.obj )
+      /subj ( one ) /verb ( TYPE ) /obj ( TEXT )
+    `,
     emoji: '⌨️',
     forms: {
       en: { base: 'line', plural: 'lines', count: 'singular' },
@@ -6276,7 +6241,10 @@ export const nouns: ConceptSeed[] = [
     id: 'HISTORY',
     role: 'noun',
     description: 'the lines typed before, in order',
-    definition: patientGloss('LIST', 'WRITE'),
+    definition: `
+      /subj ( LIST /a /rel #2.obj )
+      /subj ( one ) /verb ( WRITE ) /obj ( LIST )
+    `,
     emoji: '🕘',
     countable: false,
     forms: {
@@ -6298,14 +6266,7 @@ export const nouns: ConceptSeed[] = [
     id: 'WORKSPACE',
     role: 'noun',
     description: 'all the periods being built at once',
-    definition: {
-      subject: {
-        concept: 'GROUP',
-        definiteness: 'indefinite',
-        possessor: { concept: 'CANVAS', definiteness: 'bare', number: 'plural' },
-        possessorRole: 'parts',
-      },
-    },
+    definition: '/subj ( GROUP /a /poss [ CANVAS /pl /zero ] /parts )',
     emoji: '🗂️',
     forms: {
       en: { base: 'workspace', plural: 'workspaces', count: 'singular' },
@@ -6323,7 +6284,10 @@ export const nouns: ConceptSeed[] = [
     id: 'USAGE',
     role: 'noun',
     description: 'how a thing is written or used',
-    definition: patientGloss('WAY', 'USE'),
+    definition: `
+      /subj ( WAY /a /rel #2.obj )
+      /subj ( one ) /verb ( USE ) /obj ( WAY )
+    `,
     emoji: '📖',
     countable: false,
     forms: {
@@ -6340,7 +6304,10 @@ export const nouns: ConceptSeed[] = [
     id: 'EXAMPLE',
     role: 'noun',
     description: 'a case that shows how something is used',
-    definition: patientGloss('PHRASE', 'SHOW'),
+    definition: `
+      /subj ( PHRASE /a /rel #2.obj )
+      /subj ( one ) /verb ( SHOW ) /obj ( PHRASE )
+    `,
     emoji: '💡',
     forms: {
       en: { base: 'example', plural: 'examples', count: 'singular' },
@@ -6359,7 +6326,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CONSOLE',
     role: 'noun',
     description: 'a text field where a user types commands',
-    definition: whereGloss('PLACE', 'TYPE'),
+    definition: `
+      /subj ( PLACE /a /rel #2.loc )
+      /subj ( one ) /verb ( TYPE ) /loc ( PLACE )
+    `,
     emoji: '💻',
     forms: {
       en: { base: 'console', plural: 'consoles', count: 'singular' },
@@ -6378,7 +6348,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CANVAS',
     role: 'noun',
     description: 'the surface a phrase is built on',
-    definition: whereGloss('PLACE', 'MAKE', 'PHRASE'),
+    definition: `
+      /subj ( PLACE /a /rel #2.loc )
+      /subj ( one ) /verb ( MAKE ) /obj ( PHRASE /pl /zero ) /loc ( PLACE )
+    `,
     emoji: '🎨',
     forms: {
       en: { base: 'canvas', plural: 'canvases', count: 'singular' },
@@ -6396,7 +6369,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PREVIEW',
     role: 'noun',
     description: 'a view of a result before it is made',
-    definition: patientGloss('CONTENT', 'SEE', 'bare'),
+    definition: `
+      /subj ( CONTENT /zero /rel #2.obj )
+      /subj ( one ) /verb ( SEE ) /obj ( CONTENT )
+    `,
     emoji: '👀',
     forms: {
       en: { base: 'preview', plural: 'previews', count: 'singular' },
@@ -6413,7 +6389,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TOOLBAR',
     role: 'noun',
     description: 'a row of controls',
-    definition: whoGloss('ROW', 'HAVE', 'BUTTON'),
+    definition: `
+      /subj ( ROW /a /rel #2.subj )
+      /subj ( ROW ) /verb ( HAVE ) /obj ( BUTTON /pl /zero )
+    `,
     emoji: '🧰',
     forms: {
       en: { base: 'toolbar', plural: 'toolbars', count: 'singular' },
@@ -6432,7 +6411,10 @@ export const nouns: ConceptSeed[] = [
     id: 'LIST',
     role: 'noun',
     description: 'items written one after another',
-    definition: patientGloss('GROUP', 'ARRANGE'),
+    definition: `
+      /subj ( GROUP /a /rel #2.obj )
+      /subj ( one ) /verb ( ARRANGE ) /obj ( GROUP )
+    `,
     emoji: '📃',
     forms: {
       en: { base: 'list', plural: 'lists', count: 'singular' },
@@ -6450,7 +6432,10 @@ export const nouns: ConceptSeed[] = [
     id: 'VALUE',
     role: 'noun',
     description: 'one of the settings a control can have',
-    definition: patientGloss('CONCEPT', 'SET'),
+    definition: `
+      /subj ( CONCEPT /a /rel #2.obj )
+      /subj ( one ) /verb ( SET ) /obj ( CONCEPT )
+    `,
     emoji: '🎛️',
     forms: {
       en: { base: 'value', plural: 'values', count: 'singular' },
@@ -6468,7 +6453,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CURSOR',
     role: 'noun',
     description: 'the mark on a screen that shows where the next key acts',
-    definition: whoGloss('PICTURE', 'INDICATE', 'PLACE'),
+    definition: `
+      /subj ( PICTURE /a /rel #2.subj )
+      /subj ( PICTURE ) /verb ( INDICATE ) /obj ( PLACE /pl /zero )
+    `,
     emoji: '🖱️',
     forms: {
       en: { base: 'cursor', plural: 'cursors', count: 'singular' },
@@ -6486,7 +6474,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TEXT',
     role: 'noun',
     description: 'written words',
-    definition: massGlossOf('CONTENT', 'WRITTEN'),
+    definition: '/subj ( CONTENT /adj WRITTEN /zero )',
     emoji: '📝',
     forms: {
       en: { base: 'text', plural: 'texts', count: 'singular' },
@@ -6505,7 +6493,10 @@ export const nouns: ConceptSeed[] = [
     id: 'REFERENCE',
     role: 'noun',
     description: 'something that points to something else',
-    definition: whoGloss('WORD', 'INDICATE', 'CONCEPT'),
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( INDICATE ) /obj ( CONCEPT /pl /zero )
+    `,
     emoji: '🔗',
     forms: {
       en: { base: 'reference', plural: 'references', count: 'singular' },
@@ -6536,7 +6527,10 @@ export const nouns: ConceptSeed[] = [
     id: 'POSSESSOR',
     role: 'noun',
     description: 'the one who owns or holds something',
-    definition: whoGloss('PERSON', 'OWN', 'OBJECT_THING'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( OWN ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '🔑',
     animate: true,
     forms: {
@@ -6664,7 +6658,10 @@ export const nouns: ConceptSeed[] = [
     id: 'WORK_NOUN',
     role: 'noun',
     description: 'labour; what one does for a living',
-    definition: instrumentGloss('ACTION', 'ACQUIRE', 'MONEY'),
+    definition: `
+      /subj ( ACTION /a /rel #2.inst )
+      /subj ( one ) /verb ( ACQUIRE ) /obj ( MONEY /a )
+    `,
     emoji: '💼',
     countable: false,
     forms: {
@@ -6684,18 +6681,10 @@ export const nouns: ConceptSeed[] = [
     id: 'RESEARCH',
     role: 'noun',
     description: 'careful study to find out new facts',
-    definition: {
-      subject: {
-        concept: 'WORK_NOUN',
-        definiteness: 'bare',
-        relative: {
-          headRole: 'instrumental',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'FIND' },
-          directObject: { concept: 'FACT', definiteness: 'bare', number: 'plural', adjectives: ['NEW'] },
-        },
-      },
-    },
+    definition: `
+      /subj ( WORK_NOUN /zero /rel #2.inst )
+      /subj ( one ) /verb ( FIND ) /obj ( FACT /adj NEW /pl /zero )
+    `,
     emoji: '🔬',
     countable: false,
     forms: {
@@ -6715,7 +6704,10 @@ export const nouns: ConceptSeed[] = [
     id: 'STUDY_NOUN',
     role: 'noun',
     description: 'a piece of research, written up',
-    definition: whoGloss('TEXT', 'DESCRIBE', 'RESEARCH', 'singular'),
+    definition: `
+      /subj ( TEXT /a /rel #2.subj )
+      /subj ( TEXT ) /verb ( DESCRIBE ) /obj ( RESEARCH /zero )
+    `,
     emoji: '📑',
     forms: {
       en: { base: 'study', plural: 'studies', count: 'singular' },
@@ -6735,7 +6727,10 @@ export const nouns: ConceptSeed[] = [
     id: 'MATERIAL',
     role: 'noun',
     description: 'what something is made of',
-    definition: instrumentGloss('SUBSTANCE', 'MAKE', 'OBJECT_THING', 'bare'),
+    definition: `
+      /subj ( SUBSTANCE /zero /rel #2.inst )
+      /subj ( one ) /verb ( MAKE ) /obj ( OBJECT_THING /a )
+    `,
     emoji: '🧶',
     forms: {
       en: { base: 'material', plural: 'materials', count: 'singular' },
@@ -6813,7 +6808,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CHANGE_NOUN',
     role: 'noun',
     description: 'the act or result of becoming different',
-    definition: whoGloss('PROCESS', 'CHANGE', 'OBJECT_THING'),
+    definition: `
+      /subj ( PROCESS /a /rel #2.subj )
+      /subj ( PROCESS ) /verb ( CHANGE ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '🔀',
     isA: 'PROCESS',
     forms: {
@@ -6833,15 +6831,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SYSTEM',
     role: 'noun',
     description: 'a set of parts that work together as a whole',
-    definition: {
-      subject: {
-        concept: 'GROUP',
-        definiteness: 'indefinite',
-        possessor: { concept: 'PART', definiteness: 'bare', number: 'plural' },
-        possessorRole: 'parts',
-        relative: { verbPhrase: { verb: 'WORK' } },
-      },
-    },
+    definition: `
+      /subj ( GROUP /a /poss [ PART /pl /zero ] /parts /rel #2.subj )
+      /subj ( GROUP ) /verb ( WORK )
+    `,
     emoji: '⚙️',
     forms: {
       en: { base: 'system', plural: 'systems', count: 'singular' },
@@ -6861,14 +6854,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PROGRAM_SOFTWARE',
     role: 'noun',
     description: 'a set of instructions a computer runs',
-    definition: {
-      subject: {
-        concept: 'LIST',
-        definiteness: 'indefinite',
-        possessor: { concept: 'INSTRUCTION', definiteness: 'bare', number: 'plural' },
-        possessorRole: 'parts',
-      },
-    },
+    definition: '/subj ( LIST /a /poss [ INSTRUCTION /pl /zero ] /parts )',
     emoji: '💾',
     synonym: 'software',
     forms: {
@@ -6888,7 +6874,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PROGRAM_SHOW',
     role: 'noun',
     description: 'a show broadcast on radio or television',
-    definition: patientGloss('CONTENT', 'BROADCAST', 'bare'),
+    definition: `
+      /subj ( CONTENT /zero /rel #2.obj )
+      /subj ( one ) /verb ( BROADCAST ) /obj ( CONTENT )
+    `,
     emoji: '📺',
     synonym: 'show',
     forms: {
@@ -6924,16 +6913,10 @@ export const nouns: ConceptSeed[] = [
     id: 'IDEA',
     role: 'noun',
     description: 'a thought or a plan one has in mind',
-    definition: {
-      subject: {
-        concept: 'CONCEPT',
-        definiteness: 'indefinite',
-        relative: {
-          verbPhrase: { verb: 'BE' },
-          complements: { locative: { phrase: { concept: 'MIND', definiteness: 'indefinite' } } },
-        },
-      },
-    },
+    definition: `
+      /subj ( CONCEPT /a /rel #2.subj )
+      /subj ( CONCEPT ) /verb ( BE ) /loc ( MIND /a )
+    `,
     emoji: '💭',
     forms: {
       en: { base: 'idea', plural: 'ideas', count: 'singular' },
@@ -6970,18 +6953,10 @@ export const nouns: ConceptSeed[] = [
     id: 'GAME',
     role: 'noun',
     description: 'an activity one plays for fun, often with rules',
-    definition: {
-      subject: {
-        concept: 'ACTION',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'directObject',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'DO' },
-          complements: { purpose: { phrase: { concept: 'JOY', definiteness: 'bare' } } },
-        },
-      },
-    },
+    definition: `
+      /subj ( ACTION /a /rel #2.obj )
+      /subj ( one ) /verb ( DO ) /obj ( ACTION ) /for ( JOY /zero )
+    `,
     emoji: '🎮',
     isA: 'ACTION',
     forms: {
@@ -7025,15 +7000,7 @@ export const nouns: ConceptSeed[] = [
     id: 'THING',
     role: 'noun',
     description: 'anything, material or not',
-    definition: {
-      subject: {
-        conjuncts: [
-          { concept: 'OBJECT_THING', definiteness: 'indefinite' },
-          { concept: 'CONCEPT', definiteness: 'indefinite' },
-        ],
-        conjunction: 'or',
-      },
-    },
+    definition: '/subj ( OBJECT_THING /a /or [ CONCEPT /a ] )',
     emoji: '🔣',
     forms: {
       en: { base: 'thing', plural: 'things', count: 'singular' },
@@ -7051,13 +7018,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PROBLEM',
     role: 'noun',
     description: 'a matter that needs to be dealt with and solved',
-    definition: {
-      subject: {
-        concept: 'STATE',
-        definiteness: 'indefinite',
-        relative: { headRole: 'directObject', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'CHANGE', modals: ['MUST'] } },
-      },
-    },
+    definition: `
+      /subj ( STATE /a /rel #2.obj )
+      /subj ( one ) /verb ( CHANGE /modal MUST ) /obj ( STATE )
+    `,
     emoji: '⚠️',
     forms: {
       en: { base: 'problem', plural: 'problems', count: 'singular' },
@@ -7079,13 +7043,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ISSUE',
     role: 'noun',
     description: 'a matter that people discuss or argue about',
-    definition: {
-      subject: {
-        concept: 'PROBLEM',
-        definiteness: 'indefinite',
-        relative: { headRole: 'topic', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'SPEAK' } },
-      },
-    },
+    definition: `
+      /subj ( PROBLEM /a /rel #2.about )
+      /subj ( one ) /verb ( SPEAK ) /about ( PROBLEM )
+    `,
     emoji: '🗯️',
     synonym: 'matter',
     forms: {
@@ -7104,7 +7065,10 @@ export const nouns: ConceptSeed[] = [
     id: 'CASE_INSTANCE',
     role: 'noun',
     description: 'an instance of something happening, as in "in this case"',
-    definition: whoGloss('THING', 'HAPPEN'),
+    definition: `
+      /subj ( THING /a /rel #2.subj )
+      /subj ( THING ) /verb ( HAPPEN )
+    `,
     emoji: '🗂️',
     synonym: 'instance',
     forms: {
@@ -7157,7 +7121,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ORGAN',
     role: 'noun',
     description: 'a part of a living body',
-    definition: partOfGloss('BODY'),
+    definition: '/subj ( PART /a /poss [ BODY /a ] /whole )',
     emoji: '🫀',
     forms: {
       en: { base: 'organ', plural: 'organs', count: 'singular' },
@@ -7261,7 +7225,10 @@ export const nouns: ConceptSeed[] = [
     id: 'EYE',
     role: 'noun',
     description: 'the organ one sees with',
-    definition: instrumentGloss('ORGAN', 'SEE'),
+    definition: `
+      /subj ( ORGAN /a /rel #2.inst )
+      /subj ( one ) /verb ( SEE )
+    `,
     emoji: '👁️',
     forms: {
       en: { base: 'eye', plural: 'eyes', count: 'singular' },
@@ -7285,7 +7252,10 @@ export const nouns: ConceptSeed[] = [
     id: 'HAND',
     role: 'noun',
     description: 'the part at the end of the arm one holds things with',
-    definition: instrumentGloss('ORGAN', 'TAKE', 'OBJECT_THING'),
+    definition: `
+      /subj ( ORGAN /a /rel #2.inst )
+      /subj ( one ) /verb ( TAKE ) /obj ( OBJECT_THING /a )
+    `,
     emoji: '✋',
     isA: 'ORGAN',
     forms: {
@@ -7301,20 +7271,12 @@ export const nouns: ConceptSeed[] = [
   // ── P09-E24's head, face, back and health (localization B79) ─────────
   {
     // The body part; the leader (capo, chef, Leiter, jefe, 長) is another concept. "The high part of a
-    // body": NIGHT's shape, a definite part picked out by an adjective, and ORGAN's partOfGloss('BODY')
+    // body": NIGHT's shape, a definite part picked out by an adjective, and ORGAN's "a part of a body"
     // narrowed. No `isA`, as EYE has none. FACE is glossed on it, so it is seeded first.
     id: 'HEAD',
     role: 'noun',
     description: 'the top part of the body, with the face and the brain',
-    definition: {
-      subject: {
-        concept: 'PART',
-        definiteness: 'definite',
-        adjectives: ['HIGH'],
-        possessor: { concept: 'BODY', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-      },
-    },
+    definition: '/subj ( PART /adj HIGH /poss [ BODY /a ] /whole )',
     emoji: '👤',
     forms: {
       en: { base: 'head', plural: 'heads', count: 'singular' },
@@ -7333,18 +7295,10 @@ export const nouns: ConceptSeed[] = [
     id: 'FACE',
     role: 'noun',
     description: 'the front of the head, with the eyes, the nose and the mouth',
-    definition: {
-      subject: {
-        concept: 'PART',
-        definiteness: 'definite',
-        possessor: { concept: 'HEAD', definiteness: 'indefinite' },
-        possessorRole: 'whole',
-        relative: {
-          verbPhrase: { verb: 'HAVE' },
-          directObject: { concept: 'EYE', definiteness: 'definite', number: 'plural' },
-        },
-      },
-    },
+    definition: `
+      /subj ( PART /poss [ HEAD /a ] /whole /rel #2.subj )
+      /subj ( PART ) /verb ( HAVE ) /obj ( EYE /pl )
+    `,
     emoji: '🙂',
     forms: {
       en: { base: 'face', plural: 'faces', count: 'singular' },
@@ -7382,14 +7336,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HEALTH',
     role: 'noun',
     description: 'the state of being well in body',
-    definition: {
-      subject: {
-        concept: 'STATE',
-        definiteness: 'definite',
-        adjectives: ['GOOD'],
-        possessor: { concept: 'BODY', definiteness: 'indefinite' },
-      },
-    },
+    definition: '/subj ( STATE /adj GOOD /poss [ BODY /a ] )',
     emoji: '🩺',
     countable: false,
     forms: {
@@ -7426,7 +7373,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HISTORY_PAST',
     role: 'noun',
     description: 'the past, and the study of it',
-    definition: { subject: { concept: 'FACT', definiteness: 'definite', number: 'plural', adjectives: ['PAST'] } },
+    definition: '/subj ( FACT /adj PAST /pl )',
     emoji: '🏛️',
     countable: false,
     synonym: 'the past',
@@ -7454,16 +7401,10 @@ export const nouns: ConceptSeed[] = [
     // "Facts that one has told recently" (localization A32): the report and its recency, a bare
     // plural head over an object-gap clause, on FACT, TELL and RECENTLY. It avoids NEW, whose en
     // *new* and fr *nouveaux* would echo *news* and *nouvelles*.
-    definition: {
-      subject: {
-        concept: 'FACT', definiteness: 'bare', number: 'plural',
-        relative: {
-          headRole: 'directObject',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'TELL', aspect: 'resultative', modifier: 'RECENTLY' },
-        },
-      },
-    },
+    definition: `
+      /subj ( FACT /pl /zero /rel #2.obj )
+      /subj ( one ) /verb ( TELL /adv RECENTLY /result ) /obj ( FACT )
+    `,
     emoji: '📰',
     countable: false,
     forms: {
@@ -7730,7 +7671,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SCHOOL',
     role: 'noun',
     description: 'a place where children and young people are taught',
-    definition: whereGloss('BUILDING', 'LEARN'),
+    definition: `
+      /subj ( BUILDING /a /rel #2.loc )
+      /subj ( one ) /verb ( LEARN ) /loc ( BUILDING )
+    `,
     emoji: '🏫',
     isA: 'BUILDING',
     forms: {
@@ -7751,7 +7695,10 @@ export const nouns: ConceptSeed[] = [
     id: 'STUDENT',
     role: 'noun',
     description: 'a person who is studying at a school or university',
-    definition: whoGloss('PERSON', 'LEARN'),
+    definition: `
+      /subj ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( LEARN )
+    `,
     emoji: '🧑‍🎓',
     animate: true,
     human: true,
@@ -7772,7 +7719,10 @@ export const nouns: ConceptSeed[] = [
     id: 'COMPANY_BUSINESS',
     role: 'noun',
     description: 'a business that makes or sells goods or services',
-    definition: whoGloss('GROUP', 'SELL'),
+    definition: `
+      /subj ( GROUP /a /rel #2.subj )
+      /subj ( GROUP ) /verb ( SELL )
+    `,
     emoji: '🏢',
     synonym: 'business',
     forms: {
@@ -7793,7 +7743,10 @@ export const nouns: ConceptSeed[] = [
     id: 'TEAM',
     role: 'noun',
     description: 'a group of people who play or work together',
-    definition: whoGloss('GROUP', 'PLAY_GAME'),
+    definition: `
+      /subj ( GROUP /a /rel #2.subj )
+      /subj ( GROUP ) /verb ( PLAY_GAME )
+    `,
     emoji: '🏅',
     isA: 'GROUP',
     forms: {
@@ -7812,18 +7765,10 @@ export const nouns: ConceptSeed[] = [
     id: 'COMMUNITY',
     role: 'noun',
     description: 'the people who live in one place, taken together',
-    definition: {
-      subject: {
-        concept: 'GROUP',
-        definiteness: 'indefinite',
-        possessor: { concept: 'PERSON', definiteness: 'bare', number: 'plural' },
-        possessorRole: 'parts',
-        relative: {
-          verbPhrase: { verb: 'LIVE' },
-          complements: { locative: { phrase: { concept: 'PLACE', definiteness: 'definite', adjectives: ['SAME'] } } },
-        },
-      },
-    },
+    definition: `
+      /subj ( GROUP /a /poss [ PERSON /pl /zero ] /parts /rel #2.subj )
+      /subj ( GROUP ) /verb ( LIVE ) /loc ( PLACE /adj SAME )
+    `,
     emoji: '🏘️',
     isA: 'GROUP',
     forms: {
@@ -7843,17 +7788,10 @@ export const nouns: ConceptSeed[] = [
     id: 'UNIVERSITY',
     role: 'noun',
     description: 'a school of higher learning for adults',
-    definition: {
-      subject: {
-        concept: 'SCHOOL',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'locative',
-          subject: { concept: 'PERSON', definiteness: 'indefinite', number: 'plural', adjectives: ['ADULT'] },
-          verbPhrase: { verb: 'LEARN' },
-        },
-      },
-    },
+    definition: `
+      /subj ( SCHOOL /a /rel #2.loc )
+      /subj ( PERSON /adj ADULT /pl /a ) /verb ( LEARN ) /loc ( SCHOOL )
+    `,
     emoji: '🎓',
     isA: 'SCHOOL',
     forms: {
@@ -7872,18 +7810,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SERVICE',
     role: 'noun',
     description: 'work done for other people',
-    definition: {
-      subject: {
-        concept: 'WORK_NOUN',
-        definiteness: 'bare',
-        relative: {
-          headRole: 'directObject',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'DO' },
-          complements: { purpose: { phrase: { concept: 'PERSON', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] } } },
-        },
-      },
-    },
+    definition: `
+      /subj ( WORK_NOUN /zero /rel #2.obj )
+      /subj ( one ) /verb ( DO ) /obj ( WORK_NOUN ) /for ( PERSON /adj OTHER /pl /zero )
+    `,
     emoji: '🛎️',
     forms: {
       en: { base: 'service', plural: 'services', count: 'singular' },
@@ -7902,7 +7832,10 @@ export const nouns: ConceptSeed[] = [
     id: 'BUSINESS',
     role: 'noun',
     description: 'the buying and selling of goods and services',
-    definition: instrumentGloss('WORK_NOUN', 'TRADE', undefined, 'bare'),
+    definition: `
+      /subj ( WORK_NOUN /zero /rel #2.inst )
+      /subj ( one ) /verb ( TRADE )
+    `,
     emoji: '💹',
     countable: false,
     synonym: 'commerce',
@@ -7924,13 +7857,10 @@ export const nouns: ConceptSeed[] = [
     id: 'STATE_NATION',
     role: 'noun',
     description: 'a country considered as a political body with its own government',
-    definition: {
-      subject: {
-        concept: 'SYSTEM',
-        definiteness: 'indefinite',
-        relative: { verbPhrase: { verb: 'GOVERN_STATE' }, directObject: { concept: 'COUNTRY', definiteness: 'indefinite' } },
-      },
-    },
+    definition: `
+      /subj ( SYSTEM /a /rel #2.subj )
+      /subj ( SYSTEM ) /verb ( GOVERN_STATE ) /obj ( COUNTRY /a )
+    `,
     emoji: '🏛️',
     synonym: 'polity',
     forms: {
@@ -7951,7 +7881,10 @@ export const nouns: ConceptSeed[] = [
     id: 'POWER',
     role: 'noun',
     description: 'the authority to direct people and events',
-    definition: instrumentGloss('ABILITY', 'GOVERN_STATE'),
+    definition: `
+      /subj ( ABILITY /a /rel #2.inst )
+      /subj ( one ) /verb ( GOVERN_STATE )
+    `,
     emoji: '👑',
     synonym: 'authority',
     forms: {
@@ -7970,13 +7903,10 @@ export const nouns: ConceptSeed[] = [
     id: 'GOVERNMENT',
     role: 'noun',
     description: 'the group of people who govern a state',
-    definition: {
-      subject: {
-        concept: 'GROUP',
-        definiteness: 'indefinite',
-        relative: { verbPhrase: { verb: 'GOVERN_STATE' }, directObject: { concept: 'STATE_NATION', definiteness: 'indefinite' } },
-      },
-    },
+    definition: `
+      /subj ( GROUP /a /rel #2.subj )
+      /subj ( GROUP ) /verb ( GOVERN_STATE ) /obj ( STATE_NATION /a )
+    `,
     emoji: '🏛️',
     isA: 'GROUP',
     forms: {
@@ -7995,7 +7925,10 @@ export const nouns: ConceptSeed[] = [
     id: 'PARTY_POLITICAL',
     role: 'noun',
     description: 'an organized group that seeks political power',
-    definition: whoGloss('GROUP', 'DESIRE', 'POWER', 'singular'),
+    definition: `
+      /subj ( GROUP /a /rel #2.subj )
+      /subj ( GROUP ) /verb ( DESIRE ) /obj ( POWER /zero )
+    `,
     emoji: '🗳️',
     isA: 'GROUP',
     synonym: 'political',
@@ -8016,7 +7949,10 @@ export const nouns: ConceptSeed[] = [
     id: 'LAW',
     role: 'noun',
     description: 'a rule a state makes that everyone must follow',
-    definition: patientOfGloss('INSTRUCTION', 'WRITE', 'STATE_NATION'),
+    definition: `
+      /subj ( INSTRUCTION /a /rel #2.obj )
+      /subj ( STATE_NATION /a ) /verb ( WRITE ) /obj ( INSTRUCTION )
+    `,
     emoji: '📜',
     forms: {
       en: { base: 'law', plural: 'laws', count: 'singular' },
@@ -8033,13 +7969,10 @@ export const nouns: ConceptSeed[] = [
     id: 'COURT_LAW',
     role: 'noun',
     description: 'the body that judges cases under the law',
-    definition: {
-      subject: {
-        concept: 'GROUP',
-        definiteness: 'indefinite',
-        relative: { verbPhrase: { verb: 'APPLY' }, directObject: { concept: 'LAW', definiteness: 'definite', number: 'plural' } },
-      },
-    },
+    definition: `
+      /subj ( GROUP /a /rel #2.subj )
+      /subj ( GROUP ) /verb ( APPLY ) /obj ( LAW /pl )
+    `,
     emoji: '⚖️',
     synonym: 'of law',
     forms: {
@@ -8058,17 +7991,10 @@ export const nouns: ConceptSeed[] = [
     id: 'RIGHT_NOUN',
     role: 'noun',
     description: 'what one is allowed to do or have',
-    definition: {
-      subject: {
-        concept: 'ACTION',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'directObject',
-          subject: { concept: 'GENERIC_PERSON' },
-          verbPhrase: { verb: 'DO', modals: ['MAY'] },
-        },
-      },
-    },
+    definition: `
+      /subj ( ACTION /a /rel #2.obj )
+      /subj ( one ) /verb ( DO /modal MAY ) /obj ( ACTION )
+    `,
     emoji: '✊',
     synonym: 'entitlement',
     forms: {
@@ -8087,17 +8013,10 @@ export const nouns: ConceptSeed[] = [
     id: 'WAR',
     role: 'noun',
     description: 'armed fighting between nations',
-    definition: {
-      subject: {
-        concept: 'PERIOD_TIME',
-        definiteness: 'indefinite',
-        relative: {
-          headRole: 'locative',
-          subject: { concept: 'NATION', definiteness: 'indefinite', number: 'plural' },
-          verbPhrase: { verb: 'KILL' },
-        },
-      },
-    },
+    definition: `
+      /subj ( PERIOD_TIME /a /rel #2.loc )
+      /subj ( NATION /pl /a ) /verb ( KILL ) /loc ( PERIOD_TIME )
+    `,
     emoji: '⚔️',
     forms: {
       en: { base: 'war', plural: 'wars', count: 'singular' },
@@ -8115,13 +8034,10 @@ export const nouns: ConceptSeed[] = [
     id: 'WORLD',
     role: 'noun',
     description: 'the earth, with all its countries and peoples',
-    definition: {
-      subject: {
-        concept: 'PLACE',
-        definiteness: 'definite',
-        relative: { verbPhrase: { verb: 'INCLUDE' }, directObject: { concept: 'COUNTRY', definiteness: 'all', number: 'plural' } },
-      },
-    },
+    definition: `
+      /subj ( PLACE /rel #2.subj )
+      /subj ( PLACE ) /verb ( INCLUDE ) /obj ( COUNTRY /pl /all )
+    `,
     emoji: '🌍',
     isA: 'PLACE',
     forms: {
@@ -8156,7 +8072,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SCREEN',
     role: 'noun',
     description: 'the lit surface a program shows itself on',
-    definition: whoGloss('OBJECT_THING', 'SHOW', 'PICTURE'),
+    definition: `
+      /subj ( OBJECT_THING /a /rel #2.subj )
+      /subj ( OBJECT_THING ) /verb ( SHOW ) /obj ( PICTURE /pl /zero )
+    `,
     emoji: '🖥️',
     forms: {
       en: { base: 'screen', plural: 'screens', count: 'singular' },

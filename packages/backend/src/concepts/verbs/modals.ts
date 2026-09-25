@@ -1,22 +1,14 @@
 import type { ConceptSeed } from '../types.js';
-import type { PhrasePlan } from '@signi/shared';
-import { infinitiveGloss } from './gloss.js';
 
 // An **evaluative** modal's gloss: what is judged is the act, not the one who acts, so the act is
-// the subject — a content clause, which localization C30 built. evaluativeGloss('RIGHT_CORRECT') →
-// en "it is right that one acts", it "è giusto che si agisca", fr "il est juste qu'on agisse", de
-// "es ist richtig, dass man handelt", es "es correcto que se actúe", ja 行動することが正しい, pt "é
-// certo que se aja".
+// the subject — a content clause, which localization C30 built: `/verb ( BE ) /pred ( RIGHT_CORRECT )
+// /clause #2` over `/subj ( one ) /verb ( ACT )` → en "it is right that one acts", it "è giusto che
+// si agisca", fr "il est juste qu'on agisse", de "es ist richtig, dass man handelt", es "es correcto
+// que se actúe", ja 行動することが正しい, pt "é certo que se aja".
 //
 // This is why SHOULD and MIGHT could not take C09's shape, which the other four modals do: "to be
 // obliged / able / allowed to act" says the adjective of the **actor**, and *right* and *possible*
-// are not said of anyone. The plan's own subject is the throwaway a clausal subject leaves behind.
-const evaluativeGloss = (adjective: string): PhrasePlan => ({
-  subject: { concept: 'THING' },
-  contentSubject: { subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'ACT' } },
-  verbPhrase: { verb: 'BE' },
-  complements: { predicative: { phrase: { concept: adjective } } },
-});
+// are not said of anyone. The period has no subject word, so its that-clause is its subject (P13).
 
 // Each modal is defined by what it governs: an infinitive complement (PhrasePlan.infinitiveComplement)
 // under a word that says the modality in plain vocabulary — a duty (OBLIGED), a capacity (ABLE), a
@@ -50,7 +42,10 @@ export const modals: ConceptSeed[] = [
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to be obliged to; necessity',
     // "to be obliged to act"; es/pt "estar obligado a actuar", ja 行動することが義務的である.
-    definition: infinitiveGloss('BE', { predicate: 'OBLIGED', infinitive: 'ACT' }),
+    definition: `
+      /inf /verb ( BE ) /pred ( OBLIGED ) /to #2
+      /inf /verb ( ACT )
+    `,
     synonym: 'have to',
     emoji: '❗',
     forms: {
@@ -120,7 +115,10 @@ export const modals: ConceptSeed[] = [
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to be able to; ability or permission',
     // "to be able to act"; it "essere capace di agire", ja 行動することが可能である.
-    definition: infinitiveGloss('BE', { predicate: 'ABLE', infinitive: 'ACT' }),
+    definition: `
+      /inf /verb ( BE ) /pred ( ABLE ) /to #2
+      /inf /verb ( ACT )
+    `,
     synonym: 'be able to',
     emoji: '💪',
     forms: {
@@ -191,7 +189,10 @@ export const modals: ConceptSeed[] = [
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to want to; volition',
     // "to desire to act"; de "wünschen zu handeln", ja 行動することを望む.
-    definition: infinitiveGloss('DESIRE', { infinitive: 'ACT' }),
+    definition: `
+      /inf /verb ( DESIRE ) /to #2
+      /inf /verb ( ACT )
+    `,
     // The English lemma is "want", so the gloss disambiguates rather than repeating it.
     synonym: 'wish',
     emoji: '🎯',
@@ -268,7 +269,10 @@ export const modals: ConceptSeed[] = [
     stative: true, // a state: the Romance past is its imperfect (poteva), as CAN's is (A130)
     description: 'to be allowed to; permission',
     // "to be allowed to act"; es/pt "estar autorizado a actuar", ja 行動することが許可されている.
-    definition: infinitiveGloss('BE', { predicate: 'ALLOWED', infinitive: 'ACT' }),
+    definition: `
+      /inf /verb ( BE ) /pred ( ALLOWED ) /to #2
+      /inf /verb ( ACT )
+    `,
     synonym: 'be allowed to',
     emoji: '🎫',
     forms: {
@@ -348,7 +352,10 @@ export const modals: ConceptSeed[] = [
     role: 'verb',
     modal: true,
     description: 'ought to; what is right or advisable to do',
-    definition: evaluativeGloss('RIGHT_CORRECT'),
+    definition: `
+      /verb ( BE ) /pred ( RIGHT_CORRECT ) /clause #2
+      /subj ( one ) /verb ( ACT )
+    `,
     synonym: 'ought to',
     emoji: '🫵',
     forms: {
@@ -407,7 +414,10 @@ export const modals: ConceptSeed[] = [
     role: 'verb',
     modal: true,
     description: 'possibly will; possibility',
-    definition: evaluativeGloss('POSSIBLE'),
+    definition: `
+      /verb ( BE ) /pred ( POSSIBLE ) /clause #2
+      /subj ( one ) /verb ( ACT )
+    `,
     synonym: 'possibly',
     emoji: '🎲',
     forms: {

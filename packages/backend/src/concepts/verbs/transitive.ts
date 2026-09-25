@@ -1,5 +1,4 @@
 import type { ConceptSeed } from '../types.js';
-import { causativeGloss, infinitiveGloss } from './gloss.js';
 
 // Plain transitive verbs.
 export const transitiveVerbs: ConceptSeed[] = [
@@ -11,11 +10,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to divide or wound with a sharp edge',
     // "To divide with a blade" — B13 shipped it as "with a sharp blade", and SHARP is now glossed as
     // what cuts well, so the adjective went: the two would have defined each other (localization C24).
-    definition: infinitiveGloss('DIVIDE', {
-      complements: {
-        instrumental: { phrase: { concept: 'BLADE', definiteness: 'indefinite' } },
-      },
-    }),
+    definition: `
+      /inf /verb ( DIVIDE ) /inst #2
+      /subj ( BLADE /a )
+    `,
     emoji: '✂️',
     isA: 'DIVIDE',
     forms: {
@@ -83,7 +81,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to consume food',
-    definition: infinitiveGloss('CONSUME', 'FOOD'),
+    definition: '/inf /verb ( CONSUME ) /obj ( FOOD /zero )',
     emoji: '🍴',
     isA: 'CONSUME',
     forms: {
@@ -235,7 +233,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to consume liquid',
-    definition: infinitiveGloss('CONSUME', 'LIQUID'),
+    definition: '/inf /verb ( CONSUME ) /obj ( LIQUID /zero )',
     emoji: '🥤',
     isA: 'CONSUME',
     forms: {
@@ -447,7 +445,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to perceive with the eyes',
-    definition: infinitiveGloss('PERCEIVE', 'LIGHT'),
+    definition: '/inf /verb ( PERCEIVE ) /obj ( LIGHT /zero )',
     emoji: '👁️',
     isA: 'PERCEIVE',
     forms: {
@@ -517,7 +515,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to feel deep affection',
-    definition: infinitiveGloss('FEEL', 'AFFECTION'),
+    definition: '/inf /verb ( FEEL ) /obj ( AFFECTION /zero )',
     emoji: '❤️',
     isA: 'FEEL',
     forms: {
@@ -662,7 +660,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to cause the death of',
-    definition: infinitiveGloss('DESTROY', 'LIFE'),
+    definition: '/inf /verb ( DESTROY ) /obj ( LIFE /zero )',
     emoji: '🔪',
     forms: {
       en: {
@@ -738,7 +736,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // (conoscere, connaître, conocer, conhecer, kennen). English and Japanese have one. The user picks
     // KNOW either way; `object_sense` names the concept the translator swaps in when the verb takes an
     // object (A131).
-    definition: infinitiveGloss('UNDERSTAND', 'CONCEPT', 'plural'),
+    definition: '/inf /verb ( UNDERSTAND ) /obj ( CONCEPT /pl /zero )',
     emoji: '🧠',
     forms: {
       en: {
@@ -891,7 +889,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to keep in mind; to bring back to mind',
     // "still to know facts" (localization B86): KEEP's shape ("still to have objects") on KNOW, whose
     // noun object selects its acquaintance sense (conoscere, connaître, kennen, A131).
-    definition: infinitiveGloss('KNOW', { object: 'FACT', number: 'plural', modifier: 'STILL' }),
+    definition: '/inf /verb ( KNOW /adv STILL ) /obj ( FACT /pl /zero )',
     emoji: '💭',
     isA: 'KNOW',
     forms: {
@@ -970,9 +968,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to think carefully about',
     // "to think about a thing" (localization B86): THINK with E2's topic, whose prepositions are
     // THINK's own (pensare a, penser à, an … denken, pensar en / em).
-    definition: infinitiveGloss('THINK', {
-      complements: { topic: { phrase: { concept: 'THING', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( THINK ) /about ( THING /a )',
     emoji: '🤔',
     isA: 'THINK',
     forms: {
@@ -1117,7 +1113,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
     description: 'to look at and understand written text',
-    definition: infinitiveGloss('UNDERSTAND', 'WORD', 'plural', ['WRITTEN']),
+    definition: '/inf /verb ( UNDERSTAND ) /obj ( WORD /adj WRITTEN /pl /zero )',
     emoji: '📖',
     isA: 'UNDERSTAND',
     forms: {
@@ -1186,7 +1182,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'terminus'],
     description: 'to cry out; to shout or exclaim loudly',
-    definition: infinitiveGloss('PRODUCE', 'SOUND', 'plural', ['LOUD']),
+    definition: '/inf /verb ( PRODUCE ) /obj ( SOUND /adj LOUD /pl /zero )',
     emoji: '📢',
     synonym: 'shout',
     // The cry of a danger (an `alarm` noun) is the shout itself, "Wolf!", with no determiner of its
@@ -1258,11 +1254,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to grip or cut into with the teeth',
-    definition: infinitiveGloss('CUT', {
-      complements: {
-        instrumental: { phrase: { concept: 'TOOTH', definiteness: 'definite', number: 'plural' } },
-      },
-    }),
+    definition: `
+      /inf /verb ( CUT ) /inst #2
+      /subj ( TOOTH /pl )
+    `,
     emoji: '🦷',
     forms: {
       en: {
@@ -1329,7 +1324,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to strike repeatedly; to defeat in a contest',
-    definition: infinitiveGloss('STRIKE', { modifier: 'REPEATEDLY' }),
+    definition: '/inf /verb ( STRIKE /adv REPEATEDLY )',
     emoji: '🥊',
     synonym: 'hit/defeat',
     isA: 'STRIKE',
@@ -1398,7 +1393,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to set (something) on fire; to cause to burn',
-    definition: infinitiveGloss('CREATE', 'FIRE'),
+    definition: '/inf /verb ( CREATE ) /obj ( FIRE /zero )',
     emoji: '🧨',
     synonym: 'set on fire',
     forms: {
@@ -1468,7 +1463,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to put out (a fire); to cause to stop burning',
-    definition: infinitiveGloss('DESTROY', 'FIRE'),
+    definition: '/inf /verb ( DESTROY ) /obj ( FIRE /zero )',
     emoji: '🧯',
     synonym: 'extinguish',
     forms: {
@@ -1539,11 +1534,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'source', 'instrumental'],
     description: 'to acquire in exchange for money',
-    definition: infinitiveGloss('ACQUIRE', {
-      object: 'OBJECT_THING',
-      number: 'plural',
-      complements: { instrumental: { phrase: { concept: 'MONEY', definiteness: 'bare' } } },
-    }),
+    definition: `
+      /inf /verb ( ACQUIRE ) /obj ( OBJECT_THING /pl /zero ) /inst #2
+      /subj ( MONEY /zero )
+    `,
     emoji: '🛒',
     isA: 'ACQUIRE',
     forms: {
@@ -1612,7 +1606,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['cause', 'locative'],
     description: 'to have as property',
-    definition: infinitiveGloss('HAVE', 'PROPERTY'),
+    definition: '/inf /verb ( HAVE ) /obj ( PROPERTY /zero )',
     emoji: '🔑',
     isA: 'HAVE',
     forms: {
@@ -1681,7 +1675,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to contain or keep',
-    definition: infinitiveGloss('HAVE', 'OBJECT_THING', 'plural'),
+    definition: '/inf /verb ( HAVE ) /obj ( OBJECT_THING /pl /zero )',
     emoji: '📦',
     isA: 'HAVE',
     // HOLD_GRASP is the hand's hold (localization B83), so the picker says which.
@@ -1759,11 +1753,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to have or keep in the hand',
     synonym: 'grasp',
     // "to have an object in the hand" (localization B83): HAVE with the place it is had, on B65's HAND.
-    definition: infinitiveGloss('HAVE', {
-      object: 'OBJECT_THING',
-      definiteness: 'indefinite',
-      complements: { locative: { phrase: { concept: 'HAND', definiteness: 'definite' } } },
-    }),
+    definition: '/inf /verb ( HAVE ) /obj ( OBJECT_THING /a ) /loc ( HAND )',
     emoji: '✊',
     isA: 'HAVE',
     forms: {
@@ -1841,14 +1831,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // it "avere come parte", de "als Teil haben", ja 部分として持つ (localization C28). HAVE licenses
     // no objectPredicative box on the canvas, but a plan renders it regardless. Bare singular, the
     // idiom in all seven: "as a part" would be *come una parte* in Italian.
-    definition: infinitiveGloss('HAVE', {
-      complements: {
-        objectPredicative: {
-          phrase: { concept: 'PART', definiteness: 'bare' },
-          specifiers: [{ kind: 'predication', value: 'essive' }],
-        },
-      },
-    }),
+    definition: '/inf /verb ( HAVE ) /objpred ( PART /zero )',
     emoji: '🧺',
     forms: {
       en: {
@@ -2056,7 +2039,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to bring into existence by shaping or assembling',
-    definition: infinitiveGloss('CREATE', 'OBJECT_THING', 'plural'),
+    definition: '/inf /verb ( CREATE ) /obj ( OBJECT_THING /pl /zero )',
     emoji: '🔨',
     synonym: 'create',
     isA: 'CREATE',
@@ -2130,7 +2113,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to perform an action',
-    definition: causativeGloss({ object: 'ACTION', definiteness: 'indefinite' }, { verb: 'HAPPEN' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( ACTION /a ) /to #2 /objctl
+      /inf /verb ( HAPPEN )
+    `,
     synonym: 'perform',
     emoji: '✅',
     forms: {
@@ -2208,7 +2194,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to go on with, without stopping',
     synonym: 'carry on',
     // "still to do an action" (localization B84): KEEP's shape ("still to have objects") on DO.
-    definition: infinitiveGloss('DO', { object: 'ACTION', definiteness: 'indefinite', modifier: 'STILL' }),
+    definition: '/inf /verb ( DO /adv STILL ) /obj ( ACTION /a )',
     emoji: '▶️',
     isA: 'DO',
     forms: {
@@ -2279,10 +2265,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to make music on an instrument',
-    definition: infinitiveGloss('PRODUCE', {
-      object: 'SOUND', number: 'plural',
-      complements: { instrumental: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' } } },
-    }),
+    definition: `
+      /inf /verb ( PRODUCE ) /obj ( SOUND /pl /zero ) /inst #2
+      /subj ( OBJECT_THING /a )
+    `,
     synonym: 'play music',
     emoji: '🎻',
     forms: {
@@ -2361,10 +2347,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to require something one does not have',
-    definition: infinitiveGloss('BE', {
-      predicate: 'OBLIGED',
-      infinitive: { verbPhrase: { verb: 'HAVE' }, directObject: { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural' } },
-    }),
+    definition: `
+      /inf /verb ( BE ) /pred ( OBLIGED ) /to #2
+      /inf /verb ( HAVE ) /obj ( OBJECT_THING /pl /zero )
+    `,
     synonym: 'require',
     emoji: '❗',
     forms: {
@@ -2733,7 +2719,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to grasp the meaning of',
-    definition: infinitiveGloss('KNOW', { object: 'MEANING', definiteness: 'definite' }),
+    definition: '/inf /verb ( KNOW ) /obj ( MEANING )',
     emoji: '🧩',
     forms: {
       en: {
@@ -2884,7 +2870,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'source', 'cause', 'locative'],
     description: 'to come to have',
-    definition: infinitiveGloss('BEGIN', { infinitive: 'HAVE' }),
+    definition: `
+      /inf /verb ( BEGIN ) /to #2
+      /inf /verb ( HAVE )
+    `,
     emoji: '🫴',
     forms: {
       en: {
@@ -2959,11 +2948,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to acquire objects with the hand" (localization B61): BUY's shape, ACQUIRE with the instrument
     // that tells it apart. HAND is glossed back on TAKE ("an organ with which one takes an object",
     // B65), the verb-and-its-instrument pair BITE ↔ TOOTH and CUT ↔ BLADE already make.
-    definition: infinitiveGloss('ACQUIRE', {
-      object: 'OBJECT_THING',
-      number: 'plural',
-      complements: { instrumental: { phrase: { concept: 'HAND', definiteness: 'definite' } } },
-    }),
+    definition: `
+      /inf /verb ( ACQUIRE ) /obj ( OBJECT_THING /pl /zero ) /inst #2
+      /subj ( HAND )
+    `,
     emoji: '✊',
     isA: 'ACQUIRE',
     forms: {
@@ -3041,11 +3029,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'source', 'cause', 'locative'],
     description: 'to come to have; to obtain or receive',
-    definition: infinitiveGloss('ACQUIRE', {
-      object: 'OBJECT_THING',
-      number: 'plural',
-      complements: { source: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( ACQUIRE ) /obj ( OBJECT_THING /pl /zero ) /src ( PERSON /a )',
     emoji: '📥',
     isA: 'ACQUIRE',
     forms: {
@@ -3121,10 +3105,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to move something to a place and leave it there',
     // "to cause an object to be in a place": REMOVE's converse, the causative on BE where REMOVE's is
     // on LEAVE. German "an einem Ort" is Ort's own preposition (A218).
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'BE', complements: { locative: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } } },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BE ) /loc ( PLACE /a )
+    `,
     emoji: '📍',
     forms: {
       en: {
@@ -3197,7 +3181,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "still to have objects" (localization B61): HAVE with STILL, English's frequency adverb before
     // its "to" by design. Its natural gloss, "to continue to have", needs a continuative complement
     // the engine lacks (Spanish continuar takes a gerund).
-    definition: infinitiveGloss('HAVE', { object: 'OBJECT_THING', number: 'plural', modifier: 'STILL' }),
+    definition: '/inf /verb ( HAVE /adv STILL ) /obj ( OBJECT_THING /pl /zero )',
     emoji: '🫳',
     isA: 'HAVE',
     forms: {
@@ -3271,9 +3255,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to stop having something',
-    definition: infinitiveGloss('STOP_DOING', {
-      infinitive: { verbPhrase: { verb: 'HAVE' }, directObject: { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural' } },
-    }),
+    definition: `
+      /inf /verb ( STOP_DOING ) /to #2
+      /inf /verb ( HAVE ) /obj ( OBJECT_THING /pl /zero )
+    `,
     emoji: '🫥',
     forms: {
       en: {
@@ -3345,11 +3330,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'opponent'],
     description: 'to come first in a contest',
-    definition: infinitiveGloss('BE', {
-      predicate: 'GOOD',
-      predicateDegree: 'most',
-      complements: { locative: { phrase: { concept: 'GAME', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( BE ) /pred ( GOOD /most ) /loc ( GAME /a )',
     emoji: '🏆',
     forms: {
       en: {
@@ -3420,7 +3401,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to cause an object to come" (localization B61): the causative of COME, whose own gloss already
     // names the speaker. B60's CALL is the same causative with a person as the causee, "to cause a
     // person to come": the causee is the difference, and both ship.
-    definition: causativeGloss({ object: 'OBJECT_THING', definiteness: 'indefinite' }, { verb: 'COME' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( COME )
+    `,
     emoji: '🎁',
     forms: {
       en: {
@@ -3496,10 +3480,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to cause a person to go to a place" (localization B83): C08's causative on GO, with the goal
     // inside the caused clause. German veranlassen is the shipped causative's word (führen means the
     // gloss exactly).
-    definition: causativeGloss(
-      { object: 'PERSON', definiteness: 'indefinite' },
-      { verb: 'GO', complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } } },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to #2 /objctl
+      /inf /verb ( GO ) /dir ( PLACE /a )
+    `,
     emoji: '🧭',
     forms: {
       en: {
@@ -3570,7 +3554,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to go away without taking something; to let it stay',
     // "to cause an object to stay" (localization B61): the dictionary's "to cause to remain", the
     // causative of STAY. Japanese 物体が残るようにする is 残す said out.
-    definition: causativeGloss({ object: 'OBJECT_THING', definiteness: 'indefinite' }, { verb: 'STAY' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( STAY )
+    `,
     emoji: '🧳',
     synonym: 'leave behind',
     forms: {
@@ -3648,12 +3635,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to direct the eyes to an object" (localization B61), on DIRECT_VERB: every verb the corpus had
     // for pointing the eyes failed somewhere (TURN_OBJECT's 目を回す is getting dizzy, MOVE's is
     // shifting them, PERCEIVE's is SEE's meaning).
-    definition: infinitiveGloss('DIRECT_VERB', {
-      object: 'EYE',
-      definiteness: 'definite',
-      number: 'plural',
-      complements: { direction: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( DIRECT_VERB ) /obj ( EYE /pl ) /dir ( OBJECT_THING /a )',
     emoji: '👁️',
     forms: {
       en: {
@@ -4085,10 +4067,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     synonym: 'halt',
     // "to cause an object no longer to move" (localization B84): C08's causative on MOVE_ONESELF under
     // NO_LONGER, which B84's fix lets Spanish and Portuguese say once.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'MOVE_ONESELF', modifier: 'NO_LONGER' },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( MOVE_ONESELF /adv NO_LONGER )
+    `,
     emoji: '✋',
     forms: {
       en: {
@@ -4170,15 +4152,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // gloss to be told apart from, and "to change objects" would be CHANGE's own meaning; the
     // causative says what sets it apart, the other thing it ends up as. Japanese 物体が別の物体になる
     // ようにする keeps clear of 変える, which is this verb's word there as well as CHANGE's.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      {
-        verb: 'BECOME',
-        complements: {
-          predicative: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['OTHER'] } },
-        },
-      },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BECOME ) /pred ( OBJECT_THING /adj OTHER )
+    `,
     emoji: '🦋',
     isA: 'CHANGE',
     forms: {
@@ -4257,7 +4234,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // BIG's "di grande dimensione" already is in Italian — the gloss still says what FEEL adds to
     // its genus. English "to have feelings" wants "for someone" to read as the idiom; bare, it is
     // the definition.
-    definition: infinitiveGloss('HAVE', 'FEELING', 'plural'),
+    definition: '/inf /verb ( HAVE ) /obj ( FEELING /pl /zero )',
     emoji: '💓',
     forms: {
       en: {
@@ -4701,7 +4678,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to press a mouse button or select by pressing',
-    definition: infinitiveGloss('PRESS', { object: 'BUTTON', definiteness: 'indefinite' }),
+    definition: '/inf /verb ( PRESS ) /obj ( BUTTON /a )',
     emoji: '🖱️',
     isA: 'PRESS',
     // One clicks ON a thing in five of the languages, so their lexemes name the preposition the object
@@ -4846,7 +4823,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to pick one option from several',
-    definition: infinitiveGloss('INDICATE', { object: 'OPTION', definiteness: 'indefinite' }),
+    definition: '/inf /verb ( INDICATE ) /obj ( OPTION /a )',
     emoji: '☑️',
     synonym: 'select',
     forms: {
@@ -4988,11 +4965,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to indicate an object to use it" (localization C20). CHOOSE is "to indicate an option"; what
     // sets SELECT apart is what the indicating is *for*, a clause of purpose, whose object is a
     // pronoun standing for the object: en "it", but de "ihn", because *Gegenstand* is masculine.
-    definition: infinitiveGloss('INDICATE', {
-      object: 'OBJECT_THING',
-      definiteness: 'indefinite',
-      purpose: { verb: 'USE', object: 'THIRD_PERSON', antecedent: 'OBJECT_THING' },
-    }),
+    definition: `
+      /inf /verb ( INDICATE ) /obj ( OBJECT_THING /a ) /so #2
+      /inf /verb ( USE ) /obj ( 3rd )
+    `,
     emoji: '🖱️',
     synonym: 'mark',
     forms: {
@@ -5064,9 +5040,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to write with a keyboard',
-    definition: infinitiveGloss('WRITE', {
-      complements: { instrumental: { phrase: { concept: 'KEYBOARD', definiteness: 'indefinite' } } },
-    }),
+    definition: `
+      /inf /verb ( WRITE ) /inst #2
+      /subj ( KEYBOARD /a )
+    `,
     emoji: '⌨️',
     isA: 'WRITE',
     forms: {
@@ -5139,13 +5116,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to express concepts with another language": the differentia is the language it is done
     // with, which is the `instrumental` — the means, not a companion. Japanese marks it with で,
     // which is exactly the "in" the English literal wants (別の言語で概念を表す).
-    definition: infinitiveGloss('EXPRESS', {
-      object: 'CONCEPT',
-      number: 'plural',
-      complements: {
-        instrumental: { phrase: { concept: 'LANGUAGE', definiteness: 'indefinite', adjectives: ['OTHER'] } },
-      },
-    }),
+    definition: `
+      /inf /verb ( EXPRESS ) /obj ( CONCEPT /pl /zero ) /inst #2
+      /subj ( LANGUAGE /adj OTHER /a )
+    `,
     emoji: '🌐',
     isA: 'EXPRESS',
     forms: {
@@ -5223,10 +5197,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // clause of purpose (C12's PhrasePlan.purpose; localization C19). The pronoun object stands for
     // the content (C20), so each language genders it off its own word: en "it", ja それ, but de
     // "ihn", because *Inhalt* is masculine.
-    definition: infinitiveGloss('WRITE', {
-      object: 'CONTENT',
-      purpose: { verb: 'LOAD', object: 'THIRD_PERSON', antecedent: 'CONTENT' },
-    }),
+    definition: `
+      /inf /verb ( WRITE ) /obj ( CONTENT /zero ) /so #2
+      /inf /verb ( LOAD ) /obj ( 3rd )
+    `,
     emoji: '💾',
     forms: {
       en: {
@@ -5298,7 +5272,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to read written content". The literal's "back" is a prior state nothing in the plan model
     // expresses, but it turns out not to be needed: WRITTEN already says the content was put there
     // before, which is the whole of what "back" was carrying (localization C19).
-    definition: infinitiveGloss('READ', { object: 'CONTENT', adjectives: ['WRITTEN'] }),
+    definition: '/inf /verb ( READ ) /obj ( CONTENT /adj WRITTEN /zero )',
     emoji: '📂',
     forms: {
       en: {
@@ -5371,19 +5345,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // (C12), the one that says "together with" rather than "by means of" — an instrumental would
     // make the other objects the tool (localization C19). Indefinite, because French spells no
     // zero-article plural after a preposition ("avec d'autres objets", not *"avec autres objets").
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      {
-        verb: 'BE',
-        complements: {
-          comitative: {
-            phrase: {
-              concept: 'OBJECT_THING', number: 'plural', definiteness: 'indefinite', adjectives: ['OTHER'],
-            },
-          },
-        },
-      },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BE ) /with ( OBJECT_THING /adj OTHER /pl /a )
+    `,
     emoji: '➕',
     forms: {
       en: {
@@ -5529,10 +5494,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to send content out to another place or format',
-    definition: infinitiveGloss('TRANSFER', {
-      object: 'CONTENT',
-      complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( TRANSFER ) /obj ( CONTENT /zero ) /dir ( PLACE /a )',
     emoji: '📤',
     isA: 'TRANSFER',
     forms: {
@@ -5608,10 +5570,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'locative', 'cause'],
     description: 'to send out a program on radio or television',
-    definition: infinitiveGloss('SEND', {
-      object: 'CONTENT',
-      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'many', number: 'plural' } } },
-    }),
+    definition: '/inf /verb ( SEND ) /obj ( CONTENT /zero ) /term ( PERSON /pl /many )',
     emoji: '📡',
     forms: {
       en: {
@@ -5680,10 +5639,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'source', 'cause'],
     description: 'to bring content in from another place or format',
-    definition: infinitiveGloss('TRANSFER', {
-      object: 'CONTENT',
-      complements: { source: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( TRANSFER ) /obj ( CONTENT /zero ) /src ( PLACE /a )',
     emoji: '📥',
     isA: 'TRANSFER',
     forms: {
@@ -5754,7 +5710,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to empty something of its contents',
-    definition: infinitiveGloss('DESTROY', 'CONTENT'),
+    definition: '/inf /verb ( DESTROY ) /obj ( CONTENT /zero )',
     emoji: '🧹',
     forms: {
       en: {
@@ -5833,10 +5789,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to cause an object to leave a place" (localization C28): the causative of LEAVE, whose
     // Italian, Spanish and Portuguese words (uscire, salir, sair) are going *out of*, which is what
     // taking a thing away is. DELETE's "to remove objects" stands on it.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'LEAVE', object: 'PLACE', definiteness: 'indefinite' },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( LEAVE ) /obj ( PLACE /a )
+    `,
     emoji: '➖',
     forms: {
       en: {
@@ -5904,7 +5860,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'source', 'cause'],
     description: 'to erase something permanently',
-    definition: infinitiveGloss('REMOVE', 'OBJECT_THING', 'plural'),
+    definition: '/inf /verb ( REMOVE ) /obj ( OBJECT_THING /pl /zero )',
     emoji: '🗑️',
     forms: {
       en: {
@@ -5979,7 +5935,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // The causative of acting together: what is coordinated is not acted on, it is brought to act
     // (localization C08). PERSON is the "or people" half of the description; the adverb carries the
     // "together" that is the whole point of the verb.
-    definition: causativeGloss({ object: 'PERSON', number: 'plural' }, { verb: 'ACT', modifier: 'TOGETHER' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( PERSON /pl /zero ) /to #2 /objctl
+      /inf /verb ( ACT /adv TOGETHER )
+    `,
     emoji: '🎛️',
     forms: {
       en: {
@@ -6053,10 +6012,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // room for, and "in order" cannot be said with the seeded ORDER, which is the *command* sense
     // (de "Befehl", ja 命令). TIDY carries the state instead, and the causative says who puts things
     // into it — the C08 shape HIDE already takes (localization C19).
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', number: 'plural' },
-      { verb: 'BE', predicate: 'TIDY' },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /pl /zero ) /to #2 /objctl
+      /inf /verb ( BE ) /pred ( TIDY )
+    `,
     emoji: '🧹',
     forms: {
       en: {
@@ -6130,10 +6089,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // The resultative "into a smaller space" said as the state it leaves the thing in: the object
     // comes to be smaller (localization C08). The degree is the comparative — a compacted thing is
     // smaller than it was, not small.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'BECOME', predicate: 'SMALL', predicateDegree: 'more' },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BECOME ) /pred ( SMALL /more )
+    `,
     emoji: '🗜️',
     synonym: 'compress',
     forms: {
@@ -6204,10 +6163,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to open something out into a larger space',
     // COMPACT's opposite, the same shape: the object comes to be bigger than it was.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'BECOME', predicate: 'BIG', predicateDegree: 'more' },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BECOME ) /pred ( BIG /more )
+    `,
     emoji: '↔️',
     synonym: 'enlarge',
     forms: {
@@ -6354,10 +6313,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // The negation sits on the caused clause, not on the causing: what is caused is a *not* being
     // seen. VISIBLE rather than the seeded HIDDEN, which is this verb's own participle in every
     // language ("nascondere" → "nascosto") and would define the word with itself.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'BE', predicate: 'VISIBLE', negative: true },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BE /not ) /pred ( VISIBLE )
+    `,
     emoji: '🙈',
     forms: {
       en: {
@@ -6431,7 +6390,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // ("indurre un'azione a iniziare"), because their causative and their inchoative are one verb:
     // the gloss is then what their dictionaries say, "far sì che qcs. inizi", and it is what tells
     // the picker's two identical entries apart. en and ja have two words and read cleanly.
-    definition: causativeGloss({ object: 'ACTION', definiteness: 'indefinite' }, { verb: 'BEGIN' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( ACTION /a ) /to #2 /objctl
+      /inf /verb ( BEGIN )
+    `,
     emoji: '▶️',
     forms: {
       en: {
@@ -6581,7 +6543,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to reverse the last change',
-    definition: infinitiveGloss('CANCEL', 'ACTION', 'plural'),
+    definition: '/inf /verb ( CANCEL ) /obj ( ACTION /pl /zero )',
     emoji: '↩️',
     forms: {
       en: {
@@ -6650,7 +6612,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to make again a change that was undone',
-    definition: infinitiveGloss('MAKE', { modifier: 'AGAIN' }),
+    definition: '/inf /verb ( MAKE /adv AGAIN )',
     emoji: '↪️',
     forms: {
       en: {
@@ -6727,7 +6689,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to cause an object to return" (localization C28) — the word the esc gives back comes back.
     // German zurückkehren beside the lexeme's zurückholen, ja 戻る beside 復元する: related, not the
     // same verb, so the gloss does not cite the word it defines.
-    definition: causativeGloss({ object: 'OBJECT_THING', definiteness: 'indefinite' }, { verb: 'RETURN' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( RETURN )
+    `,
     emoji: '♻️',
     forms: {
       en: {
@@ -6808,10 +6773,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // opposite state rather than asserting OPEN_ADJECTIVE's, which is this verb's own word or
     // participle in six languages (open, aperto, ouvert, abierto, aberto, 開いた) — the reason HIDE
     // denies VISIBLE.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'BE', predicate: 'CLOSED', negative: true },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BE /not ) /pred ( CLOSED )
+    `,
     emoji: '📂',
     forms: {
       en: {
@@ -6883,10 +6848,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to shut something that was open',
     // "to cause an object not to be open" (localization C28), OPEN's gloss the other way round, and
     // for the same reason: CLOSED is this verb's participle in all seven.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'BE', predicate: 'OPEN_ADJECTIVE', negative: true },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BE /not ) /pred ( OPEN_ADJECTIVE )
+    `,
     emoji: '❎',
     forms: {
       en: {
@@ -6955,7 +6920,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to try something again after it failed',
-    definition: infinitiveGloss('START', { modifier: 'AGAIN' }),
+    definition: '/inf /verb ( START /adv AGAIN )',
     emoji: '🔄',
     // P09's /attach RETRY under TRY (localization B62). Its gloss stays "to start again": TRY is
     // literal by design, so there is no genus gloss to build it on.
@@ -7030,9 +6995,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'cause', 'locative'],
     description: 'to employ something for a purpose',
-    definition: infinitiveGloss('ACT', {
-      complements: { instrumental: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' } } },
-    }),
+    definition: `
+      /inf /verb ( ACT ) /inst #2
+      /subj ( OBJECT_THING /a )
+    `,
     emoji: '🛠️',
     forms: {
       en: {
@@ -7106,7 +7072,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to pay out money',
-    definition: infinitiveGloss('USE', 'MONEY'),
+    definition: '/inf /verb ( USE ) /obj ( MONEY /zero )',
     synonym: 'spend money',
     emoji: '💸',
     forms: {
@@ -7179,12 +7145,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to pass time in a place or doing something',
-    definition: infinitiveGloss('STAY', {
-      complements: {
-        locative: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } },
-        temporal: { phrase: { concept: 'PERIOD_TIME', definiteness: 'indefinite' }, specifiers: [{ kind: 'temporal', value: 'for' }] },
-      },
-    }),
+    definition: '/inf /verb ( STAY ) /loc ( PLACE /a ) /time ( PERIOD_TIME /a /lasting )',
     synonym: 'spend time',
     emoji: '⏳',
     forms: {
@@ -7254,7 +7215,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'direction', 'source', 'cause', 'locative'],
     description: 'to make a duplicate of something',
-    definition: infinitiveGloss('MAKE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['OTHER'] }),
+    definition: '/inf /verb ( MAKE ) /obj ( OBJECT_THING /adj OTHER /a )',
     emoji: '📋',
     forms: {
       en: {
@@ -7328,14 +7289,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to change the position of something',
     // "to change an object's place" (localization C28), RESIZE's genus on PLACE, with the object whose
     // place it is as the genitive: it "cambiare il luogo di un oggetto", ja 物体の場所を変える.
-    definition: {
-      ...infinitiveGloss('CHANGE'),
-      directObject: {
-        concept: 'PLACE',
-        definiteness: 'definite',
-        possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
-      },
-    },
+    definition: '/inf /verb ( CHANGE ) /obj ( PLACE /poss [ OBJECT_THING /a ] )',
     emoji: '↕️',
     forms: {
       en: {
@@ -7487,7 +7441,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to change the size of something',
-    definition: infinitiveGloss('CHANGE', 'SIZE'),
+    definition: '/inf /verb ( CHANGE ) /obj ( SIZE /zero )',
     emoji: '↔️',
     isA: 'CHANGE',
     forms: {
@@ -7565,11 +7519,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to move objects with the cursor" (localization C28): the gesture's instrument is what tells
     // it from its genus MOVE, which "to move objects" alone would restate. Definite, the one cursor
     // a screen has.
-    definition: infinitiveGloss('MOVE', {
-      object: 'OBJECT_THING',
-      number: 'plural',
-      complements: { instrumental: { phrase: { concept: 'CURSOR', definiteness: 'definite' } } },
-    }),
+    definition: `
+      /inf /verb ( MOVE ) /obj ( OBJECT_THING /pl /zero ) /inst #2
+      /subj ( CURSOR )
+    `,
     emoji: '🫳',
     isA: 'MOVE',
     forms: {
@@ -7637,10 +7590,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to stop a setting or a function from working',
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'BE', predicate: 'ACTIVE', negative: true },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BE /not ) /pred ( ACTIVE )
+    `,
     emoji: '📴',
     synonym: 'switch off',
     forms: {
@@ -7719,7 +7672,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to choose a value" (localization C28). "To give a value to an option" says it more fully and
     // renders wrong twice: German puts the recipient in the accusative ("einen Wert in eine Option
     // geben") and Japanese GIVE is あげる, which beside 値を reads as raising it.
-    definition: infinitiveGloss('CHOOSE', { object: 'VALUE', definiteness: 'indefinite' }),
+    definition: '/inf /verb ( CHOOSE ) /obj ( VALUE /a )',
     emoji: '⚙️',
     forms: {
       en: {
@@ -7864,10 +7817,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to cause an object not to be pinned" (localization C28), HIDE's shape on PIN's participle —
     // PIN's word, not this one's, so the gloss is no circle: fissato beside sbloccare, fijado beside
     // desfijar, ピン留め済み beside ピン留め解除する.
-    definition: causativeGloss(
-      { object: 'OBJECT_THING', definiteness: 'indefinite' },
-      { verb: 'BE', predicate: 'PINNED', negative: true },
-    ),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( OBJECT_THING /a ) /to #2 /objctl
+      /inf /verb ( BE /not ) /pred ( PINNED )
+    `,
     emoji: '📍',
     forms: {
       en: {
@@ -7938,7 +7891,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to finish a word that has been started',
-    definition: infinitiveGloss('WRITE', { object: 'WORD', definiteness: 'definite' }),
+    definition: '/inf /verb ( WRITE ) /obj ( WORD )',
     emoji: '⇥',
     forms: {
       en: {
@@ -8081,11 +8034,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to be the name of; to give a name to',
-    definition: infinitiveGloss('INDICATE', {
-      object: 'OBJECT_THING',
-      number: 'plural',
-      complements: { instrumental: { phrase: { concept: 'WORD', definiteness: 'bare', number: 'plural' } } },
-    }),
+    definition: `
+      /inf /verb ( INDICATE ) /obj ( OBJECT_THING /pl /zero ) /inst #2
+      /subj ( WORD /pl /zero )
+    `,
     emoji: '🏷️',
     forms: {
       en: {
@@ -8152,7 +8104,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'instrumental'],
     description: 'to say what something is like',
-    definition: infinitiveGloss('INDICATE', 'QUALITY', 'plural'),
+    definition: '/inf /verb ( INDICATE ) /obj ( QUALITY /pl /zero )',
     emoji: '🖊️',
     forms: {
       en: {
@@ -8219,7 +8171,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to qualify or alter another word',
-    definition: infinitiveGloss('CHANGE', 'QUALITY', 'plural'),
+    definition: '/inf /verb ( CHANGE ) /obj ( QUALITY /pl /zero )',
     emoji: '🔧',
     isA: 'CHANGE',
     forms: {
@@ -8293,7 +8245,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to indicate exactly" (localization C28). Without the adverb it was EXPRESS's "to indicate
     // concepts", character for character; EXACTLY was seeded for it. French exactement, not
     // précisément, which would echo this verb's own préciser.
-    definition: infinitiveGloss('INDICATE', { modifier: 'EXACTLY' }),
+    definition: '/inf /verb ( INDICATE /adv EXACTLY )',
     emoji: '🔍',
     forms: {
       en: {
@@ -8363,7 +8315,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to change a text or a piece of work',
-    definition: infinitiveGloss('CHANGE', 'TEXT'),
+    definition: '/inf /verb ( CHANGE ) /obj ( TEXT /zero )',
     emoji: '✏️',
     isA: 'CHANGE',
     forms: {
@@ -8586,7 +8538,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to make a clause say the opposite (grammar)',
-    definition: causativeGloss({ object: 'CLAUSE', definiteness: 'indefinite' }, { verb: 'BE', predicate: 'NEGATIVE' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( CLAUSE /a ) /to #2 /objctl
+      /inf /verb ( BE ) /pred ( NEGATIVE )
+    `,
     emoji: '🙅',
     synonym: 'grammar',
     forms: {
@@ -8727,7 +8682,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to convey or put into words',
-    definition: infinitiveGloss('INDICATE', 'CONCEPT', 'plural'),
+    definition: '/inf /verb ( INDICATE ) /obj ( CONCEPT /pl /zero )',
     emoji: '🗣️',
     forms: {
       en: {
@@ -8805,11 +8760,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to express concepts with words": the instrument is the differentia, as TRANSLATE's other
     // language is. It is true of writing too, which is right for SAY and was what kept SPEAK literal
     // (localization C28).
-    definition: infinitiveGloss('EXPRESS', {
-      object: 'CONCEPT',
-      number: 'plural',
-      complements: { instrumental: { phrase: { concept: 'WORD', definiteness: 'bare', number: 'plural' } } },
-    }),
+    definition: `
+      /inf /verb ( EXPRESS ) /obj ( CONCEPT /pl /zero ) /inst #2
+      /subj ( WORD /pl /zero )
+    `,
     emoji: '🗨️',
     isA: 'EXPRESS',
     forms: {
@@ -8890,7 +8844,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to cause a person to come": the causative of COME with a person as causee. BRING is the same
     // causative with an object (localization B61), and the causee is the difference. "By voice" does
     // not attach: "with words" on the causer or on COME breaks either way (B60).
-    definition: causativeGloss({ object: 'PERSON', definiteness: 'indefinite' }, { verb: 'COME' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to #2 /objctl
+      /inf /verb ( COME )
+    `,
     emoji: '📣',
     synonym: 'summon',
     forms: {
@@ -8968,14 +8925,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // instrumental, which after a verb of speaking reads as the one spoken with ("mit einem Telefon
     // sprechen"). TELEPHONE is the stem of the verb in four languages: a cognate in the differentia,
     // not the genus.
-    definition: infinitiveGloss('USE', {
-      object: 'TELEPHONE',
-      definiteness: 'indefinite',
-      purpose: {
-        verb: 'SPEAK',
-        complements: { comitative: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
-      },
-    }),
+    definition: `
+      /inf /verb ( USE ) /obj ( TELEPHONE /a ) /so #2
+      /inf /verb ( SPEAK ) /with ( PERSON /a )
+    `,
     emoji: '📞',
     synonym: 'phone',
     forms: {
@@ -9051,14 +9004,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to have as meaning": INCLUDE's essive frame on MEANING, bare as PART is there. MEANING is
     // cognate with MEAN in five languages (significato, Bedeutung, significado, 意味): the differentia
     // again. MEANING, unglossed, cannot now be glossed on MEAN, a two-word circle.
-    definition: infinitiveGloss('HAVE', {
-      complements: {
-        objectPredicative: {
-          phrase: { concept: 'MEANING', definiteness: 'bare' },
-          specifiers: [{ kind: 'predication', value: 'essive' }],
-        },
-      },
-    }),
+    definition: '/inf /verb ( HAVE ) /objpred ( MEANING /zero )',
     emoji: '🔣',
     synonym: 'signify',
     forms: {
@@ -9137,14 +9083,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to accept as fact": INCLUDE's essive frame on ACCEPT. Japanese 受け付ける is ACCEPT's interface
     // word (an entry accepted), so 事実として受け付ける reads "to register as fact": the lexeme, not the
     // plan, and VALID stands on it.
-    definition: infinitiveGloss('ACCEPT', {
-      complements: {
-        objectPredicative: {
-          phrase: { concept: 'FACT', definiteness: 'bare' },
-          specifiers: [{ kind: 'predication', value: 'essive' }],
-        },
-      },
-    }),
+    definition: '/inf /verb ( ACCEPT ) /objpred ( FACT /zero )',
     emoji: '🙏',
     forms: {
       en: {
@@ -9357,11 +9296,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to give one thing and take another for it',
     // "to give an object to acquire another object" (localization C28): the purpose clause (C19)
     // carries the half the description calls taking. Singular, one thing for another.
-    definition: infinitiveGloss('GIVE', {
-      object: 'OBJECT_THING',
-      definiteness: 'indefinite',
-      purpose: { verb: 'ACQUIRE', object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['OTHER'] },
-    }),
+    definition: `
+      /inf /verb ( GIVE ) /obj ( OBJECT_THING /a ) /so #2
+      /inf /verb ( ACQUIRE ) /obj ( OBJECT_THING /adj OTHER /a )
+    `,
     emoji: '🔄',
     forms: {
       en: {
@@ -9501,7 +9439,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to take in through the ears',
     // "to perceive sounds" (localization C28), SEE's "to perceive light" on the other sense. Plural:
     // sounds are counted where light is not.
-    definition: infinitiveGloss('PERCEIVE', 'SOUND', 'plural'),
+    definition: '/inf /verb ( PERCEIVE ) /obj ( SOUND /pl /zero )',
     emoji: '👂',
     forms: {
       en: {
@@ -9644,9 +9582,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "to go with a person" (localization C28): GO with the comitative companion (C12), the "with"
     // that says together rather than by means of. GO licenses no comitative box on the canvas; the
     // plan renders it regardless, as ADD's does on BE.
-    definition: infinitiveGloss('GO', {
-      complements: { comitative: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( GO ) /with ( PERSON /a )',
     emoji: '🧑‍🤝‍🧑',
     forms: {
       en: {
@@ -9716,13 +9652,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     // relative on the recipient says the *what was asked* C28 wanted a question noun or a reply
     // relation for. German puts the relative inside the clause, "einer Person, die fragt, Wörter
     // sagen". QUESTION as the object would not do: rispondere, répondre and antworten take a dative.
-    definition: infinitiveGloss('SAY', {
-      object: 'WORD',
-      number: 'plural',
-      complements: {
-        terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite', relative: { verbPhrase: { verb: 'ASK' } } } },
-      },
-    }),
+    definition: `
+      /inf /verb ( SAY ) /obj ( WORD /pl /zero ) /term ( PERSON /a /rel #2.subj )
+      /subj ( PERSON ) /verb ( ASK )
+    `,
     emoji: '💬',
     forms: {
       en: {
@@ -10150,8 +10083,11 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to allow someone to act',
-    definition: causativeGloss({ object: 'PERSON', definiteness: 'indefinite' },
-      { verb: 'BE', predicate: 'ALLOWED', infinitive: 'ACT' }),
+    definition: `
+      /inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to #2 /objctl
+      /inf /verb ( BE ) /pred ( ALLOWED ) /to #3
+      /inf /verb ( ACT )
+    `,
     emoji: '🪟',
     forms: {
       en: {
@@ -10234,11 +10170,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     synonym: 'permit',
     // "to let a person act" (B85): LET's causative with its own infinitive. LET's gloss is "to cause a
     // person to be allowed to act", so the two are close and neither restates the other's word.
-    definition: infinitiveGloss('LET', {
-      object: 'PERSON',
-      definiteness: 'indefinite',
-      infinitive: { verbPhrase: { verb: 'ACT' }, control: 'object' },
-    }),
+    definition: `
+      /inf /verb ( LET ) /obj ( PERSON /a ) /to #2 /objctl
+      /inf /verb ( ACT )
+    `,
     emoji: '✅',
     forms: {
       en: {
@@ -10317,10 +10252,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // "To find pleasant" needs a word the corpus lacks, so the gloss says what liking is: the joy
     // the thing causes. FEEL + JOY alone is PLAY_GAME's differentia (B62); the cause is what tells
     // them apart.
-    definition: infinitiveGloss('FEEL', {
-      object: 'JOY',
-      complements: { cause: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( FEEL ) /obj ( JOY /zero ) /cause ( OBJECT_THING /a )',
     stative: true,
     emoji: '👍',
     forms: {
@@ -10468,12 +10400,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to express gratitude to someone',
-    definition: infinitiveGloss('SAY', {
-      object: 'WORD',
-      number: 'plural',
-      adjectives: ['GOOD'],
-      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( SAY ) /obj ( WORD /adj GOOD /pl /zero ) /term ( PERSON /a )',
     emoji: '🙏',
     forms: {
       en: {
@@ -10547,9 +10474,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // The spouse is a **predicative**, not an object: as `{ object: 'SPOUSE' }` the same gloss reads
     // de *einen Ehepartner werden* (accusative where the copula wants the nominative), es *volverse a
     // un cónyuge* (the personal *a*) and ja 配偶者**を**なる for になる (localization B70 reading 1).
-    definition: infinitiveGloss('BECOME', {
-      complements: { predicative: { phrase: { concept: 'SPOUSE', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( BECOME ) /pred ( SPOUSE )',
     emoji: '💒',
     forms: {
       en: {

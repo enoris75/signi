@@ -1,69 +1,35 @@
 import type { ConceptSeed } from './types.js';
-import type { Definiteness, NounPhrase, PhrasePlan, TemporalRelation } from '@signi/shared';
 
-// A manner-definition gloss the engine renders into every language: a *manner noun* phrase realised
-// as the bare prepositional adverbial that defines an adverb, the adposition chosen by the noun's
-// `mannerRelation` — mannerGloss('SPEED', 'bare', 'HIGH') → en "at high speed", fr "à vitesse haute",
-// de "mit hoher Geschwindigkeit", ja "高い速さで"; mannerGloss('WAY', 'indefinite', 'GOOD') → "in a
-// good way". Set as an adverb's `definition` to localize its picker tooltip (see the engines'
-// mannerGloss render + Concept.mannerRelation).
-const mannerGloss = (noun: string, definiteness: Definiteness, ...adjectives: string[]): PhrasePlan => ({
-  subject: { concept: noun, definiteness, adjectives, mannerGloss: true },
-});
-
-// A place or direction gloss the engine renders into every language: a noun phrase realised as the
-// locative or direction complement it names, by the same renderer a clause's complements take — so
-// complementGloss('locative', 'PLACE', 'all', { number: 'plural' }) is "in all places" / "in tutti i
-// luoghi" / すべての場所で exactly as "the cat eats in all places" says it after the verb, and a
-// direction is the plain goal, "to a higher place" / "zu einem höheren Ort" / もっと高い場所へ. Set as
-// an adverb's `definition` to localize its picker tooltip (see NounPhrase.complementGloss, C25).
-const complementGloss = (
-  type: 'locative' | 'direction',
-  noun: string,
-  definiteness: Definiteness,
-  extra: Omit<NounPhrase, 'concept' | 'definiteness'> = {},
-): PhrasePlan => ({
-  subject: { concept: noun, definiteness, ...extra, complementGloss: { type } },
-});
-
-// A time gloss the engine renders into every language: a noun phrase realised as the `temporal`
-// complement, by the renderer a clause's complements take — temporalGloss('at', 'DAY', 'this') is
-// "on this day" / "in questo giorno" / "an diesem Tag" / この日に, exactly as "the cat eats on this
-// day" says it after the verb, and temporalGloss('ago', 'MOMENT', 'indefinite') is "a moment ago" /
-// "un momento fa" / "vor einem Augenblick" / "il y a un instant". The relation rides as the
-// complement's specifier, the way a place gloss carries a `path` one (C29, P09 §3 E3).
-const temporalGloss = (
-  relation: TemporalRelation,
-  noun: string,
-  definiteness: Definiteness,
-  extra: Omit<NounPhrase, 'concept' | 'definiteness'> = {},
-): PhrasePlan => ({
-  subject: {
-    concept: noun,
-    definiteness,
-    ...extra,
-    complementGloss: { type: 'temporal', specifiers: [{ kind: 'temporal', value: relation }] },
-  },
-});
-
-// The frequency adverbs gloss TIME (measure → "at") with a quantifier determiner and no adjective:
-// ALWAYS → "at all times" (plural), NEVER → "at no time". Japanese renders these すべての時間で and
-// どの時間もない — the second via the どの…も…ない circumfix, which the ja engine composes from the
-// `no` determiner (see the ja mannerGloss / npSegs negative-determiner path).
-const frequencyGloss = (definiteness: Definiteness, number?: 'singular' | 'plural'): PhrasePlan => ({
-  subject: { concept: 'TIME', definiteness, number, mannerGloss: true },
-});
-
-// A clause gloss the engine renders into every language: the similative adverbial clause said alone,
-// "as one expects" / "come si prevede" / "comme on s'y attend" / "wie man erwartet" / "como se espera"
-// / 予想するように, exactly as "the cat runs as one expects" says it after the verb. The act is the
-// generic one's, as in the evaluative modals' glosses; the plan's THING is the throwaway a verbless
-// period carries (see PhrasePlan.adverbialGloss, localization C41).
-const asGloss = (verb: string): PhrasePlan => ({
-  subject: { concept: 'THING' },
-  adverbialGloss: true,
-  adverbialClause: { conjunction: 'as', clause: { subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb } } },
-});
+// An adverb is defined by the phrase it is short for, said as the adverbial it is (P13: each
+// definition below is written in the phrase language). A verbless period's subject says it, with
+// `/gloss` naming the reading:
+//
+//  - **manner** — a *manner noun* phrase realised as the bare prepositional adverbial that defines an
+//    adverb, the adposition chosen by the noun's `mannerRelation`: `/subj ( SPEED /adj HIGH /zero
+//    /gloss manner )` → en "at high speed", fr "à vitesse haute", de "mit hoher Geschwindigkeit", ja
+//    "高い速さで"; `/subj ( WAY /adj GOOD /a /gloss manner )` → "in a good way" (see the engines'
+//    mannerGloss render + Concept.mannerRelation). The frequency adverbs gloss TIME (measure → "at")
+//    with a quantifier determiner and no adjective: ALWAYS → "at all times" (`/pl /all`), NEVER → "at
+//    no time" (`/no`). Japanese renders these すべての時間で and どの時間もない — the second via the
+//    どの…も…ない circumfix, which the ja engine composes from the `no` determiner (see the ja
+//    mannerGloss / npSegs negative-determiner path).
+//  - **place** or **direction** — a noun phrase realised as the locative or direction complement it
+//    names, by the same renderer a clause's complements take: `/subj ( PLACE /pl /all /gloss place )`
+//    is "in all places" / "in tutti i luoghi" / すべての場所で exactly as "the cat eats in all places"
+//    says it after the verb, and a direction is the plain goal, "to a higher place" / "zu einem
+//    höheren Ort" / もっと高い場所へ (see NounPhrase.complementGloss, C25).
+//  - **time** — the `temporal` complement, by the same renderer: `/subj ( DAY /this /gloss time )` is
+//    "on this day" / "in questo giorno" / "an diesem Tag" / この日に, exactly as "the cat eats on this
+//    day" says it after the verb, and `/subj ( MOMENT /a /gloss time /ago )` is "a moment ago" / "un
+//    momento fa" / "vor einem Augenblick" / "il y a un instant". The relation rides as the
+//    complement's specifier, the way a place gloss carries a `path` one (C29, P09 §3 E3).
+//
+// A clause is said as an adverb too: the similative adverbial clause said alone, `/sub as #2` over
+// `/subj ( one ) /verb ( EXPECT )` → "as one expects" / "come si prevede" / "comme on s'y attend" /
+// "wie man erwartet" / "como se espera" / 予想するように, exactly as "the cat runs as one expects" says
+// it after the verb. The act is the generic one's, as in the evaluative modals' glosses; a period
+// with neither verb nor subject reads its clause that way (see PhrasePlan.adverbialGloss, localization
+// C41).
 
 export const adverbs: ConceptSeed[] = [
   // ── ADVERBS ──────────────────────────────────────────────────────
@@ -71,7 +37,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'FAST',
     role: 'adverb',
     description: 'at high speed',
-    definition: mannerGloss('SPEED', 'bare', 'HIGH'),
+    definition: '/subj ( SPEED /adj HIGH /zero /gloss manner )',
     emoji: '⚡',
     forms: {
       en: { base: 'fast' },
@@ -87,7 +53,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'SLOWLY',
     role: 'adverb',
     description: 'at low speed',
-    definition: mannerGloss('SPEED', 'bare', 'LOW'),
+    definition: '/subj ( SPEED /adj LOW /zero /gloss manner )',
     emoji: '🐢',
     forms: {
       en: { base: 'slowly' },
@@ -103,7 +69,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'WELL',
     role: 'adverb',
     description: 'in a good or satisfactory way',
-    definition: mannerGloss('WAY', 'indefinite', 'GOOD'),
+    definition: '/subj ( WAY /adj GOOD /a /gloss manner )',
     emoji: '✅',
     forms: {
       en: { base: 'well' },
@@ -129,7 +95,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'TOGETHER',
     role: 'adverb',
     description: 'with each other, in company',
-    definition: complementGloss('locative', 'GROUP', 'indefinite'),
+    definition: '/subj ( GROUP /a /gloss place )',
     emoji: '🤝',
     forms: {
       en: { base: 'together' },
@@ -148,7 +114,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'REPEATEDLY',
     role: 'adverb',
     description: 'many times over',
-    definition: { subject: { concept: 'TIME', definiteness: 'many', number: 'plural', mannerGloss: true } },
+    definition: '/subj ( TIME /pl /many /gloss manner )',
     emoji: '🔁',
     forms: {
       en: { base: 'repeatedly' },
@@ -168,7 +134,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'AGAIN',
     role: 'adverb',
     description: 'one more time',
-    definition: { subject: { concept: 'TIME', definiteness: 'indefinite', adjectives: ['OTHER'], mannerGloss: true } },
+    definition: '/subj ( TIME /adj OTHER /a /gloss manner )',
     emoji: '🔂',
     forms: {
       en: { base: 'again' },
@@ -211,7 +177,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'SUDDENLY',
     role: 'adverb',
     description: 'quickly and without warning',
-    definition: mannerGloss('WAY', 'indefinite', 'UNEXPECTED'),
+    definition: '/subj ( WAY /adj UNEXPECTED /a /gloss manner )',
     emoji: '⚡',
     forms: {
       en: { base: 'suddenly' },
@@ -258,7 +224,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'UP',
     role: 'adverb',
     description: 'towards a higher position',
-    definition: complementGloss('direction', 'PLACE', 'indefinite', { adjectives: ['HIGH'], adjectiveDegrees: ['more'] }),
+    definition: '/subj ( PLACE /adj ( HIGH /more ) /a /gloss direction )',
     emoji: '⬆️',
     forms: {
       en: { base: 'up', subtype: 'direction' },
@@ -274,7 +240,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'DOWN',
     role: 'adverb',
     description: 'towards a lower position',
-    definition: complementGloss('direction', 'PLACE', 'indefinite', { adjectives: ['LOW'], adjectiveDegrees: ['more'] }),
+    definition: '/subj ( PLACE /adj ( LOW /more ) /a /gloss direction )',
     emoji: '⬇️',
     forms: {
       en: { base: 'down', subtype: 'direction' },
@@ -298,12 +264,10 @@ export const adverbs: ConceptSeed[] = [
     id: 'OUTSIDE',
     role: 'adverb',
     description: 'out of a building or an enclosed place',
-    definition: complementGloss('direction', 'PLACE', 'indefinite', {
-      relative: {
-        verbPhrase: { verb: 'BE', negative: true },
-        complements: { locative: { phrase: { concept: 'BUILDING', definiteness: 'indefinite' } } },
-      },
-    }),
+    definition: `
+      /subj ( PLACE /a /gloss direction /rel #2.subj )
+      /subj ( PLACE ) /verb ( BE /not ) /loc ( BUILDING /a )
+    `,
     emoji: '🌳',
     forms: {
       en: { base: 'outside', subtype: 'direction' },
@@ -359,7 +323,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'BACKWARDS',
     role: 'adverb',
     description: 'in the reverse direction or order',
-    definition: complementGloss('locative', 'DIRECTION_SPACE', 'definite', { adjectives: ['OPPOSITE'] }),
+    definition: '/subj ( DIRECTION_SPACE /adj OPPOSITE /gloss place )',
     emoji: '↩️',
     forms: {
       en: { base: 'backwards', subtype: 'direction' },
@@ -383,7 +347,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'EVERYWHERE',
     role: 'adverb',
     description: 'in every place',
-    definition: complementGloss('locative', 'PLACE', 'all', { number: 'plural' }),
+    definition: '/subj ( PLACE /pl /all /gloss place )',
     emoji: '🌍',
     forms: {
       en: { base: 'everywhere', subtype: 'place' },
@@ -407,7 +371,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'HERE',
     role: 'adverb',
     description: 'in this place',
-    definition: complementGloss('locative', 'PLACE', 'this'),
+    definition: '/subj ( PLACE /this /gloss place )',
     emoji: '📍',
     forms: {
       en: { base: 'here', subtype: 'place' },
@@ -423,7 +387,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'THERE',
     role: 'adverb',
     description: 'in that place',
-    definition: complementGloss('locative', 'PLACE', 'that', { contrastive: true }),
+    definition: '/subj ( PLACE /that /gloss place /contrast )',
     emoji: '👈',
     forms: {
       en: { base: 'there', subtype: 'place' },
@@ -444,7 +408,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'FAR_AWAY',
     role: 'adverb',
     description: 'at or to a great distance',
-    definition: complementGloss('locative', 'PLACE', 'indefinite', { adjectives: ['FAR'] }),
+    definition: '/subj ( PLACE /adj FAR /a /gloss place )',
     emoji: '🔭',
     forms: {
       en: { base: 'far away', subtype: 'place' },
@@ -462,7 +426,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'NOW',
     role: 'adverb',
     description: 'at the present time',
-    definition: { subject: { concept: 'TIME', definiteness: 'this', mannerGloss: true } },
+    definition: '/subj ( TIME /this /gloss manner )',
     emoji: '⏱️',
     forms: {
       en: { base: 'now' },
@@ -482,7 +446,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'TODAY',
     role: 'adverb',
     description: 'on this present day',
-    definition: temporalGloss('at', 'DAY', 'this'),
+    definition: '/subj ( DAY /this /gloss time )',
     emoji: '🌅',
     forms: {
       en: { base: 'today' },
@@ -503,7 +467,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'ALREADY',
     role: 'adverb',
     description: 'by this time; before now',
-    definition: mannerGloss('TIME', 'indefinite', 'PREVIOUS'),
+    definition: '/subj ( TIME /adj PREVIOUS /a /gloss manner )',
     emoji: '✔️',
     // Under a negation it is *not yet* (P09-E28): "has not eaten yet" at the end in English, "noch
     // nicht" / "ainda não" / "todavía no" ahead of the negator (the Spanish "no" stays, where
@@ -530,7 +494,7 @@ export const adverbs: ConceptSeed[] = [
     // "up to this time" — C29's `until` relation on TIME. It is NOW's noun and determiner, and the
     // "fino a" / "bis zu" / まで is the whole of what keeps the two glosses apart, which is exactly
     // what B67 found missing: NOW is "a questo tempo", STILL "fino a questo tempo".
-    definition: temporalGloss('until', 'TIME', 'this'),
+    definition: '/subj ( TIME /this /gloss time /until )',
     emoji: '⏸️',
     // STILL scopes OVER a negation — "still does not" is what the plan means, not "does not still"
     // (A244). Three languages mark that scope in the surface: English puts the adverb ahead of the
@@ -573,7 +537,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'LATER',
     role: 'adverb',
     description: 'at a time after the present one',
-    definition: temporalGloss('after', 'TIME', 'this'),
+    definition: '/subj ( TIME /this /gloss time /after )',
     emoji: '⏭️',
     forms: {
       en: { base: 'later' },
@@ -589,7 +553,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'ALWAYS',
     role: 'adverb',
     description: 'at all times, on every occasion',
-    definition: frequencyGloss('all', 'plural'),
+    definition: '/subj ( TIME /pl /all /gloss manner )',
     emoji: '♾️',
     forms: {
       en: { base: 'always', subtype: 'frequency' },
@@ -609,7 +573,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'OFTEN',
     role: 'adverb',
     description: 'many times; in many cases',
-    definition: complementGloss('locative', 'CASE_INSTANCE', 'many', { number: 'plural' }),
+    definition: '/subj ( CASE_INSTANCE /pl /many /gloss place )',
     emoji: '🔄',
     forms: {
       en: { base: 'often', subtype: 'frequency' },
@@ -625,7 +589,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'NEVER',
     role: 'adverb',
     description: 'at no time, not ever',
-    definition: frequencyGloss('no'),
+    definition: '/subj ( TIME /no /gloss manner )',
     emoji: '🚫',
     // Asked, and not denied, it is *ever* (P09-E28, `interrogativeAdverb`): a positive word in the
     // same slot. Japanese has no adverb for it — 〜たことがある is a verb construction, deferred —
@@ -684,7 +648,7 @@ export const adverbs: ConceptSeed[] = [
     description: 'a moment ago',
     // C29's `ago` relation on MOMENT, seeded with it: a moment back from now, which is not
     // ALREADY's "at a previous time" nor the previous moment (the one before another moment).
-    definition: temporalGloss('ago', 'MOMENT', 'indefinite'),
+    definition: '/subj ( MOMENT /a /gloss time /ago )',
     emoji: '⏮️',
     forms: {
       en: { base: 'just', subtype: 'frequency' },
@@ -703,7 +667,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'ALSO',
     role: 'adverb',
     description: 'likewise; in addition',
-    definition: mannerGloss('WAY', 'definite', 'SAME'),
+    definition: '/subj ( WAY /adj SAME /gloss manner )',
     emoji: '➕',
     // The additive scopes over a negation too, and six languages have a separate word for it there:
     // postposed "either", *neanche*, *non plus*, *tampoco*, and the fixed orders "auch nicht" and
@@ -742,7 +706,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'REALLY',
     role: 'adverb',
     description: 'in fact; truly',
-    definition: complementGloss('locative', 'REALITY', 'bare'),
+    definition: '/subj ( REALITY /zero /gloss place )',
     emoji: '💯',
     forms: {
       en: { base: 'really', subtype: 'frequency' },
@@ -794,7 +758,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'PROBABLY',
     role: 'adverb',
     description: 'very likely; almost certainly',
-    definition: mannerGloss('PROBABILITY', 'bare', 'HIGH'),
+    definition: '/subj ( PROBABILITY /adj HIGH /zero /gloss manner )',
     emoji: '🎲',
     forms: {
       en: { base: 'probably', subtype: 'sentence', negative_slot: 'pre-negation' },
@@ -831,7 +795,10 @@ export const adverbs: ConceptSeed[] = [
     description: 'naturally; as one would expect',
     // "As one expects": the statement-level reading, which a manner ("in the way that one expects")
     // does not have. French says it with the pronominal s'attendre à, "comme on s'y attend" (C41).
-    definition: asGloss('EXPECT'),
+    definition: `
+      /sub as #2
+      /subj ( one ) /verb ( EXPECT )
+    `,
     emoji: '👌',
     forms: {
       en: { base: 'of course', subtype: 'sentence', negative_slot: 'pre-negation' },
@@ -862,7 +829,7 @@ export const adverbs: ConceptSeed[] = [
     // The direction complement UP is glossed with, on LEVEL rather than PLACE: "to a high level"
     // (C25's `complementGloss`). TOO's "to an excessive level" has no word in the corpus and stays
     // on the literal — see docs/localization/done/C33-degree-adverbs-on-adjectives.md.
-    definition: complementGloss('direction', 'LEVEL', 'indefinite', { adjectives: ['HIGH'] }),
+    definition: '/subj ( LEVEL /adj HIGH /a /gloss direction )',
     emoji: '🔺',
     // A comparative is intensified by a word of its own — "much bigger", "bien plus grand", "viel
     // größer", "mucho más grande", ずっと大きい — which `applyIntensifier` puts in place of `base` on
@@ -934,7 +901,7 @@ export const adverbs: ConceptSeed[] = [
     role: 'adverb',
     slot: 'intensifier',
     description: 'to a small degree; somewhat',
-    definition: complementGloss('direction', 'LEVEL', 'indefinite', { adjectives: ['LOW'] }),
+    definition: '/subj ( LEVEL /adj LOW /a /gloss direction )',
     emoji: '🤏',
     forms: {
       en: { base: 'a little', attributive: 'slightly', drop_degrees: 'equally,most,least' },

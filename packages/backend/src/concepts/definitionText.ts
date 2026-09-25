@@ -13,7 +13,7 @@ import { compileDefinition, DefinitionError, definitionVocabulary } from '@signi
 import type { ConceptSeed } from './types.js';
 
 /** A seed whose definition, if it has one, is a plan — what `concepts` hands every consumer. */
-export type DefinedConceptSeed = ConceptSeed & { definition?: PhrasePlan };
+export type DefinedConceptSeed = Omit<ConceptSeed, 'definition'> & { definition?: PhrasePlan };
 
 /**
  * A seed as the pickers and the console see it (`/api/concepts`), read off the seed itself rather
@@ -22,7 +22,7 @@ export type DefinedConceptSeed = ConceptSeed & { definition?: PhrasePlan };
  * number, whether a noun has a feminine. `listConcepts` serves the same from the database, and a test
  * holds the two to each other.
  */
-export function seedConcept(seed: ConceptSeed): Concept {
+export function seedConcept(seed: Omit<ConceptSeed, 'definition'>): Concept {
   const en = seed.forms['en'] ?? {};
   const pronoun = seed.role === 'pronoun';
   return {
@@ -44,17 +44,29 @@ export function seedConcept(seed: ConceptSeed): Concept {
 }
 
 /**
+ * A definition as a seed file writes it: one period a line, the lines of a linked definition indented
+ * in a template literal with the code around it. The indentation and the blank lines around it are
+ * the file's, not the definition's.
+ */
+export function definitionLines(text: string): string {
+  return text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join('\n');
+}
+
+/**
  * The seeds with each definition written in the phrase language (P13) compiled to its plan, against
  * a vocabulary of every seed by id. A definition that does not compile throws here — on import, so
  * at boot and in every test that loads the corpus — naming the concept, the reason and the line.
  */
 export function compileSeedDefinitions(seeds: readonly ConceptSeed[]): DefinedConceptSeed[] {
-  if (!seeds.some((s) => typeof s.definition === 'string')) return seeds as DefinedConceptSeed[];
   const vocab = definitionVocabulary(seeds.map(seedConcept));
-  return seeds.map((seed) => {
-    if (typeof seed.definition !== 'string') return seed as DefinedConceptSeed;
+  return seeds.map(({ definition, ...seed }) => {
+    if (definition === undefined) return seed;
     try {
-      return { ...seed, definition: compileDefinition(seed.definition, vocab) };
+      return { ...seed, definition: compileDefinition(definitionLines(definition), vocab) };
     } catch (e) {
       if (!(e instanceof DefinitionError)) throw e;
       throw new Error(`Definition for "${seed.id}" does not compile: ${e.reason}\n  in: ${e.text}`);

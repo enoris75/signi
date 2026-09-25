@@ -1,5 +1,4 @@
 import type { ConceptSeed } from '../types.js';
-import { infinitiveGloss } from './gloss.js';
 
 // Plain intransitive verbs.
 export const intransitiveVerbs: ConceptSeed[] = [
@@ -10,7 +9,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to move quickly on foot',
     // "to move fast": QUICK is an adjective, the adverb is FAST (localization C17).
-    definition: infinitiveGloss('MOVE_ONESELF', { modifier: 'FAST' }),
+    definition: '/inf /verb ( MOVE_ONESELF /adv FAST )',
     emoji: '🏃',
     isA: 'MOVE_ONESELF',
     forms: {
@@ -81,14 +80,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     // "to move into the air" (localization C18). The differentia is where the motion ends up, which
     // is a `direction` naming a relation rather than a plain goal — "into the air", not "to the
     // air". Definite: French and Portuguese spell no zero-article mass noun after a preposition.
-    definition: infinitiveGloss('MOVE_ONESELF', {
-      complements: {
-        direction: {
-          phrase: { concept: 'AIR', definiteness: 'definite' },
-          specifiers: [{ kind: 'path', value: 'in' }],
-        },
-      },
-    }),
+    definition: '/inf /verb ( MOVE_ONESELF ) /dir ( AIR /in )',
     emoji: '🦘',
     isA: 'MOVE_ONESELF',
     forms: {
@@ -159,9 +151,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     // "to move to the speaker" (localization B35): the deixis is a noun, the goal of the `direction`
     // complement. GO's gloss says where the motion starts, COME's whom it ends at. Italian says it
     // "verso il parlante", MOVE_ONESELF's own preposition: "dal parlante" would read as leaving.
-    definition: infinitiveGloss('MOVE_ONESELF', {
-      complements: { direction: { phrase: { concept: 'SPEAKER', definiteness: 'definite' } } },
-    }),
+    definition: '/inf /verb ( MOVE_ONESELF ) /dir ( SPEAKER )',
     emoji: '🚶',
     isA: 'MOVE_ONESELF',
     forms: {
@@ -234,7 +224,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to weep; to shed tears',
-    definition: infinitiveGloss('SHED', 'TEAR', 'plural'),
+    definition: '/inf /verb ( SHED ) /obj ( TEAR /pl /zero )',
     emoji: '😭',
     synonym: 'weep',
     isA: 'SHED',
@@ -307,7 +297,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     description: 'to feel pain or distress',
     // LOVE's counterpart under the same genus: "to feel affection", "to feel sorrow". PAIN, the
     // physical half of the description, is not seeded (localization A31).
-    definition: infinitiveGloss('FEEL', 'SORROW'),
+    definition: '/inf /verb ( FEEL ) /obj ( SORROW /zero )',
     emoji: '😣',
     isA: 'FEEL',
     forms: {
@@ -379,7 +369,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     // does. Not "to be consumed by fire" (CONSUME is the ingest sense: fr consommer, de konsumieren,
     // ja 摂取), and not "to produce fire", which reads as SET_ON_FIRE's "to create fire". Japanese
     // 炎を出す does not define 燃える with itself.
-    definition: infinitiveGloss('PRODUCE', 'FLAME', 'plural'),
+    definition: '/inf /verb ( PRODUCE ) /obj ( FLAME /pl /zero )',
     emoji: '🔥',
     synonym: 'be on fire',
     forms: {
@@ -450,10 +440,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     // "to move to the ground suddenly" (localization B34). "Down" is the place the motion ends at,
     // a `direction` goal, which leaves the one adverb slot for SUDDENLY. Definite: the ground. Italian
     // and French say the goal "verso il suolo" / "vers le sol", MOVE_ONESELF's own preposition.
-    definition: infinitiveGloss('MOVE_ONESELF', {
-      modifier: 'SUDDENLY',
-      complements: { direction: { phrase: { concept: 'GROUND', definiteness: 'definite' } } },
-    }),
+    definition: '/inf /verb ( MOVE_ONESELF /adv SUDDENLY ) /dir ( GROUND )',
     emoji: '🏚️',
     isA: 'MOVE_ONESELF',
     forms: {
@@ -530,9 +517,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'cause'],
     description: 'to have one\'s home in a place',
-    definition: infinitiveGloss('BE', {
-      complements: { locative: { phrase: { concept: 'HOME', definiteness: 'definite' } } },
-    }),
+    definition: '/inf /verb ( BE ) /loc ( HOME )',
     emoji: '🏘️',
     synonym: 'dwell',
     forms: {
@@ -684,7 +669,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     description: 'to stop living',
     // "no longer to live" (localization B84): LIVE_ALIVE under NO_LONGER, which B84's fix lets Spanish
     // and Portuguese say once ("ya no vivir", "já não viver").
-    definition: infinitiveGloss('LIVE_ALIVE', { modifier: 'NO_LONGER' }),
+    definition: '/inf /verb ( LIVE_ALIVE /adv NO_LONGER )',
     emoji: '🪦',
     forms: {
       en: {
@@ -759,10 +744,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     // "still to be in a place" (localization B61): KEEP's shape on BE, the dictionary's "to continue
     // to be in the same place" without the continuative the engine lacks. Japanese 場所にまだいる is
     // the existential a person takes.
-    definition: infinitiveGloss('BE', {
-      modifier: 'STILL',
-      complements: { locative: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( BE /adv STILL ) /loc ( PLACE /a )',
     emoji: '🧍',
     forms: {
       en: {
@@ -837,9 +819,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'locative', 'cause'],
     description: 'to stay until something happens or someone comes',
     // "to stay until a time" (localization B84): STAY with C29's `until` on TIME.
-    definition: infinitiveGloss('STAY', {
-      complements: { temporal: { phrase: { concept: 'TIME', definiteness: 'indefinite' }, specifiers: [{ kind: 'temporal', value: 'until' }] } },
-    }),
+    definition: '/inf /verb ( STAY ) /time ( TIME /a /until )',
     emoji: '⏳',
     isA: 'STAY',
     forms: {
@@ -913,7 +893,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'cause', 'instrumental'],
     description: 'to buy and sell goods',
-    definition: infinitiveGloss('BUY', 'OBJECT_THING', 'plural'),
+    definition: '/inf /verb ( BUY ) /obj ( OBJECT_THING /pl /zero )',
     emoji: '🤝',
     forms: {
       en: {
@@ -1136,7 +1116,10 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'cause', 'instrumental'],
     description: 'to do a job; to labour',
-    definition: infinitiveGloss('ACT', { purpose: { verb: 'ACQUIRE', object: 'MONEY' } }),
+    definition: `
+      /inf /verb ( ACT ) /so #2
+      /inf /verb ( ACQUIRE ) /obj ( MONEY /zero )
+    `,
     synonym: 'labour',
     emoji: '⚒️',
     forms: {
@@ -1210,7 +1193,10 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'cause', 'instrumental', 'opponent'],
     description: 'to take part in a game for enjoyment',
-    definition: infinitiveGloss('ACT', { purpose: { verb: 'FEEL', object: 'JOY' } }),
+    definition: `
+      /inf /verb ( ACT ) /so #2
+      /inf /verb ( FEEL ) /obj ( JOY /zero )
+    `,
     synonym: 'play a game',
     emoji: '🎲',
     forms: {
@@ -1282,10 +1268,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'cause', 'locative', 'opponent'],
     description: 'to be defeated in a contest',
-    definition: infinitiveGloss('WIN', {
-      negative: true,
-      complements: { locative: { phrase: { concept: 'GAME', definiteness: 'indefinite' } } },
-    }),
+    definition: '/inf /verb ( WIN /not ) /loc ( GAME /a )',
     synonym: 'be defeated',
     emoji: '🥈',
     forms: {
@@ -1463,7 +1446,10 @@ export const intransitiveVerbs: ConceptSeed[] = [
     // "not to continue acting": the negation of CONTINUE_DOING, whose own gloss does not cite this
     // one. "No longer to act" (NO_LONGER) would be the closer gloss, but it meets B84's defect in
     // Spanish and Portuguese ("no actuar ya no").
-    definition: infinitiveGloss('CONTINUE_DOING', { negative: true, infinitive: 'ACT' }),
+    definition: `
+      /inf /verb ( CONTINUE_DOING /not ) /to #2
+      /inf /verb ( ACT )
+    `,
     emoji: '⏹️',
     forms: {
       en: {
@@ -1539,7 +1525,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     description: 'to come to a halt',
     synonym: 'come to a halt',
     // "no longer to move" (localization B84): MOVE_ONESELF under NO_LONGER.
-    definition: infinitiveGloss('MOVE_ONESELF', { modifier: 'NO_LONGER' }),
+    definition: '/inf /verb ( MOVE_ONESELF /adv NO_LONGER )',
     emoji: '🛑',
     forms: {
       en: {
@@ -1610,7 +1596,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     description: 'to go on with an activity',
     synonym: 'go on',
     // "still to act", KEEP's shape ("still to have objects") on ACT.
-    definition: infinitiveGloss('ACT', { modifier: 'STILL' }),
+    definition: '/inf /verb ( ACT /adv STILL )',
     emoji: '⏩',
     forms: {
       en: {
@@ -1764,7 +1750,10 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'locative', 'cause'],
     description: 'to come to know or be able to do something',
-    definition: infinitiveGloss('BEGIN', { infinitive: 'KNOW' }),
+    definition: `
+      /inf /verb ( BEGIN ) /to #2
+      /inf /verb ( KNOW )
+    `,
     emoji: '📚',
     forms: {
       en: {
@@ -1912,7 +1901,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     // "to use the mind", on the MIND seeded for it: 頭脳を使う is the idiom; the French and German
     // (utiliser l'esprit, den Verstand verwenden) are understood rather than idiomatic. Without MIND
     // every lead said something narrower: creating concepts is inventing, understanding them KNOW's.
-    definition: infinitiveGloss('USE', { object: 'MIND', definiteness: 'definite' }),
+    definition: '/inf /verb ( USE ) /obj ( MIND )',
     emoji: '🤔',
     forms: {
       en: {
