@@ -334,6 +334,14 @@ describe('the diagnostics, as the catalogue plans them', () => {
       en: 'This verb accepts no object complement', it: "Questo verbo non accetta nessun complemento predicativo dell'oggetto", fr: "Ce verbe n'accepte aucun attribut du complément d'objet", de: 'Dieses Verb akzeptiert kein Objektsprädikativ',
       es: 'Este verbo no acepta ningún complemento predicativo del objeto', pt: 'Este verbo não aceita nenhum predicativo do objeto', ja: 'この動詞はどの目的語補語も受け付けません',
     },
+    'diagnostic.verbAcceptsNo.role': {
+      en: 'This verb accepts no role', it: 'Questo verbo non accetta nessun complemento di ruolo', fr: "Ce verbe n'accepte aucun complément circonstanciel de rôle", de: 'Dieses Verb akzeptiert keine adverbiale Bestimmung der Rolle',
+      es: 'Este verbo no acepta ningún complemento circunstancial de función', pt: 'Este verbo não aceita nenhum adjunto adverbial de papel', ja: 'この動詞はどの役割の副詞語句も受け付けません',
+    },
+    'diagnostic.verbAcceptsNo.opponent': {
+      en: 'This verb accepts no opponent', it: 'Questo verbo non accetta nessun complemento di svantaggio', fr: "Ce verbe n'accepte aucun complément circonstanciel d'opposition", de: 'Dieses Verb akzeptiert keine adverbiale Bestimmung des Gegners',
+      es: 'Este verbo no acepta ningún complemento circunstancial de oposición', pt: 'Este verbo não aceita nenhum adjunto adverbial de oposição', ja: 'この動詞はどの相手の副詞語句も受け付けません',
+    },
     'diagnostic.verbAcceptsNo.instrumental': {
       en: 'This verb accepts no instrumental', it: 'Questo verbo non accetta nessun complemento di mezzo', fr: "Ce verbe n'accepte aucun complément de moyen", de: 'Dieses Verb akzeptiert keinen Instrumental',
       es: 'Este verbo no acepta ningún complemento circunstancial de instrumento', pt: 'Este verbo não aceita nenhum adjunto adverbial de instrumento', ja: 'この動詞はどの手段語も受け付けません',

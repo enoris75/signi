@@ -111,10 +111,11 @@ function pickerFor(
       // The verb's adverb slot and each modal's own adverb slot — a single-vocabulary adverb picker.
       if (slotKey === "modifier" || MODAL_ADVERB_SLOTS.includes(slotKey as SlotKey))
         return <AdverbTypeahead onSelect={pick} />;
-      // The causal complement ("because of him") also accepts a pronoun, so it uses the
-      // pronoun-inclusive picker, and so do the purpose and the topic ("for her", "about him");
-      // the motion/locative complements stay noun-only.
-      if (slotKey === "cause" || slotKey === "purpose" || slotKey === "topic")
+      // The complements that take a pronoun behind their adposition — the cause, the purpose, the
+      // topic, the companion and the opponent: "because of him", "for her", "with her", "against
+      // him" — use the pronoun-inclusive picker; the motion/locative complements stay noun-only.
+      // Which ones is slotCategories' to say, so the model, the console and this picker agree (P09-E45).
+      if (slotCategories(slotKey)?.options.some((o) => o.value === "pronoun"))
         return (
           <SubjectTypeahead
             onSelect={pick}

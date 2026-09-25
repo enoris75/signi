@@ -298,6 +298,31 @@ describe('buildRingSpecs', () => {
     expect((hours[2] + hours[3]) / 2).toBeCloseTo(6);
   });
 
+  // P09-E44: ACT's ring with the role — its four other licensed complements, the role and the three
+  // adjuncts, eight toggles in the verb's row at six, as EAT's eight already are.
+  it("waits ACT's eight toggles, the role among them, in the verb's row at six", () => {
+    const defs = groups([], ['subject', 'verb']);
+    const toggles = ['instrumental', 'role', 'comitative', 'manner', 'locative', 'temporal', 'cause', 'purpose'];
+    const verb = specs(defs, { complementToggleIcons: toggles.map(icon) })[VERB_PHRASE];
+
+    expect(keys(verb.outer).filter((k) => toggles.includes(k))).toEqual(toggles);
+    const hours = toggles.map((k) => (aimOf(verb.outer, k) as { clock: number }).clock);
+    expect(hours).toEqual([...hours].sort((a, b) => b - a));
+    expect((hours[3] + hours[4]) / 2).toBeCloseTo(6);
+  });
+
+  // P09-E45: PLAY_GAME's ring with the opponent — eight toggles, the opponent beside the companion.
+  it("waits PLAY_GAME's eight toggles, the opponent among them, in the verb's row at six", () => {
+    const defs = groups([], ['subject', 'verb']);
+    const toggles = ['comitative', 'opponent', 'instrumental', 'manner', 'locative', 'temporal', 'cause', 'purpose'];
+    const verb = specs(defs, { complementToggleIcons: toggles.map(icon) })[VERB_PHRASE];
+
+    expect(keys(verb.outer).filter((k) => toggles.includes(k))).toEqual(toggles);
+    const hours = toggles.map((k) => (aimOf(verb.outer, k) as { clock: number }).clock);
+    expect(hours).toEqual([...hours].sort((a, b) => b - a));
+    expect((hours[3] + hours[4]) / 2).toBeCloseTo(6);
+  });
+
   it("faces the verb's toggles toward the constituents they show, and ports toward the rest", () => {
     const defs = groups(['directObject', 'route'], ['subject', 'verb', 'directObject', 'route']);
     const result = specs(defs, {

@@ -290,6 +290,10 @@ const CANVAS_PARTS = {
   // P13's two boxes: what the object is taken as or turned into, and the companion.
   objectPredicative: { concept: 'OBJECT_COMPLEMENT', en: 'object complement' },
   comitative: { concept: 'COMITATIVE', en: 'comitative' },
+  // P09-E44's box: the capacity the subject acts in, "acts as a friend".
+  role: { concept: 'ROLE_COMPLEMENT', en: 'role' },
+  // P09-E45's box: the party the act is directed against, "plays against the dog".
+  opponent: { concept: 'OPPONENT_COMPLEMENT', en: 'opponent' },
 } as const;
 
 /** A named part of the canvas — see CANVAS_PARTS and the `action.<verb>.<part>` families. */
@@ -298,7 +302,7 @@ export type CanvasPart = keyof typeof CANVAS_PARTS;
 // The complements the canvas draws as a boxed ring of their own: every one but the instrumental, which
 // lives in a period container of its own and is linked to (the canvas's BOX_COMPLEMENT_TYPES).
 const BOXED_COMPLEMENT_PARTS = [
-  'objectPredicative', 'predicative', 'terminus', 'comitative', 'manner', 'locative', 'direction', 'source',
+  'objectPredicative', 'predicative', 'terminus', 'role', 'comitative', 'opponent', 'manner', 'locative', 'direction', 'source',
   'route', 'temporal', 'purpose', 'topic', 'cause',
 ] as const satisfies readonly CanvasPart[];
 
@@ -771,9 +775,8 @@ export const UI_STRINGS = defineUiStrings({
 
   // The object complement's name — the subject complement's counterpart on the direct object, named
   // the same way, by the phrase each tradition uses for it ("complemento predicativo dell'oggetto",
-  // "attribut du complément d'objet", de the compound Objektsprädikativ). Neither this nor the
-  // comitative below titles a box yet: the two are plan-only complements (see COMPLEMENT_TYPES),
-  // and what shows them is the word map, which names every complement a verb licenses.
+  // "attribut du complément d'objet", de the compound Objektsprädikativ). It titles its box (P13), as
+  // the comitative's below does.
   'slot.objectPredicative': {
     plan: nameOf('OBJECT_COMPLEMENT'),
     format: NAME_FORMAT,
@@ -846,15 +849,15 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Topic',
   },
-  // The *as* of a role said of the subject (P09-E13), "acts as a friend". Plan-only, like the object
-  // complement: no box shows it yet, and the word map names it on the verbs that license it (ACT).
+  // The *as* of a role said of the subject (P09-E13), "acts as a friend". It titles the role's box
+  // (P09-E44), offered on the verbs that license it (ACT, WORK_LABOUR).
   'slot.role': {
     plan: nameOf('ROLE_COMPLEMENT'),
     format: NAME_FORMAT,
     fallback: 'Role',
   },
-  // The party an act is directed *against* (P09-E22), "plays against the dog". Plan-only, like the
-  // role: no box shows it yet, and the word map names it on the verbs that license it (PLAY_GAME).
+  // The party an act is directed *against* (P09-E22), "plays against the dog". It titles the opponent's
+  // box (P09-E45), offered on the verbs that license it (PLAY_GAME, WIN, LOSE_GAME).
   'slot.opponent': {
     plan: nameOf('OPPONENT_COMPLEMENT'),
     format: NAME_FORMAT,
@@ -3599,6 +3602,10 @@ export const UI_STRINGS = defineUiStrings({
         ['instrumental', 'INSTRUMENTAL', 'instrumental'],
         // P13: a verb with no object has nothing to take as something (the comitative goes with any).
         ['objectPredicative', 'OBJECT_COMPLEMENT', 'object complement'],
+        // P09-E44: the capacity one acts in is licensed (ACT, WORK_LABOUR).
+        ['role', 'ROLE_COMPLEMENT', 'role'],
+        // P09-E45: so is the party the act is directed against (PLAY_GAME, WIN, LOSE_GAME).
+        ['opponent', 'OPPONENT_COMPLEMENT', 'opponent'],
       ] as const
     ).map(([slot, concept, en]) => [
       `diagnostic.verbAcceptsNo.${slot}`,
@@ -3613,7 +3620,7 @@ export const UI_STRINGS = defineUiStrings({
       },
     ]),
   ) as Record<
-    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'topic' | 'cause' | 'instrumental' | 'objectPredicative'}`,
+    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'topic' | 'cause' | 'instrumental' | 'objectPredicative' | 'role' | 'opponent'}`,
     UiStringPlanDef
   >,
   // A verb that takes no clause as its object (P09-E12 D9): `/clause` on one whose `clauseObject` is

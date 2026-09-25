@@ -246,6 +246,59 @@ test.describe('complements', () => {
       ja: '女は猫について考えます。',
     });
   });
+
+  // P09-E44. The capacity the subject acts in, where the verb licenses it (ACT). Nothing infers its
+  // gender from the subject, so the feminine is the box's own chip; six languages print it bare.
+  test('the role, with the gender its own chip gives it', async ({ app }) => {
+    await app.buildClause('WOMAN', 'ACT');
+    await app.revealAndPick('role', 'FRIEND');
+    await app.expectSentences({ en: 'the woman acts as a friend.', it: 'la donna agisce come amico.' });
+
+    await app.satellite('roleGender').click();
+    await app.expectSentences({
+      en: 'the woman acts as a friend.',
+      it: 'la donna agisce come amica.',
+      fr: 'la femme agit comme amie.',
+      de: 'die Frau handelt als Freundin.',
+      es: 'la mujer actúa como amiga.',
+      pt: 'a mulher age como amiga.',
+      ja: '女は友達として行動します。',
+    });
+  });
+
+  // P09-E45. The party the act is directed against, where the verb licenses it (PLAY_GAME); a noun,
+  // or a pronoun behind its adposition as the cause's.
+  test('the opponent, a noun or a pronoun', async ({ app, page }) => {
+    await app.setSubject('CAT');
+    // "play" names PLAY_INSTRUMENT too, so the option is picked by its concept.
+    await page.getByTestId('typeahead-verb').fill('play');
+    await page.locator('[data-testid="typeahead-option"][data-concept="PLAY_GAME"]').click();
+    await app.revealAndPick('opponent', 'DOG');
+    await app.expectSentences({
+      en: 'the cat plays against the dog.',
+      it: 'il gatto gioca contro il cane.',
+      fr: 'le chat joue contre le chien.',
+      de: 'der Kater spielt gegen den Hund.',
+      es: 'el gato juega contra el perro.',
+      pt: 'o gato joga contra o cão.',
+      ja: '猫は犬を相手に遊びます。',
+    });
+
+    // Re-picked as a pronoun from the same box's chooser.
+    await page.getByTestId('box-opponent').click();
+    await page.getByTestId('pronoun-tab').click();
+    for (const choice of ['third', 'singular', 'male']) await page.getByRole('button', { name: choice, exact: true }).click();
+    await page.getByTestId('pronoun-commit').click();
+    await app.expectSentences({
+      en: 'the cat plays against him.',
+      it: 'il gatto gioca contro di lui.',
+      fr: 'le chat joue contre lui.',
+      de: 'der Kater spielt gegen ihn.',
+      es: 'el gato juega contra él.',
+      pt: 'o gato joga contra ele.',
+      ja: '猫は彼を相手に遊びます。',
+    });
+  });
 });
 
 // The instrumental is the one complement with no box on the verb's canvas: its noun phrase lives in

@@ -30,6 +30,8 @@ export const NOUNS = [
   c('MOMENT', 'noun', 'moment', 'momento'),
   c('NIGHT', 'noun', 'night', 'notte', { gendered: true }),
   c('WOMAN', 'noun', 'woman', 'donna', { animate: true, human: true }),
+  // A capacity one acts in, for the role box (P09-E44): "acts as a friend".
+  c('FRIEND', 'noun', 'friend', 'amico', { gendered: true, animate: true, human: true }),
   c('STICK', 'noun', 'stick', 'bastone'),
   c('WORD', 'noun', 'word', 'parola'),
   c('PHRASE', 'noun', 'phrase', 'frase'),
@@ -65,6 +67,12 @@ export const VERBS = [
   verb('SEEM', 'seem', 'sembrare', { transitivity: 'intransitive', ...complements('predicative') }),
   // One of the two seeded verbs that license the topic ("thinks about the cat").
   verb('THINK', 'think', 'pensare', { transitivity: 'intransitive', ...complements('topic') }),
+  // The verb that licenses the role (P09-E13, P09-E44): "acts as a friend".
+  verb('ACT', 'act', 'agire', { transitivity: 'intransitive', ...complements('manner', 'role', 'locative', 'cause', 'instrumental') }),
+  // Two of the verbs that license the opponent (P09-E22, P09-E45): "plays against the dog", and a
+  // transitive one, "wins the game against the dog".
+  verb('PLAY_GAME', 'play', 'giocare', { transitivity: 'intransitive', ...complements('opponent', 'locative') }),
+  verb('WIN', 'win', 'vincere', complements('opponent')),
   // The verbs that take a clause as their object (P09-E12 D9): a that-clause, an infinitive.
   verb('SAY', 'say', 'dire', { clauseObject: 'content' }),
   verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive' }),

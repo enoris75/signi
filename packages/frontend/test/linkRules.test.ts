@@ -42,6 +42,22 @@ describe('linkRules', () => {
     expect(canBeRelativeTarget(CONTAINERS, links, 'B', { containerId: 'A', nounKey: 'subject' })).toBe(false);
   });
 
+  // P09-E44: the capacity one acts in is never a relative's gap (A288), "the friend the man acts as".
+  it('never offers the role as a relative clause’s gap', () => {
+    const act: PhraseContainer = { id: 'R', selection: { subject: noun('MAN'), verb: verb('ACT'), role: noun('FRIEND') } };
+
+    expect(canBeRelativeTarget([...CONTAINERS, act], [], 'A', { containerId: 'R', nounKey: 'role' })).toBe(false);
+    expect(canBeRelativeTarget([...CONTAINERS, act], [], 'A', { containerId: 'R', nounKey: 'subject' })).toBe(true);
+  });
+
+  // P09-E45: the opponent is a gap like any box, "the dog against which the cat plays".
+  it('offers a filled opponent as a relative clause’s gap', () => {
+    const play: PhraseContainer = { id: 'P', selection: { subject: noun('CAT'), verb: verb('PLAY_GAME'), opponent: noun('DOG') } };
+
+    expect(canBeRelativeTarget([...CONTAINERS, play], [], 'A', { containerId: 'P', nounKey: 'opponent' })).toBe(true);
+    expect(canBeRelativeTarget(CONTAINERS, [], 'A', { containerId: 'B', nounKey: 'opponent' })).toBe(false);
+  });
+
   it('gives a period one subordinate role: a relative gap is no if-clause, coordinate or instrument', () => {
     const links = addRelativeLink([], { containerId: 'A', nounKey: 'subject' }, { containerId: 'C', nounKey: 'subject' }, 'l1');
     expect(inClauseRelation(links, 'C')).toBe(true);

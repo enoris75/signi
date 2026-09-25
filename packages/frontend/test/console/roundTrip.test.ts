@@ -79,8 +79,9 @@ type Frame = 'period' | 'possessor' | 'standard' | 'conjunct';
 function wordFor(rng: Rng, slot: SlotKey, frame: Frame): { concept: Concept; opts?: R_Opts } {
   const nounOrPronoun = () => (rng() < 0.25 ? pronounPick(rng) : { concept: pick(rng, NOUNS)! });
   if (slot === 'subject') return frame === 'possessor' ? { concept: pick(rng, NOUNS)! } : nounOrPronoun();
-  // The purpose and the topic take a pronoun behind their adposition as the cause does ("for her").
-  if (slot === 'directObject' || slot === 'cause' || slot === 'purpose' || slot === 'topic') return nounOrPronoun();
+  // The purpose, the topic and the opponent take a pronoun behind their adposition as the cause does
+  // ("for her", "against him").
+  if (slot === 'directObject' || slot === 'cause' || slot === 'purpose' || slot === 'topic' || slot === 'opponent') return nounOrPronoun();
   if (slot === 'predicative') return { concept: rng() < 0.5 ? pick(rng, ADJECTIVES)! : pick(rng, NOUNS)! };
   return { concept: pick(rng, NOUNS)! };
 }
@@ -162,6 +163,21 @@ const OPS: Op[] = [
     const w = wordFor(rng, type as SlotKey, 'period');
     return R.applyConceptSelect(sel, type as SlotKey, w.concept, w.opts);
   }),
+  // The capacity the subject acts in (P09-E44), where the verb offers it: a noun head only, and its
+  // gender and number the user's own — nothing infers them from the subject.
+  onPeriod((sel, rng, s, cid) => {
+    if (!offeredComplements(sel.verb).includes('role') || (isLinked(s, cid) && sel.role)) return undefined;
+    let next = R.applyConceptSelect(sel, 'role', pick(rng, NOUNS)!);
+    if (next.role?.gendered && rng() < 0.5) next = R.toggleGender(next, 'role');
+    if (rng() < 0.5) next = R.toggleNumber(next, 'role');
+    return next;
+  }),
+  // The party the act is directed against (P09-E45), where the verb offers it: a noun or a pronoun.
+  onPeriod((sel, rng, s, cid) => {
+    if (!offeredComplements(sel.verb).includes('opponent') || (isLinked(s, cid) && sel.opponent)) return undefined;
+    const w = rng() < 0.4 ? pronounPick(rng) : { concept: pick(rng, NOUNS)! };
+    return R.applyConceptSelect(sel, 'opponent', w.concept, w.opts);
+  }),
   // Adjectives and noun modifiers, on any noun head.
   onPeriod((sel, rng) => {
     const head = pick(rng, nounHeads(sel));
@@ -197,7 +213,7 @@ const OPS: Op[] = [
       const r = rng();
       if (r < 0.25 && c.role !== 'adjective') return R.toggleNumber(slice, which);
       if (r < 0.45 && (c.role === 'pronoun' || c.gendered)) return R.toggleGender(slice, which);
-      if (r < 0.65 && c.role === 'noun' && (which === 'subject' || which === 'directObject' || ['predicative', 'terminus', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose', 'topic'].includes(which) || (which === 'manner' && c.mannerRelation !== 'measure')))
+      if (r < 0.65 && c.role === 'noun' && (which === 'subject' || which === 'directObject' || ['predicative', 'terminus', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose', 'topic', 'opponent'].includes(which) || (which === 'manner' && c.mannerRelation !== 'measure')))
         return R.setDefiniteness(slice, which, pick(rng, DEFINITENESS)!);
       if (r < 0.75 && (which === 'route' || which === 'locative') && head.frame === 'period')
         return R.setSpecifier(slice, pick(rng, PATH_SPECIFIERS)!, which);
@@ -266,7 +282,8 @@ const OPS: Op[] = [
     let next = R.addConjunct(sel, which);
     const i = R.conjunctsOf(next, which).length - 1;
     if (rng() < 0.9) {
-      const w = wordFor(rng, 'subject', 'conjunct');
+      // Beside a predicate, what a predicate takes (P13, conjunctSpec): no pronoun there.
+      const w = which === 'predicative' ? wordFor(rng, 'predicative', 'period') : wordFor(rng, 'subject', 'conjunct');
       next = R.updateConjunct(next, which, i, (c) => R.applyConceptSelect(c, 'subject', w.concept, w.opts));
     }
     if (rng() < 0.3) next = R.cycleNounConjunction(next, which);

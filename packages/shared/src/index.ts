@@ -303,7 +303,7 @@ export type ConceptSlot = 'intensifier' | 'title' | 'possessorOwn' | 'indefinite
  * Not E1's spatial `against`, which is contact ("leans against the wall") and is *an* + dative in
  * German, where the opponent is *gegen* + accusative. Its word is the language's own — *against /
  * contro / contre / gegen / contra* / を相手に — unless the verb governs another (`opponent_prep`,
- * see `opponentLink`), as FIGHT's Japanese 戦う takes と. Plan-only, as E2's two are.
+ * see `opponentLink`), as FIGHT's Japanese 戦う takes と.
  */
 export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'purpose' | 'instrumental' | 'topic' | 'manner' | 'comitative' | 'terminus' | 'role' | 'temporal' | 'predicative' | 'objectPredicative' | 'opponent';
 
@@ -312,12 +312,11 @@ export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'ca
  * order (`COMPLEMENT_RENDER_ORDER`) for the ones it has, so the reading order on the canvas is the
  * sentence's: the `topic` beside the manner, the `temporal` after the place, the `purpose` after the
  * cause (P09-E12b). The object complement and the comitative got theirs with P13 (a definition says
- * "to have as a part", "to go with a person"). The `role` and the `opponent` render from a plan (the
- * UI strings of C12 are built on them) but have no box on the canvas, so the frontend — which
- * derives its slots, satellites and selection fields from this list — does not know about them. Add
- * one here to give it a box.
+ * "to have as a part", "to go with a person"), the `role` with P09-E44 ("acts as a friend") and the
+ * `opponent` with P09-E45 ("plays against the dog"). The frontend derives its slots, satellites and
+ * selection fields from this list: add a complement here to give it a box.
  */
-export const COMPLEMENT_TYPES: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'cause', 'purpose'];
+export const COMPLEMENT_TYPES: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'role', 'comitative', 'opponent', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'cause', 'purpose'];
 
 /**
  * The complements the builder offers on **every** period with a verb, whether the verb licenses

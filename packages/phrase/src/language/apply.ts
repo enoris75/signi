@@ -1327,6 +1327,8 @@ class Run {
     const n = this.periodNumber(target.containerId);
     const ref = printRefText(n, target.nounKey);
     if (sourceId === target.containerId) return coded("relativeSamePeriod");
+    // The capacity one acts in is never a relative's gap (P09-E44, A288): choose another noun.
+    if (target.nounKey === "role") return coded("relativeGapRole", { period: n });
     const c = this.containers.find((x) => x.id === target.containerId);
     // A gap no box holds (P13): the instrument of a verb that takes one, unlinked; the subject's possessor.
     const there =

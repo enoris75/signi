@@ -266,6 +266,27 @@ describe('rawSatellites', () => {
       expect(offered({ verb: concept('SEE', 'verb', { transitivity: 'transitive' }) })).toContain('objectPredicative');
     });
 
+    // P09-E44: the role is licensed — ACT and WORK_LABOUR offer it — and no adjunct.
+    it('offers the role only where the verb licenses it, in the builder’s order', () => {
+      const act = concept('ACT', 'verb', { complements: ['manner', 'role', 'locative', 'cause', 'instrumental'] });
+      const toggles = offered({ verb: act }).filter((key) => (COMPLEMENT_TYPES as string[]).includes(key));
+
+      expect(toggles).toEqual(['instrumental', 'role', 'comitative', 'manner', 'locative', 'temporal', 'cause', 'purpose']);
+      expect(offered({ verb: concept('EAT', 'verb', { transitivity: 'transitive', complements: ['instrumental', 'locative', 'cause'] }) })).not.toContain('role');
+    });
+
+    // P09-E45: so is the opponent — PLAY_GAME, LOSE_GAME and WIN offer it.
+    it('offers the opponent only where the verb licenses it, a transitive verb included', () => {
+      const play = concept('PLAY_GAME', 'verb', { transitivity: 'intransitive', complements: ['opponent', 'locative'] });
+      const lose = concept('LOSE_GAME', 'verb', { transitivity: 'intransitive', complements: ['opponent'] });
+      const win = concept('WIN', 'verb', { transitivity: 'transitive', complements: ['opponent'] });
+
+      expect(offered({ verb: play }).filter((key) => (COMPLEMENT_TYPES as string[]).includes(key))).toEqual(['comitative', 'opponent', 'locative', 'temporal', 'purpose']);
+      expect(offered({ verb: lose })).toContain('opponent');
+      expect(offered({ verb: win })).toEqual(expect.arrayContaining(['opponent', 'objectPredicative']));
+      expect(offered({ verb: concept('EAT', 'verb', { transitivity: 'transitive', complements: ['instrumental', 'locative', 'cause'] }) })).not.toContain('opponent');
+    });
+
     it('offers the topic only where the verb licenses it, and no complement without a verb', () => {
       const think = concept('THINK', 'verb', { complements: ['topic'] });
 

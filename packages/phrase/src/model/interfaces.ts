@@ -181,17 +181,12 @@ export const governsInfinitive = (sel: Pick<PhraseSelection, "verb" | "predicati
  * toggles, possessors — is keyed by this rather than by ComplementType.
  */
 /**
- * The complements this canvas draws a box for. Two kinds are left out. The `instrumental` has a
- * box, but in a period container of its own, reached by a link (see LINKED_COMPLEMENT_TYPES). The
- * `objectPredicative`, the `comitative`, P09-E13's `role` and P09-E22's `opponent` have no builder slot at all: they are plan-only
- * complements the engine renders (see COMPLEMENT_TYPES in @signi/shared), which is what the UI
- * strings built on them need, and all they need. Giving one a box means adding its selection fields
- * below, as every other complement has them.
+ * The complements this canvas draws a box for: every one but the `instrumental`, which has a box,
+ * but in a period container of its own, reached by a link (see LINKED_COMPLEMENT_TYPES). The last
+ * plan-only complements got theirs with P13 (the object complement, the comitative) and P09-E44/E45
+ * (the `role`, the `opponent`); a new one gets its selection fields below, as every other has them.
  */
-export type BoxComplementType = Exclude<
-    ComplementType,
-    "instrumental" | "role" | "opponent"
->;
+export type BoxComplementType = Exclude<ComplementType, "instrumental">;
 
 export interface SlotConfig {
     key: "subject" |
@@ -464,6 +459,23 @@ export interface PhraseSelection {
     comitativeAdjective?: Concept;
     comitativeAdjective2?: Concept;
     comitativeAdjective3?: Concept;
+    // The capacity the subject acts in ("acts **as a friend**", ACT, WORK_LABOUR; P09-E44): a noun
+    // head only, bare in six languages, its gender the user's (nothing infers it from the subject).
+    role?: Concept;
+    roleNumber?: "singular" | "plural";
+    roleGender?: "masc" | "fem" | "neut";
+    roleAdjective?: Concept;
+    roleAdjective2?: Concept;
+    roleAdjective3?: Concept;
+    // The party the act is directed against ("plays **against the dog**", PLAY_GAME, WIN, LOSE_GAME;
+    // P09-E45): a noun or a pronoun ("against him"). Its word is the verb's (`opponent_prep`), so the
+    // box holds only the noun; no negation, which the engine ignores here.
+    opponent?: Concept;
+    opponentNumber?: "singular" | "plural";
+    opponentGender?: "masc" | "fem" | "neut";
+    opponentAdjective?: Concept;
+    opponentAdjective2?: Concept;
+    opponentAdjective3?: Concept;
     // Adverbial of manner ("runs *at the speed of light*", "cuts *with care*"). A full noun
     // phrase, like the motion complements. Its preposition is not a field here: it follows the
     // head noun's semantic manner relation (SPEED→"at", CARE→"with"), resolved in the engine.
@@ -540,6 +552,8 @@ export interface PhraseSelection {
     mannerConjuncts?: PhraseSelection[];
     objectPredicativeConjuncts?: PhraseSelection[];
     comitativeConjuncts?: PhraseSelection[];
+    roleConjuncts?: PhraseSelection[];
+    opponentConjuncts?: PhraseSelection[];
     // The one conjunction joining a block's whole group (default 'and'). Only `and` / `or` join
     // noun phrases — see NOUN_COORD_CONJUNCTIONS.
     subjectConjunction?: CoordConjunction;
@@ -557,6 +571,8 @@ export interface PhraseSelection {
     mannerConjunction?: CoordConjunction;
     objectPredicativeConjunction?: CoordConjunction;
     comitativeConjunction?: CoordConjunction;
+    roleConjunction?: CoordConjunction;
+    opponentConjunction?: CoordConjunction;
     subjectPossessor?: PhraseSelection;
     directObjectPossessor?: PhraseSelection;
     predicativePossessor?: PhraseSelection;
@@ -572,6 +588,8 @@ export interface PhraseSelection {
     mannerPossessor?: PhraseSelection;
     objectPredicativePossessor?: PhraseSelection;
     comitativePossessor?: PhraseSelection;
+    rolePossessor?: PhraseSelection;
+    opponentPossessor?: PhraseSelection;
     // A *pronominal* possessor: instead of a genitive `${which}Possessor` phrase, the noun's
     // possessor corefers with another noun in the same period ("the boy and *his* horse"), stored
     // as that antecedent's `NounAddress`. The engine then renders a possessive pronoun agreeing
@@ -592,6 +610,8 @@ export interface PhraseSelection {
     mannerPossessorRef?: NounAddress;
     objectPredicativePossessorRef?: NounAddress;
     comitativePossessorRef?: NounAddress;
+    rolePossessorRef?: NounAddress;
+    opponentPossessorRef?: NounAddress;
 }
 
 // Extra grammatical settings a picker can commit alongside a concept. The pronoun
@@ -696,8 +716,9 @@ export function slotCategories(
       : { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   // The direct object takes a pronoun on the same footing as the subject ("I see you"), and
   // the causal, purpose and topic complements take one behind their adposition ("because of him",
-  // "for her", "about him" — the engine's TONIC_COMPLEMENTS).
-  if (slotKey === "directObject" || slotKey === "cause" || slotKey === "purpose" || slotKey === "topic" || slotKey === "comitative")
+  // "for her", "about him" — the engine's TONIC_COMPLEMENTS), as do the companion and the opponent
+  // ("with her", "against him").
+  if (slotKey === "directObject" || slotKey === "cause" || slotKey === "purpose" || slotKey === "topic" || slotKey === "comitative" || slotKey === "opponent")
     return { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   if (slotKey === "predicative")
     return { options: [NOUN_CATEGORY, ADJECTIVE_CATEGORY], fallback: "noun" };

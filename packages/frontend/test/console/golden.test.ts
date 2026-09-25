@@ -116,6 +116,20 @@ const GOLDEN: Record<string, Golden> = {
     misuse: { line: '/verb run /objpred cat', says: { code: 'takesNoComplement', args: { verb: 'run', slot: 'objectPredicative' } } },
   },
   with: { line: '/verb eat /with dog', prints: '/verb ( eat ) /with ( dog )', holds: { comitative: 'DOG' } },
+  // P09-E44: the capacity one acts in, licensed (ACT); a verb that does not license it refuses it.
+  role: {
+    line: '/verb act /role friend /fem',
+    prints: '/verb ( act ) /role ( friend /fem )',
+    holds: { role: 'FRIEND', roleGender: 'fem' },
+    misuse: { line: '/verb eat /role friend', says: { code: 'takesNoComplement', args: { verb: 'eat', slot: 'role' } } },
+  },
+  // P09-E45: the party the act is directed against, licensed (PLAY_GAME, WIN); a pronoun too.
+  vs: {
+    line: '/subj cat /verb play /vs dog',
+    prints: '/subj ( cat ) /verb ( play ) /vs ( dog )',
+    holds: { opponent: 'DOG' },
+    misuse: { line: '/verb eat /vs dog', says: { code: 'takesNoComplement', args: { verb: 'eat', slot: 'opponent' } } },
+  },
   factitive: {
     line: '/verb eat /obj food /objpred cat /factitive',
     prints: '/verb ( eat ) /obj ( food ) /objpred ( cat /factitive )',
