@@ -27,3 +27,12 @@ describe('a relative clause whose gap no box holds', () => {
     expect(run('/subj man /rel #2.subj.poss\n/subj cat /verb run').diagnostic?.code).toBe('relativeGapEmpty');
   });
 });
+
+// P13: CAN is "to be able to act" — the adjective the period predicates governs the infinitive.
+describe('an infinitive governed by the predicate adjective', () => {
+  it('is taken by /to where the verb takes none', () => {
+    const plan = workspaceToPlans(ok('/verb seem /pred happy /to ( /verb run )').containers, ok('/verb seem /pred happy /to ( /verb run )').links)[0]!.plan;
+    expect(run('/verb seem /pred big /to ( /verb run )').diagnostic?.code).toBe('takesNoInfinitive');
+    expect(plan.infinitiveComplement).toMatchObject({ verbPhrase: { verb: 'RUN' } });
+  });
+});

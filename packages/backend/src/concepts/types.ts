@@ -19,7 +19,7 @@ export interface ConceptSeed {
   emoji?: string;
   transitivity?: string; // only for verbs
   modal?: boolean; // verb that governs another verb's infinitive rather than heading a clause
-  clauseObject?: 'content' | 'infinitive'; // the clause a verb takes as its object — "says that …", "needs to …" (P09-E12 D9)
+  clauseObject?: 'content' | 'infinitive'; // the clause a verb takes as its object — "says that …", "needs to …" (P09-E12 D9); on an adjective, the infinitive it governs as a predicate — "able to act" (P13)
   slot?: ConceptSlot; // the slot this concept fills where that is not its role's — VERY/TOO, MR, OWN_ADJECTIVE, SOMETHING (see ConceptSlot; C32, C33, C37, C38)
   complements?: string[]; // ComplementType list a verb licenses (motion/locative)
   animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition

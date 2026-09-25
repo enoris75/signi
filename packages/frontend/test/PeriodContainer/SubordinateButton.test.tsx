@@ -77,8 +77,11 @@ describe('SubordinateButton', () => {
 });
 
 describe('subordinateOptions', () => {
-  const kinds = (verb: Parameters<typeof subordinateOptions>[0], hasObject = false) =>
-    subordinateOptions(verb, hasObject).map((o) => o.conjunction ?? o.link);
+  const kinds = (
+    verb: Parameters<typeof subordinateOptions>[0],
+    hasObject = false,
+    predicate?: Parameters<typeof subordinateOptions>[2],
+  ) => subordinateOptions(verb, hasObject, predicate).map((o) => o.conjunction ?? o.link);
   // P09-E27 added until, since and though, localization C41 the similative as. The clause of purpose
   // (P13) goes with any verb, as the adverbial ones do, and sits after the infinitive.
   const ADVERBIAL = ['purpose', 'when', 'while', 'because', 'after', 'before', 'until', 'since', 'though', 'as'];
@@ -89,5 +92,7 @@ describe('subordinateOptions', () => {
     expect(kinds({ clauseObject: 'infinitive' })).toEqual(['infinitive' as SubordinateKind, ...ADVERBIAL]);
     expect(kinds({})).toEqual(ADVERBIAL);
     expect(kinds(undefined)).toEqual([]);
+    // P13: the adjective a period predicates may govern the infinitive instead, "is able to act".
+    expect(kinds({}, false, { clauseObject: 'infinitive' })).toEqual(['infinitive', ...ADVERBIAL]);
   });
 });

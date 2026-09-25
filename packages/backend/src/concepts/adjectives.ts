@@ -869,6 +869,8 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'ABLE',
     role: 'adjective',
+    // It governs the infinitive a predicate says it of — "able to act" (P13).
+    clauseObject: 'infinitive',
     description: 'having the power or the skill to do something',
     definition: dimGloss('ABILITY', 'HIGH'),
     emoji: '🦾',
@@ -885,6 +887,8 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'OBLIGED',
     role: 'adjective',
+    // It governs the infinitive a predicate says it of — "obliged to act", MUST (P13).
+    clauseObject: 'infinitive',
     // Bound by a duty that holds for now, not a trait: es/pt say it with estar ("estar obligado a").
     transient: true,
     description: 'bound to do something by a duty or a rule',
@@ -914,6 +918,8 @@ export const adjectives: ConceptSeed[] = [
     // ("of high ability") wants a scalar noun, and permission is not one.
     id: 'ALLOWED',
     role: 'adjective',
+    // It governs the infinitive a predicate says it of — "allowed to act", MAY (P13).
+    clauseObject: 'infinitive',
     transient: true,
     description: 'having permission to do something',
     emoji: '🆗',

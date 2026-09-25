@@ -7,6 +7,7 @@ import {
   type SubordinatingConjunction,
 } from "@signi/shared";
 import {
+  governsInfinitive,
   conjunctAddress,
   isConditionalLink,
   isCoordinativeLink,
@@ -1213,7 +1214,7 @@ class Run {
         if (op.link === "content" && verb!.clauseObject !== "content")
           fail(op.span, coded("takesNoContentClause", { verb: this.vocab.label(verb!) }));
         if (op.link === "content" && main.selection.directObject) fail(op.span, coded("contentClauseHasObject"));
-        if (op.link === "infinitive" && verb!.clauseObject !== "infinitive")
+        if (op.link === "infinitive" && !governsInfinitive(main.selection))
           fail(op.span, coded("takesNoInfinitive", { verb: this.vocab.label(verb!) }));
         if (!canStartSubordinate(this.links, main, op.link)) fail(op.span, coded("cantTakeSubordinate"));
         if (!canBeSubordinate(this.containers, this.links, op.mainId, clauseId, op.link))

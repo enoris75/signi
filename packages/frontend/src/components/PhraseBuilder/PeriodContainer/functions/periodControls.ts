@@ -77,7 +77,7 @@ export function periodControls(
     subordinate: {
       asSource: subordinate.asSource,
       asTarget: subordinate.asTarget,
-      options: subordinateOptions(selection.verb, Boolean(selection.directObject)),
+      options: subordinateOptions(selection.verb, Boolean(selection.directObject), selection.predicative),
       isPickTarget: subordinate.isPickTarget,
       pickActive: binding.pickActive,
       canStart: subordinate.canStart,

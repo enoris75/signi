@@ -10145,6 +10145,8 @@ export const transitiveVerbs: ConceptSeed[] = [
   {
     id: 'LET',
     role: 'verb',
+    // It governs what it lets its object do — ALLOW is "to let a person act" (P13).
+    clauseObject: 'infinitive',
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to allow someone to act',

@@ -128,16 +128,25 @@ export const subordinateLabelKey = (s: {
 export function subordinateOptions(
   verb: { clauseObject?: ClauseObject } | undefined,
   hasObject: boolean,
+  predicate?: { clauseObject?: ClauseObject },
 ): SubordinateOption[] {
   if (!verb) return [];
   return SUBORDINATE_OPTIONS.filter((o) =>
     o.link === "content"
       ? verb.clauseObject === "content" && !hasObject
       : o.link === "infinitive"
-        ? verb.clauseObject === "infinitive"
+        ? verb.clauseObject === "infinitive" || predicate?.clauseObject === "infinitive"
         : true,
   );
 }
+
+/**
+ * Whether a period governs an infinitive: its verb does ("needs to act"), or — P13 — the adjective it
+ * predicates does, "is **able to** act", "is **obliged to** act" (CAN, MUST): the adjective, not the
+ * copula, takes the infinitive, with its own linker (it "capace **di**", "obbligato **a**").
+ */
+export const governsInfinitive = (sel: Pick<PhraseSelection, "verb" | "predicative">): boolean =>
+  sel.verb?.clauseObject === "infinitive" || sel.predicative?.clauseObject === "infinitive";
 
 
 /**

@@ -83,7 +83,8 @@ export const ADJECTIVES = [
   c('OLD', 'adjective', 'old', 'vecchio'),
   c('BIG', 'adjective', 'big', 'grande'),
   c('SEMANTIC', 'adjective', 'semantic', 'semantico'),
-  c('HAPPY', 'adjective', 'happy', 'felice'),
+  // It governs an infinitive as a predicate, "is happy to run" (P13).
+  c('HAPPY', 'adjective', 'happy', 'felice', { clauseObject: 'infinitive' }),
   c('LIGHT_WEIGHT', 'adjective', 'light', 'leggero'),
 ];
 

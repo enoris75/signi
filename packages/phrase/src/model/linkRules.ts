@@ -1,5 +1,6 @@
 import type { AbstractionLevel, CoordConjunction, SubordinatingConjunction } from "@signi/shared";
 import {
+  governsInfinitive,
   type RelativeGap,
   isConditionalLink,
   isCoordinativeLink,
@@ -283,7 +284,7 @@ export function canStartSubordinate(links: PhraseLink[], c: PhraseContainer, kin
   const verb = c.selection.verb;
   if (!verb || links.some((l) => l.target.containerId === c.id)) return false;
   if (kind === "content") return verb.clauseObject === "content" && !c.selection.directObject;
-  if (kind === "infinitive") return verb.clauseObject === "infinitive";
+  if (kind === "infinitive") return governsInfinitive(c.selection);
   return true;
 }
 

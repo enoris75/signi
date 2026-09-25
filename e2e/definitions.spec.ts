@@ -175,3 +175,13 @@ test.describe('a clause of purpose', () => {
     await app.expectSentences({ en: 'the man reads the book to learn.' });
   });
 });
+
+test.describe('an infinitive the predicate adjective governs', () => {
+  test('says CAN, "to be able to act", with each language’s own linker', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/inf /verb BE /pred ABLE /to ( /verb ACT )');
+    await run(page);
+    await app.expectSentences({ en: 'to be able to act.', it: 'essere capace di agire.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/to #2');
+  });
+});

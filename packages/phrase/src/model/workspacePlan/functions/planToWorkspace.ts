@@ -16,7 +16,7 @@ import type {
 } from "@signi/shared";
 import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES } from "@signi/shared";
 import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection, RelativeGap } from "../../interfaces.ts";
-import { conjunctAddress, possessorAddress, standardAddress } from "../../interfaces.ts";
+import { conjunctAddress, governsInfinitive, possessorAddress, standardAddress } from "../../interfaces.ts";
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
 
 /**
@@ -138,7 +138,7 @@ class Builder {
     if (plan.infinitiveComplement) {
       // Only a verb that governs an infinitive takes one on the canvas; "to be able to act" is
       // governed by the predicate adjective instead.
-      if (sel.verb?.clauseObject === "infinitive") this.infinitive(c, plan.infinitiveComplement);
+      if (governsInfinitive(sel)) this.infinitive(c, plan.infinitiveComplement);
       else this.unsupported.add("PhrasePlan.infinitiveComplement governed by the predicate");
     }
     return c;
