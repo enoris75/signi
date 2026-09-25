@@ -78,7 +78,7 @@ export const VERBS = [
   // The verbs that take a clause as their object (P09-E12 D9): a that-clause, an infinitive.
   verb('SAY', 'say', 'dire', { clauseObject: 'content', clauseForce: 'either' }),
   // Its that-clause is a question, never a statement (P09-E55), as the API serves it.
-  verb('ASK', 'ask', 'chiedere', { transitivity: 'ditransitive', clauseObject: 'content', clauseForce: 'interrogative' }),
+  verb('ASK', 'ask', 'chiedere', { transitivity: 'ditransitive', clauseObject: 'content', clauseForce: 'interrogative', prepositionalObject: true }),
   // Its that-clause is a statement only (P09-E55): no clauseForce.
   verb('BELIEVE', 'believe', 'credere', { clauseObject: 'content' }),
   // Its object takes a preposition in it, fr and pt ("ha bisogno del cane"), as the API serves (P09-E54).
