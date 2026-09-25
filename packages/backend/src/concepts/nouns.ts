@@ -547,6 +547,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '➖',
     isA: 'SHAPE',
     synonym: 'stroke',
+    glosses: { fr: 'trait', es: 'trazo', pt: 'traço' },
     forms: {
       en: { base: 'line', plural: 'lines', count: 'singular' },
       it: { base: 'linea', plural: 'linee', gender: 'fem', count: 'singular' },
@@ -799,6 +800,7 @@ export const nouns: ConceptSeed[] = [
     id: 'DESTINATION',
     role: 'noun',
     description: 'the place where a motion ends',
+    glosses: { de: 'einer Bewegung' },
     emoji: '🏁',
     isA: 'PLACE',
     forms: {
@@ -937,6 +939,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HOME',
     role: 'noun',
     description: 'the place where one lives',
+    glosses: { it: 'dove si abita', ja: '住まい' },
     definition: `
       /subj ( PLACE /a /rel #2.loc )
       /subj ( one ) /verb ( LIVE ) /loc ( PLACE )
@@ -961,6 +964,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ROOM',
     role: 'noun',
     description: 'a part of a building enclosed by walls',
+    glosses: { fr: "d'un bâtiment" },
     definition: '/subj ( PART /a /poss [ BUILDING /a ] /whole )',
     emoji: '🛋️',
     isA: 'PLACE',
@@ -1072,6 +1076,7 @@ export const nouns: ConceptSeed[] = [
     animate: true,
     human: true,
     synonym: 'informal',
+    glosses: { de: 'umgangssprachlich' },
     isA: 'CHILD',
     forms: {
       en: { base: 'kid', plural: 'kids', count: 'singular' },
@@ -1193,6 +1198,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BOY',
     role: 'noun',
     description: 'a young male human',
+    glosses: { es: 'varón' },
     definition: '/subj ( PERSON /adj YOUNG /adj MALE /a )',
     emoji: '👦',
     animate: true,
@@ -1268,6 +1274,7 @@ export const nouns: ConceptSeed[] = [
     human: true,
     sex: 'masc',
     synonym: 'informal',
+    glosses: { it: 'informale', es: 'informal' },
     isA: 'MAN',
     forms: {
       en: { base: 'guy', plural: 'guys', count: 'singular' },
@@ -1343,6 +1350,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COW',
     role: 'noun',
     description: 'an adult female bovine kept for milk or meat',
+    glosses: { ja: '雌牛' },
     definition: '/subj ( MAMMAL /adj BIG /a )',
     emoji: '🐄',
     animate: true,
@@ -1618,6 +1626,7 @@ export const nouns: ConceptSeed[] = [
     definition: '/subj ( STICK /adj SHARP /a )',
     emoji: '🏹',
     synonym: 'projectile',
+    glosses: { it: "dell'arco", fr: "de l'arc", es: 'del arco' },
     isA: 'STICK',
     forms: {
       en: { base: 'arrow', plural: 'arrows', count: 'singular' },
@@ -1776,6 +1785,7 @@ export const nouns: ConceptSeed[] = [
     animate: true,
     human: true,
     synonym: 'family member',
+    glosses: { fr: 'de la famille' },
     isA: 'PERSON',
     forms: {
       en: { base: 'relative', plural: 'relatives', count: 'singular' },
@@ -1846,6 +1856,7 @@ export const nouns: ConceptSeed[] = [
     animate: true,
     human: true,
     synonym: 'offspring',
+    glosses: { it: 'figlio o figlia', fr: 'fils ou fille', de: 'Sohn oder Tochter', es: 'hijo o hija', ja: '息子や娘', pt: 'filho ou filha' },
     isA: 'RELATIVE',
     forms: {
       en: { base: 'child', plural: 'children', count: 'singular' },
@@ -1883,6 +1894,7 @@ export const nouns: ConceptSeed[] = [
     id: 'DAUGHTER',
     role: 'noun',
     description: 'a female child of a parent',
+    glosses: { fr: "d'un parent" },
     emoji: '👧',
     animate: true,
     human: true,
@@ -1906,6 +1918,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SIBLING',
     role: 'noun',
     description: 'a person who has the same parents as another',
+    glosses: { it: 'fratello o sorella', fr: 'frère ou sœur', es: 'hermano o hermana', ja: '兄弟姉妹', pt: 'irmão ou irmã' },
     definition: `
       /subj ( PERSON /a /rel #2.subj )
       /subj ( PERSON ) /verb ( HAVE ) /obj ( PARENT /adj SAME /pl )
@@ -2058,6 +2071,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDPARENT',
     role: 'noun',
     description: 'a parent of a parent',
+    glosses: { it: 'nonno o nonna', es: 'abuelo o abuela', pt: 'avô ou avó' },
     definition: '/subj ( PARENT /a /poss [ PARENT /a ] )',
     emoji: '👴',
     animate: true,
@@ -2121,6 +2135,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDCHILD',
     role: 'noun',
     description: 'a child of a child',
+    glosses: { it: 'dei nonni', es: 'nieto o nieta', pt: 'neto ou neta' },
     definition: '/subj ( CHILD_OFFSPRING /a /poss [ CHILD_OFFSPRING /a ] )',
     emoji: '🧒',
     animate: true,
@@ -2143,6 +2158,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDSON',
     role: 'noun',
     description: 'a male grandchild',
+    glosses: { it: 'maschio, dei nonni' },
     definition: '/subj ( GRANDCHILD /adj MALE /a )',
     emoji: '👦',
     animate: true,
@@ -2163,6 +2179,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GRANDDAUGHTER',
     role: 'noun',
     description: 'a female grandchild',
+    glosses: { it: 'femmina, dei nonni' },
     definition: '/subj ( GRANDCHILD /adj FEMALE /fem /a )',
     emoji: '👧',
     animate: true,
@@ -2249,6 +2266,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NEPHEW',
     role: 'noun',
     description: 'a son of a sibling',
+    glosses: { it: 'maschio, degli zii' },
     definition: '/subj ( SON /a /poss [ SIBLING /a ] )',
     emoji: '👦',
     animate: true,
@@ -2269,6 +2287,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NIECE',
     role: 'noun',
     description: 'a daughter of a sibling',
+    glosses: { it: 'femmina, degli zii' },
     definition: '/subj ( DAUGHTER /a /poss [ SIBLING /a ] )',
     emoji: '👧',
     animate: true,
@@ -2292,6 +2311,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MOTHER_IN_LAW',
     role: 'noun',
     description: 'a mother of a spouse',
+    glosses: { fr: 'du conjoint' },
     definition: '/subj ( MOTHER /poss [ SPOUSE /a ] )',
     emoji: '👵',
     animate: true,
@@ -2312,6 +2332,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FATHER_IN_LAW',
     role: 'noun',
     description: 'a father of a spouse',
+    glosses: { fr: 'du conjoint' },
     definition: '/subj ( FATHER /poss [ SPOUSE /a ] )',
     emoji: '👴',
     animate: true,
@@ -2424,6 +2445,7 @@ export const nouns: ConceptSeed[] = [
     id: 'STEPFATHER',
     role: 'noun',
     description: "a husband of one's mother who is not one's father",
+    glosses: { fr: 'mari de la mère' },
     definition: `
       /subj ( HUSBAND /a /poss [ MOTHER /a ] /rel #2.subj )
       /subj ( HUSBAND ) /verb ( BE /not ) /pred ( FATHER )
@@ -2447,6 +2469,7 @@ export const nouns: ConceptSeed[] = [
     id: 'STEPMOTHER',
     role: 'noun',
     description: "a wife of one's father who is not one's mother",
+    glosses: { fr: 'épouse du père' },
     definition: `
       /subj ( WIFE /a /poss [ FATHER /a ] /rel #2.subj )
       /subj ( WIFE ) /verb ( BE /not ) /pred ( MOTHER )
@@ -2535,6 +2558,7 @@ export const nouns: ConceptSeed[] = [
     animate: true,
     human: true,
     synonym: 'life partner',
+    glosses: { it: 'di vita', fr: 'de vie', pt: 'de vida' },
     isA: 'PERSON',
     forms: {
       en: { base: 'partner', plural: 'partners', count: 'singular' },
@@ -2561,6 +2585,7 @@ export const nouns: ConceptSeed[] = [
     human: true,
     sex: 'masc',
     synonym: 'romantic partner',
+    glosses: { it: 'fidanzato', de: 'fester Freund' },
     isA: 'PARTNER',
     forms: {
       en: { base: 'boyfriend', plural: 'boyfriends', count: 'singular' },
@@ -2582,6 +2607,7 @@ export const nouns: ConceptSeed[] = [
     human: true,
     sex: 'fem',
     synonym: 'romantic partner',
+    glosses: { it: 'fidanzata' },
     isA: 'PARTNER',
     forms: {
       en: { base: 'girlfriend', plural: 'girlfriends', count: 'singular' },
@@ -2671,6 +2697,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COIN',
     role: 'noun',
     description: 'a small round piece of metal used as money',
+    glosses: { fr: 'de monnaie' },
     definition: '/subj ( OBJECT_THING /adj SMALL /adj ROUND /a )',
     emoji: '🪙',
     isA: 'OBJECT_THING',
@@ -2772,6 +2799,7 @@ export const nouns: ConceptSeed[] = [
     human: true,
     sex: 'masc',
     synonym: 'youth',
+    glosses: { it: 'uomo', es: 'hombre', pt: 'homem' },
     isA: 'PERSON',
     forms: {
       en: { base: 'young man', plural: 'young men', count: 'singular' },
@@ -2793,6 +2821,7 @@ export const nouns: ConceptSeed[] = [
     human: true,
     sex: 'fem',
     synonym: 'youth',
+    glosses: { it: 'donna', es: 'mujer', pt: 'mulher' },
     isA: 'PERSON',
     forms: {
       en: { base: 'young woman', plural: 'young women', count: 'singular' },
@@ -2909,6 +2938,8 @@ export const nouns: ConceptSeed[] = [
     id: 'SLOT_COMPUTING',
     role: 'noun',
     description: 'a reserved position in memory or a schedule (informatics)',
+    synonym: 'computing',
+    glosses: { ja: 'コンピュータ' },
     emoji: '🧩',
     forms: {
       en: { base: 'slot', plural: 'slots', count: 'singular' },
@@ -3424,6 +3455,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COUNTRY',
     role: 'noun',
     description: 'a nation with its own territory and government',
+    glosses: { de: 'Staat' },
     definition: `
       /subj ( LAND /zero /rel #2.obj )
       /subj ( NATION /a ) /verb ( GOVERN_STATE ) /obj ( LAND )
@@ -3893,6 +3925,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HOUR',
     role: 'noun',
     description: 'a period of sixty minutes',
+    glosses: { ja: '六十分' },
     emoji: '🕐',
     forms: {
       en: { base: 'hour', plural: 'hours', count: 'singular' },
@@ -4156,6 +4189,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🥅',
     synonym: 'grammar',
+    glosses: { es: 'directo', pt: 'em gramática' },
     forms: {
       en: { base: 'object', plural: 'objects', count: 'singular' },
       it: { base: 'complemento oggetto', plural: 'complementi oggetto', gender: 'masc', count: 'singular' },
@@ -4601,6 +4635,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NOUN',
     role: 'noun',
     description: 'a word naming a person, place or thing (grammar)',
+    glosses: { fr: 'en grammaire' },
     definition: `
       /subj ( WORD /a /rel #2.subj )
       /subj ( WORD ) /verb ( NAME ) /obj ( OBJECT_THING /pl /zero )
@@ -4891,6 +4926,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CONJUNCT',
     role: 'noun',
     description: 'one of the phrases a coordination joins (grammar)',
+    glosses: { fr: 'en grammaire' },
     // "a phrase that is linked by a conjunction" (localization B38): the passive, not the active "a
     // phrase that a conjunction links". German Phrase and Konjunktion are both feminine, so in the
     // active "eine Phrase, die eine Konjunktion verbindet" neither the relative pronoun nor the article
@@ -5076,6 +5112,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '📝',
     synonym: 'sentence',
+    glosses: { it: 'in grammatica', fr: 'en grammaire', es: 'en gramática', pt: 'em gramática' },
     forms: {
       en: { base: 'period', plural: 'periods', count: 'singular' },
       it: { base: 'periodo', plural: 'periodi', gender: 'masc', count: 'singular' },
@@ -5092,6 +5129,7 @@ export const nouns: ConceptSeed[] = [
     description: 'the full stop that ends a sentence (grammar)',
     emoji: '⏹️',
     synonym: 'full stop',
+    glosses: { it: 'punteggiatura', fr: 'ponctuation', de: 'Satzzeichen', es: 'puntuación', pt: 'pontuação' },
     forms: {
       en: { base: 'period', plural: 'periods', count: 'singular' },
       it: { base: 'punto', plural: 'punti', gender: 'masc', count: 'singular' },
@@ -5222,6 +5260,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🗣️',
     synonym: 'grammar',
+    glosses: { it: 'in grammatica', fr: 'en grammaire', de: 'in der Grammatik', es: 'en gramática', pt: 'em gramática' },
     forms: {
       en: { base: 'person', plural: 'persons', count: 'singular' },
       it: { base: 'persona', plural: 'persone', gender: 'fem', count: 'singular' },
@@ -5254,6 +5293,8 @@ export const nouns: ConceptSeed[] = [
     id: 'NUMBER_LABEL',
     role: 'noun',
     description: 'a number that marks one item among others',
+    synonym: 'label',
+    glosses: { it: 'etichetta', es: 'etiqueta', pt: 'etiqueta' },
     emoji: '#️⃣',
     forms: {
       en: { base: 'number', plural: 'numbers', count: 'singular' },
@@ -5361,6 +5402,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🔢',
     synonym: 'grammar',
+    glosses: { it: 'in grammatica', fr: 'en grammaire', es: 'en gramática', ja: '文法', pt: 'em gramática' },
     isA: 'CATEGORY',
     forms: {
       en: { base: 'number', plural: 'numbers', count: 'singular' },
@@ -5426,6 +5468,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🗂️',
     synonym: 'grammar',
+    glosses: { it: 'in grammatica', fr: 'en grammaire', es: 'en gramática', pt: 'em gramática' },
     isA: 'CATEGORY',
     forms: {
       en: { base: 'case', plural: 'cases', count: 'singular' },
@@ -5511,6 +5554,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TENSE',
     role: 'noun',
     description: 'the form of a verb that places an event in time (grammar)',
+    glosses: { it: 'in grammatica', fr: 'en grammaire', es: 'en gramática', pt: 'em gramática' },
     definition: `
       /subj ( FEATURE /a /rel #2.subj )
       /subj ( FEATURE ) /verb ( INDICATE ) /obj ( TIME /pl /zero )
@@ -5689,6 +5733,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🎭',
     synonym: 'grammar',
+    glosses: { it: 'in grammatica' },
     forms: {
       en: { base: 'mood', plural: 'moods', count: 'singular' },
       it: { base: 'modo', plural: 'modi', gender: 'masc', count: 'singular' },
@@ -5839,6 +5884,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ORDER',
     role: 'noun',
     description: 'a command telling someone to act',
+    glosses: { de: 'Anordnung', ja: '指図' },
     emoji: '📢',
     isA: 'COMMAND',
     forms: {
@@ -5984,6 +6030,7 @@ export const nouns: ConceptSeed[] = [
     definition: '/subj ( PART /a /poss [ KEYBOARD /a ] /whole )',
     emoji: '🔑',
     synonym: 'keyboard',
+    glosses: { de: 'der Tastatur' },
     forms: {
       en: { base: 'key', plural: 'keys', count: 'singular' },
       it: { base: 'tasto', plural: 'tasti', gender: 'masc', count: 'singular' },
@@ -6013,6 +6060,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '⬅️',
     synonym: 'key',
+    glosses: { it: 'tasto', fr: 'touche', es: 'tecla' },
     forms: {
       en: { base: 'arrow key', plural: 'arrow keys', count: 'singular' },
       it: { base: 'freccia', plural: 'frecce', gender: 'fem', count: 'singular' },
@@ -6030,6 +6078,7 @@ export const nouns: ConceptSeed[] = [
     id: 'REGION',
     role: 'noun',
     description: 'a part of a page or a screen',
+    glosses: { fr: "de l'écran", es: 'de la pantalla', pt: 'da tela' },
     definition: '/subj ( PART /a /poss [ SCREEN /a ] /whole )',
     emoji: '🗺️',
     forms: {
@@ -6109,6 +6158,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ROW',
     role: 'noun',
     description: 'a line of items across a list or a grid',
+    glosses: { it: 'di un elenco', fr: "d'une liste", de: 'einer Liste', ja: '一覧の', pt: 'de uma lista' },
     definition: '/subj ( PART /a /poss [ LIST /a ] /whole )',
     emoji: '🟰',
     forms: {
@@ -6172,6 +6222,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TARGET',
     role: 'noun',
     description: 'the thing a link points to',
+    glosses: { it: 'di un collegamento', de: 'eines Links', es: 'de un enlace' },
     definition: `
       /subj ( OBJECT_THING /a /rel #2.obj )
       /subj ( one ) /verb ( INDICATE ) /obj ( OBJECT_THING )
@@ -6467,6 +6518,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LINE',
     role: 'noun',
     description: 'a row of text typed as one command',
+    glosses: { it: 'di testo', fr: 'de texte', de: 'Textzeile', es: 'de texto', ja: 'テキストの', pt: 'de texto' },
     definition: `
       /subj ( TEXT /zero /rel #2.obj )
       /subj ( one ) /verb ( TYPE ) /obj ( TEXT )
@@ -6532,6 +6584,7 @@ export const nouns: ConceptSeed[] = [
     id: 'USAGE',
     role: 'noun',
     description: 'how a thing is written or used',
+    glosses: { it: 'di una parola', de: 'eines Wortes', es: 'de una palabra', pt: 'de uma palavra' },
     definition: `
       /subj ( WAY /a /rel #2.obj )
       /subj ( one ) /verb ( USE ) /obj ( WAY )
@@ -6837,6 +6890,7 @@ export const nouns: ConceptSeed[] = [
     id: 'DOMAIN',
     role: 'noun',
     description: 'the sphere or class a thing belongs to',
+    glosses: { de: 'Bereich' },
     emoji: '🧭',
     forms: {
       en: { base: 'domain', plural: 'domains', count: 'singular' },
@@ -7105,6 +7159,7 @@ export const nouns: ConceptSeed[] = [
     definition: '/subj ( LIST /a /poss [ INSTRUCTION /pl /zero ] /parts )',
     emoji: '💾',
     synonym: 'software',
+    glosses: { it: 'software', es: 'software', pt: 'software' },
     forms: {
       en: { base: 'program', plural: 'programs', count: 'singular' },
       it: { base: 'programma', plural: 'programmi', gender: 'masc', count: 'singular' },
@@ -7128,6 +7183,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '📺',
     synonym: 'show',
+    glosses: { it: 'trasmissione', es: 'emisión', pt: 'emissão' },
     forms: {
       en: { base: 'program', plural: 'programs', count: 'singular' },
       it: { base: 'programma', plural: 'programmi', gender: 'masc', count: 'singular' },
@@ -7297,6 +7353,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🗯️',
     synonym: 'matter',
+    glosses: { fr: 'sujet', de: 'Angelegenheit', ja: '論点' },
     forms: {
       en: { base: 'issue', plural: 'issues', count: 'singular' },
       it: { base: 'questione', plural: 'questioni', gender: 'fem', count: 'singular' },
@@ -7601,6 +7658,7 @@ export const nouns: ConceptSeed[] = [
     id: 'STORY',
     role: 'noun',
     description: 'a telling of events, true or not',
+    glosses: { it: 'racconto', fr: 'récit', de: 'Erzählung', es: 'relato', pt: 'relato' },
     emoji: '📖',
     forms: {
       en: { base: 'story', plural: 'stories', count: 'singular' },
@@ -7625,6 +7683,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '🏛️',
     countable: false,
     synonym: 'the past',
+    glosses: { it: 'il passato', fr: 'le passé', de: 'Vergangenheit', es: 'el pasado', pt: 'o passado' },
     forms: {
       en: { base: 'history', count: 'singular' },
       it: { base: 'storia', gender: 'fem', count: 'singular' },
@@ -7885,6 +7944,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '🏞️',
     countable: false,
     synonym: 'territory',
+    glosses: { de: 'Boden' },
     forms: {
       en: { base: 'land', count: 'singular' },
       it: { base: 'terra', gender: 'fem', count: 'singular' },
@@ -8320,6 +8380,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SCREEN',
     role: 'noun',
     description: 'the lit surface a program shows itself on',
+    glosses: { pt: 'do computador' },
     definition: `
       /subj ( OBJECT_THING /a /rel #2.subj )
       /subj ( OBJECT_THING ) /verb ( SHOW ) /obj ( PICTURE /pl /zero )

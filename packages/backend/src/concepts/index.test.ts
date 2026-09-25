@@ -260,19 +260,20 @@ describe('the Swiss German column (P10-E4)', () => {
 
 // A picker lists concepts by their word, so two verbs that share one in a language look identical
 // there unless a gloss beside the word tells them apart (BEGIN / START, both *iniziare*): English's
-// `synonym`, every other language's `glosses`. Nouns are not glossed yet.
+// `synonym`, every other language's `glosses`. The word compared is the one the picker shows: a
+// noun's `citation` where it has one (de *junge Frau*), else its `base`.
 describe('picker glosses', () => {
   const READY = ['en', 'it', 'fr', 'de', 'es', 'ja', 'pt'] as const;
   const sensed = new Set(concepts.filter((c) => c.senseOf).map((c) => c.id));
   const glossOf = (c: (typeof concepts)[number], lang: (typeof READY)[number]) =>
     lang === 'en' ? c.synonym : c.glosses?.[lang];
 
-  const GLOSSED_ROLES = ['verb', 'adjective', 'adverb'];
+  const GLOSSED_ROLES = ['verb', 'noun', 'adjective', 'adverb'];
 
   test.each(READY)('%s: of the words a picker lists twice, at most one goes unglossed', (lang) => {
     const byWord = new Map<string, typeof concepts>();
     for (const c of concepts) {
-      const word = c.forms[lang]?.['base'];
+      const word = c.forms[lang]?.['citation'] ?? c.forms[lang]?.['base'];
       if (!GLOSSED_ROLES.includes(c.role) || !word || sensed.has(c.id) || c.slot) continue;
       byWord.set(`${c.role}:${word}`, [...(byWord.get(`${c.role}:${word}`) ?? []), c]);
     }
