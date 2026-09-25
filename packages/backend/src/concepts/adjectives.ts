@@ -117,6 +117,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'GREAT',
     role: 'adjective',
     description: 'large in amount, degree, or extent',
+    glosses: { it: 'in quantità', fr: 'en quantité', de: 'an Menge', es: 'en cantidad', ja: '程度が', pt: 'em quantidade' },
     emoji: '📈',
     forms: {
       en: { base: 'great' },
@@ -154,6 +155,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // distance is a location, and Iberian Romance locates with estar (A47)
     description: 'a short distance away',
+    glosses: { pt: 'perto' },
     // The distance scale's two poles, as TEMPERATURE's are COLD and HOT: "at small distance" /
     // "at great distance". SMALL, not LOW, is the low pole here — "at low distance", it "a distanza
     // bassa" say a height — and it is not circular, as it was for SMALL's own gloss (A28).
@@ -268,6 +270,7 @@ export const adjectives: ConceptSeed[] = [
       /subj ( BEING ) /verb ( HAVE /not ) /obj ( PROBLEM /pl /zero )
     `,
     synonym: 'all right',
+    glosses: { de: 'in Ordnung' },
     emoji: '👌',
     forms: {
       en: { base: 'okay' },
@@ -589,6 +592,7 @@ export const adjectives: ConceptSeed[] = [
     definition: '/subj ( TEMPERATURE /adj LOW /zero /gloss dimension )',
     emoji: '❄️',
     synonym: 'climate',
+    glosses: { it: 'del clima', fr: 'du climat', de: 'vom Klima', es: 'del clima', pt: 'do clima' },
     forms: {
       en: { base: 'cold' },
       it: { base: 'freddo' },
@@ -650,6 +654,7 @@ export const adjectives: ConceptSeed[] = [
     definition: '/subj ( TEMPERATURE /adj HIGH /zero /gloss dimension )',
     emoji: '☀️',
     synonym: 'climate',
+    glosses: { it: 'del clima', fr: 'du climat', de: 'vom Klima', pt: 'do clima' },
     forms: {
       en: { base: 'hot' },
       it: { base: 'caldo' },
@@ -1043,6 +1048,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'LOUD',
     role: 'adjective',
     description: 'producing much sound',
+    glosses: { it: 'di suono', fr: 'de son', es: 'de sonido', ja: '音が', pt: 'de som' },
     definition: '/subj ( SOUND /adj GREAT /zero /gloss dimension )',
     emoji: '📣',
     forms: {
@@ -1547,6 +1553,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'PLURAL',
     role: 'adjective',
     description: 'referring to more than one (grammar)',
+    glosses: { ja: '文法' },
     // "One and others", not MANIFOLD: Japanese spells MANIFOLD 複数の, PLURAL's own word.
     definition: `
       /subj ( WORD /a /rel #2.subj /headless )
@@ -1567,6 +1574,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'NEUTER',
     role: 'adjective',
     description: 'of the gender that is neither masculine nor feminine (grammar)',
+    glosses: { fr: 'en grammaire', pt: 'em gramática' },
     definition: `
       /subj ( WORD /a /rel #2.subj /headless )
       /subj ( WORD ) /verb ( BE /not ) /pred ( MALE /or FEMALE )
@@ -1872,6 +1880,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'MULTIPLE',
     role: 'adjective',
     description: 'naming more than one or two, but not many (grammar)',
+    glosses: { fr: 'en grammaire', de: 'in der Grammatik', es: 'en gramática', ja: '少数', pt: 'em gramática' },
     definition: `
       /subj ( DETERMINER /a /rel #2.subj /headless )
       /subj ( DETERMINER ) /verb ( INDICATE ) /obj ( OBJECT_THING /several )
@@ -2073,6 +2082,7 @@ export const adjectives: ConceptSeed[] = [
     `,
     emoji: '🏁',
     synonym: 'final',
+    glosses: { fr: 'final', de: 'abschließend' },
     forms: {
       en: { base: 'last' },
       it: { base: 'ultimo' },
@@ -2093,6 +2103,7 @@ export const adjectives: ConceptSeed[] = [
     `,
     emoji: '⏪',
     synonym: 'most recent',
+    glosses: { fr: 'précédent', de: 'vorig', es: 'anterior', pt: 'anterior' },
     forms: {
       en: { base: 'last' },
       it: { base: 'scorso' },
@@ -2116,6 +2127,7 @@ export const adjectives: ConceptSeed[] = [
     `,
     emoji: '🔜',
     synonym: 'coming',
+    glosses: { de: 'kommend', pt: 'que vem' },
     forms: {
       en: { base: 'next' },
       it: { base: 'prossimo' },
@@ -2185,6 +2197,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'certain; having no doubt',
+    glosses: { pt: 'seguro' },
     definition: `
       /subj ( PERSON /a /rel #2.subj /headless )
       /subj ( PERSON ) /verb ( KNOW /adv WELL )
@@ -2283,6 +2296,7 @@ export const adjectives: ConceptSeed[] = [
     `,
     emoji: '🎯',
     synonym: 'correct',
+    glosses: { pt: 'correto' },
     // Evaluative: the clause it is said of goes into the Romance subjunctive — "è giusto che si
     // agisca" (`content_clause_mood`, P09-E4).
     forms: {
@@ -2733,6 +2747,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     synonym: 'grammar',
     description: 'presenting the agent of an event as the subject (grammar)',
+    glosses: { it: 'in grammatica', fr: 'en grammaire', de: 'in der Grammatik', es: 'en gramática', pt: 'em gramática' },
     // The voices are said of a CLAUSE (VOICE: which participant a clause makes its subject).
     definition: `
       /subj ( CLAUSE /a /rel #2.subj /headless )

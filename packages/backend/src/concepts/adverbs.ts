@@ -69,6 +69,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'WELL',
     role: 'adverb',
     description: 'in a good or satisfactory way',
+    glosses: { ja: '上手に' },
     definition: '/subj ( WAY /adj GOOD /a /gloss manner )',
     emoji: '✅',
     forms: {
@@ -467,6 +468,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'ALREADY',
     role: 'adverb',
     description: 'by this time; before now',
+    glosses: { ja: '既に' },
     definition: '/subj ( TIME /adj PREVIOUS /a /gloss manner )',
     emoji: '✔️',
     // Under a negation it is *not yet* (P09-E28): "has not eaten yet" at the end in English, "noch
@@ -573,6 +575,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'OFTEN',
     role: 'adverb',
     description: 'many times; in many cases',
+    glosses: { ja: 'しばしば' },
     definition: '/subj ( CASE_INSTANCE /pl /many /gloss place )',
     emoji: '🔄',
     forms: {
@@ -612,6 +615,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'NO_LONGER',
     role: 'adverb',
     description: 'not any more; not now, as it was before',
+    glosses: { ja: 'もはや' },
     emoji: '🔚',
     forms: {
       en: { base: 'no longer', subtype: 'frequency', polarity: 'negative' },
