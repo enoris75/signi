@@ -1090,3 +1090,59 @@ describe('known bugs: English drops "just" from a postposed equative with VERY (
     }), 'en')).toBe('the cat is just as big as the dog.');
   });
 });
+
+// A371. An attributive superlative's set (P09-E19, E51 D4) is dropped: `adjectiveStandards` on `most`
+// or `least` reaches no language, so "the man sees the biggest house in the city" loses its set.
+// The predicate superlative says it (the regression test below), which is where the Wants come from.
+describe('known bugs: an attributive superlative drops its set (A371)', () => {
+  const sees = (degree: Degree) =>
+    sayAll(clause(np('MAN'), 'SEE', { directObject: np('HOUSE', { adjectives: ['BIG'], adjectiveDegrees: [degree], adjectiveStandards: [np('CITY')] }) }));
+
+  test.fails('the object "the biggest house in the city"', () => {
+    expect(sees('most')).toEqual({
+      en: 'the man sees the biggest house in the city.', // now: "the man sees the biggest house."
+      it: "l'uomo vede la casa più grande della città.",
+      fr: "l'homme voit la maison la plus grande de la ville.",
+      de: 'der Mann sieht das größte Haus der Stadt.',
+      es: 'el hombre ve la casa más grande de la ciudad.',
+      ja: '男は都市の中で最も大きい家を見ます。',
+      pt: 'o homem vê a maior casa da cidade.',
+    });
+  });
+
+  test('the predicate superlative says its set', () => {
+    expect(sayAll(clause(np('HOUSE'), 'BE', { complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headStandard: np('CITY') }) } } }))).toEqual({
+      en: 'the house is the biggest in the city.',
+      it: 'la casa è la più grande della città.',
+      fr: 'la maison est la plus grande de la ville.',
+      de: 'das Haus ist das größte der Stadt.',
+      es: 'la casa es la más grande de la ciudad.',
+      ja: '家は都市の中で最も大きいです。',
+      pt: 'a casa é a maior da cidade.',
+    });
+  });
+});
+
+// A372. French, Spanish and Portuguese write a noun's possessor after its attributive standard (P09-E18,
+// E50), where it reads as the standard's: "un chat plus grand que le chien de la femme" is a cat bigger
+// than the woman's dog. Italian puts the possessor first, which is the order the three want.
+describe('known bugs: fr / es / pt write a possessor after an attributive standard (A372)', () => {
+  const runs = () =>
+    sayAll(clause(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['more'], adjectiveStandards: [DOG], possessor: np('WOMAN') }), 'RUN'));
+
+  test.fails('the possessor ahead of the standard', () => {
+    expect(runs()).toMatchObject({
+      fr: 'un chat de la femme plus grand que le chien court.', // now: "… plus grand que le chien de la femme court."
+      es: 'un gato de la mujer más grande que el perro corre.', // now: "… más grande que el perro de la mujer corre."
+      pt: 'um gato da mulher maior do que o cão corre.', // now: "… maior do que o cão da mulher corre."
+    });
+  });
+
+  test('Italian and German already keep it with the noun', () => {
+    expect(runs()).toMatchObject({
+      it: 'un gatto della donna più grande del cane corre.',
+      de: 'ein größerer Kater der Frau als der Hund läuft.',
+    });
+  });
+});
+

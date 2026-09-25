@@ -383,7 +383,9 @@ E48) and Q (E53, E54, E52, E55), in the orders above; the key letters landed as 
 - The round-trip walk no longer puts a pronoun in a predicate's conjunct, which the console never
   accepted (`/pred ( brown /and [ 1st /pl ] )`, reproducible at 1d8f359b with `SEEDS=30000`).
 
-**Leads the lanes met, not filed:**
+**Leads the lanes met.** The bugs among them were filed on 2026-09-25 as
+[A371–A375](../../../bugs/engine-grammar-bugs.md); the two feature items (layout, hosted-ring
+conjuncts) are not bugs and wait for a task file. As first listed:
 
 - **Layout:** an opponent or topic box sends the verb phrase down a row, and on a verb with an
   object (*cat wins game* + *against the dog*) the object stays on the upper row. The topic box

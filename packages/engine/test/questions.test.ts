@@ -1264,3 +1264,27 @@ describe('P09-E28: ever — NEVER in a question', () => {
     });
   });
 });
+
+// A374. The route asked about a person (E15, `questionAnimate`) reads as another relation in three
+// languages: es "¿por quién corre el gato?" and pt "por quem o gato corre?" are *for whom*, and ja
+// 猫は誰を走りますか runs a person as a path. The canvas withholds the who chip on the route (P09-E53 D3),
+// so only a plan reaches it. Decision for the fixer: the path words pinned here, or refuse the plan.
+describe('known bugs: an animate route question reads as another relation (A374)', () => {
+  const through = () => sayAll(about(clause(np('CAT'), 'RUN'), 'route', undefined, true));
+
+  test.fails('es, pt and ja ask through whom', () => {
+    expect(through()).toMatchObject({
+      es: '¿a través de quién corre el gato?', // now: "¿por quién corre el gato?"
+      pt: 'através de quem o gato corre?', // now: "por quem o gato corre?"
+      ja: '猫は誰の中を通って走りますか？', // now: "猫は誰を走りますか？"
+    });
+  });
+
+  test('the other four, and the inanimate route', () => {
+    expect(through()).toMatchObject({
+      en: 'who does the cat run through?', it: 'attraverso chi corre il gatto?',
+      fr: 'à travers qui est-ce que le chat court ?', de: 'durch wen läuft der Kater?',
+    });
+    expect(sayAll(about(clause(np('CAT'), 'RUN'), 'route'))).toMatchObject({ es: '¿por dónde corre el gato?', ja: '猫はどこを走りますか？' });
+  });
+});

@@ -52,7 +52,8 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds one file, A370, and Part B is empty).** If
+this writing Part A holds six files, A370–A375, and Part B is empty). One is pinned in `e2e/` instead, as a
+Playwright `test.fail`: A375, a canvas key that only a browser reaches.** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -65,6 +66,20 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | # | File | Language | Summary |
 |---|---|---|---|
 | A370 | [A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md](A-must-fix/A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md) | Portuguese | ALREADY beside the concord "não" of a `no` object or complement becomes "ainda não" (*not yet*) instead of "já não" |
+| A371 | [A371-attributive-superlative-drops-its-set.md](A-must-fix/A371-attributive-superlative-drops-its-set.md) | all | An attributive superlative's set (`adjectiveStandards` on `most` / `least`) is dropped: "the biggest house" for "the biggest house in the city" |
+| A372 | [A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md](A-must-fix/A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md) | French, Spanish, Portuguese | A possessor written after an attributive standard reads as the standard's ("plus grand que le chien de la femme") |
+| A373 | [A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md](A-must-fix/A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md) | Japanese | WIN with an object and an opponent doubles に (猫は犬にゲームに勝ちます) |
+| A374 | [A374-animate-route-question-reads-as-another-relation.md](A-must-fix/A374-animate-route-question-reads-as-another-relation.md) | Spanish, Portuguese, Japanese | An animate route question reads as *for whom* (¿por quién…?) or runs a person as a path (誰を走りますか) |
+| A375 | [A375-enter-in-the-owner-picker-points-to-the-subject.md](A-must-fix/A375-enter-in-the-owner-picker-points-to-the-subject.md) | frontend | ↵ in the owner ring's word picker builds a pronominal possessor on the subject ("his food") instead of the word typed |
+
+**Five more open**, **A371–A375**, filed on 2026-09-25 from the leads the P09-E44–E55 lanes reported,
+each re-probed at c8f098dc: the attributive superlative's lost set (A371), the Romance possessor after
+an attributive standard (A372), Japanese WIN's doubled に (A373), the animate route question (A374, which
+only a plan reaches) and ↵ in the canvas owner picker (A375, older than that batch, pinned in e2e).
+A373 and A374 leave decisions for the fixer. Five leads were not filed: English "is biggest" (intended,
+pinned in `comparison.test.ts`), German *das am wenigsten große der Tiere* (the article is the set's
+*Tier*, as *der größte der Hunde* is *Hund*'s), a possessor question over OBJECT (an unseeded id;
+OBJECT_THING renders), English "the woman's bigger cat" and Japanese 犬より大きい女の猫 (A372's *Not filed*).
 
 **One open**, **A370**, filed on 2026-09-24 from ten random phrases: Portuguese reads the concord
 "não" of a `no` object as the verb's own negation and turns ALREADY into *not yet* ("ainda não come

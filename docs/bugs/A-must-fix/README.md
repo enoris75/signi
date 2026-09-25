@@ -1,5 +1,13 @@
 # A-must-fix — confirmed bugs
 
+**Six open.** **A371–A375**, filed on 2026-09-25 from the leads the P09-E44–E55 lanes reported, each
+re-probed at c8f098dc.
+[A371](A371-attributive-superlative-drops-its-set.md), an attributive superlative's set dropped in all seven ("the biggest house" for "the biggest house in the city").
+[A372](A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md), fr / es / pt write a possessor after an attributive standard, where it reads as the standard's.
+[A373](A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md), Japanese WIN with an object and an opponent doubles に.
+[A374](A374-animate-route-question-reads-as-another-relation.md), an animate route question reads as *for whom* (es, pt) or runs a person as a path (ja).
+[A375](A375-enter-in-the-owner-picker-points-to-the-subject.md), ↵ in the canvas owner picker points to the subject ("his food"); pinned in e2e.
+
 **One open**, **A370**, filed on 2026-09-24 from ten random phrases.
 [A370](A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md), Portuguese ALREADY beside the concord "não" of a `no` object or complement, written "ainda não" (*not yet*) for "já não".
 
