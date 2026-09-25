@@ -1,5 +1,6 @@
 import type { ComplementType, Tense } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
+import { adverbClass, moreAdverbText } from '../../functions/adverbClass.js';
 import { alarmCry } from '../../functions/alarmCry.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
@@ -42,7 +43,8 @@ import { withRelative } from './withRelative.js';
 function preNegationAdverb(verbPhrase: ResolvedVerbPhrase): string {
   if (verbPhrase.interrogative) return '';
   const negAdverb = negativeAdverb(verbPhrase.modifier, verbPhrase.negative === true);
-  return negAdverb?.slot === 'pre-negation' ? negAdverb.text : '';
+  // A further frequency adverb stands beside it: "still often does not eat" (P15).
+  return negAdverb?.slot === 'pre-negation' ? [negAdverb.text, moreAdverbText(verbPhrase, 'frequency')].filter(Boolean).join(' ') : '';
 }
 
 /**
@@ -59,13 +61,26 @@ export function predicateParts(
   // The demoted agent of a passive clause, rendered as the by-phrase (see ResolvedPhrase.agent).
   agent?: ResolvedNounElement,
 ): string[] {
-  const parts = predicateWords(subjectForms, verbPhrase, directObject, complements, subjectIsNegative, agent);
+  const parts = withTrailingManner(predicateWords(subjectForms, verbPhrase, directObject, complements, subjectIsNegative, agent), verbPhrase);
   const ordered = particleAfterPronoun(parts, subjectForms, verbPhrase, directObject);
   // An adverb that outscopes the negation stands in front of the whole negated group, ahead of the
   // auxiliary that carries the "not": "the cat still does not eat the food" (A244). The parts are
   // joined in order, so leading them puts it there whichever branch built the verb group.
   const lead = preNegationAdverb(verbPhrase);
   return lead ? [lead, ...ordered] : ordered;
+}
+
+/**
+ * A verb's further manner adverbs (P15) trail the clause, where a manner adverb goes: "the cat often
+ * runs fast". Every branch of `predicateWords` ends on that trailing slot. Behind a manner primary
+ * they are already spelled with it, wherever it went ("is eaten slowly and well by the dog").
+ */
+function withTrailingManner(parts: string[], verbPhrase: ResolvedVerbPhrase): string[] {
+  const more = moreAdverbText(verbPhrase, 'manner');
+  if (!more || (verbPhrase.modifier && adverbClass(verbPhrase.modifier) === 'manner')) return parts;
+  const out = [...parts];
+  out[out.length - 1] = [out[out.length - 1], more].filter(Boolean).join(' ');
+  return out;
 }
 
 /**
@@ -181,7 +196,15 @@ function predicateWords(
   // A question cannot take the pre-negation adverb (see `preNegationAdverb`), so it keeps the
   // frequency slot and the ordinary word there: "does the cat not still eat the food?".
   const keepsSlot = negAdverb?.slot === undefined || (verbPhrase.interrogative === true && negAdverb.slot === 'pre-negation');
-  const adverbText = (keepsSlot ? undefined : negAdverb?.text) ?? (modifier ? (modifier.forms['base'] ?? '') : '');
+  // Several adverbs (P15): a further frequency one stands beside a frequency primary ("already often
+  // runs"), and a further manner one beside a manner primary ("runs slowly well"), wherever the
+  // primary goes. A manner one behind any other primary trails the clause (`withTrailingManner`).
+  const primaryText = (keepsSlot ? undefined : negAdverb?.text) ?? (modifier ? (modifier.forms['base'] ?? '') : '');
+  const adverbText = [
+    primaryText,
+    moreAdverbText(verbPhrase, 'frequency'),
+    modifier && adverbClass(modifier) === 'manner' ? moreAdverbText(verbPhrase, 'manner') : '',
+  ].filter(Boolean).join(' ');
   const isFrequency = modifier?.forms['subtype'] === 'frequency' && keepsSlot;
   // A direction adverb (UP, DOWN) is a particle of the verb, not a comment on the action: it follows
   // the verb or its object directly and leads the complements, because a complement after it joins
@@ -242,6 +265,7 @@ function predicateWords(
     particleFirst || passiveParticle ? '' : adverbText,
     trailingComplements,
     (c) => complementsPhrase(c, lexical.forms),
+    { direction: moreAdverbText(verbPhrase, 'direction'), place: moreAdverbText(verbPhrase, 'place') },
   );
   // A modal's own manner adverb has no slot inside the verb group ("*can fast eat"), so it trails the
   // clause with the main verb's: "can eat the mouse fast".

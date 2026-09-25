@@ -4,6 +4,7 @@ import { PASSIVE_AUXILIARY, PASSIVIZABLE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolve } from './resolve.js';
 import { asFrequencyAdverb, preverbalSentenceMood } from './sentenceAdverb.js';
+import { verbAdverbs } from './verbAdverbs.js';
 
 /** Resolve a verb phrase (the shared predicate head of a plan or a relative clause). Only
  *  called when a verb phrase is present — a verbless period skips it (see translate).
@@ -70,7 +71,12 @@ export function resolveVerbPhrase(
   const finiteModal = modals[0];
   // A sentence adverb stands where a frequency adverb does, unless the top clause lifts it out
   // (P09-E39, see `liftSentenceAdverb`).
-  const modifier = vp.modifier ? asFrequencyAdverb(resolve(vp.modifier, language, lookup)) : undefined;
+  // Of several adverbs, the primary is the one every engine's negation and slots read (P15). A
+  // repeated one is said once.
+  const adverbs = [...new Set([vp.modifier, ...(vp.modifiers ?? [])])]
+    .filter((id): id is string => !!id)
+    .map((id) => asFrequencyAdverb(resolve(id, language, lookup))!);
+  const { modifier, moreAdverbs } = verbAdverbs(adverbs);
   const resolved: ResolvedVerbPhrase = {
     verb,
     negative: governed ? finiteModal?.negative : vp.negative,
@@ -83,6 +89,7 @@ export function resolveVerbPhrase(
     mood,
     register: imperative ? (register ?? 'request') : undefined,
     modifier,
+    ...(moreAdverbs ? { moreAdverbs } : {}),
     // The outermost modal's negation has moved to `negative` above, so no engine reads it twice.
     modals: modals.map((m, i) => (i === 0 ? { ...m, negative: undefined } : m)),
     // Carried as asked; whether the subject lets it apply is the Japanese engine's call (P11-E1 D4).

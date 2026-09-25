@@ -5,6 +5,12 @@ import { isPlaceAdverb } from './isPlaceAdverb.js';
 
 type Complements = Partial<Record<ComplementType, ResolvedComplement>>;
 
+/** The verb's further direction and place adverbs, spelled (see `moreAdverbText`, P15). */
+export interface MoreLocativeAdverbs {
+  direction?: string;
+  place?: string;
+}
+
 /**
  * The complements slot with the verb's own adverb seated inside it, for the five languages that
  * render the predicate before its complements (English and the four Romance).
@@ -24,16 +30,21 @@ type Complements = Partial<Record<ComplementType, ResolvedComplement>>;
  * adverb's surface with the subject. `render` is the caller's own `complementsPhrase`, bound to its
  * other arguments; it is called twice for a place adverb, once per side of the split, and every
  * complement renders independently of its neighbours.
+ *
+ * A verb with several adverbs (P15) passes the rest in `more`: further direction adverbs lead the
+ * slot after the primary's, further place adverbs stand after it where a locative does, whatever
+ * class the primary is.
  */
 export function complementsAroundAdverb(
   modifier: ConceptForms | undefined,
   adverbText: string,
   complements: Complements | undefined,
   render: (complements?: Complements) => string,
+  more: MoreLocativeAdverbs = {},
 ): string {
-  if (!adverbText) return render(complements);
-  if (isDirectionAdverb(modifier)) return [adverbText, render(complements)].filter(Boolean).join(' ');
-  if (!isPlaceAdverb(modifier)) return render(complements);
+  const lead = [isDirectionAdverb(modifier) ? adverbText : '', more.direction ?? ''].filter(Boolean).join(' ');
+  const place = [isPlaceAdverb(modifier) ? adverbText : '', more.place ?? ''].filter(Boolean).join(' ');
+  if (!place) return [lead, render(complements)].filter(Boolean).join(' ');
   const locative = COMPLEMENT_RENDER_ORDER.indexOf('locative');
   const before: Complements = {};
   const after: Complements = {};
@@ -41,5 +52,5 @@ export function complementsAroundAdverb(
     const c = complements?.[type];
     if (c) (i < locative ? before : after)[type] = c;
   });
-  return [render(before), adverbText, render(after)].filter(Boolean).join(' ');
+  return [lead, render(before), place, render(after)].filter(Boolean).join(' ');
 }

@@ -302,7 +302,20 @@ export interface ResolvedVerbPhrase {
    * `interrogative`, because the predicate builders see it and not the clause.
    */
   existential?: boolean;
+  /**
+   * The verb's **primary** adverb: its only one, or of several the one whose class carries the most
+   * grammar — a negative adverb, else a frequency one, else manner, direction, place (see
+   * `verbAdverbs`, P15). Every engine's negation, concord and slot logic reads this one.
+   */
   modifier?: ConceptForms;
+  /**
+   * The verb's other adverbs, after `modifier`, in plan order (P15). None is negative (only the first
+   * negative adverb is kept, and it is the primary), and a sentence adverb here stands as a frequency
+   * one (`asFrequencyAdverb`). Each engine places each by its class (`moreAdverbsOf`): a frequency one
+   * right after the primary, which is then a frequency adverb as well; a manner one in the trailing
+   * slot; a direction or place one among the complements, as the primary of that class would be.
+   */
+  moreAdverbs?: ConceptForms[];
   /** Resolved modal verbs governing the predicate, outermost first (see VerbPhrase.modals). */
   modals: ResolvedModal[];
   /**

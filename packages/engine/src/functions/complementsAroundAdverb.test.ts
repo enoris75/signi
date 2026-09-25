@@ -43,4 +43,14 @@ describe('complementsAroundAdverb', () => {
     // An empty text is how English says the particle has moved in front of the object (A193).
     expect(complementsAroundAdverb(up, '', all, render)).toBe('<predicative> <terminus> <locative> <cause>');
   });
+
+  test('more direction and place adverbs join the primary\'s seat, whatever the primary is (P15)', () => {
+    expect(complementsAroundAdverb(up, 'up', all, render, { place: 'here' }))
+      .toBe('up <predicative> <terminus> here <locative> <cause>');
+    expect(complementsAroundAdverb(everywhere, 'everywhere', all, render, { place: 'here', direction: 'down' }))
+      .toBe('down <predicative> <terminus> everywhere here <locative> <cause>');
+    expect(complementsAroundAdverb(fast, 'fast', all, render, { direction: 'up' }))
+      .toBe('up <predicative> <terminus> <locative> <cause>');
+    expect(complementsAroundAdverb(undefined, '', undefined, render, { place: 'here' })).toBe('here');
+  });
 });

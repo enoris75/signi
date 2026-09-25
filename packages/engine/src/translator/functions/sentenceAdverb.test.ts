@@ -25,6 +25,29 @@ describe('asFrequencyAdverb', () => {
 });
 
 describe('liftSentenceAdverb', () => {
+  test('of several adverbs the sentence one opens the clause and the next becomes primary (P15)', () => {
+    const OFTEN = { base: 'often', subtype: 'frequency' };
+    const FAST = { base: 'fast' };
+    const lifted = liftSentenceAdverb(phrase({
+      modifier: asFrequencyAdverb(concept(MAYBE)),
+      moreAdverbs: [concept(FAST), concept(OFTEN)],
+    }));
+    expect(lifted.sentenceAdverb?.forms).toEqual(MAYBE);
+    expect(lifted.verbPhrase?.modifier?.forms).toEqual(OFTEN);
+    expect(lifted.verbPhrase?.moreAdverbs?.map((a) => a.forms)).toEqual([FAST]);
+  });
+
+  test('a sentence adverb behind the primary is lifted too, and the primary stays', () => {
+    const NEVER = { base: 'never', subtype: 'frequency', polarity: 'negative' };
+    const lifted = liftSentenceAdverb(phrase({
+      modifier: concept(NEVER),
+      moreAdverbs: [asFrequencyAdverb(concept(MAYBE))!],
+    }));
+    expect(lifted.sentenceAdverb?.forms).toEqual(MAYBE);
+    expect(lifted.verbPhrase?.modifier?.forms).toEqual(NEVER);
+    expect(lifted.verbPhrase?.moreAdverbs).toBeUndefined();
+  });
+
   test('a statement moves it out of the verb phrase, with its own subtype back', () => {
     const lifted = liftSentenceAdverb(phrase({ modifier: asFrequencyAdverb(concept(MAYBE)) }));
     expect(lifted.sentenceAdverb?.forms).toEqual(MAYBE);

@@ -1,4 +1,5 @@
 import type { ConceptForms, Mood, ResolvedPhrase } from '../../types.js';
+import { verbAdverbs } from './verbAdverbs.js';
 
 /**
  * A **sentence adverb** (`subtype: 'sentence'` — *maybe, probably, actually, of course*) comments on
@@ -30,17 +31,27 @@ export function asFrequencyAdverb(modifier: ConceptForms | undefined): ConceptFo
  */
 export function liftSentenceAdverb(resolved: ResolvedPhrase, topMood?: Mood): ResolvedPhrase {
   const vp = resolved.verbPhrase;
-  const modifier = vp?.modifier;
-  if (!vp || modifier?.forms['sentence'] !== '1') return resolved;
+  // Of several adverbs the first sentence one opens the clause, and the rest stay (P15): "maybe the
+  // cat often runs", where OFTEN becomes the primary the lifted MAYBE was.
+  const adverbs = vp ? [vp.modifier, ...(vp.moreAdverbs ?? [])].filter((a): a is ConceptForms => !!a) : [];
+  const modifier = adverbs.find((a) => a.forms['sentence'] === '1');
+  if (!vp || !modifier) return resolved;
   // The clause's own mood, not the verb phrase's: a negated statement may already be in the
   // subjunctive its adverb asked for (see `preverbalSentenceMood`), and the shift below is the same.
   if (vp.interrogative || topMood !== undefined) return resolved;
   const { sentence: _sentence, ...forms } = modifier.forms;
   const adverb: ConceptForms = { ...modifier, forms: { ...forms, subtype: 'sentence' } };
+  const { modifier: rest, moreAdverbs } = verbAdverbs(adverbs.filter((a) => a !== modifier));
+  const { moreAdverbs: _more, ...lifted } = vp;
   return {
     ...resolved,
     sentenceAdverb: adverb,
-    verbPhrase: { ...vp, modifier: undefined, ...(forms['mood'] === 'subjunctive' ? subjunctive(vp) : {}) },
+    verbPhrase: {
+      ...lifted,
+      modifier: rest,
+      ...(moreAdverbs ? { moreAdverbs } : {}),
+      ...(forms['mood'] === 'subjunctive' ? subjunctive(vp) : {}),
+    },
   };
 }
 

@@ -1354,7 +1354,7 @@ export interface ModalVerb {
  */
 export type ModalRef = string | ModalVerb;
 
-/** The predicate head: a core verb, optional negation, and an optional adverb. */
+/** The predicate head: a core verb, optional negation, and optional adverbs. */
 export interface VerbPhrase {
   verb: string;                    // core verb id
   /**
@@ -1364,6 +1364,15 @@ export interface VerbPhrase {
    */
   negative?: boolean;
   modifier?: string;               // adverb id scoped to the main verb
+  /**
+   * More adverbs on the main verb, after `modifier` (P15): "the cat **often** runs **fast**
+   * **here**" is `modifier: 'OFTEN'` with `modifiers: ['FAST', 'HERE']`. The translator reads
+   * `[modifier, ...modifiers]` as one list, so a plan may spell a lone adverb either way. Each engine
+   * places each adverb by its class (frequency, manner, direction, place), and two of one class
+   * stand side by side in the order given. Only the first **negative** adverb counts: "never no
+   * longer runs" is not a sentence in any of the seven, so a second one is dropped (P15 D3).
+   */
+  modifiers?: string[];
   tense?: Tense;                   // defaults to 'present'
   aspect?: Aspect;                 // defaults to 'neutral'
   /**
