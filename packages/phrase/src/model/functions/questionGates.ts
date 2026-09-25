@@ -1,4 +1,5 @@
-import type { Concept } from "@signi/shared";
+import { DEFAULT_TEMPORAL_RELATION, type Concept } from "@signi/shared";
+import { offeredComplements } from "../slots.ts";
 import type { PhraseSelection, QuestionRole } from "../interfaces.ts";
 
 /**
@@ -10,17 +11,43 @@ import type { PhraseSelection, QuestionRole } from "../interfaces.ts";
  * is kept for the user and left out of the plan, as a degree left on a noun is.
  */
 
-/** The word held in a subject or object gap, whose `human` the who / what chip defaults to. */
-const heldWord = (sel: PhraseSelection, role: QuestionRole): Concept | undefined =>
-  role === "subject" ? sel.subject : role === "directObject" ? sel.directObject : undefined;
+/** The word held in the asked slot, whose `human` the who / what chip defaults to. */
+const heldWord = (sel: PhraseSelection, role: QuestionRole): Concept | undefined => sel[role];
+
+/**
+ * Whether the question over `role` has the two words *who* and *what* (P09-E53 D4): the subject and
+ * the object, and the complements whose question word changes with the answer's animacy — *con chi* /
+ * *con che cosa*, *zu wem* / *wohin*, *unter wem* / *worunter*, *dank wem* / *dank was*. Not the
+ * adverbial gaps (*when*, *how*, a plain *where*, a neutral *why*), not the negative cause (always
+ * *whose fault*), and not the route, whose animate question reads "for whom" (es) or takes an object
+ * (ja).
+ */
+export function hasQuestionAnimacy(sel: PhraseSelection, role: QuestionRole | undefined): boolean {
+  switch (role) {
+    case "subject":
+    case "directObject":
+    case "terminus":
+    case "comitative":
+    case "topic":
+    case "direction":
+    case "source":
+      return true;
+    case "locative":
+      return (sel.locativeSpecifier ?? "in") !== "in";
+    case "cause":
+      return sel.causeSentiment === "positive";
+    default:
+      return false;
+  }
+}
 
 /**
  * Whether the question over `role` asks *who* rather than *what*: the chip's own setting, else the
- * held word's `human` (a man is a who, a cat a what), else *what*. Only a subject or an object gap
- * has the two words.
+ * held word's `human` (a man is a who, a cat a what), else *what*. Only a gap with the two words has
+ * them (see hasQuestionAnimacy).
  */
 export function questionAnimateOf(sel: PhraseSelection, role: QuestionRole | undefined = sel.questionRole): boolean {
-  if (role !== "subject" && role !== "directObject") return false;
+  if (!role || !hasQuestionAnimacy(sel, role)) return false;
   return sel.questionAnimate ?? Boolean(heldWord(sel, role)?.human);
 }
 
@@ -31,9 +58,10 @@ export const asksQuestion = (sel: PhraseSelection): boolean =>
 /**
  * Whether `role` may be the gap of this period's wh-question. Not in the passive (the passive
  * re-maps the slots the gap names), not on an existential, not under a command or a citation; the
- * slot must be the verb's to have — an object for a verb that takes one, a complement it licenses —
- * and a locative only in its plain relation (*where* is *in*), a cause only neutral and not denied
- * (*why* is *because of*).
+ * slot must be the verb's to have — an object for a verb that takes one, a complement it is offered
+ * (`offeredComplements`, so a time and a companion on any verb). A complement keeps its relation
+ * (P09-E15, P09-E53 D2): a place, a direction, a source or a route in any relation, a cause in any
+ * stance but not denied (a gap has no complement to carry the denial), a time only *at* or *until*.
  */
 export function canAsk(sel: PhraseSelection, role: QuestionRole): boolean {
   const verb = sel.verb;
@@ -44,18 +72,23 @@ export function canAsk(sel: PhraseSelection, role: QuestionRole): boolean {
       return true;
     case "directObject":
       return verb.transitivity !== "intransitive";
-    case "locative":
-      return Boolean(verb.complements?.includes("locative")) && (sel.locativeSpecifier ?? "in") === "in";
-    case "manner":
-      return Boolean(verb.complements?.includes("manner"));
-    case "cause":
-      return (
-        Boolean(verb.complements?.includes("cause")) &&
-        (sel.causeSentiment ?? "neutral") === "neutral" &&
-        !sel.causeNegative
-      );
+    default:
+      if (!offeredComplements(verb).includes(role)) return false;
+      if (role === "cause") return !sel.causeNegative;
+      if (role === "temporal") {
+        const relation = sel.temporalRelation ?? DEFAULT_TEMPORAL_RELATION;
+        return relation === "at" || relation === "until";
+      }
+      return true;
   }
 }
+
+/**
+ * Whether a box's relation is there to choose (P09-E53 D3): on a box that holds a word, and on the
+ * one a wh-question asks about, which is usually empty — the relation is the gap's ("**under what**").
+ */
+export const hasRelation = (sel: PhraseSelection, slot: QuestionRole | "objectPredicative"): boolean =>
+  Boolean(sel[slot]) || sel.questionRole === slot;
 
 /** The wh-question's gap as the plan will carry it: the marked slot, where the engine asks it. */
 export function askedRole(sel: PhraseSelection): QuestionRole | undefined {

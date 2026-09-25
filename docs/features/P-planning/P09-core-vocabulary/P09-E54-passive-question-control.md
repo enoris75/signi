@@ -10,7 +10,7 @@ patient, and ships the one lexical fact the gate lacks.
 console tests. No new UI string.
 **Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the engine
 side is [P09-E16](Z-done/P09-E16-passive-question.md). Second of four question controls, after
-[E53](P09-E53-marked-relation-question-control.md) (see E53 D6).
+[E53](Z-done/P09-E53-marked-relation-question-control.md) (see E53 D6).
 
 Engine output at HEAD, from hand-written plans (rendered 2026-09-25 against the seeded lexicon):
 

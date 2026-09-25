@@ -32,7 +32,7 @@ import {
 } from '../../src/components/PhraseBuilder/interfaces.ts';
 import * as R from '../../src/components/PhraseBuilder/phraseReducers.ts';
 import * as L from '../../src/components/PhraseBuilder/linkRules.ts';
-import { canAsk, canBeExistential } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
+import { canAsk, canBeExistential, hasQuestionAnimacy } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
 import { workspaceToPlans } from '../../src/components/PhraseBuilder/workspacePlan/index.ts';
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, COORDINABLE_NOUN_KEYS, MODAL_SLOTS, modalAdverbFor, offeredComplements } from '../../src/components/PhraseBuilder/slots.ts';
 import { applyScript } from '../../src/console/language/apply.ts';
@@ -315,7 +315,15 @@ const OPS: Op[] = [
       const role = pick(rng, QUESTION_ROLES.filter((q) => canAsk(sel, q)));
       if (!role || (locked && !sel.interrogative)) return undefined;
       sel = R.toggleQuestionRole(sel, role);
-      if (sel.questionRole === role && (role === 'subject' || role === 'directObject') && rng() < 0.5) sel = R.toggleQuestionAnimate(sel);
+      // P09-E53: the asked box's relation, from its toolbar — any of them, the refused ones too (the
+      // plan builder gates those) — and the who / what chip where the question word has the two.
+      if (sel.questionRole === role && rng() < 0.6) {
+        if (role === 'locative' || role === 'route') sel = R.setSpecifier(sel, pick(rng, PATH_SPECIFIERS)!, role);
+        else if (role === 'direction') sel = R.setSpecifier(sel, pick(rng, [undefined, ...PATH_SPECIFIERS]), role);
+        else if (role === 'temporal') sel = R.setTemporalRelation(sel, pick(rng, TEMPORAL_RELATIONS)!);
+        else if (role === 'cause') sel = R.setSentiment(sel, pick(rng, CAUSE_SENTIMENTS)!);
+      }
+      if (sel.questionRole === role && hasQuestionAnimacy(sel, role) && rng() < 0.5) sel = R.toggleQuestionAnimate(sel);
     } else {
       if (!canBeExistential(sel)) return undefined;
       sel = R.toggleExistential(sel);

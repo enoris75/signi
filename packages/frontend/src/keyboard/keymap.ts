@@ -34,6 +34,7 @@ import {
   modalAdverbFor,
   negativeFieldOf,
 } from "../components/PhraseBuilder/slots.ts";
+import { hasRelation } from "../components/PhraseBuilder/functions/questionGates.ts";
 import { isComplementSlot, nounBlockOf, type Scope } from "./scope.ts";
 import type { Direction } from "./spatialNav.ts";
 
@@ -638,8 +639,9 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     hint: true,
     // The spatial complements carry a relation ("under the bed"), the cause an affective stance
     // ("thanks to" / "because of" / "the fault of"). Both are toolbars already on the ring, so S
-    // points the next key at one rather than opening anything.
-    when: (ctx) => TOOLBAR_SLOTS.includes(ctx.slot) && Boolean(ctx.selection[ctx.slot]),
+    // points the next key at one rather than opening anything — on an empty box too, when a
+    // wh-question asks about it (P09-E53 D3).
+    when: (ctx) => TOOLBAR_SLOTS.includes(ctx.slot) && hasRelation(ctx.selection, ctx.slot as QuestionRole | "objectPredicative"),
     run: (ctx) => ctx.armToolbar(ctx.slot),
   },
   {

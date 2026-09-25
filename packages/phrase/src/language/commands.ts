@@ -323,11 +323,72 @@ export const QUESTION_SLOT_VALUES: readonly ValueDef[] = [
   { name: "loc", aliases: ["locative", "place"], value: "locative", description: "place", descriptionKey: "slot.locative" },
   { name: "manner", value: "manner", description: "manner", descriptionKey: "slot.manner" },
   { name: "cause", value: "cause", description: "cause", descriptionKey: "slot.cause" },
+  // P09-E53: the complements that keep their relation — "to whom", "with whom", "about what", "where
+  // to", "where from", "which way", "when".
+  { name: "term", aliases: ["terminus"], value: "terminus", description: "terminus", descriptionKey: "slot.terminus" },
+  { name: "with", aliases: ["comitative"], value: "comitative", description: "companion", descriptionKey: "slot.comitative" },
+  { name: "about", aliases: ["topic"], value: "topic", description: "topic", descriptionKey: "slot.topic" },
+  { name: "dir", aliases: ["direction"], value: "direction", description: "direction", descriptionKey: "slot.direction" },
+  { name: "src", aliases: ["source"], value: "source", description: "source", descriptionKey: "slot.source" },
+  { name: "route", value: "route", description: "route", descriptionKey: "slot.route" },
+  { name: "time", aliases: ["temporal"], value: "temporal", description: "time", descriptionKey: "slot.temporal" },
 ];
 
 export const QUESTION_ANIMACY_VALUES: readonly ValueDef[] = [
   { name: "who", value: "who", description: "who", descriptionKey: "question.who" },
   { name: "what", value: "what", description: "what", descriptionKey: "question.what" },
+];
+
+// The relations a place, a route or a direction is said in, by the commands that set them in the
+// box's bracket (`/loc ( house /under )`), and the cause's stances (`/cause ( dog /thanks )`).
+const PATH_RELATION_NAMES = [
+  ["in", ["inside"], "in"],
+  ["through", [], "through"],
+  ["under", [], "under"],
+  ["over", ["above"], "over"],
+  ["around", [], "around"],
+  ["behind", [], "behind"],
+  ["front", ["infront", "in_front_of"], "in_front_of"],
+  ["on", [], "on"],
+  ["between", [], "between"],
+  ["against", [], "against"],
+  // P09-E32, on a plural or a group: "/loc ( house /pl /among )".
+  ["among", [], "among"],
+] as const;
+
+const SENTIMENT_NAMES = [
+  ["because", [], "neutral", "because of"],
+  ["fault", ["blame"], "negative", "the fault of"],
+  ["thanks", ["thanksto"], "positive", "thanks to"],
+] as const;
+
+/**
+ * An asked box's relation, said with its slot when the box holds no word to hang a bracket on
+ * (P09-E53 D5): `/wh loc under`, `/wh cause thanks who`, `/wh time until`. Each is named as the
+ * command that sets it in the bracket; its value says which of the box's settings it is, `kind:value`.
+ */
+export const QUESTION_RELATION_VALUES: readonly ValueDef[] = [
+  ...PATH_RELATION_NAMES.map(([name, aliases, value]) => ({
+    name,
+    aliases: [...aliases],
+    value: `specifier:${value}`,
+    description: value.replace(/_/g, " "),
+    descriptionKey: `specifier.value.${value}` as UiStringKey,
+  })),
+  { name: "goal", value: "specifier:to", description: "to", descriptionKey: "slot.direction" },
+  ...TEMPORAL_RELATIONS.map((value) => ({
+    name: TEMPORAL_COMMAND_NAME[value] ?? value,
+    value: `temporal:${value}`,
+    description: value,
+    descriptionKey: `temporal.value.${value}` as UiStringKey,
+  })),
+  ...SENTIMENT_NAMES.map(([name, aliases, value, description]) => ({
+    name,
+    aliases: [...aliases],
+    value: `sentiment:${value}`,
+    description,
+    descriptionKey: `sentiment.connector.${value}` as UiStringKey,
+  })),
 ];
 
 export const LEVEL_VALUES: readonly ValueDef[] = [
@@ -572,22 +633,7 @@ export const COMMANDS: readonly CommandDef[] = [
     action: { kind: "headless" },
     satellites: /Headless$/,
   },
-  ...(
-    [
-      ["in", ["inside"], "in"],
-      ["through", [], "through"],
-      ["under", [], "under"],
-      ["over", ["above"], "over"],
-      ["around", [], "around"],
-      ["behind", [], "behind"],
-      ["front", ["infront", "in_front_of"], "in_front_of"],
-      ["on", [], "on"],
-      ["between", [], "between"],
-      ["against", [], "against"],
-      // P09-E32, on a plural or a group: "/loc ( house /pl /among )".
-      ["among", [], "among"],
-    ] as const
-  ).map(([name, aliases, value]) =>
+  ...PATH_RELATION_NAMES.map(([name, aliases, value]) =>
     setting(
       name,
       [...aliases],
@@ -634,13 +680,7 @@ export const COMMANDS: readonly CommandDef[] = [
       ["setTemporalRelation", "setGlossRelation"],
     ),
   ),
-  ...(
-    [
-      ["because", [], "neutral", "because of"],
-      ["fault", ["blame"], "negative", "the fault of"],
-      ["thanks", ["thanksto"], "positive", "thanks to"],
-    ] as const
-  ).map(([name, aliases, value, description]) =>
+  ...SENTIMENT_NAMES.map(([name, aliases, value, description]) =>
     setting(
       name,
       [...aliases],
@@ -837,7 +877,8 @@ export const COMMANDS: readonly CommandDef[] = [
   },
   // The slot the question asks about, and whether it asks who or what (P09-E12 M6): `/wh obj`,
   // `/wh subj who`. Said of the period, not inside the slot's bracket — the gap usually holds no word,
-  // and the printer writes a noun only when it holds one. Taken back by `/del wh`.
+  // and the printer writes a noun only when it holds one. Taken back by `/del wh`. An empty asked box's
+  // relation rides it too (P09-E53 D5): `/wh loc under`, `/wh cause thanks who`, `/wh time until`.
   {
     name: "wh",
     aliases: [],
@@ -845,10 +886,10 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "what the question asks about",
     descriptionKey: "mood.question",
     color: "setting",
-    arg: { kind: "values", values: [...QUESTION_SLOT_VALUES, ...QUESTION_ANIMACY_VALUES], max: 2 },
+    arg: { kind: "values", values: [...QUESTION_SLOT_VALUES, ...QUESTION_ANIMACY_VALUES, ...QUESTION_RELATION_VALUES], max: 3 },
     action: { kind: "question" },
     satellites: /Question(Animate)?$/,
-    reducers: ["setQuestionRole", "setQuestionAnimate"],
+    reducers: ["setQuestionRole", "setQuestionAnimate", "setSpecifier", "setTemporalRelation", "setSentiment"],
   },
   // The existential, "there is a cat" (P09-E12 M7): a fact of the clause, said of the period after its
   // mood, as /without is though its control sits elsewhere. Taken back by `/del there`.

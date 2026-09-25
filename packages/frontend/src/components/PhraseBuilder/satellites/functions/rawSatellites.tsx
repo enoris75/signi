@@ -31,7 +31,7 @@ import {
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
 import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole } from "../../interfaces.ts";
-import { canAsk, canBeExistential, questionAnimateOf } from "../../functions/questionGates.ts";
+import { canAsk, canBeExistential, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
 import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
@@ -94,10 +94,11 @@ export function rawSatellites(
     hasValue: selection.questionRole === role,
     directToggle: true,
   });
-  // Its who / what chip, on a marked subject or object: what the question asks for, a person or a
-  // thing, defaulting to the held word's (see questionAnimateOf). The chip names the question it
-  // makes ("Who acts?"), so its label is its value.
-  const questionAnimacy = (role: "subject" | "directObject"): RawSatellite => {
+  // Its who / what chip, on a marked subject or object, and on a marked complement whose question
+  // word changes with the answer's animacy (P09-E53 D4, see hasQuestionAnimacy): what the question
+  // asks for, a person or a thing, defaulting to the held word's (see questionAnimateOf). The chip
+  // names the question it makes ("Who acts?"), so its label is its value.
+  const questionAnimacy = (role: QuestionRole): RawSatellite => {
     const who = questionAnimateOf(selection, role);
     return {
       key: `${role}QuestionAnimate`,
@@ -105,7 +106,7 @@ export function rawSatellites(
       label: t(who ? "question.who" : "question.what"),
       labelKey: who ? "question.who" : "question.what",
       icon: who ? <PersonIcon sx={iconSx} /> : <CategoryIcon sx={iconSx} />,
-      available: askable(role) && selection.questionRole === role,
+      available: askable(role) && selection.questionRole === role && hasQuestionAnimacy(selection, role),
       hasValue: who,
       directToggle: true,
     };
@@ -802,8 +803,11 @@ export function rawSatellites(
             valueLabel: t(`polarity.value.${selection.causeNegative ? "negative" : "positive"}`),
           }]
           : []),
-        // The wh-question's mark on the three complements that have a question word (P09-E12 M6).
-        ...((QUESTION_ROLES as readonly string[]).includes(type) ? [question(type as QuestionRole)] : []),
+        // The wh-question's mark on every complement a question can ask about (P09-E12 M6, P09-E53),
+        // and its who / what chip where the question word has the two.
+        ...((QUESTION_ROLES as readonly string[]).includes(type)
+          ? [question(type as QuestionRole), questionAnimacy(type as QuestionRole)]
+          : []),
       ];
     }),
   ];

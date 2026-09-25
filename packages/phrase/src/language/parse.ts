@@ -3,6 +3,7 @@ import {
   SUB_VALUES,
   PERSON_VALUES,
   QUESTION_ANIMACY_VALUES,
+  QUESTION_RELATION_VALUES,
   QUESTION_SLOT_VALUES,
   REGISTER_VALUES,
   commandNamed,
@@ -288,7 +289,10 @@ export function sameKind(a: ValueDef, b: ValueDef): boolean {
           ? "slot"
           : QUESTION_ANIMACY_VALUES.includes(v)
             ? "animacy"
-            : "value";
+            : // …and an empty asked box's relation, `/wh loc under` (P09-E53).
+              QUESTION_RELATION_VALUES.includes(v)
+              ? "relation"
+              : "value";
   return kind(a) === kind(b);
 }
 

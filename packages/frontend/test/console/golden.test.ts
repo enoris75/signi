@@ -423,6 +423,32 @@ describe('the question on a subordinate clause', () => {
   });
 });
 
+// P09-E53: the complements that keep their relation, and an empty asked box's relation on /wh (D5).
+describe('the question over a marked relation', () => {
+  it.each<[string, string, Record<string, unknown>]>([
+    ['/wh with who /subj cat /verb run', '/wh with who /subj ( cat ) /verb ( run )', { questionRole: 'comitative', questionAnimate: true }],
+    ['/wh loc under /subj cat /verb eat', '/wh loc under /subj ( cat ) /verb ( eat )', { questionRole: 'locative', locativeSpecifier: 'under' }],
+    ['/wh cause thanks who /subj cat /verb run', '/wh cause who thanks /subj ( cat ) /verb ( run )', { questionRole: 'cause', causeSentiment: 'positive', questionAnimate: true }],
+    ['/wh time until /subj cat /verb eat', '/wh time until /subj ( cat ) /verb ( eat )', { questionRole: 'temporal', temporalRelation: 'until' }],
+    ['/wh dir goal /subj cat /verb run', '/wh dir /subj ( cat ) /verb ( run )', { questionRole: 'direction' }],
+    ['/wh src /subj cat /verb run', '/wh src /subj ( cat ) /verb ( run )', { questionRole: 'source' }],
+  ])('%s', (line, prints, holds) => {
+    const state = ok(line);
+    expect(sel(state)).toMatchObject({ interrogative: true, ...holds });
+    expect(print(state)).toBe(prints);
+  });
+
+  it('says the relation in the bracket of a box that holds a word, and on /wh only when it is empty', () => {
+    expect(print(ok('/wh loc /subj cat /verb eat /loc ( house /under )'))).toBe('/wh loc /subj ( cat ) /verb ( eat ) /loc ( house /under )');
+  });
+
+  it('refuses a relation the asked box has not', () => {
+    expect(run('/wh with under').diagnostic).toMatchObject({ code: 'valueNotTaken', args: { command: 'wh', given: 'under', values: [] } });
+    expect(run('/wh time under').diagnostic).toMatchObject({ code: 'valueNotTaken', args: { command: 'wh', given: 'under' } });
+    expect(run('/wh loc under thanks').diagnostic).toMatchObject({ code: 'valueAlreadyGiven' });
+  });
+});
+
 // A268: an if-clause is rendered in its own mood and asks nothing, so `/if` refuses a question as one,
 // and says why, as it refuses one as a subordinate clause; the main clause may not ask either
 // (`cantTakeCondition`).

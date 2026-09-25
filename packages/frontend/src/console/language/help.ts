@@ -176,7 +176,7 @@ export const EXAMPLES: Record<string, string> = {
   command: "/command lets /verb ( run )",
   inf: "/inf /verb ( eat ) /obj ( food )",
   ask: "/ask /subj ( cat ) /verb ( eat )",
-  wh: "/wh obj /subj ( cat ) /verb ( eat )",
+  wh: "/wh loc under /subj ( cat ) /verb ( eat )",
   there: "/there /subj ( cat ) /verb ( be ) /loc ( house )",
   statement: "/command /verb ( eat ) /statement",
   if: "/subj ( dog ) /verb ( run ) /if { /subj ( cat ) /verb ( eat ) }",

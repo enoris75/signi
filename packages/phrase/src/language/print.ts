@@ -26,6 +26,7 @@ import {
   COORD_VALUES,
   LEVEL_VALUES,
   PERSON_VALUES,
+  QUESTION_RELATION_VALUES,
   QUESTION_SLOT_VALUES,
   REGISTER_VALUES,
   SUBORDINATE_NAMES,
@@ -227,6 +228,10 @@ class Printer {
       this.emit("/wh", "command", "setting");
       this.emit(QUESTION_SLOT_VALUES.find((v) => v.value === root.questionRole)!.name, "value", "setting");
       if (root.questionAnimate !== undefined) this.emit(root.questionAnimate ? "who" : "what", "value", "setting");
+      // An empty asked box's relation rides /wh (P09-E53 D5): a box that holds a word says it in its
+      // bracket, so each fact is printed in one place.
+      const relation = questionRelationValue(root);
+      if (relation) this.emit(QUESTION_RELATION_VALUES.find((v) => v.value === relation)!.name, "value", "setting");
     }
     // The existential, a fact of the clause after its force (P09-E12).
     if (root.existential) {
@@ -538,6 +543,29 @@ class Printer {
 }
 
 /** A conjunct that is nothing but its word (and the defaults a pick seeds), written without brackets. */
+/**
+ * The relation an asked, empty box is said in, as a `/wh` value (QUESTION_RELATION_VALUES), or
+ * undefined at the box's default and wherever the box holds a word (its bracket says it).
+ */
+function questionRelationValue(root: PhraseSelection): string | undefined {
+  const role = root.questionRole;
+  if (!role || root[role]) return undefined;
+  switch (role) {
+    case "locative":
+      return root.locativeSpecifier && root.locativeSpecifier !== "in" ? `specifier:${root.locativeSpecifier}` : undefined;
+    case "route":
+      return root.routeSpecifier && root.routeSpecifier !== "through" ? `specifier:${root.routeSpecifier}` : undefined;
+    case "direction":
+      return root.directionSpecifier ? `specifier:${root.directionSpecifier}` : undefined;
+    case "temporal":
+      return root.temporalRelation && root.temporalRelation !== "at" ? `temporal:${root.temporalRelation}` : undefined;
+    case "cause":
+      return root.causeSentiment && root.causeSentiment !== "neutral" ? `sentiment:${root.causeSentiment}` : undefined;
+    default:
+      return undefined;
+  }
+}
+
 function isBareConjunct(c: PhraseSelection): boolean {
   return Object.entries(c).every(([k, v]) => {
     if (k === "subject") return true;

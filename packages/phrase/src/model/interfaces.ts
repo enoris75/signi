@@ -226,10 +226,38 @@ export interface SlotConfig {
 // the person/number still selects the imperative form (tu vs "let's" vs plural). Default 2sg.
 export type ImperativePerson = "2sg" | "1pl" | "2pl";
 
-// The five slots a wh-question can ask about — the only gaps with a question word in every engine
-// (see the engine's resolveQuestion): who / what, where, how, why.
-export type QuestionRole = "subject" | "directObject" | "locative" | "manner" | "cause";
-export const QUESTION_ROLES: readonly QuestionRole[] = ["subject", "directObject", "locative", "manner", "cause"];
+// The slots a wh-question can ask about (see the engine's resolveQuestion): E6's five with a question
+// word of their own — who / what, where, how, why — and the boxed complements that keep their relation
+// (P09-E15, P09-E53): "**to whom**", "**with whom**", "**about what**", "**where to**", "**where
+// from**", "**which way**", "**when**". Left out: the predicative and the object predicative (no
+// adposition), the purpose ("what for?" overlaps *why*), and the instrumental, a linked period.
+export type QuestionRole =
+  | "subject"
+  | "directObject"
+  | "locative"
+  | "manner"
+  | "cause"
+  | "terminus"
+  | "comitative"
+  | "topic"
+  | "direction"
+  | "source"
+  | "route"
+  | "temporal";
+export const QUESTION_ROLES: readonly QuestionRole[] = [
+  "subject",
+  "directObject",
+  "locative",
+  "manner",
+  "cause",
+  "terminus",
+  "comitative",
+  "topic",
+  "direction",
+  "source",
+  "route",
+  "temporal",
+];
 
 // The person a selection's command agrees with (default 2sg). Still meaningful under the
 // `instruction` register — the selector only greys it there, it does not forget it, so

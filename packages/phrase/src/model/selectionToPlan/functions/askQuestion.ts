@@ -1,6 +1,7 @@
-import type { ComplementType, PhrasePlan } from "@signi/shared";
+import type { PhrasePlan } from "@signi/shared";
 import type { PhraseSelection } from "../../interfaces.ts";
 import { askedRole, questionAnimateOf } from "../../functions/questionGates.ts";
+import { complementSpecifiers } from "./buildComplements.ts";
 
 /**
  * Turn a period's plan into its wh-question (P09-E12 M6): name the gap, and leave the gapped slot's
@@ -27,10 +28,11 @@ export function askQuestion(plan: Partial<PhrasePlan>, sel: PhraseSelection): vo
   else if (role === "directObject") delete plan.directObject;
   else {
     const complements = { ...plan.complements };
-    const specifiers = complements[role as ComplementType]?.specifiers;
-    delete complements[role as ComplementType];
+    delete complements[role];
     if (Object.keys(complements).length > 0) plan.complements = complements;
     else delete plan.complements;
+    // The relation is the box's, word or no word (P09-E53 D3): an asked box is usually empty.
+    const specifiers = complementSpecifiers(sel, role);
     if (specifiers?.length) plan.questionSpecifiers = specifiers;
   }
   plan.questionRole = role;

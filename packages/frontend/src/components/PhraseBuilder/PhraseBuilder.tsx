@@ -38,6 +38,7 @@ import {
   toggleInterrogative,
 } from "./phraseReducers.ts";
 import { moodLocked } from "./functions/moodLocked.ts";
+import { hasRelation } from "./functions/questionGates.ts";
 import {
   buildSatelliteIcons,
   buildSatellites,
@@ -692,12 +693,14 @@ export function PhraseBuilder({
       perimeterByNoun,
       linkTargetKeys: linkBinding?.relative.targetKeys,
       clearable,
+      // A relation's toolbar sits on a box that holds a word, or on one a wh-question asks about,
+      // which is usually empty: "**under what** does the cat eat?" (P09-E53 D3, see hasRelation).
       toolbars: {
-        ...(selection.route && { route: PATH_SPECIFIERS }),
-        ...(selection.locative && { locative: PATH_SPECIFIERS }),
-        ...(selection.direction && { direction: ["to", ...PATH_SPECIFIERS] }),
-        ...(selection.temporal && { temporal: TEMPORAL_RELATIONS }),
-        ...(selection.cause && { cause: CAUSE_SENTIMENTS }),
+        ...(hasRelation(selection, "route") && { route: PATH_SPECIFIERS }),
+        ...(hasRelation(selection, "locative") && { locative: PATH_SPECIFIERS }),
+        ...(hasRelation(selection, "direction") && { direction: ["to", ...PATH_SPECIFIERS] }),
+        ...(hasRelation(selection, "temporal") && { temporal: TEMPORAL_RELATIONS }),
+        ...(hasRelation(selection, "cause") && { cause: CAUSE_SENTIMENTS }),
         ...(selection.objectPredicative && { objectPredicative: OBJECT_PREDICATIONS }),
       },
       centerOf,

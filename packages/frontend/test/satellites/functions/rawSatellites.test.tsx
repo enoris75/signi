@@ -9,7 +9,7 @@ import {
 import { rawSatellites } from '../../../src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx';
 import { setImperative, setInfinitive, setVoice } from '../../../src/components/PhraseBuilder/phraseReducers.ts';
 import type { RawSatellite } from '../../../src/components/PhraseBuilder/satellites/satellites.types.tsx';
-import type { PhraseSelection } from '../../../src/components/PhraseBuilder/interfaces.ts';
+import type { PhraseSelection, QuestionRole } from '../../../src/components/PhraseBuilder/interfaces.ts';
 import {
   BIG,
   CAN,
@@ -925,5 +925,65 @@ describe('known bugs: A179 a passive infinitive', () => {
       // The subject is still a gap to ask about ("who says that the cat runs?").
       expect(find(sats, 'subjectQuestion').available).toBe(true);
     });
+  });
+});
+
+// P09-E53: the mark on the complements that keep their relation, and the who / what chip where the
+// question word changes with the answer's animacy.
+describe('the question over a marked relation', () => {
+  const find = (sats: RawSatellite[], key: string) => sats.find((x) => x.key === key)!;
+  const GIVE = concept('GIVE', 'verb', { transitivity: 'ditransitive', complements: ['terminus'] });
+  const MOVE = concept('MOVE', 'verb', { transitivity: 'intransitive', complements: ['locative', 'direction', 'source', 'route', 'cause'] });
+  const SPEAK = concept('SPEAK', 'verb', { transitivity: 'intransitive', complements: ['topic'] });
+
+  it.each<[string, Concept]>([
+    ['terminus', GIVE],
+    ['comitative', MOVE],
+    ['topic', SPEAK],
+    ['direction', MOVE],
+    ['source', MOVE],
+    ['route', MOVE],
+    ['temporal', MOVE],
+  ])('marks the %s, on an empty box', (type, verb) => {
+    const sat = find(rawSatellites({ subject: CAT, verb }, 'en', t), `${type}Question`);
+    expect(sat).toMatchObject({ parent: type, available: true, hasValue: false });
+    const asked = rawSatellites({ subject: CAT, verb, interrogative: true, questionRole: type as QuestionRole }, 'en', t);
+    expect(find(asked, `${type}Question`).hasValue).toBe(true);
+    // The asked box is shown although it holds no word.
+    expect(find(asked, type).defaultShown).toBe(true);
+  });
+
+  it.each<[string, PhraseSelection, boolean]>([
+    ['the comitative', { questionRole: 'comitative' }, true],
+    ['the terminus', { verb: GIVE, questionRole: 'terminus' }, true],
+    ['the topic', { verb: SPEAK, questionRole: 'topic' }, true],
+    ['the direction', { questionRole: 'direction' }, true],
+    ['the source', { questionRole: 'source' }, true],
+    ['a marked place', { questionRole: 'locative', locativeSpecifier: 'under' }, true],
+    ['a positive cause', { questionRole: 'cause', causeSentiment: 'positive' }, true],
+    ['a plain place', { questionRole: 'locative' }, false],
+    ['a neutral cause', { questionRole: 'cause' }, false],
+    ['a negative cause', { questionRole: 'cause', causeSentiment: 'negative' }, false],
+    ['the route', { questionRole: 'route' }, false],
+    ['the time', { questionRole: 'temporal' }, false],
+  ])('offers who / what on %s: %s', (_, extra, available) => {
+    const sel: PhraseSelection = { subject: CAT, verb: MOVE, interrogative: true, ...extra };
+    const sat = find(rawSatellites(sel, 'en', t), `${extra.questionRole}QuestionAnimate`);
+    expect(sat.available).toBe(available);
+  });
+
+  it('defaults the chip to the held word and names the question it makes', () => {
+    const MAN = concept('MAN', 'noun', { human: true });
+    const sel: PhraseSelection = { subject: CAT, verb: MOVE, comitative: MAN, interrogative: true, questionRole: 'comitative' };
+    expect(find(rawSatellites(sel, 'en', t), 'comitativeQuestionAnimate')).toMatchObject({ hasValue: true, labelKey: 'question.who' });
+    expect(find(rawSatellites({ ...sel, questionAnimate: false }, 'en', t), 'comitativeQuestionAnimate')).toMatchObject({
+      hasValue: false,
+      labelKey: 'question.what',
+    });
+  });
+
+  it('withdraws the mark from a time asked in a relation the engine refuses', () => {
+    const sel: PhraseSelection = { subject: CAT, verb: MOVE, interrogative: true, questionRole: 'temporal', temporalRelation: 'ago' };
+    expect(find(rawSatellites(sel, 'en', t), 'temporalQuestion').available).toBe(false);
   });
 });

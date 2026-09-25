@@ -59,6 +59,72 @@ test.describe('the question', () => {
     await app.expectSentences({ en: 'the cat sees the food.' });
   });
 
+  // P09-E53: the mark on a box that keeps its relation, which is chosen on the empty asked box.
+  test('an empty place asked under its relation asks "under what"', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.satellite('locative').click();
+    await page.keyboard.press('Escape');
+    await app.satellite('locativeQuestion').click();
+    await app.expectSentences({ en: 'where does the cat eat?' });
+
+    await page.getByTestId('specifier-toolbar').getByRole('button', { name: 'under', exact: true }).click();
+    await app.expectSentences({
+      en: 'what does the cat eat under?',
+      it: 'sotto che cosa mangia il gatto?',
+      fr: 'sous quoi est-ce que le chat mange ?',
+      de: 'worunter frisst der Kater?',
+      es: '¿debajo de qué come el gato?',
+      pt: 'debaixo de que o gato come?',
+      ja: '猫は何の下で食べますか？',
+    });
+  });
+
+  test('the companion asks what, and its chip asks who', async ({ app, page }) => {
+    await app.buildClause('CAT', 'RUN');
+    await app.satellite('comitative').click();
+    await page.keyboard.press('Escape');
+    await app.satellite('comitativeQuestion').click();
+    await app.expectSentences({
+      en: 'what does the cat run with?',
+      it: 'con che cosa corre il gatto?',
+      de: 'womit läuft der Kater?',
+    });
+
+    await app.satellite('comitativeQuestionAnimate').click();
+    await app.expectSentences({
+      en: 'who does the cat run with?',
+      it: 'con chi corre il gatto?',
+      fr: 'avec qui est-ce que le chat court ?',
+      de: 'mit wem läuft der Kater?',
+      es: '¿con quién corre el gato?',
+      pt: 'com quem o gato corre?',
+      ja: '猫は誰と走りますか？',
+    });
+  });
+
+  // P09-E53 §Implementation 2: the mark, its chip and the relation toolbar share the direction's
+  // dotted ring with its other controls, each clear of the others.
+  test('the asked direction keeps its ring’s controls apart', async ({ app, page }) => {
+    await app.buildClause('CAT', 'GO');
+    await app.revealAndPick('direction', 'HOUSE');
+    await app.satellite('directionQuestion').click();
+    await expect(app.satellite('directionQuestionAnimate')).toBeVisible();
+    await page.mouse.move(0, 0);
+    await expect(async () => {
+      const centers = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-testid^="satellite-direction"], [data-testid="direction-toolbar"] button')]
+          .map((el) => el.getBoundingClientRect())
+          .filter((r) => r.width > 0)
+          .map((r) => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 })),
+      );
+      expect(centers.length).toBeGreaterThanOrEqual(8);
+      for (let i = 0; i < centers.length; i++)
+        for (let j = i + 1; j < centers.length; j++)
+          expect(Math.hypot(centers[i].x - centers[j].x, centers[i].y - centers[j].y)).toBeGreaterThanOrEqual(19.5);
+    }).toPass({ timeout: 5000 });
+    await app.expectSentences({ en: 'where does the cat go?', de: 'wohin geht der Kater?' });
+  });
+
   test('the existential on the subject’s ring says there is', async ({ app, page }) => {
     await app.buildClause('CAT', 'BE');
     await app.revealAndPick('locative', 'HOUSE');

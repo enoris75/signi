@@ -6,6 +6,7 @@ import {
   asksQuestion,
   canAsk,
   canBeExistential,
+  hasQuestionAnimacy,
   questionAnimateOf,
 } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
 
@@ -19,6 +20,8 @@ const RUN = c('RUN', 'verb', { transitivity: 'intransitive', complements: ['loca
 const BE = c('BE', 'verb', { transitivity: 'intransitive', complements: ['predicative', 'locative', 'cause'] });
 
 const ROLES: QuestionRole[] = ['subject', 'directObject', 'locative', 'manner', 'cause'];
+// P09-E53's seven, the complements that keep their relation.
+const EXTRA: QuestionRole[] = ['terminus', 'comitative', 'topic', 'direction', 'source', 'route', 'temporal'];
 const askable = (sel: PhraseSelection) => ROLES.filter((r) => canAsk(sel, r));
 
 // Each gate is one of the engine's refusals (resolveQuestion, existentialPlan, withExistential).
@@ -38,11 +41,42 @@ describe('the wh-question gate', () => {
     expect(askable({ subject: CAT, verb: EAT, ...extra })).toEqual([]);
   });
 
-  it('asks a locative only in its plain relation, a cause only neutral and not denied', () => {
+  // P09-E53 D2: the gate mirrors P09-E15's refusals, and the licence is what the verb is offered.
+  it('asks a place in any relation, a cause in any stance but not denied', () => {
     expect(canAsk({ verb: EAT, locativeSpecifier: 'in' }, 'locative')).toBe(true);
-    expect(canAsk({ verb: EAT, locativeSpecifier: 'under' }, 'locative')).toBe(false);
-    expect(canAsk({ verb: EAT, causeSentiment: 'positive' }, 'cause')).toBe(false);
+    expect(canAsk({ verb: EAT, locativeSpecifier: 'under' }, 'locative')).toBe(true);
+    expect(canAsk({ verb: EAT, causeSentiment: 'positive' }, 'cause')).toBe(true);
+    expect(canAsk({ verb: EAT, causeSentiment: 'negative' }, 'cause')).toBe(true);
     expect(canAsk({ verb: EAT, causeNegative: true }, 'cause')).toBe(false);
+  });
+
+  it('asks the complements that keep their relation, where the verb is offered them', () => {
+    const GIVE = c('GIVE', 'verb', { transitivity: 'ditransitive', complements: ['terminus'] });
+    const GO = c('GO', 'verb', { transitivity: 'intransitive', complements: ['direction', 'source', 'route'] });
+    const SPEAK = c('SPEAK', 'verb', { transitivity: 'intransitive', complements: ['topic'] });
+    const ALL = [...ROLES, ...EXTRA];
+    const askableOf = (sel: PhraseSelection) => ALL.filter((r) => canAsk(sel, r));
+    // The time and the companion are adjuncts, offered on every verb: RUN licenses neither.
+    expect(askableOf({ verb: RUN })).toEqual(['subject', 'locative', 'comitative', 'temporal']);
+    expect(askableOf({ verb: GIVE })).toEqual(['subject', 'directObject', 'terminus', 'comitative', 'temporal']);
+    expect(askableOf({ verb: GO, directionSpecifier: 'under', routeSpecifier: 'over' })).toEqual([
+      'subject', 'comitative', 'direction', 'source', 'route', 'temporal',
+    ]);
+    expect(askableOf({ verb: SPEAK })).toEqual(['subject', 'comitative', 'topic', 'temporal']);
+    expect(askableOf({ verb: GO, verbVoice: 'passive' })).toEqual([]);
+  });
+
+  it('asks a time only at or until: the other relations are refused by the engine', () => {
+    expect(canAsk({ verb: RUN }, 'temporal')).toBe(true);
+    expect(canAsk({ verb: RUN, temporalRelation: 'at' }, 'temporal')).toBe(true);
+    expect(canAsk({ verb: RUN, temporalRelation: 'until' }, 'temporal')).toBe(true);
+    for (const relation of ['ago', 'after', 'before', 'during', 'between', 'for'] as const)
+      expect(canAsk({ verb: RUN, temporalRelation: relation }, 'temporal')).toBe(false);
+  });
+
+  it('asks no purpose, predicative or object predicative', () => {
+    // Not question roles at all: the type leaves them out, and the gate has no case for them.
+    expect((['purpose', 'predicative', 'objectPredicative'] as string[]).filter((r) => [...ROLES, ...EXTRA].includes(r as QuestionRole))).toEqual([]);
   });
 
   it('carries the mark into the plan only where the question is asked', () => {
@@ -58,6 +92,21 @@ describe('the wh-question gate', () => {
     expect(questionAnimateOf({ subject: MAN, questionRole: 'subject', questionAnimate: false })).toBe(false);
     expect(questionAnimateOf({ questionRole: 'directObject', questionAnimate: true })).toBe(true);
     expect(questionAnimateOf({ questionRole: 'locative', questionAnimate: true })).toBe(false);
+  });
+
+  // P09-E53 D4: the chip only where the answer's animacy changes the question word.
+  it('has who and what only where the question word changes with them', () => {
+    const has = (role: QuestionRole, extra: PhraseSelection = {}) => hasQuestionAnimacy({ questionRole: role, ...extra }, role);
+    for (const role of ['subject', 'directObject', 'terminus', 'comitative', 'topic', 'direction', 'source'] as const)
+      expect(has(role)).toBe(true);
+    expect(has('locative', { locativeSpecifier: 'under' })).toBe(true);
+    expect(has('cause', { causeSentiment: 'positive' })).toBe(true);
+    for (const role of ['manner', 'temporal', 'route', 'locative', 'cause'] as const) expect(has(role)).toBe(false);
+    expect(has('cause', { causeSentiment: 'negative' })).toBe(false);
+    // The held word answers until the chip is flipped.
+    expect(questionAnimateOf({ comitative: MAN, questionRole: 'comitative' })).toBe(true);
+    expect(questionAnimateOf({ comitative: MAN, questionRole: 'comitative', questionAnimate: false })).toBe(false);
+    expect(questionAnimateOf({ route: MAN, questionRole: 'route', questionAnimate: true })).toBe(false);
   });
 });
 

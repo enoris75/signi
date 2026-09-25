@@ -10,7 +10,7 @@ and a `/wh poss` value.
 No new UI string.
 **Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the engine
 side is [P09-E14](Z-done/P09-E14-possessor-question.md). Third of four question controls, after
-[E53](P09-E53-marked-relation-question-control.md) and [E54](P09-E54-passive-question-control.md)
+[E53](Z-done/P09-E53-marked-relation-question-control.md) and [E54](P09-E54-passive-question-control.md)
 (see E53 D6).
 
 Engine output at HEAD, from hand-written plans (rendered 2026-09-25 against the seeded lexicon):

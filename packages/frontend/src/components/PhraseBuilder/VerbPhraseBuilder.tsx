@@ -23,6 +23,7 @@ import {
   defaultPredication, isModalAdverbSlot, isModalSlot } from "./slots.ts";
 import { activatable } from "../../keyboard/activate.ts";
 import { ComplementMenu } from "./ComplementMenu.tsx";
+import { hasRelation } from "./functions/questionGates.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 
 // Renders the verb phrase onto the shared canvas: the verb in its solid ring, the adverb, modal and
@@ -147,8 +148,9 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
 
       {/* The relation toolbars ride the top of the route, locative and cause rings — one button per
           relation, seated among the ring's other controls. Like the ring's other controls, they are
-          withdrawn in compact view. */}
-      {!compact && selection.route && (
+          withdrawn in compact view. A box a wh-question asks about has one too, although it is
+          usually empty: its relation is the question's, "under what" (P09-E53 D3). */}
+      {!compact && hasRelation(selection, "route") && (
         <SpecifierSelector
           value={selection.routeSpecifier ?? DEFAULT_ROUTE_SPECIFIER}
           armed={toolbarFor === "route"}
@@ -161,7 +163,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {/* The locative takes the same relation toolbar as the route — it is what lets the
           place read "under the bed" or "behind the tree" rather than only "in the bed".
           Same relations, different default: the locative falls back on containment. */}
-      {!compact && selection.locative && (
+      {!compact && hasRelation(selection, "locative") && (
         <SpecifierSelector
           value={selection.locativeSpecifier ?? DEFAULT_LOCATIVE_SPECIFIER}
           armed={toolbarFor === "locative"}
@@ -172,7 +174,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       )}
 
       {/* The direction's relation (P13): its plain goal, or into / onto / … it. */}
-      {!compact && selection.direction && (
+      {!compact && hasRelation(selection, "direction") && (
         <DirectionSelector
           value={selection.directionSpecifier ?? "to"}
           armed={toolbarFor === "direction"}
@@ -183,7 +185,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       )}
 
       {/* The temporal's relation (at / ago / until / …) rides the top of its ring the same way. */}
-      {!compact && selection.temporal && (
+      {!compact && hasRelation(selection, "temporal") && (
         <TemporalSelector
           value={selection.temporalRelation ?? DEFAULT_TEMPORAL_RELATION}
           armed={toolbarFor === "temporal"}
@@ -204,7 +206,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
         />
       )}
 
-      {!compact && selection.cause && (
+      {!compact && hasRelation(selection, "cause") && (
         <SentimentSelector
           value={selection.causeSentiment ?? CAUSE_SENTIMENTS[0]}
           armed={toolbarFor === "cause"}

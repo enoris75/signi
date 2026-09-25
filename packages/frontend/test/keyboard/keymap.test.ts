@@ -268,6 +268,19 @@ describe('the menus and toolbars a key opens', () => {
     expect(commandFor('s', filled('directObject'))).toBeUndefined();
     expect(commandFor('s', { slot: 'locative', nounKey: 'locative' })).toBeUndefined();
   });
+
+  // P09-E53 D3: an asked box is usually empty, and its relation is the question's ("under what").
+  it('points S at the relation toolbar of an empty box a question asks about', () => {
+    const asked = (slot: 'locative' | 'temporal' | 'comitative') => ({
+      slot,
+      nounKey: slot,
+      selection: { interrogative: true, questionRole: slot } as PhraseSelection,
+    });
+    expect(commandFor('s', asked('locative'))).toBe('noun.relation');
+    expect(commandFor('s', asked('temporal'))).toBe('noun.relation');
+    // The companion has no relation to choose.
+    expect(commandFor('s', asked('comitative'))).toBeUndefined();
+  });
 });
 
 describe('the command box', () => {

@@ -55,9 +55,64 @@ describe('the question and the existential in the plan', () => {
     const passive = planOf({ subject: CAT, verb: EAT, directObject: DOG, verbVoice: 'passive', interrogative: true, questionRole: 'directObject' });
     expect(passive).not.toHaveProperty('questionRole');
     expect(passive.directObject).toMatchObject({ concept: 'DOG' });
-    const under = planOf({ subject: CAT, verb: EAT, locative: HOUSE, locativeSpecifier: 'under', interrogative: true, questionRole: 'locative' });
-    expect(under).not.toHaveProperty('questionRole');
-    expect(under.complements?.locative).toBeDefined();
+    // A time the engine asks only at or until (P09-E53 D2).
+    const ago = planOf({ subject: CAT, verb: EAT, temporal: HOUSE, temporalRelation: 'ago', interrogative: true, questionRole: 'temporal' });
+    expect(ago).not.toHaveProperty('questionRole');
+    expect(ago.complements?.temporal).toBeDefined();
+  });
+
+  // P09-E53 D3: one plan per column of the task's table, each from an EMPTY asked box with its
+  // relation — the plans questions.test.ts pins in the engine.
+  describe('asks a complement that keeps its relation, from an empty box', () => {
+    const RUN = concept('RUN', 'verb', { transitivity: 'intransitive', complements: ['locative', 'cause'] });
+    const COME = concept('COME', 'verb', { transitivity: 'intransitive', complements: ['source'] });
+    const GIVE = concept('GIVE', 'verb', { transitivity: 'ditransitive', complements: ['terminus'] });
+    const BOOK = concept('BOOK', 'noun');
+    const ask = (sel: PhraseSelection) => {
+      const plan = planOf({ interrogative: true, ...sel });
+      delete plan.interrogative;
+      return plan;
+    };
+    it.each<[string, PhraseSelection, Partial<PhrasePlan>]>([
+      [
+        'under what does the cat eat?',
+        { subject: CAT, verb: EAT, locativeSpecifier: 'under', questionRole: 'locative' },
+        { questionRole: 'locative', questionSpecifiers: [{ kind: 'path', value: 'under' }] },
+      ],
+      [
+        'thanks to whom does the cat run?',
+        { subject: CAT, verb: RUN, causeSentiment: 'positive', questionRole: 'cause', questionAnimate: true },
+        { questionRole: 'cause', questionSpecifiers: [{ kind: 'sentiment', value: 'positive' }], questionAnimate: true },
+      ],
+      ['where does the cat come from?', { subject: CAT, verb: COME, questionRole: 'source' }, { questionRole: 'source' }],
+      ['when does the cat eat?', { subject: CAT, verb: EAT, questionRole: 'temporal' }, { questionRole: 'temporal' }],
+      [
+        'with whom does the cat run?',
+        { subject: CAT, verb: RUN, questionRole: 'comitative', questionAnimate: true },
+        { questionRole: 'comitative', questionAnimate: true },
+      ],
+      [
+        'to whom does the man give the book?',
+        { subject: MAN, verb: GIVE, directObject: BOOK, questionRole: 'terminus', questionAnimate: true },
+        { questionRole: 'terminus', questionAnimate: true, directObject: { concept: 'BOOK' } },
+      ],
+    ])('%s', (_, sel, want) => {
+      const plan = ask(sel);
+      expect(plan).toMatchObject(want);
+      expect(plan).not.toHaveProperty('complements');
+      if (!want.questionSpecifiers) expect(plan).not.toHaveProperty('questionSpecifiers');
+      if (!want.questionAnimate) expect(plan).not.toHaveProperty('questionAnimate');
+    });
+
+    it('asks until when, and who a companion is by the held word', () => {
+      expect(ask({ subject: CAT, verb: EAT, temporalRelation: 'until', questionRole: 'temporal' })).toMatchObject({
+        questionRole: 'temporal',
+        questionSpecifiers: [{ kind: 'temporal', value: 'until' }],
+      });
+      const held = ask({ subject: CAT, verb: RUN, comitative: MAN, questionRole: 'comitative' });
+      expect(held).toMatchObject({ questionRole: 'comitative', questionAnimate: true });
+      expect(held).not.toHaveProperty('complements');
+    });
   });
 
   it('asks only the root period: a clause under a condition keeps its words', () => {

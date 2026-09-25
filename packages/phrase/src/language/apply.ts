@@ -1,10 +1,13 @@
 import {
   canCoordinateImperative,
   type AbstractionLevel,
+  type CauseSentiment,
   type Concept,
   type CoordConjunction,
   type ImperativeRegister,
+  type PathSpecifier,
   type SubordinatingConjunction,
+  type TemporalRelation,
 } from "@signi/shared";
 import {
   governsInfinitive,
@@ -75,6 +78,9 @@ import {
   setExistential,
   setQuestionAnimate,
   setQuestionRole,
+  setSentiment,
+  setSpecifier,
+  setTemporalRelation,
   setModifierAdjective,
   setNounConjunction,
   setPossessorRef,
@@ -92,6 +98,7 @@ import {
   LEVEL_VALUES,
   PERSON_VALUES,
   QUESTION_ANIMACY_VALUES,
+  QUESTION_RELATION_VALUES,
   QUESTION_SLOT_VALUES,
   REGISTER_VALUES,
   SUBORDINATE_NAMES,
@@ -943,14 +950,26 @@ class Run {
     const parts = (item.word?.text ?? "").split(/\s+/).filter(Boolean);
     const slot = parts.map((p) => valueNamed(QUESTION_SLOT_VALUES, p)).find(Boolean);
     const animacy = parts.map((p) => valueNamed(QUESTION_ANIMACY_VALUES, p)).find(Boolean);
+    const relationPart = parts.find((p) => valueNamed(QUESTION_RELATION_VALUES, p));
     if (!slot) {
       return unfinished(item.word ?? item.head, coded("setNeedsValue", { command: "wh", values: QUESTION_SLOT_VALUES.map((v) => v.name) }));
+    }
+    const role = slot.value as QuestionRole;
+    // The relation is the box's own setting, so it must be one the box has: a place's, a route's or a
+    // direction's path, the direction's plain goal, a time's relation, a cause's stance. Whether the
+    // engine asks it (a time only at or until) is the plan builder's to gate, as the slot is.
+    const relation = relationPart ? questionRelation(role, valueNamed(QUESTION_RELATION_VALUES, relationPart)!.value) : undefined;
+    if (relationPart && !relation) {
+      const taken = QUESTION_RELATION_VALUES.filter((v) => questionRelation(role, v.value)).map((v) => v.name);
+      const at = item.word!.from + [...item.word!.text.matchAll(/\S+/g)].find((m) => m[0] === relationPart)!.index!;
+      fail({ from: at, to: at + relationPart.length }, coded("valueNotTaken", { command: "wh", values: taken, given: relationPart }));
     }
     const id = frame.containerId;
     const root = this.root(id);
     if (!root.interrogative && this.moodLocked(id)) fail(item.head, coded("moodLocked"));
-    let sel = setQuestionRole(root, slot.value as QuestionRole);
+    let sel = setQuestionRole(root, role);
     if (animacy) sel = setQuestionAnimate(sel, animacy.value === "who");
+    if (relation) sel = relation(sel);
     this.updateRoot(id, () => sel);
     this.touch({ containerId: id, slot: slot.value as QuestionRole });
   }
@@ -1391,6 +1410,20 @@ export function roleRefusal(
   return offeredComplements(verb).includes(slot as never)
     ? undefined
     : coded("takesNoComplement", { verb: verbName, command: def.name, slot: slot as ComplementSlot });
+}
+
+/**
+ * What a `/wh` relation value (`specifier:under`, `temporal:until`, `sentiment:positive`, see
+ * QUESTION_RELATION_VALUES) writes onto the period for the asked `role`, or undefined where the box
+ * has no such setting — a companion has no relation, a time no path (P09-E53 D5).
+ */
+function questionRelation(role: QuestionRole, value: string): ((sel: PhraseSelection) => PhraseSelection) | undefined {
+  const [kind, v] = value.split(":") as [string, string];
+  if (kind === "specifier" && (role === "direction" || ((role === "locative" || role === "route") && v !== "to")))
+    return (sel) => setSpecifier(sel, v === "to" ? undefined : (v as PathSpecifier), role);
+  if (kind === "temporal" && role === "temporal") return (sel) => setTemporalRelation(sel, v as TemporalRelation);
+  if (kind === "sentiment" && role === "cause") return (sel) => setSentiment(sel, v as CauseSentiment);
+  return undefined;
 }
 
 /** The period slot a `/del` target names by its role command's name or alias. */
