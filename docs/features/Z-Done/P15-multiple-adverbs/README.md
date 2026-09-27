@@ -126,3 +126,13 @@ None of these is a P15 regression. Each also shows with a single adverb, or is a
 - **An extra adverb keeps its plain form under negation**: only the primary takes a negative form
   (ALREADY → *yet*). A second focus adverb under a negation would need its own.
 - **An instrument's action** (`Complement.action`, "by eating slowly") still reads one adverb.
+
+Filed on 2026-09-27 as [A383](../../../bugs/A-must-fix/A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md)
+(French frequency after an infinitive), [A384](../../../bugs/A-must-fix/A384-never-again-is-said-word-for-word.md)
+(NEVER + AGAIN), [A385](../../../bugs/A-must-fix/A385-japanese-often-and-well-together-say-yokuyoku.md)
+(よくよく), [A386](../../../bugs/A-must-fix/A386-english-yet-before-a-further-adverb.md) (English *yet*
+ahead of an extra, found while probing the negation follow-up) and
+[A387](../../../bugs/A-must-fix/A387-instrument-act-says-one-adverb-of-several.md) (the instrument's
+act). The manner adverb before a noun object is pinned as right (A142, A191) and was not filed; nor was
+the extra adverb's form under negation, which no sensible plan reaches. The e2e spec's English *runs
+here fast* follows A156's pinned order, not this README's target (*fast here*).

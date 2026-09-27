@@ -95,3 +95,18 @@ describe('several adverbs (ja)', () => {
       .toEqual(['ねこ', 'けっして', 'はやく', 'はしりません']);
   });
 });
+
+// A385. WELL and OFTEN are both よく, so OFTEN + WELL says よくよく, which reads "thoroughly".
+// WELL alone keeps よく, as in よく知る.
+describe('known bugs: Japanese OFTEN and WELL together say よくよく (A385)', () => {
+  const eat = (verbPhrase: Partial<VerbPhrase>) => ja(clause(np('CAT'), 'EAT', { verbPhrase, directObject: np('MOUSE') }));
+
+  test.fails('WELL beside a frequency よく says 上手に', () => {
+    expect(eat({ modifier: 'OFTEN', modifiers: ['WELL'] })).toBe('猫はネズミをよく上手に食べます。');
+  });
+
+  test('regression: WELL alone and OFTEN alone are よく', () => {
+    expect(run({ modifier: 'WELL' })).toBe('猫はよく走ります。');
+    expect(run({ modifier: 'OFTEN' })).toBe('猫はよく走ります。');
+  });
+});

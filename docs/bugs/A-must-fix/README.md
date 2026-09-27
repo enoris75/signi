@@ -1,5 +1,15 @@
 # A-must-fix — confirmed bugs
 
+**Five open.** **A383–A387**, filed on 2026-09-27 from P15's follow-ups, at aa554c6b.
+[A383](A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md), a French bare infinitive splits OFTEN + WELL round the verb (*bien manger souvent*).
+[A384](A384-never-again-is-said-word-for-word.md), NEVER + AGAIN is said word for word (*mai di nuovo* for *mai più*) in six languages.
+[A385](A385-japanese-often-and-well-together-say-yokuyoku.md), Japanese OFTEN + WELL say よくよく.
+[A386](A386-english-yet-before-a-further-adverb.md), English *does not run yet fast*.
+[A387](A387-instrument-act-says-one-adverb-of-several.md), an instrument's act drops every adverb but one, in all seven.
+
+A381 and A382 were fixed on 2026-09-27 and moved to [`../fixed/`](../fixed/). The history below is
+kept as it was written.
+
 **Two open.** **A381** and **A382**, filed on 2026-09-25 from ten random phrases, at ba6f93ba.
 [A381](A381-german-du-imperative-of-speak-and-happen-drops-the-e-to-i.md), the German du command of SPEAK and HAPPEN is the bare stem (*sprech*, *gescheh*).
 [A382](A382-german-answer-takes-its-object-in-the-accusative.md), German ANSWER takes what is answered as a bare accusative (*antwortet das Wort* for *antwortet auf das Wort*).

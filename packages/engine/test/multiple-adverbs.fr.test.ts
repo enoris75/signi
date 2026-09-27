@@ -113,3 +113,20 @@ describe('French: several adverbs on one verb', () => {
       .toBe("le chat m'a souvent vu vite.");
   });
 });
+
+// A383. A bare infinitive with a frequency primary and a short manner extra splits them round the
+// verb: BIEN takes A155's place before the infinitive, and SOUVENT stays behind it, "bien manger
+// souvent la souris". The modal's infinitive keeps them together, "doit souvent bien manger".
+describe('known bugs: French bien before an infinitive leaves souvent behind it (A383)', () => {
+  const eatInf = (verbPhrase: Partial<VerbPhrase>) =>
+    fr({ ...clause(np('CAT'), 'EAT', { verbPhrase, directObject: np('MOUSE') }), infinitive: true });
+
+  test.fails('the frequency adverb leads the manner adverb before the infinitive', () => {
+    expect(eatInf({ modifier: 'OFTEN', modifiers: ['WELL'] })).toBe('souvent bien manger la souris.');
+  });
+
+  test('regression: a lone frequency adverb, and the modal, are unchanged', () => {
+    expect(eatInf({ modifier: 'OFTEN' })).toBe('manger souvent la souris.');
+    expect(eats({ modifier: 'OFTEN', modifiers: ['WELL'], modals: ['MUST'] })).toBe('le chat doit souvent bien manger la souris.');
+  });
+});

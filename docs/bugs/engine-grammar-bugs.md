@@ -65,8 +65,20 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
+| A383 | [A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md](A-must-fix/A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md) | French | a bare infinitive splits OFTEN + WELL round the verb: *bien manger souvent la souris* for *souvent bien manger la souris* |
+| A384 | [A384-never-again-is-said-word-for-word.md](A-must-fix/A384-never-again-is-said-word-for-word.md) | it, fr, de, es, pt, ja | NEVER + AGAIN word for word: *non corre mai di nuovo* for *mai più*, *nie erneut* for *nie wieder* |
+| A385 | [A385-japanese-often-and-well-together-say-yokuyoku.md](A-must-fix/A385-japanese-often-and-well-together-say-yokuyoku.md) | Japanese | OFTEN + WELL say よくよく ("thoroughly") for よく上手に |
+| A386 | [A386-english-yet-before-a-further-adverb.md](A-must-fix/A386-english-yet-before-a-further-adverb.md) | English | *does not run yet fast* for *does not run fast yet* |
+| A387 | [A387-instrument-act-says-one-adverb-of-several.md](A-must-fix/A387-instrument-act-says-one-adverb-of-several.md) | all seven, gsw | an instrument's act ("by choosing a word") drops every adverb but the primary |
 
-**None open.** A381 and A382, filed on 2026-09-25 from ten random phrases at ba6f93ba (A382 on
+**Five open.** **A383–A387**, filed on 2026-09-27 from P15's follow-ups, each re-probed at aa554c6b.
+Not filed, because a test already pins the output as right: a manner adverb before a noun object in
+it / fr / es / pt / de (A142's regression, A191's positive-clause decision), and English putting a manner
+adverb after a place complement or adverb, *runs here fast* (A156's regression in `adverb.test.ts`).
+Also not filed: a second adverb keeping its positive form under a negation (*does not often already
+run*), which no sensible plan reaches.
+
+Before them: A381 and A382, filed on 2026-09-25 from ten random phrases at ba6f93ba (A382 on
 the user's ruling that ANSWER's pinned *antwortet das Wort* is a bug), were fixed on 2026-09-27 and
 are listed under **Fixed** below. Not filed: the
 generator's own gap (it hands VERY and TOO to a verb, which the canvas's adverb picker never offers),
