@@ -11,7 +11,10 @@ every concept of the corpus, inline-SVG flags, and the groundwork of
 no database CHECK, a `preview`/`ready` language status, ready-only test gating). If Romansh ships
 before Catalan, it carries that groundwork instead.
 
-**Status:** planning. D1–D4 are **decided** (below). The rest are proposed. Flags are D3.
+**Status:** planning. D1–D4 are **decided** (below). The rest are proposed. Flags are D3. Split into
+**E1–E20** (2026-09-27) — see [§7](#7-tasks-e1e20). **§0 is mostly shipped** by
+[P10-E1](../P10-swiss-german/Z-done/P10-E1-language-groundwork.md) and P10-E2's `Flag` widening; the
+counts in §1, §2 and §4 are stale and re-measured in E4, E7 and E17.
 
 > **Almost every Romansh form in this document is a draft, and the two idiom columns are mostly
 > blank.** Model knowledge of Rumantsch Grischun is thin; of Sursilvan and Vallader it is thinner
@@ -58,7 +61,7 @@ languages rather than one with a variant switch:
 |---|---|---|---|
 | D1 | Which Romansh? | **Three, as peers:** Rumantsch Grischun, Sursilvan, Vallader. The other idioms (Sutsilvan, Surmiran, Puter) and the Jauer dialect stay out of scope. | RG is what the Confederation and the canton write official texts in, and the only variety with one complete modern dictionary and conjugator — but it is an administrative standard, not a spoken variety, and several Surselva and Engadine municipalities adopted it for schools and then reverted. Sursilvan is the largest idiom and the Rhenish pole; Vallader is the Engadine pole with its own literary tradition. The three span the real dialect continuum. Puter is close enough to Vallader (the two are often grouped as *rumantsch ladin*) that it adds little; Sutsilvan and Surmiran are small. **Treating them as peers, not as variants of RG, is the decision** — it costs three reviewers and three columns, and it avoids declaring one variety the "real" Romansh. |
 | D2 | Language codes | **BCP 47 variant subtags: `rm-rumgr`, `rm-sursilv`, `rm-vallader`.** | Verified against the IANA Language Subtag Registry: `rumgr` ("Rumantsch Grischun", *Supraregional Romansh written standard*), `sursilv` and `vallader` (each *"one of the five traditional written standards or 'idioms' of the Romansh language"*), all `Prefix: rm`, all added 2010-06-29. ISO 639 offers only `roh` for Romansh as a whole, so these subtags are the only standard way to name the three. Symmetric: no variety gets the bare `rm`. **These are the first non-two-letter codes in `LanguageCode`** — see §0.1. |
-| D3 | Flags | **Inline SVG arms of the Three Leagues (*Trais Ligias*) — not 🇨🇭.** The full cantonal arms of Graubünden for `rm-rumgr`; the **Grey League** for `rm-sursilv`; the **League of God's House** for `rm-vallader`. | Not 🇨🇭, which would be three identical icons, and not invented emblems either: the leagues are a real heraldic set whose historic territories map onto the varieties. The **Grey League** (*Lia Grischa*, founded 1395, capital Ilanz, holding Disentis, Lugnez, Vals and Waltensburg) **is** the Surselva — an exact match for Sursilvan. The **League of God's House** (*Chadé*, 1367, capital Chur) holds both Engadines, so it covers Vallader — though more loosely, since it also holds Puter country, Italian-speaking Bergell and Chur itself. **Rumantsch Grischun takes the full cantonal arms**, which combine all three: the supraregional standard gets the supraregional emblem. The third league, the **Ten Jurisdictions** (Davos, Klosters, Prättigau), is the German-speaking one and carries no Romansh variety — which is why only two of the three ever appear alone. Blazons, from the cantonal arms fixed in 1932: Grey League *per pale sable and argent*; Ten Jurisdictions *quarterly azure and or, a cross counterchanged*; God's House *argent, an ibex rampant sable*. Still **requires P03 D3's widening** of `FLAG` from `Record<LanguageCode, string>` to a small `Flag` component ([`frontend/src/i18n/flags.ts`](../../../../packages/frontend/src/i18n/flags.ts) is a plain string map today, and both callers render it as text). |
+| D3 | Flags | **Inline SVG arms of the Three Leagues (*Trais Ligias*) — not 🇨🇭.** The full cantonal arms of Graubünden for `rm-rumgr`; the **Grey League** for `rm-sursilv`; the **League of God's House** for `rm-vallader`. | Not 🇨🇭, which would be three identical icons, and not invented emblems either: the leagues are a real heraldic set whose historic territories map onto the varieties. The **Grey League** (*Lia Grischa*, founded 1395, capital Ilanz, holding Disentis, Lugnez, Vals and Waltensburg) **is** the Surselva — an exact match for Sursilvan. The **League of God's House** (*Chadé*, 1367, capital Chur) holds both Engadines, so it covers Vallader — though more loosely, since it also holds Puter country, Italian-speaking Bergell and Chur itself. **Rumantsch Grischun takes the full cantonal arms**, which combine all three: the supraregional standard gets the supraregional emblem. The third league, the **Ten Jurisdictions** (Davos, Klosters, Prättigau), is the German-speaking one and carries no Romansh variety — which is why only two of the three ever appear alone. Blazons, from the cantonal arms fixed in 1932: Grey League *per pale sable and argent*; Ten Jurisdictions *quarterly azure and or, a cross counterchanged*; God's House *argent, an ibex rampant sable*. Still **requires P03 D3's widening** of `FLAG` from `Record<LanguageCode, string>` to a small `Flag` component ([`frontend/src/i18n/flags.ts`](../../../../packages/frontend/src/i18n/flags.tsx) is a plain string map today, and both callers render it as text). |
 | D4 | Engine layout | **Three independent folders**, each free to diverge: `languages/rm-rumgr/`, `languages/rm-sursilv/`, `languages/rm-vallader/`. No shared Romansh core. | Maximum independence: a Sursilvan fix can never regress Vallader, and each folder reads as its own language like the existing seven. The cost is explicit and permanent: **~180 source files, ~6,200 LOC and ~165 colocated test files** (§2), and every shared-grammar fix applied three times. Accepted deliberately. |
 | D5 | What fills `past` | The **compound past**: *haver/esser* + participle. | The simple past is extinct in speech and rare in writing in all three. Auxiliary choice is per verb: reuse the existing `aux: 'be'` key in [`concepts/verbs/nonfinite.ts`](../../../../packages/backend/src/concepts/verbs/nonfinite.ts) (it/de already select the BE auxiliary with it). The participle agrees with the subject after *esser*, like Italian `aspectVerb.ts`. Participle morphology differs per variety (RG *-à*, Sursilvan *-au*). |
 | D6 | Past vs resultative | Accept that **neutral past and resultative aspect render the same**. | No variety has a second construction to tell "he went" from "he is gone". Document as a known collision, not a bug. |
@@ -106,7 +109,7 @@ on the checklist for phase 0:
 |---|---|
 | [`shared/src/index.ts:3`](../../../../packages/shared/src/index.ts#L3) `LanguageCode`, [`:406`](../../../../packages/shared/src/index.ts#L406) `LANGUAGES` | Add the three codes and names. `LANGUAGES` fails typecheck until the names are there. |
 | [`shared/src/uiStrings.ts:4521-4527`](../../../../packages/shared/src/uiStrings.ts#L4521-L4527) | Add `'language.rm-rumgr'` and the other two, in the `{ word: …, format: { capitalize: true }, fallback: … }` shape the seven use. |
-| [`frontend/src/i18n/flags.ts`](../../../../packages/frontend/src/i18n/flags.ts) | D3: widen `FLAG` from a string map to a `Flag` component rendering either an emoji or an inline SVG. Shared with P03. |
+| [`frontend/src/i18n/flags.ts`](../../../../packages/frontend/src/i18n/flags.tsx) | D3: widen `FLAG` from a string map to a `Flag` component rendering either an emoji or an inline SVG. Shared with P03. |
 | [`engine/src/translator/translator.consts.ts:1-18`](../../../../packages/engine/src/translator/translator.consts.ts#L1-L18) | Import and register three engines. The array order is the order of `Translation[]`. |
 | [`backend/src/concepts/nouns.ts`](../../../../packages/backend/src/concepts/nouns.ts) | Three new language-name concepts (`isA: 'LANGUAGE'`, `countable: false`), plus three forms on each of the seven existing ones. See §0.5. |
 | `shared/src/index.d.ts`, `shared/src/index.js` | Stale compiled copies still listing seven languages, committed to git. Delete them. |
@@ -363,6 +366,45 @@ All three varieties move together through each phase, per the sequencing decisio
   Outside phase 3; planned then.
 - **Three rows of near-identical text** (§3) is a UI cost borne by every user, for three varieties of a
   40,000-speaker language sitting beside one row of Spanish.
+
+## 7. Tasks (E1–E20)
+
+Filed 2026-09-27, verified against HEAD 98a65a47. Decision numbers are this README's. The groundwork
+P04 §0 planned shipped with P10 (E1 builds on it); what changed since this plan was written:
+
+- **§0.2–§0.4, §0.7 done** by P10-E1: one language list, no database CHECK, `preview`/`ready`, the
+  boot checks warn for a preview language, ready-only test gating, a preview row never borrows another
+  language's word. **D3's `Flag` widening done** by P10-E2. The codes now append after `gsw` (D12).
+- **Counts:** 836 concepts, not 463 (E4); 615 UI strings and 619 definitions, not 483 and 148 — about
+  **1,234 reviewed strings per variety, ~3,700 for the three** (E17); `it` is 62 files / 2,717 LOC (E7).
+- **The corpus column pattern** is `concepts/<code>/`, keyed by concept id, with a pending list
+  (P10-E4) — E4–E6 follow it.
+- **Rows can be reordered** by the reader (735ec57d), so D12 fixes only the default order.
+
+| task | phase | what | status |
+|---|---|---|---|
+| [P04-E1](P04-E1-register-three-codes.md) | 0 | The three codes on the shipped groundwork; per-language tables; pending lists | Open |
+| [P04-E2](P04-E2-row-identity.md) | 0 | *Romansh (Sursilvan)* labels; names in eleven languages; the league arms | Open |
+| [P04-E3](P04-E3-sources-and-reviewers.md) | before 1 | Sources and terms of use (D11), a style sheet per variety, the irregular core, reviewer contacts | Open; blocks E4–E6 |
+| [P04-E4](P04-E4-rumantsch-grischun-column.md) | 1–3 | The `rm-rumgr` column, all 836 concepts | Open |
+| [P04-E5](P04-E5-sursilvan-column.md) | 1–3 | The `rm-sursilv` column, with the predicative adjective form | Open |
+| [P04-E6](P04-E6-vallader-column.md) | 1–3 | The `rm-vallader` column | Open |
+| [P04-E7](P04-E7-rumgr-engine-fork-noun-phrase.md) | 1 | RG engine forked from `it`; the noun phrase; the leak guard | Open |
+| [P04-E8](P04-E8-idiom-engine-forks.md) | 1 | Sursilvan and Vallader forked from RG; the noun phrase | Open |
+| [P04-E9](P04-E9-sursilvan-predicative-adjective.md) | 1 | *il paun ei buns* — the attributive/predicative axis | Open |
+| [P04-E10](P04-E10-clause-core-present.md) | 1 | Subjects kept, *ins*, the present, the copula | Open |
+| [P04-E11](P04-E11-three-negation-shapes.md) | 2 | *na … betg*, *buca*, *nu* (D8) | Open |
+| [P04-E12](P04-E12-compound-past.md) | 2 | The compound past (D5); `past == resultative` pinned (D6) | Open |
+| [P04-E13](P04-E13-periphrastic-future.md) | 2 | *vegnir a* + infinitive (D7) | Open |
+| [P04-E14](P04-E14-aspect-modals-degree.md) | 2 | Aspect, modals, degree, BECOME | Open |
+| [P04-E15](P04-E15-complements-relatives-coordination.md) | 3 | §2.3's complements, relatives, coordination | Open |
+| [P04-E16](P04-E16-moods.md) | 3 | Conditional, imperative (D10), infinitive; no inversion (D9) | Open |
+| [P04-E17](P04-E17-ui-strings-and-definitions.md) | 5 | Every UI string and definition renders, per variety | Open |
+| [P04-E18](P04-E18-interface-three-rows.md) | 3–5 | Three near-identical rows; diacritic folding in the picker | Open |
+| [P04-E19](P04-E19-review.md) | 4 | Three generated sheets, three reviewers, independent sign-off | Open; needs three native reviewers |
+| [P04-E20](P04-E20-promotion.md) | 6 | `ready`, per variety | Blocked on E19 |
+
+E17 runs before E19 (phase 5 before phase 4) so each reviewer sees every string the variety renders.
 
 ## Out of scope
 
