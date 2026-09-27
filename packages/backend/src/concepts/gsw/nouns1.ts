@@ -3,6 +3,7 @@ import type { GswColumn } from './types.js';
 export const GSW_NOUNS_1: GswColumn = {
   ANIMAL: { base: 'Tier', plural: 'Tier', gender: 'neut', count: 'singular' },
   MAMMAL: { base: 'Süügetier', plural: 'Süügetier', gender: 'neut', count: 'singular' },
+  FELINE: { base: 'Chatz', plural: 'Chatze', gender: 'fem', count: 'singular' },
   CAT: { base: 'Chater', plural: 'Chater', gender: 'masc', count: 'singular', fem: 'Chatz', fem_plural: 'Chatze' },
   DOG: {
     base: 'Hund', plural: 'Hünd', gender: 'masc', count: 'singular', fem: 'Hündin', fem_plural: 'Hündine', compound: 'Hunde',

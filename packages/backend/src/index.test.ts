@@ -134,9 +134,9 @@ describe('GET /api/concepts', () => {
       readings: { ja: 'ねこ' },
       emoji: '🐱',
       gendered: true,
-      isA: 'MAMMAL',
+      isA: 'FELINE',
       // Its ancestors, nearest first, which a noun modifier's relation is read against (P16).
-      classes: ['MAMMAL', 'ANIMAL'],
+      classes: ['FELINE', 'MAMMAL', 'ANIMAL'],
     });
   });
 

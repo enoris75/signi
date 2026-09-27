@@ -190,8 +190,8 @@ describe('the concept corpus', () => {
     // two a tidy-up could get wrong are pinned by name: WHALE is a mammal, not a fish, and SPIDER
     // an arachnid, not an insect, so it hangs from ANIMAL itself.
     const CLASSES: Record<string, string[]> = {
-      MAMMAL: ['CAT', 'DOG', 'FOX', 'WOLF', 'MOUSE', 'BOVINE', 'HORSE', 'PIG', 'SHEEP', 'GOAT', 'RABBIT',
-        'BEAR', 'LION', 'TIGER', 'ELEPHANT', 'MONKEY', 'DEER', 'WHALE'],
+      MAMMAL: ['FELINE', 'DOG', 'FOX', 'WOLF', 'MOUSE', 'BOVINE', 'HORSE', 'PIG', 'SHEEP', 'GOAT', 'RABBIT',
+        'BEAR', 'ELEPHANT', 'MONKEY', 'DEER', 'WHALE'],
       BIRD: ['CHICKEN', 'DUCK', 'EAGLE', 'OWL', 'PENGUIN'],
       FISH: ['SHARK', 'SALMON'],
       REPTILE: ['SNAKE', 'TURTLE', 'CROCODILE', 'LIZARD'],
@@ -203,6 +203,9 @@ describe('the concept corpus', () => {
       for (const id of animals) expect([id, ancestors(id, byId)]).toEqual([id, [cls, 'ANIMAL']]);
     }
     expect(ancestors('COW', byId)).toEqual(['BOVINE', 'MAMMAL', 'ANIMAL']);
+    for (const id of ['CAT', 'LION', 'TIGER']) {
+      expect([id, ancestors(id, byId)]).toEqual([id, ['FELINE', 'MAMMAL', 'ANIMAL']]);
+    }
     expect(ancestors('SPIDER', byId)).toEqual(['ANIMAL']);
     expect(ancestors('ANIMAL', byId)).toEqual([]);
   });

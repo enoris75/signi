@@ -43,9 +43,9 @@ describe('lookupLexicalEntry', () => {
         fem: 'gatta',
         fem_plural: 'gatte',
         animate: '1',
-        // The whole is-a chain, not the direct hypernym: CAT isA MAMMAL isA ANIMAL (A157).
+        // The whole is-a chain, not the direct hypernym: CAT isA FELINE isA MAMMAL isA ANIMAL (A157).
         animal: '1',
-        isA: 'MAMMAL',
+        isA: 'FELINE',
         role: 'noun',
       },
     });

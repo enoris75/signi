@@ -118,13 +118,35 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    id: 'FELINE',
+    role: 'noun',
+    description: 'a mammal of the cat family',
+    definition: `
+      /subj ( MAMMAL /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( EAT_ANIMAL ) /obj ( ANIMAL /pl /zero )
+    `,
+    emoji: '🐈',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'feline', plural: 'felines', count: 'singular' },
+      it: { base: 'felino', plural: 'felini', gender: 'masc', count: 'singular' },
+      fr: { base: 'félin', plural: 'félins', gender: 'masc', count: 'singular' },
+      // "Katze" in its family sense (Duden: a lion is a Katze), as the zoologist's "die Katzen".
+      de: { base: 'Katze', plural: 'Katzen', gender: 'fem', count: 'singular' },
+      es: { base: 'felino', plural: 'felinos', gender: 'masc', count: 'singular' },
+      ja: { base: 'ネコ科', count: 'singular', reading: 'ねこか', counter: '頭' },
+      pt: { base: 'felino', plural: 'felinos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'CAT',
     role: 'noun',
     description: 'domestic feline animal',
     definition: '/subj ( MAMMAL /adj SMALL /a )',
     emoji: '🐱',
     animate: true,
-    isA: 'MAMMAL',
+    isA: 'FELINE',
     forms: {
       en: { base: 'cat', plural: 'cats', count: 'singular' },
       it: { base: 'gatto', plural: 'gatti', gender: 'masc', count: 'singular', fem: 'gatta', fem_plural: 'gatte' },
@@ -156,8 +178,8 @@ export const nouns: ConceptSeed[] = [
   // ── The animal classes ─────────────────────────────────────────
   // The everyday taxonomy under ANIMAL, a class a level (MAMMAL is above): what a speaker sorts a
   // common animal into. SPIDER is an arachnid, not an insect, and sits under ANIMAL itself; WHALE
-  // is a mammal, not a fish. Families (the felines, the canines) are not levels yet: no rule needs
-  // them, and CANINE is already an adjective (see concepts/hierarchy.ts).
+  // is a mammal, not a fish. Families are levels only where asked for (BOVINE, FELINE); CANINE is
+  // an adjective, not a level (see concepts/hierarchy.ts).
   {
     id: 'BIRD',
     role: 'noun',
@@ -381,7 +403,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🦁',
     animate: true,
-    isA: 'MAMMAL',
+    isA: 'FELINE',
     forms: {
       en: { base: 'lion', plural: 'lions', count: 'singular' },
       it: { base: 'leone', plural: 'leoni', gender: 'masc', count: 'singular', fem: 'leonessa', fem_plural: 'leonesse' },
@@ -402,7 +424,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🐯',
     animate: true,
-    isA: 'MAMMAL',
+    isA: 'FELINE',
     forms: {
       en: { base: 'tiger', plural: 'tigers', count: 'singular' },
       // Italian "la tigre" is feminine for either sex.

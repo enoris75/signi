@@ -447,6 +447,31 @@ describe('subject: B02 kin and cattle nouns', () => {
   });
 });
 
+// FELINE, the cat family CAT hangs from: the learned word in Romance, German "Katze" in its family
+// sense (feminine, where CAT's base is Kater), Japanese ネコ科.
+describe('subject: the family noun FELINE', () => {
+  test('FELINE renders and pluralises in every language', () => {
+    expect(subject(np('FELINE'))).toEqual({
+      en: 'the feline runs.',
+      it: 'il felino corre.',
+      fr: 'le félin court.',
+      de: 'die Katze läuft.', // feminine
+      es: 'el felino corre.',
+      ja: 'ネコ科は走ります。',
+      pt: 'o felino corre.',
+    });
+    expect(subject(np('FELINE', { number: 'plural' }))).toEqual({
+      en: 'the felines run.',
+      it: 'i felini corrono.',
+      fr: 'les félins courent.',
+      de: 'die Katzen laufen.',
+      es: 'los felinos corren.',
+      ja: 'ネコ科は走ります。',
+      pt: 'os felinos correm.',
+    });
+  });
+});
+
 // ACTION, seeded for B06 (the VERB definition — "a word that expresses actions"). Feminine in
 // every gendered language (azione / action / Handlung / acción / ação), and vowel-initial in
 // Italian and French so the definite article elides (l'azione / l'action).
