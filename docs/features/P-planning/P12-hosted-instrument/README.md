@@ -204,3 +204,25 @@ Drawn on the canvas, and rejected for this plan:
 - **The other plan-only complements.** `comitative`, `objectPredicative` and `temporal` have no box
   and none is added here.
 - Any engine, seed or translation work.
+
+## Tasks (E1–E4)
+
+Filed 2026-09-27, checked against HEAD fb8af41a. One task per phase. What has moved since this plan
+was written, and is corrected in the tasks rather than above:
+
+- **The model lives in `@signi/phrase`** (P13). `linkRules`, `interfaces`, `workspacePlan` and the
+  console's `commands` under `packages/frontend` are one-line re-exports, and the line numbers above
+  have drifted.
+- **`RingHost` has four kinds** (`conjunct`, `owner`, `standard`, `examples`), and all four move to the
+  group report in E1.
+- **The instrument's relative gap shipped in P13** (`/rel #n.inst`). Its connector ends at the
+  verb-ring instrument toggle that E2 turns into "add the instrument", so the toggle keeps both jobs.
+- **The comitative and the object complement have boxes** (P13), so the out-of-scope list is out of date.
+- **P17** (the phone layout, unmerged) changes the same canvas files.
+
+| task | phase | what | status |
+|---|---|---|---|
+| [P12-E1](P12-E1-group-reports.md) | 1 | `sameHostedRings` / `mergeHostedRings`; every host reports a group | Open |
+| [P12-E2](P12-E2-object-level-instrument.md) | 2 | `InstrumentRings`, `bindingFor(id)`, the rank, no card, no connector; the toggle and the instrument gap | Open, after E1 |
+| [P12-E3](P12-E3-act-levels-and-toolbar.md) | 3 | Two rings at an action level; the level toolbar at twelve; `R` | Open, after E2 |
+| [P12-E4](P12-E4-linked-form-and-d2.md) | 4 | **D2**, the linked form beside the hosted one, old saves, compact view | Open, blocked on D2 |
