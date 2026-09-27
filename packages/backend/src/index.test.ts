@@ -206,6 +206,18 @@ describe('GET /api/concepts', () => {
     expect(await find('START')).not.toHaveProperty('glosses');
   });
 
+  // The antonym and synonym pairs of concepts/relations.ts, served from both ends.
+  test('carries a concept\'s antonyms and synonyms, both ends of each pair', async () => {
+    expect(await find('OLD')).toMatchObject({ antonyms: ['NEW', 'YOUNG'] });
+    expect(await find('NEW')).toMatchObject({ antonyms: ['OLD'] });
+    expect(await find('BEGIN')).toMatchObject({ synonyms: ['START'] });
+    expect(await find('START')).toMatchObject({ antonyms: ['STOP'], synonyms: ['BEGIN'] });
+    expect((await list('?role=adjective')).find((c) => c.id === 'BIG')?.antonyms).toEqual(['SMALL']);
+    const divide = await find('DIVIDE');
+    expect(divide).not.toHaveProperty('antonyms');
+    expect(divide).not.toHaveProperty('synonyms');
+  });
+
   test('lists every seeded alias, and only those', async () => {
     const served = Object.fromEntries((await list()).filter((c) => c.aliases).map((c) => [c.id, c.aliases]));
     const seeded = Object.fromEntries(offered.filter((c) => c.aliases).map((c) => [c.id, c.aliases]));

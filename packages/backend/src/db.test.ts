@@ -130,6 +130,17 @@ describe('schema', () => {
     expect(() => addHypernym.run('CARAVEL', 'VEHICLE')).toThrow(/UNIQUE constraint failed/);
   });
 
+  test('allows a concept several antonyms and synonyms, one hypernym still', () => {
+    for (const id of ['OLD', 'NEW', 'YOUNG', 'AGED', 'THING']) insertConcept(id);
+    const add = db.prepare('INSERT INTO concept_relations (concept_a_id, concept_b_id, relation) VALUES (?, ?, ?)');
+    add.run('OLD', 'NEW', 'antonym');
+    add.run('OLD', 'YOUNG', 'antonym');
+    add.run('OLD', 'AGED', 'synonym');
+    add.run('OLD', 'THING', 'hypernym');
+    expect(() => add.run('OLD', 'AGED', 'hypernym')).toThrow(/UNIQUE constraint failed/);
+    expect(() => add.run('OLD', 'NEW', 'meronym')).toThrow(/CHECK constraint failed/);
+  });
+
   test('rejects a concept as its own hypernym', () => {
     insertConcept('SHIP');
     expect(() =>
@@ -345,6 +356,44 @@ describe('migrations', () => {
     expect(db.pragma('foreign_keys', { simple: true })).toBe(1);
     expect(() => db.prepare("INSERT INTO semantic_concepts (id, role, description) VALUES ('X', 'particle', 'x')").run())
       .toThrow(/CHECK constraint failed/);
+  });
+
+  test('widens a hypernym-only relation table to take antonyms, keeping every row', async () => {
+    const file = path.join(tmp, 'relations.db');
+    const legacy = new Database(file);
+    legacy.exec(`
+      CREATE TABLE semantic_concepts (
+        id           TEXT PRIMARY KEY,
+        role         TEXT NOT NULL,
+        description  TEXT NOT NULL
+      );
+      INSERT INTO semantic_concepts (id, role, description) VALUES
+        ('CAT', 'noun', 'a cat'), ('ANIMAL', 'noun', 'an animal'), ('BIG', 'adjective', 'large'),
+        ('SMALL', 'adjective', 'little'), ('TINY', 'adjective', 'very small'), ('THING', 'noun', 'a thing');
+      CREATE TABLE concept_relations (
+        concept_a_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+        concept_b_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+        relation     TEXT NOT NULL CHECK (relation IN ('hypernym')),
+        PRIMARY KEY (concept_a_id, concept_b_id, relation),
+        UNIQUE (concept_a_id, relation),
+        CHECK (concept_a_id <> concept_b_id)
+      );
+      INSERT INTO concept_relations VALUES ('CAT', 'ANIMAL', 'hypernym');
+    `);
+    legacy.close();
+
+    const db = await track(file);
+    const add = db.prepare('INSERT INTO concept_relations (concept_a_id, concept_b_id, relation) VALUES (?, ?, ?)');
+    add.run('BIG', 'SMALL', 'antonym');
+    add.run('BIG', 'TINY', 'antonym');
+    expect(db.prepare('SELECT concept_a_id, concept_b_id, relation FROM concept_relations ORDER BY concept_a_id, concept_b_id').all()).toEqual([
+      { concept_a_id: 'BIG', concept_b_id: 'SMALL', relation: 'antonym' },
+      { concept_a_id: 'BIG', concept_b_id: 'TINY', relation: 'antonym' },
+      { concept_a_id: 'CAT', concept_b_id: 'ANIMAL', relation: 'hypernym' },
+    ]);
+    // The one-hypernym cap came back with the rebuilt table.
+    expect(() => add.run('CAT', 'THING', 'hypernym')).toThrow(/UNIQUE constraint failed/);
+    expect(db.pragma('foreign_keys', { simple: true })).toBe(1);
   });
 
   test('migrates once: reopening a migrated database changes nothing', async () => {

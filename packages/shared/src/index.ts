@@ -844,13 +844,25 @@ export interface Concept {
   isA?: string;
   /**
    * Secondary lexemes — other words that name this concept, keyed by language (P09-E23): *talk*
-   * for SPEAK, *cominciare* for BEGIN, whose primary is *iniziare*. **Search-only**: the pickers
-   * and the console find the concept by them, but nothing ever renders or prints one — the word
-   * shown is still `labels`, the primary lemma. Ships every language, as `labels` does, so a
+   * for SPEAK, *cominciare* for BEGIN, whose primary is *iniziare*. The pickers and the console find the
+   * concept by them, and a picker lists them among the word's synonyms, but no phrase ever renders
+   * one — the word shown is still `labels`, the primary lemma. Ships every language, as `labels` does, so a
    * search can match the English alias while browsing in another language. Absent when the
    * concept has none.
    */
   aliases?: Partial<Record<LanguageCode, string[]>>;
+  /**
+   * The ids of the concepts of the same role that mean the opposite (BIG → ['SMALL']), from the
+   * seed's antonym pairs (backend concepts/relations.ts). A picker shows their words, in the UI
+   * language, beside the definition. Absent when the concept has none.
+   */
+  antonyms?: string[];
+  /**
+   * The ids of the concepts of the same role that mean the same in another word (BEGIN →
+   * ['START']), from the seed's synonym pairs. A picker shows their words beside the definition,
+   * together with the concept's own `aliases` in the UI language. Absent when it has none.
+   */
+  synonyms?: string[];
 }
 
 /** A noun used attributively to modify a head noun, plus its semantic relation. */

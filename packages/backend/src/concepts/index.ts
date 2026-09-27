@@ -6,6 +6,7 @@ import { adjectives } from './adjectives.js';
 import { adverbs } from './adverbs.js';
 import { interjections } from './interjections.js';
 import { COLUMNS } from './columns.js';
+import { ANTONYMS, SYNONYMS, assertValidLexicalRelations } from './relations.js';
 import type { LanguageCode } from '@signi/shared';
 import type { ConceptSeed } from './types.js';
 
@@ -37,15 +38,36 @@ function withColumns(seeds: ConceptSeed[]): ConceptSeed[] {
   return merged;
 }
 
+/**
+ * Each seed with its antonyms and synonyms folded in from the pairs in `relations.ts`, both ends of
+ * a pair naming the other. The pairs are checked first, so one naming no seeded concept, or joining
+ * two roles, fails here rather than as a foreign key in the middle of the seed.
+ */
+function withRelations(seeds: ConceptSeed[]): ConceptSeed[] {
+  assertValidLexicalRelations(seeds);
+  const ends = (pairs: typeof ANTONYMS, id: string) =>
+    pairs.flatMap(([a, b]) => (a === id ? [b] : b === id ? [a] : []));
+  return seeds.map((c) => {
+    const antonyms = ends(ANTONYMS, c.id);
+    const synonyms = ends(SYNONYMS, c.id);
+    if (antonyms.length === 0 && synonyms.length === 0) return c;
+    return {
+      ...c,
+      ...(antonyms.length > 0 && { antonyms }),
+      ...(synonyms.length > 0 && { synonyms }),
+    };
+  });
+}
+
 // Every seed, with each definition written in the phrase language compiled to its plan (P13).
-export const concepts: DefinedConceptSeed[] = compileSeedDefinitions(withColumns([
+export const concepts: DefinedConceptSeed[] = compileSeedDefinitions(withRelations(withColumns([
   ...pronouns,
   ...nouns,
   ...verbs,
   ...adjectives,
   ...adverbs,
   ...interjections,
-]));
+])));
 
 export { NONFINITE } from './verbs/index.js';
 export type { ConceptSeed } from './types.js';

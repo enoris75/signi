@@ -53,7 +53,7 @@ test.describe('interface language', () => {
     // Concept labels localize too: the picker offers the Italian word for the same concept.
     await app.subjectInput.fill('gatto');
     await expect(
-      page.locator('[data-testid="typeahead-option"][data-concept="CAT"]'),
+      page.locator('[data-testid="typeahead-option"][data-concept="CAT"]').getByTestId('option-word'),
     ).toHaveText('gatto');
   });
 

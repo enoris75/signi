@@ -297,14 +297,19 @@ function initSchema(db: Database.Database): void {
     -- Widening the relation set later (meronymy: WHEEL part_of CAR) means editing the CHECK,
     -- which in SQLite is a table rebuild — cheap, since "npm run seed" regenerates this table
     -- wholesale and it holds no user data.
+    --
+    -- The antonym and synonym relations (BIG antonym SMALL, BEGIN synonym START) are symmetric and
+    -- stored in both directions, and a concept may have several of each (see concepts/relations.ts),
+    -- so the one-parent cap is a partial index on the hypernym rows alone.
     CREATE TABLE IF NOT EXISTS concept_relations (
       concept_a_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
       concept_b_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
-      relation     TEXT NOT NULL CHECK (relation IN ('hypernym')),
+      relation     TEXT NOT NULL CHECK (relation IN ('hypernym','antonym','synonym')),
       PRIMARY KEY (concept_a_id, concept_b_id, relation),
-      UNIQUE (concept_a_id, relation),
       CHECK (concept_a_id <> concept_b_id)
     );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_concept_relations_one_hypernym
+      ON concept_relations (concept_a_id) WHERE relation = 'hypernym';
 
     -- ── Per-type within-language lexical relations ────────────────────
     -- Relations are always between words of the same grammatical category
@@ -450,6 +455,7 @@ function initSchema(db: Database.Database): void {
   }
   widenRoleCheck(db);
   dropLanguageChecks(db);
+  widenConceptRelations(db);
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.
   const savedPhraseCols = db
@@ -540,6 +546,39 @@ function dropLanguageChecks(db: Database.Database): void {
         db.exec(`DROP TABLE ${name}`);
         db.exec(`ALTER TABLE ${name}_unchecked RENAME TO ${name}`);
       }
+    })();
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
+  initSchema(db);
+}
+
+/**
+ * A database created before the antonym and synonym relations has `concept_relations` with a
+ * hypernym-only CHECK and a table-level `UNIQUE (concept_a_id, relation)`, which would refuse a
+ * concept's second antonym. SQLite can ALTER neither, so rebuild the table as the schema now
+ * declares it, keeping its rows (new table, copy, drop, rename, with foreign keys off as in
+ * `widenRoleCheck`), and let `initSchema` recreate the one-hypernym index the drop took with it.
+ */
+function widenConceptRelations(db: Database.Database): void {
+  const row = db
+    .prepare<[], { sql: string }>("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'concept_relations'")
+    .get();
+  if (!row || row.sql.includes("'antonym'")) return;
+  db.pragma('foreign_keys = OFF');
+  try {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE concept_relations_widened (
+          concept_a_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+          concept_b_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+          relation     TEXT NOT NULL CHECK (relation IN ('hypernym','antonym','synonym')),
+          PRIMARY KEY (concept_a_id, concept_b_id, relation),
+          CHECK (concept_a_id <> concept_b_id)
+        )`);
+      db.exec('INSERT INTO concept_relations_widened (concept_a_id, concept_b_id, relation) SELECT concept_a_id, concept_b_id, relation FROM concept_relations');
+      db.exec('DROP TABLE concept_relations');
+      db.exec('ALTER TABLE concept_relations_widened RENAME TO concept_relations');
     })();
   } finally {
     db.pragma('foreign_keys = ON');

@@ -1,9 +1,9 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, screen, within } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import type { Concept } from '@signi/shared';
 import { ConceptOption } from '../src/components/PhraseBuilder/ConceptOption.tsx';
-import { renderWithProviders } from './render.tsx';
+import { renderWithProviders, type Seed } from './render.tsx';
 
 const CRY: Concept = {
   id: 'CRY',
@@ -24,7 +24,7 @@ const CAT: Concept = {
   readings: { ja: 'ねこ' },
 };
 
-function renderOption(props: Partial<ComponentProps<typeof ConceptOption>> = {}) {
+function renderOption(props: Partial<ComponentProps<typeof ConceptOption>> = {}, seed: Seed = {}) {
   const onClick = vi.fn();
   const onMouseEnter = vi.fn();
   const view = renderWithProviders(
@@ -37,27 +37,25 @@ function renderOption(props: Partial<ComponentProps<typeof ConceptOption>> = {})
         {...props}
       />
     </div>,
+    seed,
   );
-  return { ...view, onClick, onMouseEnter, option: screen.getByTestId('typeahead-option') };
+  const option = screen.getByTestId('typeahead-option');
+  return { ...view, onClick, onMouseEnter, option, word: within(option).getByTestId('option-word') };
 }
-
-afterEach(() => {
-  vi.useRealTimers();
-});
 
 describe('ConceptOption', () => {
   it('shows the word with its gloss in English', () => {
-    const { option } = renderOption();
+    const { option, word } = renderOption();
 
-    expect(option).toHaveTextContent(/^cry\s*\(weep\)$/);
+    expect(word).toHaveTextContent(/^cry\s*\(weep\)$/);
     expect(option).toHaveAttribute('data-concept', 'CRY');
   });
 
   it('shows the word without the English gloss in another language', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
-    const { option } = renderOption();
+    const { word } = renderOption();
 
-    expect(option).toHaveTextContent(/^piangere$/);
+    expect(word).toHaveTextContent(/^piangere$/);
   });
 
   it("shows the language's own gloss where the concept has one", () => {
@@ -71,15 +69,15 @@ describe('ConceptOption', () => {
       synonym: 'get under way',
       glosses: { it: 'avere inizio' },
     };
-    const { option } = renderOption({ concept: BEGIN });
+    const { word } = renderOption({ concept: BEGIN });
 
-    expect(option).toHaveTextContent(/^iniziare\s*\(avere inizio\)$/);
+    expect(word).toHaveTextContent(/^iniziare\s*\(avere inizio\)$/);
   });
 
   it('shows no gloss for a word that has none', () => {
-    const { option } = renderOption({ concept: CAT });
+    const { word } = renderOption({ concept: CAT });
 
-    expect(option).toHaveTextContent(/^cat$/);
+    expect(word).toHaveTextContent(/^cat$/);
   });
 
   it('sets furigana over the word where the language supplies a reading', () => {
@@ -126,18 +124,71 @@ describe('ConceptOption', () => {
     expect(background(true)).not.toBe('rgba(0, 0, 0, 0)');
   });
 
-  // MUI shares a module-level "a tooltip was just open" flag across every Tooltip, which drops
-  // the enter delay for the next one; keep this the only test that opens a tooltip.
-  it('shows the definition in the UI language after hovering a moment', () => {
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  it('shows the definition under the word, in the UI language', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
     const { option } = renderOption();
 
-    fireEvent.mouseOver(option);
-    act(() => vi.advanceTimersByTime(399));
+    expect(within(option).getByTestId('option-definition')).toHaveTextContent(/^versare lacrime$/);
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
 
-    act(() => vi.advanceTimersByTime(1));
-    expect(screen.getByRole('tooltip')).toHaveTextContent('versare lacrime');
+  it('falls back to the English definition where the language has none', () => {
+    localStorage.setItem('signi:uiLanguage', 'de');
+    const { option } = renderOption();
+
+    expect(within(option).getByTestId('option-definition')).toHaveTextContent(/^to shed tears$/);
+  });
+
+  it('shows no relations line for a word that has none', () => {
+    const { option } = renderOption({ concept: CAT });
+
+    expect(within(option).queryByTestId('option-relations')).not.toBeInTheDocument();
+  });
+
+  describe('synonyms and antonyms', () => {
+    const OLD: Concept = {
+      id: 'OLD',
+      role: 'adjective',
+      description: 'having existed for a long time',
+      label: 'old',
+      labels: { en: 'old', it: 'vecchio' },
+      antonyms: ['NEW', 'YOUNG'],
+      synonyms: ['AGED'],
+    };
+    const adjective = (id: string, en: string, it: string): Concept => ({
+      id, role: 'adjective', description: en, label: en, labels: { en, it },
+    });
+    const adjectives = [
+      OLD,
+      adjective('NEW', 'new', 'nuovo'),
+      adjective('YOUNG', 'young', 'giovane'),
+      adjective('AGED', 'aged', 'anziano'),
+    ];
+
+    it('names them in the UI language, under the definition', () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      const { option } = renderOption({ concept: OLD }, { concepts: { adjective: adjectives } });
+
+      expect(within(option).getByTestId('option-synonyms')).toHaveTextContent(/^≈ anziano$/);
+      expect(within(option).getByTestId('option-antonyms')).toHaveTextContent(/^↔ nuovo, giovane$/);
+    });
+
+    it("lists the word's aliases in the UI language among its synonyms", () => {
+      const SPEAK: Concept = {
+        id: 'SPEAK', role: 'verb', description: 'to say words aloud', label: 'speak',
+        labels: { en: 'speak' }, aliases: { en: ['talk'], it: ['discorrere'] },
+      };
+      const { option } = renderOption({ concept: SPEAK });
+
+      expect(within(option).getByTestId('option-synonyms')).toHaveTextContent(/^≈ talk$/);
+      expect(within(option).queryByTestId('option-antonyms')).not.toBeInTheDocument();
+    });
+
+    it('leaves out a related concept its list does not hold', () => {
+      const { option } = renderOption({ concept: OLD }, { concepts: { adjective: [OLD, adjective('NEW', 'new', 'nuovo')] } });
+
+      expect(within(option).queryByTestId('option-synonyms')).not.toBeInTheDocument();
+      expect(within(option).getByTestId('option-antonyms')).toHaveTextContent(/^↔ new$/);
+    });
   });
 });

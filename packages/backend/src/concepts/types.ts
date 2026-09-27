@@ -51,6 +51,13 @@ export interface ConceptSeed {
    * A phrase a dictionary gives for this sense, never the word itself.
    */
   glosses?: Partial<Record<Exclude<LanguageCode, 'en'>, string>>;
+  /**
+   * The concepts of the same role that mean the opposite, and those that mean the same in another
+   * word. Not written on the seed: folded in from the symmetric pairs in `relations.ts`, so each end
+   * of a pair names the other.
+   */
+  antonyms?: string[];
+  synonyms?: string[];
   isA?: string;     // immediate hypernym — CARAVEL isA SAILING_SHIP. One parent only; see concepts/hierarchy.ts
   /**
    * Secondary lexemes (P09-E23): other words that find this concept in the pickers and the console

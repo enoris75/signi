@@ -124,6 +124,10 @@ function seed() {
     insertHypernym: db.prepare<[string, string]>(
       "INSERT INTO concept_relations (concept_a_id, concept_b_id, relation) VALUES (?, ?, 'hypernym')"
     ),
+
+    insertRelation: db.prepare<[string, string, string]>(
+      'INSERT INTO concept_relations (concept_a_id, concept_b_id, relation) VALUES (?, ?, ?)'
+    ),
   };
 
   const roleStmts: Record<string, RoleStmts> = {
@@ -201,6 +205,13 @@ function seed() {
     // after SHIP). Every concept exists by now, so no ordering discipline is needed above.
     for (const c of concepts) {
       if (c.isA) stmts.insertHypernym.run(c.id, c.isA);
+    }
+
+    // Antonyms and synonyms, in the same pass for the same reason. Each concept carries both ends
+    // of its pairs (see concepts/relations.ts), so a symmetric pair lands in both directions.
+    for (const c of concepts) {
+      for (const other of c.antonyms ?? []) stmts.insertRelation.run(c.id, other, 'antonym');
+      for (const other of c.synonyms ?? []) stmts.insertRelation.run(c.id, other, 'synonym');
     }
   });
 

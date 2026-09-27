@@ -1,16 +1,20 @@
 import type { Locator } from '@playwright/test';
 import { test, expect } from './fixtures';
 
-// Hovering a word in a picker dropdown surfaces the concept's definition in a tooltip.
+// Every word in a picker dropdown carries the concept's definition on the line under it; these
+// specs hover a row and read that line (a pronoun, which has no row, keeps it in a tooltip).
 //
 // A definition comes from one of two sources, both keyed by the current UI language and both
 // falling back to English:
 //   - an engine-composed `definition` plan (CAT → "a small mammal"), rendered from seeded
-//     concepts into every language, so the tooltip is localized like the rest of the UI;
+//     concepts into every language, so the definition is localized like the rest of the UI;
 //   - the stored `concept_definitions` literal (FEELING → "an emotion or sensation one feels"),
 //     of which only English is seeded.
 test.describe('word definition tooltip', () => {
-  const tooltip = '.MuiTooltip-tooltip';
+  // The definition the pointer is on: the line under the hovered row, or the pronoun row's tooltip.
+  // `:hover` is what lets a spec park the pointer and see it go, as a tooltip used to.
+  const tooltip =
+    '[data-testid="typeahead-option"]:hover [data-testid="option-definition"], .MuiTooltip-tooltip';
 
   test('shows the definition on hover in the subject picker', async ({ app, page }) => {
     // PERSON carries only a stored English literal: it is one of the primitives the definition

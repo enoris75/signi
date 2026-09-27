@@ -95,6 +95,15 @@ const HYPERNYM_SQL = `
   SELECT concept_a_id, concept_b_id FROM concept_relations WHERE relation = 'hypernym'
 `;
 
+// Every antonym and synonym edge (`Concept.antonyms` / `.synonyms`). The seed writes each pair both
+// ways, so a concept's own rows list all of them; both ends share a role, so a list narrowed to one
+// role still holds every concept an edge names.
+const LEXICAL_RELATION_SQL = `
+  SELECT concept_a_id, concept_b_id, relation FROM concept_relations
+  WHERE relation IN ('antonym', 'synonym')
+  ORDER BY concept_a_id, concept_b_id
+`;
+
 // The citation form of every concept in every seeded language — the primary lexeme's lemma
 // (a noun's singular, or its `citation` where the singular is only the head of a longer name:
 // German "adverbiale Bestimmung des Ortes", A140), with the kana reading of that lemma where the lexeme carries one (ja),
@@ -271,6 +280,14 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     .prepare<[], { concept_a_id: string; concept_b_id: string }>(HYPERNYM_SQL)
     .all();
   const hypernyms = new Map(hypernymRows.map((r) => [r.concept_a_id, r.concept_b_id]));
+  const antonyms = new Map<string, string[]>();
+  const synonyms = new Map<string, string[]>();
+  for (const r of db
+    .prepare<[], { concept_a_id: string; concept_b_id: string; relation: 'antonym' | 'synonym' }>(LEXICAL_RELATION_SQL)
+    .all()) {
+    const into = r.relation === 'antonym' ? antonyms : synonyms;
+    into.set(r.concept_a_id, [...(into.get(r.concept_a_id) ?? []), r.concept_b_id]);
+  }
   const humbleVerbs = new Set(db.prepare<[], { concept_id: string }>(HUMBLE_SQL).all().map((r) => r.concept_id));
   // A noun under RELATIVE, walked up its hypernyms (P11-E6 D2, `Concept.relative`). The seed rejects
   // a cyclic tree, and the walk is bounded anyway.
@@ -331,5 +348,7 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     gendered: genderedNouns.has(r.id) || undefined,
     isA: hypernyms.get(r.id),
     aliases: aliases.get(r.id),
+    antonyms: antonyms.get(r.id),
+    synonyms: synonyms.get(r.id),
   }));
 }

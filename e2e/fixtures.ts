@@ -94,7 +94,7 @@ export class Builder {
    * Reveal the subject's first adjective slot and type into its picker. Adjectives are reached
    * differently from the core slots: a satellite on the subject box reveals the adjective box
    * (`satellite-subjectAdjective` → `box-subjectAdjective`), which holds the adjective typeahead.
-   * The caller then hovers the `typeahead-option` row it wants (its tooltip is the definition).
+   * The caller then hovers the `typeahead-option` row it wants (the definition is the line under it).
    */
   async openSubjectAdjective(query: string): Promise<void> {
     // The satellite is a toggle, so reveal only when the box isn't already up (a second call —
@@ -111,7 +111,7 @@ export class Builder {
    * Reveal the verb's adverb slot and type into its picker. The adverb (`modifier`) is a satellite
    * on the verb phrase (`satellite-modifier` → `box-modifier`), revealed once a verb is set — the
    * same shape as `openSubjectAdjective`. The caller then hovers the `typeahead-option` row it wants
-   * (its tooltip is the definition).
+   * (the definition is the line under it).
    */
   async openVerbAdverb(query: string): Promise<void> {
     // The satellite is a toggle, so reveal only when the box isn't already up (a second call —

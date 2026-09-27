@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 
 // Secondary lexemes (P09-E23): a second word finds a concept in the picker — *talk* finds SPEAK,
-// *cominciare* finds BEGIN — and the row, the box and every translation still read the primary
-// word. The haystack has unit tests (packages/frontend/test/VerbTypeahead.test.tsx); this spec checks
+// *cominciare* finds BEGIN — and the row's word, the box and every translation still read the
+// primary word; the second word is listed among the row's synonyms. The haystack has unit tests (packages/frontend/test/VerbTypeahead.test.tsx); this spec checks
 // the seeded rows reach the picker through /api/concepts.
 test.describe('aliases', () => {
   const option = (app: { page: Page }, id: string) =>
@@ -15,8 +15,8 @@ test.describe('aliases', () => {
     await app.verbInput.fill('talk');
 
     await expect(option(app, 'SPEAK')).toBeVisible();
-    await expect(option(app, 'SPEAK')).toContainText('speak');
-    await expect(option(app, 'SPEAK')).not.toContainText('talk');
+    await expect(option(app, 'SPEAK').getByTestId('option-word')).toHaveText('speak');
+    await expect(option(app, 'SPEAK').getByTestId('option-synonyms')).toHaveText('≈ talk');
 
     await option(app, 'SPEAK').click();
     await app.expectSentences({ en: 'the cat speaks.', it: 'il gatto parla.' });

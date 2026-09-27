@@ -25,7 +25,7 @@ export function PronounChooser({
 }: {
   chooser: Chooser;
   // The pronoun vocabulary, so the person row can name the concept each option stands for and
-  // show its definition on hover — the tooltip the noun list gets from ConceptOption.
+  // show its definition on hover — what the noun list shows under each word in ConceptOption.
   pronouns: readonly Concept[];
   onCommit: () => void;
   // The persons the box takes (P11-E8's vocative: the 2nd alone); the others are shown, greyed, as the
@@ -112,9 +112,9 @@ export function PronounChooser({
  *
  * A pronoun is described rather than searched for, so it never passes through a picker list and
  * never through [ConceptOption](./ConceptOption.tsx) — which is where every other word gets its
- * hover definition. The option that names the person is where it belongs here: it carries the
- * concept's `data-concept` and the same tooltip, so "the first person" reads the way "a small
- * mammal" does in the noun list, in the UI language.
+ * definition, under the word. A toggle has no room for a line under it, so here the definition is
+ * a tooltip on the option that names the person: it carries the concept's `data-concept`, so "the
+ * first person" reads the way "a small mammal" does in the noun list, in the UI language.
  *
  * ToggleButtonGroup passes `value`/`selected` down by context rather than by cloning its children,
  * so a Tooltip may sit between the group and its button without breaking the toggle.

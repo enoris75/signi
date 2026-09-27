@@ -26,7 +26,7 @@ export function useConceptGloss(): (concept: Concept) => string | undefined {
 
 /**
  * Returns `definition`, the concept's dictionary gloss in the current UI language — the text a
- * picker shows in a tooltip on hover. Only English is populated so far, so any other UI language
+ * picker row shows under the word. Only English is populated so far, so any other UI language
  * falls back to the English definition (and, defensively, to the always-present `description`).
  */
 export function useConceptDefinition(): (concept: Concept) => string {

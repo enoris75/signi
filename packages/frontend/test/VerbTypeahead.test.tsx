@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import type { Concept } from '@signi/shared';
 import { VerbTypeahead } from '../src/components/PhraseBuilder/VerbTypeahead.tsx';
 import { renderWithProviders } from './render.tsx';
@@ -43,13 +43,13 @@ describe('VerbTypeahead', () => {
     };
     const seed = { concepts: { verb: [verb('EAT', 'eat'), speak, begin] } };
 
-    it('finds SPEAK by typing talk, and lists it as speak', () => {
+    it('finds SPEAK by typing talk, and lists it as speak with talk among its synonyms', () => {
       renderWithProviders(<VerbTypeahead onSelect={() => {}} />, seed);
       typeInto(screen.getByTestId('typeahead-verb'), 'talk');
 
       expect(listed()).toEqual(['SPEAK']);
-      expect(row('SPEAK')).toHaveTextContent('speak');
-      expect(row('SPEAK')).not.toHaveTextContent('talk');
+      expect(within(row('SPEAK')).getByTestId('option-word')).toHaveTextContent(/^speak$/);
+      expect(within(row('SPEAK')).getByTestId('option-synonyms')).toHaveTextContent(/^≈ talk$/);
     });
 
     it('finds an alias of the UI language, and the English one too', () => {
