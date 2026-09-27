@@ -138,6 +138,28 @@ test.describe('the Phrase view', () => {
     expect(listBox.height).toBeGreaterThan(300);
   });
 
+  test('the complements a verb takes are offered under it, before any is drawn', async ({ app, page }) => {
+    void app;
+    await fillRole(page, 'subject', 'Europe', 'EUROPE');
+    await fillRole(page, 'verb', 'be', 'BE');
+    // Not only a predicate filled on the canvas first: the verb's own toggles, listed as rows.
+    await page.getByTestId('role-offer-predicative').tap();
+    await expect(page.getByTestId('word-sheet')).toBeVisible();
+    await page.keyboard.type('continent');
+    await page.locator('[data-testid="typeahead-option"][data-concept="CONTINENT"]').click();
+    await expect(page.getByTestId('result-strip')).toHaveText('Europe is a continent.');
+    await expect(page.getByTestId('role-offer-predicative')).toHaveCount(0);
+  });
+
+  test('a motion verb offers its goal, source and route', async ({ app, page }) => {
+    void app;
+    await fillRole(page, 'subject', 'cat', 'CAT');
+    await fillRole(page, 'verb', 'go', 'GO');
+    for (const complement of ['direction', 'source', 'route']) {
+      await expect(page.getByTestId(`role-offer-${complement}`)).toBeVisible();
+    }
+  });
+
   test('a filled role opens its sheet: the ring controls run the canvas\'s own handlers', async ({ app, page }) => {
     void app;
     await fillRole(page, 'subject', 'cat', 'CAT');

@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { Box, Button, ButtonBase, Drawer, IconButton, Typography } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -122,6 +123,17 @@ export function RoleList({
     }
   }
 
+  // The complements the verb takes but has not drawn yet (a predicate, a goal, a source, …). The
+  // canvas offers them as toggles on the verb phrase's ring, in plain sight; here they would hide in
+  // the verb's sheet, so they are listed under the verb as rows of their own, one tap from a picker.
+  const offered = verbControls.filter((icon) => !icon.active && !icon.isSet);
+  function offer(icon: SatelliteIcon) {
+    advancing.current = true;
+    icon.onToggle();
+    // A link control starts a pick on the canvas rather than drawing a box: that is where it goes on.
+    if (icon.link) onShowCanvas?.();
+  }
+
   const sheetSlot = sheetFor ? byKey.get(sheetFor) : undefined;
   const sheetControls = sheetFor
     ? [
@@ -143,7 +155,7 @@ export function RoleList({
         const values = (controlsByParent[slot.key] ?? []).filter(
           (i) => i.isSet && i.valueLabel && !isAdjectiveSlot(i.key as SlotKey),
         );
-        return (
+        const row = (
           <ButtonBase
             key={slot.key}
             data-testid={`role-${slot.key}`}
@@ -186,6 +198,40 @@ export function RoleList({
             </Box>
             <ChevronRightIcon sx={{ color: "text.secondary", flexShrink: 0 }} />
           </ButtonBase>
+        );
+        if (slot.key !== "verb" || offered.length === 0) return row;
+        return (
+          <Fragment key={slot.key}>
+            {row}
+            {offered.map((icon) => (
+              <ButtonBase
+                key={icon.key}
+                data-testid={`role-offer-${icon.key}`}
+                onClick={() => offer(icon)}
+                sx={{
+                  minHeight: 44,
+                  ml: 3,
+                  px: 1.5,
+                  gap: 1,
+                  justifyContent: "flex-start",
+                  textAlign: "left",
+                  borderRadius: 2,
+                  border: "1.5px dashed",
+                  borderColor: "divider",
+                  color: "text.secondary",
+                  fontSize: "0.85rem",
+                }}
+              >
+                <AddIcon fontSize="small" />
+                <Box component="span" sx={{ display: "inline-flex", "& svg": { fontSize: 18 } }}>
+                  {icon.icon}
+                </Box>
+                <Box component="span" sx={{ flex: 1, minWidth: 0 }}>
+                  {icon.label}
+                </Box>
+              </ButtonBase>
+            ))}
+          </Fragment>
         );
       })}
 
