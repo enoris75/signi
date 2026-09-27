@@ -142,6 +142,12 @@ describe('buildUiStrings', () => {
     expect(Object.entries(strings).filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['rm-rumgr']).map(([key]) => key)).toEqual([]);
   });
 
+  // P03-E10: Catalan renders every entry too, pinned at 0 so a regression shows.
+  test('leaves no entry unrendered in Catalan', () => {
+    const strings = buildUiStrings();
+    expect(Object.entries(strings).filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['ca']).map(([key]) => key)).toEqual([]);
+  });
+
   // P04-E17: Sursilvan likewise, pinned at its Done value, 0 (all 792 before its engine, P04-E8).
   test('leaves no entry unrendered in Sursilvan', () => {
     const strings = buildUiStrings();

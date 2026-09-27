@@ -6,7 +6,10 @@ panel and, once complete, as an interface language.
 Catalan column in every concept of the corpus, and a one-off **groundwork** (§0) that removes the places
 where the app assumes exactly seven languages. The groundwork is shared with
 [P04 Romansh](../P04-romansh/README.md): whichever language ships first carries it.
-**Status:** planning. The decisions below are **proposed**, not yet confirmed; each carries a recommendation.
+**Status:** **E1–E10 shipped, 2026-09-28** — Catalan renders as a `preview` row: its own column (all
+846 concepts, none borrowed), an engine forked from `es`, every UI string and definition. E11 (native
+review) and E12 (promotion) are open — see [§7](#7-tasks-e1e12). D1–D7 were taken as recommended; §0 had
+already shipped with P10/P04, so the counts in §1 and §2 are stale.
 
 | construction | Catalan (Central, IEC standard) |
 |---|---|
@@ -292,6 +295,54 @@ qual / la qual* otherwise (*la casa de la qual*).
   may expect *valencià* forms. Name the variety in the README.
 - **Flag.** The Senyera is the usual symbol for the language, but flags for languages are always
   approximate. D3 is deliberately a separate decision.
+
+## 7. Tasks (E1–E12)
+
+Shipped 2026-09-28 on branch `p03-catalan`, built as P04 was: the columns and the engine in parallel,
+then merged. **Every Catalan form is drafted from model knowledge and is *(verify)* until E11.** The
+conventions are in [style-ca.md](style-ca.md); the generated [review-sheet-ca.md](review-sheet-ca.md)
+lists every string the row says (2,449 rows).
+
+| task | what | status |
+|---|---|---|
+| E1 | `ca` registered after `rm-vallader`: `LanguageCode`, `LANGUAGES`, `LANGUAGE_STATUS` (`preview`), an engine slot, `COLUMNS` (borrows from `es`) | **Shipped** |
+| E2 | Row identity: the CATALAN concept (in every column), `language.ca`, the **Senyera** as an inline SVG (D3); search folds the middle dot (*collegi* finds *col·legi*, §3) | **Shipped** |
+| E3 | [style-ca.md](style-ca.md): Central Catalan, the IEC's current orthography (2017 diacritics), the column's keys | **Shipped** |
+| E4 | The noun column, 440 nouns: `no_elision` on the *la universitat* nouns, `takes_article` (*l'Àfrica, el Japó*), plurale tantum *els diners* | **Shipped**, `concepts/ca/nouns.test.ts` |
+| E5 | The verb column, 205 verbs, the full stored paradigm (D6's spirit applied to verbs: nothing derived from a Spanish rule), no `_past` (D2); pronominal verbs as Spanish stores them (*tornar-se*, *em torno*) | **Shipped**, `concepts/ca/verbs.test.ts` |
+| E6 | Adjectives (all four forms, D6), adverbs (*mai* negative), pronouns (*jo … elles*, generic *es*, D5), interjection | **Shipped**, `concepts/ca/lexicon.test.ts` |
+| E7 | The engine, forked from `es` (59 files): articles, elision, contractions, *d'*, agreement, determiners, `possessiveCa` (*el meu gat*), degree (*millor, pitjor*) | **Shipped** |
+| E8 | The clause and the verb group from stored cells: pro-drop, *va menjar* (D2), future, *no … mai* (the preverbal *no* kept, IEC formal), *estar* + gerund, *haver* + participle, *haver de / poder / voler*, *ser/estar*, *es va tornar*, *hi ha*, weak object pronouns (*el menja, menja'l, l'hi dono*) | **Shipped** |
+| E9 | Complements, relatives (*que, on, a qui, el qual*), coordination, moods (conditional, *si* + imperfect subjunctive, imperative D4 with *no* + subjunctive), the translator's language tables | **Shipped** |
+| E10 | Every UI string (794) and definition (618) renders in Catalan — pinned at 0 missing in `uiStrings.test.ts` / `definitions.test.ts`; e2e checks the row and its flag | **Shipped** |
+| [E11](P03-E11-review.md) | The native review of the sheet | Open — needs a reviewer |
+| [E12](P03-E12-promotion.md) | `ready` | Blocked on E11 |
+
+**Where the engine departs from this plan** (each `(verify)` in the code, and a ruling owed in E11):
+
+- Marked aspects in the past take the auxiliary's **imperfect** (*estava menjant*, *havia menjat*), not
+  §2.2's *va estar menjant*; the neutral past stays *va menjar*.
+- Location takes *ser* (*el gat és a la casa*); *estar* only for transient adjectives.
+- Negative concord keeps the preverbal *no* (*ningú no corre*, *tampoc no menja*), the formal register.
+- The locative is *a* before the definite article and a place name, *en* before any other determiner
+  and a bare noun (*en una casa*, *en realitat*).
+- The UI instruction register is the infinitive (*Desar la frase*), as Spanish; Catalan software often
+  writes the imperative.
+- Out of scope and pinned `test.fails`: the weak pronouns *en* and *hi* (*el gat hi és*, *en depèn*).
+
+**Translator tables** (`translator.consts.ts` and the translator functions), Catalan's answers: approximators
+*uns/unes, gairebé*; in `NO_TAKES_SINGULAR`, `CONTENT_CLAUSE_MOOD` (present subjunctive),
+`SEQUENCE_OF_TENSES_LANGUAGES`, `RELATIVIZES_AGENT`, `SUBJUNCTIVE_CONJUNCTIONS` (*before, until*; not
+*though*: *tot i que* + indicative), `IMPERFECT_PAST_LANGUAGES`, `FUTURE_TEMPORAL_MOOD`,
+`PAST_SUBJUNCTIVE_LANGUAGES`, `GENERIC_DEFINITE_SUBJECT`, `SHARED_CLITIC_LANGUAGES`; `PASSIVE_AUXILIARY`
+BE, `EXISTENTIAL_VERBS` HAVE (*haver-hi*), dative *a*; left out of `MOST_AGREES_SINGULAR`,
+`OTHER_REPLACES_INDEFINITE`, `EXISTENTIAL_AGREEING_LANGUAGES` (*hi ha* stays singular),
+`NO_NEGATIVE_CONCORD`, `FUTURE_AS_PRESENT_LANGUAGES`, `FUTURE_IN_PAST_PERFECT_LANGUAGES`, `TONIC_ADDRESS`.
+
+Tests: `packages/engine/test/languages/ca.test.ts` (the opening table, each area, a Spanish leak guard);
+56 colocated unit tests in `languages/ca/` on Catalan fixtures; the column tests above. Regenerate the
+sheet after any change: `npx tsx packages/engine/test/tools/catalanReviewSheet.ts > docs/features/P-planning/P03-catalan/review-sheet-ca.md`
+(build `shared` and `engine` first).
 
 ## Out of scope
 

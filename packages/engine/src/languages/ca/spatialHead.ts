@@ -5,13 +5,13 @@ import { deDet } from './deDet.js';
 import { prepDet } from './prepDet.js';
 
 /**
- * The plain locative preposition (P03 §2.3): *a* before the definite article and a bare noun ("a la
- * casa", "al jardí", "a Europa"), *en* before every other determiner ("en una casa", "en aquesta casa",
- * "en cap casa").
+ * The plain locative preposition (P03 §2.3): *a* before the definite article and a place name ("a la
+ * casa", "al jardí", "a Europa"), *en* before every other determiner and a bare common noun ("en una
+ * casa", "en aquesta casa", "en cap casa", "en realitat").
  */
 export function inHead(f: Record<string, string>, plural: boolean): string {
   const definiteness = f['definiteness'] ?? 'definite';
-  return definiteness === 'definite' || definiteness === 'bare' || f['proper'] === '1' ? aDet(f, plural) : prepDet('en', f, plural);
+  return definiteness === 'definite' || f['proper'] === '1' ? aDet(f, plural) : prepDet('en', f, plural);
 }
 
 /**

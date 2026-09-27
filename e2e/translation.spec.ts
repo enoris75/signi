@@ -181,6 +181,17 @@ test.describe('translation', () => {
   });
 });
 
+// Catalan (P03) is a preview row: the last one, under the Senyera, in Central Catalan.
+test.describe('the Catalan row', () => {
+  test('renders the sentence, flagged with the Senyera', async ({ app, page }) => {
+    await app.setSubject('CAT');
+    await app.setVerb('EAT');
+    await app.setDirectObject('MOUSE');
+    await app.expectSentences({ en: 'the cat eats the mouse.', ca: 'el gat menja el ratolí.' });
+    await expect(page.getByTestId('translation-ca').getByTestId('flag-senyera')).toBeVisible();
+  });
+});
+
 // The reader arranges the languages: the arrow buttons (or ⇧↑ ⇧↓ on a row) move a row, and the order
 // is remembered in the browser, so a reload lists them the same way.
 test.describe('translation language order', () => {
@@ -194,7 +205,7 @@ test.describe('translation language order', () => {
 
     // The first row cannot go up, the last cannot go down.
     await expect(page.getByTestId('translation-en').getByTestId('move-language-up')).toBeDisabled();
-    await expect(page.getByTestId('translation-rm-vallader').getByTestId('move-language-down')).toBeDisabled();
+    await expect(page.getByTestId('translation-ca').getByTestId('move-language-down')).toBeDisabled();
 
     const ja = page.getByTestId('translation-ja');
     await ja.hover();

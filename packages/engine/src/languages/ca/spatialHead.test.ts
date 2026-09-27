@@ -26,11 +26,12 @@ describe('spatialHead', () => {
 });
 
 describe('inHead', () => {
-  test('a before the definite article and a bare name, en before any other determiner', () => {
+  test('a before the definite article and a place name, en before any other determiner and a bare noun', () => {
     expect(inHead(CASA, false)).toBe('a la');
     expect(inHead(EUROPA, false)).toBe('a');
     expect(inHead({ ...CASA, definiteness: 'indefinite' }, false)).toBe('en una');
     expect(inHead({ ...CASA, definiteness: 'no' }, false)).toBe('en cap');
+    expect(inHead({ ...CASA, definiteness: 'bare' }, false)).toBe('en');
     expect(np(CASA).head.forms['base']).toBe('casa');
   });
 });
