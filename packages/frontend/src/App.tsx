@@ -10,7 +10,7 @@ import { SavedPhrasesToolbar, isEmpty } from "./components/SavedPhrasesToolbar.t
 import { AppMenu } from "./components/AppMenu.tsx";
 import { MobileTabBar, TAB_BAR_HEIGHT, type MobileView } from "./components/MobileTabBar.tsx";
 import { ResultStrip } from "./components/ResultStrip.tsx";
-import { useCompactLayout } from "./hooks/useCompactLayout.ts";
+import { isTouchOnly, useCompactLayout } from "./hooks/useCompactLayout.ts";
 import { useHeaderOffset } from "./hooks/useHeaderOffset.ts";
 import UndoIcon from "@mui/icons-material/Undo";
 import { LanguageSelector } from "./components/LanguageSelector.tsx";
@@ -85,10 +85,15 @@ export default function App() {
   // the console tab, so ` and the console's own commands move between tabs as they show and hide it.
   const compact = useCompactLayout();
   const headerOffset = useHeaderOffset(compact);
-  const [pageView, setPageView] = useState<Exclude<MobileView, "console">>("canvas");
+  // The Phrase view is the phone's default: it exists because a finger can't work the canvas's
+  // rings, so a narrowed *desktop* window (still driven by a mouse) starts on the canvas instead,
+  // which the compact layout already lays out in one column.
+  const [pageView, setPageView] = useState<Exclude<MobileView, "console">>(() =>
+    isTouchOnly() ? "phrase" : "canvas",
+  );
   const mobileView: MobileView = phraseConsole.open ? "console" : pageView;
-  // Arriving at the phone layout — on load, or a window narrowed past the breakpoint — starts on the
-  // canvas. The console docked on a desktop is not a choice of tab, and would hide the canvas.
+  // Arriving at the phone layout — on load, or a window narrowed past the breakpoint — starts on a
+  // page view, not the console. The console docked on a desktop is not a choice of tab, and would hide the canvas.
   useEffect(() => {
     if (compact && phraseConsole.open) phraseConsole.setOpen(false);
     // Only on the way in: afterwards the console tab is the user's to open.
@@ -293,7 +298,7 @@ export default function App() {
           maxWidth="xl"
           sx={compact ? { pb: `${TAB_BAR_HEIGHT + 16}px`, position: "relative" } : undefined}
         >
-          {compact && mobileView === "canvas" && (
+          {compact && (mobileView === "phrase" || mobileView === "canvas") && (
             <ResultStrip sentences={results} onOpen={() => showView("translations")} />
           )}
           <Box
@@ -306,7 +311,7 @@ export default function App() {
               // On a phone the canvas is one tab of several, and the whole width. Stowed, not
               // unmounted or `display: none`: it measures its own width, and a width of nothing would
               // have the layout move every box to fit it.
-              ...(compact && mobileView !== "canvas" ? STOWED : {}),
+              ...(compact && mobileView !== "canvas" && mobileView !== "phrase" ? STOWED : {}),
             }}
           >
             {/* Left: stack of phrase containers + their relative-clause links */}
@@ -330,6 +335,8 @@ export default function App() {
                   wordsPanelOpen={wordsPanelOpen}
                   onWordsPanelClose={() => setWordsPanel(false)}
                   onPeriodRemoved={() => setUndoToast("toast.periodRemoved")}
+                  listView={compact && mobileView === "phrase"}
+                  onShowCanvas={() => showView("canvas")}
                 />
               </ConsoleMarksProvider>
             </Box>

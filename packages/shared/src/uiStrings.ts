@@ -526,6 +526,8 @@ export const UI_STRINGS = defineUiStrings({
   // console's `console.fromCanvas` names it; the translations tab reuses `translations.heading`, the
   // console's `console.name`.
   'view.canvas': { plan: nameOf('CANVAS'), format: NAME_FORMAT, fallback: 'Canvas' },
+  // …and the Phrase view, the phone's list of a period's roles: the bare PHRASE (it "Frase").
+  'view.phrase': { plan: nameOf('PHRASE'), format: NAME_FORMAT, fallback: 'Phrase' },
 
   // The heading of the translations area: the TRANSLATION noun in the plural, bare — the
   // panel lists many translations.

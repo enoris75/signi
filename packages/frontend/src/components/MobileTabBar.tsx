@@ -1,14 +1,16 @@
 import { Box, ButtonBase } from "@mui/material";
 import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
+import ViewAgendaOutlinedIcon from "@mui/icons-material/ViewAgendaOutlined";
 import TranslateIcon from "@mui/icons-material/Translate";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import type { UiStringKey } from "@signi/shared";
 import { useUiString } from "../i18n/useUiString.ts";
 
 /** The views a phone shows one at a time (P17). */
-export type MobileView = "canvas" | "translations" | "console";
+export type MobileView = "phrase" | "canvas" | "translations" | "console";
 
 const TABS: { view: MobileView; label: UiStringKey; icon: React.ReactNode }[] = [
+  { view: "phrase", label: "view.phrase", icon: <ViewAgendaOutlinedIcon /> },
   { view: "canvas", label: "view.canvas", icon: <HubOutlinedIcon /> },
   { view: "translations", label: "translations.heading", icon: <TranslateIcon /> },
   { view: "console", label: "console.name", icon: <TerminalIcon /> },

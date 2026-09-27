@@ -10,7 +10,7 @@ P01 made every control reachable by key, and P02 made the phrase typeable. On a 
 keys nor the width are there. This plan keeps their handlers and their command table: the Phrase
 view's role sheet is P01's keymap listed as buttons, and the console tab is P02's console,
 undocked.
-**Status:** phase 1 built (branch `p17-mobile`); phases 2–4 planned.
+**Status:** phases 1–2 built (branch `p17-mobile`); phases 3–4 planned.
 **Drawings:** the [design canvas](https://claude.ai/artifact/RYyD3YwGnpDfCkJkYKHQva), with six
 phone screens and a note on what breaks today.
 
@@ -73,29 +73,61 @@ On an iPhone 13 (390 px), before this plan:
 Left for phase 3: the rings still lay themselves out at 358 px, so they stack vertically and the
 widest one overhangs the edge.
 
-### Phase 2 — the Phrase view
+### Phase 2 — the Phrase view (built)
 
-The default tab on a phone. Each period is a list of its filled roles in sentence order: a colored
-disc, the role's name, the word, and chips for what is set on it (number, adjectives, …). A dashed
-row adds a complement, and a button adds a period.
+The default tab on a genuinely touch phone. A narrowed *desktop* window (no touch) still opens on
+the Canvas, since it's a mouse there and the compact canvas (phase 1) already works — see
+"touch, not just narrow" below.
 
-- **Where it renders.** It renders inside `PhraseBuilder`, as another body next to the canvas,
-  because that component already builds each box's `BoxContext` (every handler, `PhraseBuilder.tsx`
-  around line 1073) and owns the pickers. Rebuilding those outside would split one write path in two.
-- **Roles.** `visibleSlotsFor(selection, …)` gives them in reading order (`ALL_SLOTS`), filtered to
-  the filled ones.
-- **Tapping a role opens its sheet** (a bottom `Drawer`):
-  - the word, with Change (the slot's own typeahead, full screen) and Remove;
-  - the role's controls, which are `KEYMAP` filtered by `boxScopesOf(slot, selection)` and each
-    command's `when(ctx)`, labelled by `commandLabel(cmd, t)` and run with `run(ctx)`;
-  - a "Next: …" button that goes where `nextActiveSlot` goes.
-  Commands that `nav` (links, picks on another period) close the sheet and show the canvas mid-pick.
-- **Period controls.** Mood, condition, join, interjection and vocative come from `PERIOD_KEYMAP`
-  and go in the period's ⋯.
+Each period is a list of its filled roles in sentence order (subject, verb, its adverbs and
+complements): a colored disc, the role's name, the word (an adjective rides its noun's row as its
+own chip), and a chip for anything else set on it (number, gender, …). Tapping an empty role opens
+its word picker, full screen; picking a word auto-advances to the next empty role and opens *its*
+picker too, the way the canvas's own auto-advance does. Tapping a filled role opens a sheet: the
+word (Replace, Remove) and a grid of every control its ring carries.
+
+- **Where it renders** — [`RoleList.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/RoleList.tsx),
+  mounted inside `PhraseBuilder.tsx` (`listView` prop) as another body next to the canvas, which
+  is kept mounted behind it (stowed — see Principle 5) so nothing about its layout or state
+  changes. `PhraseWorkspace.tsx` and `App.tsx` thread `listView`/`onShowCanvas` down to it.
+- **A role's controls are two buckets PhraseBuilder already computes, folded into one grid:**
+  `satelliteIconsByParent[slot]` (number, gender, determiner, tense, adjective's own reveal, …) and
+  `perimeterByNoun[slot]` (possessor, relative clause, coordination, standard, examples — the ones
+  the canvas seats on the noun's own dotted ring, not the word's). Missing perimeter controls from
+  the sheet was the first bug this phase found.
+- **Two kinds of tap, same list of icons:**
+  - A **direct toggle** (number, gender, negation) or a plain **reveal** (adjective, determiner,
+    relative clause) — `icon.onToggle()`, exactly what its click does on the canvas.
+  - A satellite that always carries a value and isn't a direct toggle — tense, aspect, voice,
+    degree, a modifier's relation, a possessor's role, a conjunction — is a chip a *click cycles*
+    on the canvas, not a box a dot reveals (`VerbPhraseBuilder.tsx`'s `TenseToggleBox` and its
+    kin). Its own satellite icon only reveals that chip, so tapping it in the sheet instead runs
+    the matching `KEYMAP` command directly (`PhraseBuilder.tsx`'s `runCommand`: filter `KEYMAP` by
+    `c.satellite?.test(icon.key)` and `boxScopesOf(slot, selection)`, then `cmd.run(ctx)` with a
+    stub `nav`, since a value-cycling command never uses it). This was the second bug: without it,
+    tapping "Tense" just folded/unfolded an already-shown box and nothing appeared to happen.
+  - A control that opens a ring of its own (possessor, conjunct, standard, examples) is drawn only
+    on the canvas, so pressing it — by either path above — also closes the sheet and switches to
+    the Canvas tab (`onShowCanvas`). Ordering this *after* the two paths above, not only in the
+    fallback one, was the third bug: `runCommand` routes a possessor tap to the real
+    `handleTogglePossessor` (better than the satellite's own plain reveal), and skipping the
+    ring-check whenever `runCommand` handled the tap left the tab never switching.
+- **Word pickers are the canvas's own** (`slotTypeahead`), shown in a second sheet. `SlideProps`
+  focuses its field once the sheet has entered — MUI's own `autoFocus` fires before the slide
+  finishes and loses the focus race — and its `Drawer` disables the focus trap so the picker's
+  own popper (a MUI `Popper`, outside the sheet's DOM) can still take it.
 - **Surface forms.** A translation carries no per-role text
   ([`shared/src/index.ts`](../../../../packages/shared/src/index.ts), `Translation`), so the list
-  shows the lemma plus the chips, not "cats". A per-role render would need a new request type; it
-  is not needed for phase 2.
+  shows the lemma plus its chips, not "cats". A per-role render would need a new request type.
+- **Touch, not just narrow.** `App.tsx` reads `isTouchOnly()` once (a lazy `useState` initializer)
+  to choose the phone's default tab, not `useCompactLayout()` alone: a real phone starts on
+  Phrase, but a desktop window merely narrowed by a mouse user starts on Canvas. Without this,
+  `tidy.spec.ts`'s phone-width suite (390 px, no touch) would open on a view its `Builder` helpers
+  know nothing about. `e2e/fixtures.ts`'s `Builder.goto()` also had to accept either the canvas's
+  `typeahead-subject` or the Phrase view's `role-subject` as proof the page loaded — checked with
+  polled `isVisible()`, not an `.or()` locator, since the stowed one is still in the DOM and a
+  combinator over two present-but-not-both-visible elements is a strict-mode violation.
+- **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('the Phrase view')`.
 
 ### Phase 3 — the canvas by touch
 

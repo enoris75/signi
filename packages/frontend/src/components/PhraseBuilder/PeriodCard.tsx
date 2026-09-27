@@ -21,6 +21,8 @@ export interface PeriodCardProps {
   // The workspace container's linking hooks; undefined for a standalone period.
   binding?: WorkspaceBinding;
   compact: boolean;
+  // Whether the card shows the canvas's resize grip: not over the Phrase view's list (P17).
+  resizable?: boolean;
   showCanvas: boolean;
   hasGroups: boolean;
   hasContent: boolean;
@@ -61,6 +63,7 @@ export function PeriodCard({
   consoleNumber,
   binding,
   compact,
+  resizable = true,
   showCanvas,
   hasGroups,
   hasContent,
@@ -236,7 +239,7 @@ export function PeriodCard({
         {/* The container's own bottom edge is the resize grip, so it bleeds back through
             the Paper's padding. No manual resize while compact — the canvas is auto-sized
             to hug the chips, and the resizer's tall minimum would fight that. */}
-        {!compact && (
+        {!compact && resizable && (
           <Box sx={{ mt: 2, mx: -paperPad, mb: -paperPad }}>
             <Resizer
               height={graphHeight}

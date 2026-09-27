@@ -1433,6 +1433,10 @@ describe('buildUiStrings', () => {
     expect(strings['view.canvas']).toEqual({
       en: 'Canvas', it: 'Tela', fr: 'Canevas', de: 'Arbeitsfläche', es: 'Lienzo', ja: 'キャンバス', pt: 'Tela',
     });
+    // …and its Phrase view (P17 phase 2): the list of a period's roles.
+    expect(strings['view.phrase']).toEqual({
+      en: 'Phrase', it: 'Frase', fr: 'Phrase', de: 'Phrase', es: 'Frase', ja: 'フレーズ', pt: 'Frase',
+    });
   });
 });
 
