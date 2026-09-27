@@ -29,8 +29,10 @@ export const GSW: GswColumn = {
  * The concepts seeded without a Swiss German form (P10-E4 D2): while `gsw` is a preview language a
  * seeder who cannot supply a Zürich word leaves it out — never a copied German form, which would
  * lie — and names the concept here, so the gap is a list someone can work through rather than a
- * silence. Each renders the `gsw` row empty (P10-E1 D1). Empty today: the column is complete.
+ * silence. Each renders the `gsw` row empty (P10-E1 D1).
  */
-export const GSW_PENDING: readonly string[] = [];
+export const GSW_PENDING: readonly string[] = [
+  'SALMON', // Lachs, but the Zürich plural (Lachs or Lächs) wants a native reviewer
+];
 
 export type { GswColumn, GswForms } from './types.js';

@@ -153,6 +153,685 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'cão', plural: 'cães', gender: 'masc', count: 'singular', fem: 'cadela', fem_plural: 'cadelas' },
     },
   },
+  // ── The animal classes ─────────────────────────────────────────
+  // The everyday taxonomy under ANIMAL, a class a level (MAMMAL is above): what a speaker sorts a
+  // common animal into. SPIDER is an arachnid, not an insect, and sits under ANIMAL itself; WHALE
+  // is a mammal, not a fish. Families (the felines, the canines) are not levels yet: no rule needs
+  // them, and CANINE is already an adjective (see concepts/hierarchy.ts).
+  {
+    id: 'BIRD',
+    role: 'noun',
+    description: 'a feathered animal with wings that lays eggs',
+    definition: `
+      /subj ( ANIMAL /a /rel #2.subj )
+      /subj ( ANIMAL ) /verb ( HAVE ) /obj ( WING /pl /zero )
+    `,
+    emoji: '🐦',
+    animate: true,
+    isA: 'ANIMAL',
+    forms: {
+      en: { base: 'bird', plural: 'birds', count: 'singular' },
+      it: { base: 'uccello', plural: 'uccelli', gender: 'masc', count: 'singular' },
+      fr: { base: 'oiseau', plural: 'oiseaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Vogel', plural: 'Vögel', gender: 'masc', count: 'singular' },
+      // "ave", the class, over "pájaro", a small bird: an eagle is an ave. Stressed a: "el ave".
+      es: { base: 'ave', plural: 'aves', gender: 'fem', stressed_a: '1', count: 'singular' },
+      ja: { base: '鳥', count: 'singular', reading: 'とり', counter: '羽' },
+      // "ave", the class, as in Spanish; "pássaro" is a small bird.
+      pt: { base: 'ave', plural: 'aves', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'FISH',
+    role: 'noun',
+    description: 'a cold-blooded animal that lives in water and breathes with gills',
+    definition: `
+      /subj ( ANIMAL /a /rel #2.subj )
+      /subj ( ANIMAL ) /verb ( LIVE_ALIVE ) /loc ( WATER )
+    `,
+    emoji: '🐠',
+    animate: true,
+    isA: 'ANIMAL',
+    forms: {
+      en: { base: 'fish', plural: 'fish', count: 'singular' },
+      it: { base: 'pesce', plural: 'pesci', gender: 'masc', count: 'singular' },
+      fr: { base: 'poisson', plural: 'poissons', gender: 'masc', count: 'singular' },
+      de: { base: 'Fisch', plural: 'Fische', gender: 'masc', count: 'singular' },
+      // "pez", the living animal; "pescado" is the fish one eats.
+      es: { base: 'pez', plural: 'peces', gender: 'masc', count: 'singular' },
+      ja: { base: '魚', count: 'singular', reading: 'さかな' },
+      pt: { base: 'peixe', plural: 'peixes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'REPTILE',
+    role: 'noun',
+    description: 'a cold-blooded animal with scales that lays eggs',
+    emoji: '🦕',
+    animate: true,
+    isA: 'ANIMAL',
+    forms: {
+      en: { base: 'reptile', plural: 'reptiles', count: 'singular' },
+      it: { base: 'rettile', plural: 'rettili', gender: 'masc', count: 'singular' },
+      fr: { base: 'reptile', plural: 'reptiles', gender: 'masc', count: 'singular' },
+      de: { base: 'Reptil', plural: 'Reptilien', gender: 'neut', count: 'singular', compound: 'Reptilien' },
+      es: { base: 'reptil', plural: 'reptiles', gender: 'masc', count: 'singular' },
+      ja: { base: '爬虫類', count: 'singular', reading: 'はちゅうるい' },
+      pt: { base: 'réptil', plural: 'répteis', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'AMPHIBIAN',
+    role: 'noun',
+    description: 'a cold-blooded animal that lives both in water and on land',
+    emoji: '🐸',
+    animate: true,
+    isA: 'ANIMAL',
+    forms: {
+      en: { base: 'amphibian', plural: 'amphibians', count: 'singular' },
+      it: { base: 'anfibio', plural: 'anfibi', gender: 'masc', count: 'singular' },
+      fr: { base: 'amphibien', plural: 'amphibiens', gender: 'masc', count: 'singular' },
+      de: { base: 'Amphibie', plural: 'Amphibien', gender: 'fem', count: 'singular' },
+      es: { base: 'anfibio', plural: 'anfibios', gender: 'masc', count: 'singular' },
+      ja: { base: '両生類', count: 'singular', reading: 'りょうせいるい' },
+      pt: { base: 'anfíbio', plural: 'anfíbios', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'INSECT',
+    role: 'noun',
+    description: 'a small animal with six legs and a body in three parts',
+    definition: '/subj ( ANIMAL /adj SMALL /a )',
+    emoji: '🐛',
+    animate: true,
+    isA: 'ANIMAL',
+    forms: {
+      en: { base: 'insect', plural: 'insects', count: 'singular' },
+      it: { base: 'insetto', plural: 'insetti', gender: 'masc', count: 'singular' },
+      fr: { base: 'insecte', plural: 'insectes', gender: 'masc', count: 'singular' },
+      de: { base: 'Insekt', plural: 'Insekten', gender: 'neut', count: 'singular', compound: 'Insekten' },
+      es: { base: 'insecto', plural: 'insectos', gender: 'masc', count: 'singular' },
+      ja: { base: '昆虫', count: 'singular', reading: 'こんちゅう' },
+      pt: { base: 'inseto', plural: 'insetos', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── Mammals ──────────────────────────────────────────────────────
+  // Japanese counts a large animal with 頭 (三頭の馬) and a small one with the default 匹.
+  {
+    id: 'HORSE',
+    role: 'noun',
+    description: 'a large domestic mammal ridden or used to pull loads',
+    definition: '/subj ( MAMMAL /adj BIG /adj DOMESTIC /a )',
+    emoji: '🐴',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'horse', plural: 'horses', count: 'singular' },
+      it: { base: 'cavallo', plural: 'cavalli', gender: 'masc', count: 'singular', fem: 'cavalla', fem_plural: 'cavalle' },
+      fr: { base: 'cheval', plural: 'chevaux', gender: 'masc', count: 'singular', fem: 'jument', fem_plural: 'juments' },
+      de: { base: 'Pferd', plural: 'Pferde', gender: 'neut', count: 'singular', compound: 'Pferde' },
+      es: { base: 'caballo', plural: 'caballos', gender: 'masc', count: 'singular', fem: 'yegua', fem_plural: 'yeguas' },
+      ja: { base: '馬', count: 'singular', reading: 'うま', counter: '頭' },
+      pt: { base: 'cavalo', plural: 'cavalos', gender: 'masc', count: 'singular', fem: 'égua', fem_plural: 'éguas' },
+    },
+  },
+  {
+    id: 'PIG',
+    role: 'noun',
+    description: 'a domestic mammal raised for its meat',
+    definition: '/subj ( MAMMAL /adj DOMESTIC /a )',
+    emoji: '🐷',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'pig', plural: 'pigs', count: 'singular' },
+      it: { base: 'maiale', plural: 'maiali', gender: 'masc', count: 'singular' },
+      fr: { base: 'cochon', plural: 'cochons', gender: 'masc', count: 'singular' },
+      de: { base: 'Schwein', plural: 'Schweine', gender: 'neut', count: 'singular', compound: 'Schweine' },
+      es: { base: 'cerdo', plural: 'cerdos', gender: 'masc', count: 'singular', fem: 'cerda', fem_plural: 'cerdas' },
+      ja: { base: '豚', count: 'singular', reading: 'ぶた', counter: '頭' },
+      pt: { base: 'porco', plural: 'porcos', gender: 'masc', count: 'singular', fem: 'porca', fem_plural: 'porcas' },
+    },
+  },
+  {
+    id: 'SHEEP',
+    role: 'noun',
+    description: 'a domestic mammal kept for its wool and meat',
+    definition: '/subj ( MAMMAL /adj WHITE /adj DOMESTIC /a )',
+    emoji: '🐑',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'sheep', plural: 'sheep', count: 'singular' },
+      it: { base: 'pecora', plural: 'pecore', gender: 'fem', count: 'singular' },
+      fr: { base: 'mouton', plural: 'moutons', gender: 'masc', count: 'singular', fem: 'brebis', fem_plural: 'brebis' },
+      de: { base: 'Schaf', plural: 'Schafe', gender: 'neut', count: 'singular' },
+      es: { base: 'oveja', plural: 'ovejas', gender: 'fem', count: 'singular' },
+      ja: { base: '羊', count: 'singular', reading: 'ひつじ', counter: '頭' },
+      pt: { base: 'ovelha', plural: 'ovelhas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'GOAT',
+    role: 'noun',
+    description: 'a domestic mammal with horns, kept for its milk',
+    definition: `
+      /subj ( MAMMAL /adj DOMESTIC /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( PRODUCE ) /obj ( MILK /zero )
+    `,
+    emoji: '🐐',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'goat', plural: 'goats', count: 'singular' },
+      it: { base: 'capra', plural: 'capre', gender: 'fem', count: 'singular' },
+      fr: { base: 'chèvre', plural: 'chèvres', gender: 'fem', count: 'singular' },
+      de: { base: 'Ziege', plural: 'Ziegen', gender: 'fem', count: 'singular' },
+      es: { base: 'cabra', plural: 'cabras', gender: 'fem', count: 'singular' },
+      ja: { base: 'ヤギ', count: 'singular', reading: 'やぎ', counter: '頭' },
+      pt: { base: 'cabra', plural: 'cabras', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'RABBIT',
+    role: 'noun',
+    description: 'a small mammal with long ears',
+    definition: `
+      /subj ( MAMMAL /adj SMALL /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( JUMP )
+    `,
+    emoji: '🐰',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'rabbit', plural: 'rabbits', count: 'singular' },
+      it: { base: 'coniglio', plural: 'conigli', gender: 'masc', count: 'singular', fem: 'coniglia', fem_plural: 'coniglie' },
+      fr: { base: 'lapin', plural: 'lapins', gender: 'masc', count: 'singular', fem: 'lapine', fem_plural: 'lapines' },
+      de: { base: 'Kaninchen', plural: 'Kaninchen', gender: 'neut', count: 'singular' },
+      es: { base: 'conejo', plural: 'conejos', gender: 'masc', count: 'singular', fem: 'coneja', fem_plural: 'conejas' },
+      ja: { base: 'ウサギ', count: 'singular', reading: 'うさぎ' },
+      pt: { base: 'coelho', plural: 'coelhos', gender: 'masc', count: 'singular', fem: 'coelha', fem_plural: 'coelhas' },
+    },
+  },
+  {
+    id: 'BEAR',
+    role: 'noun',
+    description: 'a large heavy wild mammal with thick fur',
+    definition: '/subj ( MAMMAL /adj BIG /adj STRONG /adj WILD /a )',
+    emoji: '🐻',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'bear', plural: 'bears', count: 'singular' },
+      it: { base: 'orso', plural: 'orsi', gender: 'masc', count: 'singular', fem: 'orsa', fem_plural: 'orse' },
+      fr: { base: 'ours', plural: 'ours', gender: 'masc', count: 'singular', fem: 'ourse', fem_plural: 'ourses' },
+      de: { base: 'Bär', plural: 'Bären', gender: 'masc', count: 'singular', fem: 'Bärin', fem_plural: 'Bärinnen', weak: '1' },
+      es: { base: 'oso', plural: 'osos', gender: 'masc', count: 'singular', fem: 'osa', fem_plural: 'osas' },
+      ja: { base: '熊', count: 'singular', reading: 'くま', counter: '頭' },
+      pt: { base: 'urso', plural: 'ursos', gender: 'masc', count: 'singular', fem: 'ursa', fem_plural: 'ursas' },
+    },
+  },
+  {
+    id: 'LION',
+    role: 'noun',
+    description: 'a large wild cat of Africa with a mane',
+    definition: `
+      /subj ( MAMMAL /adj BIG /adj WILD /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( LIVE_ALIVE ) /loc ( AFRICA )
+    `,
+    emoji: '🦁',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'lion', plural: 'lions', count: 'singular' },
+      it: { base: 'leone', plural: 'leoni', gender: 'masc', count: 'singular', fem: 'leonessa', fem_plural: 'leonesse' },
+      fr: { base: 'lion', plural: 'lions', gender: 'masc', count: 'singular', fem: 'lionne', fem_plural: 'lionnes' },
+      de: { base: 'Löwe', plural: 'Löwen', gender: 'masc', count: 'singular', fem: 'Löwin', fem_plural: 'Löwinnen', weak: '1' },
+      es: { base: 'león', plural: 'leones', gender: 'masc', count: 'singular', fem: 'leona', fem_plural: 'leonas' },
+      ja: { base: 'ライオン', count: 'singular', counter: '頭' },
+      pt: { base: 'leão', plural: 'leões', gender: 'masc', count: 'singular', fem: 'leoa', fem_plural: 'leoas' },
+    },
+  },
+  {
+    id: 'TIGER',
+    role: 'noun',
+    description: 'a large wild cat with a striped coat',
+    definition: `
+      /subj ( MAMMAL /adj BIG /adj WILD /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( LIVE_ALIVE ) /loc ( ASIA )
+    `,
+    emoji: '🐯',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'tiger', plural: 'tigers', count: 'singular' },
+      // Italian "la tigre" is feminine for either sex.
+      it: { base: 'tigre', plural: 'tigri', gender: 'fem', count: 'singular' },
+      fr: { base: 'tigre', plural: 'tigres', gender: 'masc', count: 'singular', fem: 'tigresse', fem_plural: 'tigresses' },
+      de: { base: 'Tiger', plural: 'Tiger', gender: 'masc', count: 'singular', fem: 'Tigerin', fem_plural: 'Tigerinnen' },
+      es: { base: 'tigre', plural: 'tigres', gender: 'masc', count: 'singular', fem: 'tigresa', fem_plural: 'tigresas' },
+      ja: { base: '虎', count: 'singular', reading: 'とら', counter: '頭' },
+      pt: { base: 'tigre', plural: 'tigres', gender: 'masc', count: 'singular', fem: 'tigresa', fem_plural: 'tigresas' },
+    },
+  },
+  {
+    id: 'ELEPHANT',
+    role: 'noun',
+    description: 'a very large mammal with a trunk and tusks',
+    definition: `
+      /subj ( MAMMAL /adj BIG /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( EAT_ANIMAL ) /obj ( GRASS /pl /zero )
+    `,
+    emoji: '🐘',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'elephant', plural: 'elephants', count: 'singular' },
+      it: { base: 'elefante', plural: 'elefanti', gender: 'masc', count: 'singular', fem: 'elefantessa', fem_plural: 'elefantesse' },
+      fr: { base: 'éléphant', plural: 'éléphants', gender: 'masc', count: 'singular' },
+      de: { base: 'Elefant', plural: 'Elefanten', gender: 'masc', count: 'singular', fem: 'Elefantin', fem_plural: 'Elefantinnen', weak: '1' },
+      es: { base: 'elefante', plural: 'elefantes', gender: 'masc', count: 'singular', fem: 'elefanta', fem_plural: 'elefantas' },
+      ja: { base: '象', count: 'singular', reading: 'ぞう', counter: '頭' },
+      pt: { base: 'elefante', plural: 'elefantes', gender: 'masc', count: 'singular', fem: 'elefanta', fem_plural: 'elefantas' },
+    },
+  },
+  {
+    id: 'MONKEY',
+    role: 'noun',
+    description: 'a mammal with hands and a long tail that lives in trees',
+    definition: `
+      /subj ( MAMMAL /adj WILD /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( HAVE ) /obj ( HAND /pl /zero )
+    `,
+    emoji: '🐒',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'monkey', plural: 'monkeys', count: 'singular' },
+      it: { base: 'scimmia', plural: 'scimmie', gender: 'fem', count: 'singular' },
+      fr: { base: 'singe', plural: 'singes', gender: 'masc', count: 'singular' },
+      de: { base: 'Affe', plural: 'Affen', gender: 'masc', count: 'singular', fem: 'Äffin', fem_plural: 'Äffinnen', weak: '1' },
+      es: { base: 'mono', plural: 'monos', gender: 'masc', count: 'singular', fem: 'mona', fem_plural: 'monas' },
+      ja: { base: '猿', count: 'singular', reading: 'さる' },
+      pt: { base: 'macaco', plural: 'macacos', gender: 'masc', count: 'singular', fem: 'macaca', fem_plural: 'macacas' },
+    },
+  },
+  {
+    id: 'DEER',
+    role: 'noun',
+    description: 'a wild mammal whose males grow antlers',
+    definition: `
+      /subj ( MAMMAL /adj WILD /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( EAT_ANIMAL ) /obj ( GRASS /pl /zero )
+    `,
+    emoji: '🦌',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'deer', plural: 'deer', count: 'singular' },
+      it: { base: 'cervo', plural: 'cervi', gender: 'masc', count: 'singular' },
+      fr: { base: 'cerf', plural: 'cerfs', gender: 'masc', count: 'singular', fem: 'biche', fem_plural: 'biches' },
+      de: { base: 'Hirsch', plural: 'Hirsche', gender: 'masc', count: 'singular' },
+      es: { base: 'ciervo', plural: 'ciervos', gender: 'masc', count: 'singular', fem: 'cierva', fem_plural: 'ciervas' },
+      ja: { base: '鹿', count: 'singular', reading: 'しか', counter: '頭' },
+      pt: { base: 'veado', plural: 'veados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A mammal, not a fish: the gloss says what sets it apart from the other mammals.
+    id: 'WHALE',
+    role: 'noun',
+    description: 'a very large mammal that lives in the sea',
+    definition: `
+      /subj ( MAMMAL /adj BIG /a /rel #2.subj )
+      /subj ( MAMMAL ) /verb ( LIVE_ALIVE ) /loc ( WATER )
+    `,
+    emoji: '🐋',
+    animate: true,
+    isA: 'MAMMAL',
+    forms: {
+      en: { base: 'whale', plural: 'whales', count: 'singular' },
+      it: { base: 'balena', plural: 'balene', gender: 'fem', count: 'singular' },
+      fr: { base: 'baleine', plural: 'baleines', gender: 'fem', count: 'singular' },
+      de: { base: 'Wal', plural: 'Wale', gender: 'masc', count: 'singular' },
+      es: { base: 'ballena', plural: 'ballenas', gender: 'fem', count: 'singular' },
+      ja: { base: '鯨', count: 'singular', reading: 'くじら', counter: '頭' },
+      pt: { base: 'baleia', plural: 'baleias', gender: 'fem', count: 'singular' },
+    },
+  },
+  // ── Birds ────────────────────────────────────────────────────────
+  // Japanese counts a bird with 羽 (二羽の鶏).
+  {
+    // The farmyard bird, not its meat: each language's general word for the species, which is the
+    // hen's (it "gallina", fr "poule", es "gallina", pt "galinha"; de "Huhn").
+    id: 'CHICKEN',
+    role: 'noun',
+    description: 'a domestic bird kept for its eggs and meat',
+    definition: '/subj ( BIRD /adj DOMESTIC /a )',
+    emoji: '🐔',
+    animate: true,
+    synonym: 'hen',
+    isA: 'BIRD',
+    forms: {
+      en: { base: 'chicken', plural: 'chickens', count: 'singular' },
+      it: { base: 'gallina', plural: 'galline', gender: 'fem', count: 'singular' },
+      fr: { base: 'poule', plural: 'poules', gender: 'fem', count: 'singular' },
+      de: { base: 'Huhn', plural: 'Hühner', gender: 'neut', count: 'singular', compound: 'Hühner' },
+      es: { base: 'gallina', plural: 'gallinas', gender: 'fem', count: 'singular' },
+      ja: { base: '鶏', count: 'singular', reading: 'にわとり', counter: '羽' },
+      pt: { base: 'galinha', plural: 'galinhas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'DUCK',
+    role: 'noun',
+    description: 'a water bird with a broad flat beak',
+    definition: '/subj ( BIRD /a )',
+    emoji: '🦆',
+    animate: true,
+    isA: 'BIRD',
+    forms: {
+      en: { base: 'duck', plural: 'ducks', count: 'singular' },
+      it: { base: 'anatra', plural: 'anatre', gender: 'fem', count: 'singular' },
+      fr: { base: 'canard', plural: 'canards', gender: 'masc', count: 'singular', fem: 'cane', fem_plural: 'canes' },
+      de: { base: 'Ente', plural: 'Enten', gender: 'fem', count: 'singular' },
+      es: { base: 'pato', plural: 'patos', gender: 'masc', count: 'singular', fem: 'pata', fem_plural: 'patas' },
+      ja: { base: 'アヒル', count: 'singular', reading: 'あひる', counter: '羽' },
+      pt: { base: 'pato', plural: 'patos', gender: 'masc', count: 'singular', fem: 'pata', fem_plural: 'patas' },
+    },
+  },
+  {
+    id: 'EAGLE',
+    role: 'noun',
+    description: 'a large bird of prey with keen sight',
+    definition: '/subj ( BIRD /adj BIG /adj WILD /a )',
+    emoji: '🦅',
+    animate: true,
+    isA: 'BIRD',
+    forms: {
+      en: { base: 'eagle', plural: 'eagles', count: 'singular' },
+      it: { base: 'aquila', plural: 'aquile', gender: 'fem', count: 'singular' },
+      fr: { base: 'aigle', plural: 'aigles', gender: 'masc', count: 'singular' },
+      de: { base: 'Adler', plural: 'Adler', gender: 'masc', count: 'singular' },
+      // Stressed a: "el águila", "las águilas".
+      es: { base: 'águila', plural: 'águilas', gender: 'fem', stressed_a: '1', count: 'singular' },
+      ja: { base: '鷲', count: 'singular', reading: 'わし', counter: '羽' },
+      pt: { base: 'águia', plural: 'águias', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'OWL',
+    role: 'noun',
+    description: 'a bird of prey with large eyes that hunts at night',
+    definition: '/subj ( BIRD /adj WILD /a )',
+    emoji: '🦉',
+    animate: true,
+    isA: 'BIRD',
+    forms: {
+      en: { base: 'owl', plural: 'owls', count: 'singular' },
+      it: { base: 'gufo', plural: 'gufi', gender: 'masc', count: 'singular' },
+      // h aspiré: "le hibou", so no `elides`.
+      fr: { base: 'hibou', plural: 'hiboux', gender: 'masc', count: 'singular' },
+      de: { base: 'Eule', plural: 'Eulen', gender: 'fem', count: 'singular' },
+      es: { base: 'búho', plural: 'búhos', gender: 'masc', count: 'singular' },
+      ja: { base: 'フクロウ', count: 'singular', reading: 'ふくろう', counter: '羽' },
+      pt: { base: 'coruja', plural: 'corujas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // French "manchot": "pingouin" is properly the auk, a northern bird that flies.
+    id: 'PENGUIN',
+    role: 'noun',
+    description: 'a black and white sea bird of the south that swims and cannot fly',
+    definition: `
+      /subj ( BIRD /a /rel #2.subj )
+      /subj ( BIRD ) /verb ( FLY /not )
+    `,
+    emoji: '🐧',
+    animate: true,
+    isA: 'BIRD',
+    forms: {
+      en: { base: 'penguin', plural: 'penguins', count: 'singular' },
+      it: { base: 'pinguino', plural: 'pinguini', gender: 'masc', count: 'singular' },
+      fr: { base: 'manchot', plural: 'manchots', gender: 'masc', count: 'singular' },
+      de: { base: 'Pinguin', plural: 'Pinguine', gender: 'masc', count: 'singular' },
+      es: { base: 'pingüino', plural: 'pingüinos', gender: 'masc', count: 'singular' },
+      ja: { base: 'ペンギン', count: 'singular', counter: '羽' },
+      pt: { base: 'pinguim', plural: 'pinguins', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── Fish ─────────────────────────────────────────────────────────
+  {
+    id: 'SHARK',
+    role: 'noun',
+    description: 'a large sea fish with sharp teeth',
+    definition: '/subj ( FISH /adj BIG /a )',
+    emoji: '🦈',
+    animate: true,
+    isA: 'FISH',
+    forms: {
+      en: { base: 'shark', plural: 'sharks', count: 'singular' },
+      it: { base: 'squalo', plural: 'squali', gender: 'masc', count: 'singular' },
+      fr: { base: 'requin', plural: 'requins', gender: 'masc', count: 'singular' },
+      de: { base: 'Hai', plural: 'Haie', gender: 'masc', count: 'singular' },
+      es: { base: 'tiburón', plural: 'tiburones', gender: 'masc', count: 'singular' },
+      ja: { base: 'サメ', count: 'singular', reading: 'さめ' },
+      pt: { base: 'tubarão', plural: 'tubarões', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'SALMON',
+    role: 'noun',
+    description: 'a fish with pink flesh that swims up rivers to breed',
+    definition: '/subj ( FISH /a )',
+    emoji: '🐟',
+    animate: true,
+    isA: 'FISH',
+    forms: {
+      en: { base: 'salmon', plural: 'salmon', count: 'singular' },
+      it: { base: 'salmone', plural: 'salmoni', gender: 'masc', count: 'singular' },
+      fr: { base: 'saumon', plural: 'saumons', gender: 'masc', count: 'singular' },
+      de: { base: 'Lachs', plural: 'Lachse', gender: 'masc', count: 'singular' },
+      es: { base: 'salmón', plural: 'salmones', gender: 'masc', count: 'singular' },
+      ja: { base: '鮭', count: 'singular', reading: 'さけ' },
+      pt: { base: 'salmão', plural: 'salmões', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── Reptiles and amphibians ──────────────────────────────────────
+  {
+    id: 'SNAKE',
+    role: 'noun',
+    description: 'a long reptile with no legs',
+    definition: '/subj ( REPTILE /adj LONG /a )',
+    emoji: '🐍',
+    animate: true,
+    isA: 'REPTILE',
+    forms: {
+      en: { base: 'snake', plural: 'snakes', count: 'singular' },
+      it: { base: 'serpente', plural: 'serpenti', gender: 'masc', count: 'singular' },
+      fr: { base: 'serpent', plural: 'serpents', gender: 'masc', count: 'singular' },
+      de: { base: 'Schlange', plural: 'Schlangen', gender: 'fem', count: 'singular' },
+      es: { base: 'serpiente', plural: 'serpientes', gender: 'fem', count: 'singular' },
+      ja: { base: '蛇', count: 'singular', reading: 'へび' },
+      // "cobra", the everyday word for any snake; "serpente" is literary.
+      pt: { base: 'cobra', plural: 'cobras', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'TURTLE',
+    role: 'noun',
+    description: 'a reptile with a hard shell over its body',
+    definition: '/subj ( REPTILE /a )',
+    emoji: '🐢',
+    animate: true,
+    synonym: 'tortoise',
+    isA: 'REPTILE',
+    forms: {
+      en: { base: 'turtle', plural: 'turtles', count: 'singular' },
+      it: { base: 'tartaruga', plural: 'tartarughe', gender: 'fem', count: 'singular' },
+      fr: { base: 'tortue', plural: 'tortues', gender: 'fem', count: 'singular' },
+      de: { base: 'Schildkröte', plural: 'Schildkröten', gender: 'fem', count: 'singular' },
+      es: { base: 'tortuga', plural: 'tortugas', gender: 'fem', count: 'singular' },
+      ja: { base: '亀', count: 'singular', reading: 'かめ' },
+      pt: { base: 'tartaruga', plural: 'tartarugas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'CROCODILE',
+    role: 'noun',
+    description: 'a large reptile with a long jaw that lives in rivers',
+    definition: '/subj ( REPTILE /adj BIG /a )',
+    emoji: '🐊',
+    animate: true,
+    isA: 'REPTILE',
+    forms: {
+      en: { base: 'crocodile', plural: 'crocodiles', count: 'singular' },
+      it: { base: 'coccodrillo', plural: 'coccodrilli', gender: 'masc', count: 'singular' },
+      fr: { base: 'crocodile', plural: 'crocodiles', gender: 'masc', count: 'singular' },
+      de: { base: 'Krokodil', plural: 'Krokodile', gender: 'neut', count: 'singular' },
+      es: { base: 'cocodrilo', plural: 'cocodrilos', gender: 'masc', count: 'singular' },
+      ja: { base: 'ワニ', count: 'singular', reading: 'わに' },
+      pt: { base: 'crocodilo', plural: 'crocodilos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'LIZARD',
+    role: 'noun',
+    description: 'a small reptile with four legs and a long tail',
+    definition: '/subj ( REPTILE /adj SMALL /a )',
+    emoji: '🦎',
+    animate: true,
+    isA: 'REPTILE',
+    forms: {
+      en: { base: 'lizard', plural: 'lizards', count: 'singular' },
+      it: { base: 'lucertola', plural: 'lucertole', gender: 'fem', count: 'singular' },
+      fr: { base: 'lézard', plural: 'lézards', gender: 'masc', count: 'singular' },
+      de: { base: 'Eidechse', plural: 'Eidechsen', gender: 'fem', count: 'singular' },
+      es: { base: 'lagarto', plural: 'lagartos', gender: 'masc', count: 'singular' },
+      ja: { base: 'トカゲ', count: 'singular', reading: 'とかげ' },
+      pt: { base: 'lagarto', plural: 'lagartos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'FROG',
+    role: 'noun',
+    description: 'a small amphibian with long back legs for jumping',
+    definition: '/subj ( AMPHIBIAN /adj SMALL /a )',
+    emoji: '🐸',
+    animate: true,
+    isA: 'AMPHIBIAN',
+    forms: {
+      en: { base: 'frog', plural: 'frogs', count: 'singular' },
+      it: { base: 'rana', plural: 'rane', gender: 'fem', count: 'singular' },
+      fr: { base: 'grenouille', plural: 'grenouilles', gender: 'fem', count: 'singular' },
+      de: { base: 'Frosch', plural: 'Frösche', gender: 'masc', count: 'singular' },
+      es: { base: 'rana', plural: 'ranas', gender: 'fem', count: 'singular' },
+      ja: { base: '蛙', count: 'singular', reading: 'かえる' },
+      // "rã", the frog; "sapo" is the toad.
+      pt: { base: 'rã', plural: 'rãs', gender: 'fem', count: 'singular' },
+    },
+  },
+  // ── Insects and spiders ──────────────────────────────────────────
+  {
+    id: 'BEE',
+    role: 'noun',
+    description: 'a flying insect that makes honey',
+    definition: `
+      /subj ( INSECT /a /rel #2.subj )
+      /subj ( INSECT ) /verb ( FLY )
+    `,
+    emoji: '🐝',
+    animate: true,
+    isA: 'INSECT',
+    forms: {
+      en: { base: 'bee', plural: 'bees', count: 'singular' },
+      it: { base: 'ape', plural: 'api', gender: 'fem', count: 'singular' },
+      fr: { base: 'abeille', plural: 'abeilles', gender: 'fem', count: 'singular' },
+      de: { base: 'Biene', plural: 'Bienen', gender: 'fem', count: 'singular' },
+      es: { base: 'abeja', plural: 'abejas', gender: 'fem', count: 'singular' },
+      ja: { base: '蜂', count: 'singular', reading: 'はち' },
+      pt: { base: 'abelha', plural: 'abelhas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'ANT',
+    role: 'noun',
+    description: 'a small insect that lives in large organized colonies',
+    definition: '/subj ( INSECT /adj SMALL /a )',
+    emoji: '🐜',
+    animate: true,
+    isA: 'INSECT',
+    forms: {
+      en: { base: 'ant', plural: 'ants', count: 'singular' },
+      it: { base: 'formica', plural: 'formiche', gender: 'fem', count: 'singular' },
+      fr: { base: 'fourmi', plural: 'fourmis', gender: 'fem', count: 'singular' },
+      de: { base: 'Ameise', plural: 'Ameisen', gender: 'fem', count: 'singular' },
+      es: { base: 'hormiga', plural: 'hormigas', gender: 'fem', count: 'singular' },
+      ja: { base: '蟻', count: 'singular', reading: 'あり' },
+      pt: { base: 'formiga', plural: 'formigas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'BUTTERFLY',
+    role: 'noun',
+    description: 'an insect with large colourful wings',
+    definition: '/subj ( INSECT /adj BEAUTIFUL /a )',
+    emoji: '🦋',
+    animate: true,
+    isA: 'INSECT',
+    forms: {
+      en: { base: 'butterfly', plural: 'butterflies', count: 'singular' },
+      it: { base: 'farfalla', plural: 'farfalle', gender: 'fem', count: 'singular' },
+      fr: { base: 'papillon', plural: 'papillons', gender: 'masc', count: 'singular' },
+      de: { base: 'Schmetterling', plural: 'Schmetterlinge', gender: 'masc', count: 'singular' },
+      es: { base: 'mariposa', plural: 'mariposas', gender: 'fem', count: 'singular' },
+      ja: { base: '蝶', count: 'singular', reading: 'ちょう' },
+      pt: { base: 'borboleta', plural: 'borboletas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'MOSQUITO',
+    role: 'noun',
+    description: 'a small flying insect that bites and sucks blood',
+    definition: `
+      /subj ( INSECT /a /rel #2.subj )
+      /subj ( INSECT ) /verb ( BITE )
+    `,
+    emoji: '🦟',
+    animate: true,
+    isA: 'INSECT',
+    forms: {
+      en: { base: 'mosquito', plural: 'mosquitoes', count: 'singular' },
+      it: { base: 'zanzara', plural: 'zanzare', gender: 'fem', count: 'singular' },
+      fr: { base: 'moustique', plural: 'moustiques', gender: 'masc', count: 'singular' },
+      de: { base: 'Mücke', plural: 'Mücken', gender: 'fem', count: 'singular' },
+      es: { base: 'mosquito', plural: 'mosquitos', gender: 'masc', count: 'singular' },
+      ja: { base: '蚊', count: 'singular', reading: 'か' },
+      pt: { base: 'mosquito', plural: 'mosquitos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // An arachnid, not an insect (eight legs, not six): it hangs from ANIMAL itself.
+    id: 'SPIDER',
+    role: 'noun',
+    description: 'a small animal with eight legs that spins webs',
+    definition: `
+      /subj ( ANIMAL /adj SMALL /a /rel #2.subj )
+      /subj ( ANIMAL ) /verb ( KILL ) /obj ( INSECT /pl /zero )
+    `,
+    emoji: '🕷️',
+    animate: true,
+    isA: 'ANIMAL',
+    forms: {
+      en: { base: 'spider', plural: 'spiders', count: 'singular' },
+      it: { base: 'ragno', plural: 'ragni', gender: 'masc', count: 'singular' },
+      fr: { base: 'araignée', plural: 'araignées', gender: 'fem', count: 'singular' },
+      de: { base: 'Spinne', plural: 'Spinnen', gender: 'fem', count: 'singular' },
+      es: { base: 'araña', plural: 'arañas', gender: 'fem', count: 'singular' },
+      ja: { base: '蜘蛛', count: 'singular', reading: 'くも' },
+      pt: { base: 'aranha', plural: 'aranhas', gender: 'fem', count: 'singular' },
+    },
+  },
   {
     id: 'BOOK',
     role: 'noun',
@@ -1594,7 +2273,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '🪰',
     animate: true,
     synonym: 'insect',
-    isA: 'ANIMAL',
+    isA: 'INSECT',
     forms: {
       en: { base: 'fly', plural: 'flies', count: 'singular' },
       it: { base: 'mosca', plural: 'mosche', gender: 'fem', count: 'singular' },

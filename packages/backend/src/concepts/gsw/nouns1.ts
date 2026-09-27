@@ -96,6 +96,50 @@ export const GSW_NOUNS_1: GswColumn = {
   AFFECTION: { base: 'Zueneigig', gender: 'fem', count: 'singular' },
   MOUSE: { base: 'Muus', plural: 'Müüs', gender: 'fem', count: 'singular' },
   FLY_INSECT: { base: 'Flüüge', plural: 'Flüüge', gender: 'fem', count: 'singular' },
+  // The animal classes and the common animals under them.
+  BIRD: { base: 'Vogel', plural: 'Vögel', gender: 'masc', count: 'singular' },
+  FISH: { base: 'Fisch', plural: 'Fisch', gender: 'masc', count: 'singular' },
+  REPTILE: { base: 'Reptil', plural: 'Reptilie', gender: 'neut', count: 'singular', compound: 'Reptilie' },
+  AMPHIBIAN: { base: 'Amphibie', plural: 'Amphibie', gender: 'fem', count: 'singular' },
+  INSECT: { base: 'Insekt', plural: 'Insekte', gender: 'neut', count: 'singular', compound: 'Insekte' },
+  // Ross, not Pferd.
+  HORSE: { base: 'Ross', plural: 'Ross', gender: 'neut', count: 'singular' },
+  // Sau, the everyday word, not Schwein.
+  PIG: { base: 'Sau', plural: 'Säu', gender: 'fem', count: 'singular' },
+  SHEEP: { base: 'Schaaf', plural: 'Schaaf', gender: 'neut', count: 'singular' },
+  // Geiss, not Ziege.
+  GOAT: { base: 'Geiss', plural: 'Geisse', gender: 'fem', count: 'singular' },
+  // Chüngel, not Kaninchen.
+  RABBIT: { base: 'Chüngel', plural: 'Chüngel', gender: 'masc', count: 'singular' },
+  BEAR: { base: 'Bär', plural: 'Bäre', gender: 'masc', count: 'singular', fem: 'Bärin', fem_plural: 'Bärine' },
+  // Löi, not Löwe.
+  LION: { base: 'Löi', plural: 'Löie', gender: 'masc', count: 'singular' },
+  TIGER: { base: 'Tiger', plural: 'Tiger', gender: 'masc', count: 'singular' },
+  ELEPHANT: { base: 'Elefant', plural: 'Elefante', gender: 'masc', count: 'singular' },
+  MONKEY: { base: 'Aff', plural: 'Affe', gender: 'masc', count: 'singular' },
+  DEER: { base: 'Hirsch', plural: 'Hirsche', gender: 'masc', count: 'singular' },
+  WHALE: { base: 'Wal', plural: 'Wal', gender: 'masc', count: 'singular' },
+  // Huen, plural Hüener.
+  CHICKEN: { base: 'Huen', plural: 'Hüener', gender: 'neut', count: 'singular', compound: 'Hüener' },
+  DUCK: { base: 'Änte', plural: 'Änte', gender: 'fem', count: 'singular' },
+  EAGLE: { base: 'Adler', plural: 'Adler', gender: 'masc', count: 'singular' },
+  // Üüle, not Eule.
+  OWL: { base: 'Üüle', plural: 'Üüle', gender: 'fem', count: 'singular' },
+  PENGUIN: { base: 'Pinguin', plural: 'Pinguin', gender: 'masc', count: 'singular' },
+  SHARK: { base: 'Hai', plural: 'Hai', gender: 'masc', count: 'singular' },
+  SNAKE: { base: 'Schlange', plural: 'Schlange', gender: 'fem', count: 'singular' },
+  // Schildchrott, with Zürich ch- for k-.
+  TURTLE: { base: 'Schildchrott', plural: 'Schildchrotte', gender: 'fem', count: 'singular' },
+  CROCODILE: { base: 'Krokodil', plural: 'Krokodil', gender: 'neut', count: 'singular' },
+  LIZARD: { base: 'Eidechs', plural: 'Eidechse', gender: 'fem', count: 'singular' },
+  FROG: { base: 'Frosch', plural: 'Frösch', gender: 'masc', count: 'singular' },
+  // s Bii, not Biene.
+  BEE: { base: 'Bii', plural: 'Bii', gender: 'neut', count: 'singular' },
+  ANT: { base: 'Ameisi', plural: 'Ameise', gender: 'fem', count: 'singular' },
+  BUTTERFLY: { base: 'Schmetterling', plural: 'Schmetterling', gender: 'masc', count: 'singular' },
+  // Mugge, the biting midge or mosquito; a fly is Flüüge.
+  MOSQUITO: { base: 'Mugge', plural: 'Mugge', gender: 'fem', count: 'singular' },
+  SPIDER: { base: 'Spinne', plural: 'Spinne', gender: 'fem', count: 'singular' },
   // Zürich de Stecke for a stick of wood; Stock is a walking stick or a floor (verify spelling Stecke/Stäcke).
   STICK: { base: 'Stecke', plural: 'Stecke', gender: 'masc', count: 'singular' },
   ARROW_PROJECTILE: { base: 'Pfiil', plural: 'Pfiil', gender: 'masc', count: 'singular' },

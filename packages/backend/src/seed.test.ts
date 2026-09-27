@@ -4,7 +4,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { LANGUAGES } from '@signi/shared';
-import { concepts, NONFINITE } from './concepts/index.js';
+import { concepts, GSW_PENDING, NONFINITE } from './concepts/index.js';
 import type { ConceptSeed } from './concepts/types.js';
 import { getDb } from './db.js';
 // The seed does its work on import, into this file's in-memory database (see vitest.config.ts).
@@ -77,7 +77,7 @@ describe('seeding the corpus', () => {
     expect(
       count(db, `SELECT COUNT(*) AS n FROM ${role}_lexemes l
                  JOIN concept_${role}_links k ON k.lexeme_id = l.id AND k.is_primary = 1`),
-    ).toBe(seeds.length * LANGUAGE_COUNT);
+    ).toBe(seeds.length * LANGUAGE_COUNT - seeds.filter((c) => GSW_PENDING.includes(c.id)).length);
     // Exactly one per concept and language — the constraint the schema cannot state, and the one
     // every lookup's `.get()` relies on (P09-E23).
     expect(

@@ -309,3 +309,51 @@ describe('P10-E13: the rest of the sentence suite', () => {
     expect(gsw({ ...clause(CAT, 'EAT'), condition: clause(np('DOG'), 'RUN') })).toBe('wenn de Hund würd springe, würd d Chatz frässe.');
   });
 });
+
+// The common animals (seeded with their classes): Zürich words where they differ from German — s Ross,
+// d Sau, d Geiss, de Chüngel, de Löi, s Huen, d Üüle, s Bii. SALMON is in GSW_PENDING, so its row is
+// empty.
+describe('the animals', () => {
+  test.each<[string, string, string]>([
+    ['BIRD', 'de Vogel.', 'd Vögel.'],
+    ['FISH', 'de Fisch.', 'd Fisch.'],
+    ['REPTILE', 's Reptil.', 'd Reptilie.'],
+    ['AMPHIBIAN', 'd Amphibie.', 'd Amphibie.'],
+    ['INSECT', 's Insekt.', 'd Insekte.'],
+    ['HORSE', 's Ross.', 'd Ross.'],
+    ['PIG', 'd Sau.', 'd Säu.'],
+    ['SHEEP', 's Schaaf.', 'd Schaaf.'],
+    ['GOAT', 'd Geiss.', 'd Geisse.'],
+    ['RABBIT', 'de Chüngel.', 'd Chüngel.'],
+    ['BEAR', 'de Bär.', 'd Bäre.'],
+    ['LION', 'de Löi.', 'd Löie.'],
+    ['TIGER', 'de Tiger.', 'd Tiger.'],
+    ['ELEPHANT', 'de Elefant.', 'd Elefante.'],
+    ['MONKEY', 'de Aff.', 'd Affe.'],
+    ['DEER', 'de Hirsch.', 'd Hirsche.'],
+    ['WHALE', 'de Wal.', 'd Wal.'],
+    ['CHICKEN', 's Huen.', 'd Hüener.'],
+    ['DUCK', 'd Änte.', 'd Änte.'],
+    ['EAGLE', 'de Adler.', 'd Adler.'],
+    ['OWL', 'd Üüle.', 'd Üüle.'],
+    ['PENGUIN', 'de Pinguin.', 'd Pinguin.'],
+    ['SHARK', 'de Hai.', 'd Hai.'],
+    ['SNAKE', 'd Schlange.', 'd Schlange.'],
+    ['TURTLE', 'd Schildchrott.', 'd Schildchrotte.'],
+    ['CROCODILE', 's Krokodil.', 'd Krokodil.'],
+    ['LIZARD', 'd Eidechs.', 'd Eidechse.'],
+    ['FROG', 'de Frosch.', 'd Frösch.'],
+    ['BEE', 's Bii.', 'd Bii.'],
+    ['ANT', 'd Ameisi.', 'd Ameise.'],
+    ['BUTTERFLY', 'de Schmetterling.', 'd Schmetterling.'],
+    ['MOSQUITO', 'd Mugge.', 'd Mugge.'],
+    ['SPIDER', 'd Spinne.', 'd Spinne.'],
+  ])('%s: %s / %s', (id, the, thePlural) => {
+    expect(gsw(subject(np(id)))).toBe(the);
+    expect(gsw(subject(np(id, { number: 'plural' })))).toBe(thePlural);
+  });
+
+  test('SALMON, pending review, empties the row', () => {
+    expect(gsw(subject(np('SALMON')))).toBe('');
+  });
+});

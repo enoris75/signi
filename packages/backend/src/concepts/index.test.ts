@@ -27,7 +27,10 @@ describe('the concept corpus', () => {
   test('seeds every concept in exactly the supported languages, each with a base form', () => {
     const bad = concepts.flatMap((c) => {
       const languages = Object.keys(c.forms);
-      const missing = LANGUAGE_CODES.filter((l) => !languages.includes(l)).map((l) => `${c.id}: no ${l}`);
+      // A concept in GSW_PENDING is seeded without its Swiss German form, by design (P10-E4 D2).
+      const missing = LANGUAGE_CODES.filter((l) => !languages.includes(l))
+        .filter((l) => !(l === 'gsw' && GSW_PENDING.includes(c.id)))
+        .map((l) => `${c.id}: no ${l}`);
       const unknown = languages.filter((l) => !LANGUAGE_CODES.includes(l)).map((l) => `${c.id}: unknown ${l}`);
       const noBase = languages.filter((l) => !c.forms[l]?.['base']).map((l) => `${c.id}: no ${l} base`);
       return [...missing, ...unknown, ...noBase];
@@ -180,6 +183,28 @@ describe('the concept corpus', () => {
     for (const id of ['LOCATIVE', 'DIRECTION', 'SOURCE', 'ROUTE', 'CAUSE_COMPLEMENT', 'TERMINUS']) {
       expect(ancestors(id, byId)).toEqual(['COMPLEMENT_GRAMMAR', 'PHRASE']);
     }
+  });
+
+  test('sorts the common animals into their classes under ANIMAL', () => {
+    // The everyday taxonomy: a class a level under ANIMAL, and every animal under its class. The
+    // two a tidy-up could get wrong are pinned by name: WHALE is a mammal, not a fish, and SPIDER
+    // an arachnid, not an insect, so it hangs from ANIMAL itself.
+    const CLASSES: Record<string, string[]> = {
+      MAMMAL: ['CAT', 'DOG', 'FOX', 'WOLF', 'MOUSE', 'BOVINE', 'HORSE', 'PIG', 'SHEEP', 'GOAT', 'RABBIT',
+        'BEAR', 'LION', 'TIGER', 'ELEPHANT', 'MONKEY', 'DEER', 'WHALE'],
+      BIRD: ['CHICKEN', 'DUCK', 'EAGLE', 'OWL', 'PENGUIN'],
+      FISH: ['SHARK', 'SALMON'],
+      REPTILE: ['SNAKE', 'TURTLE', 'CROCODILE', 'LIZARD'],
+      AMPHIBIAN: ['FROG'],
+      INSECT: ['FLY_INSECT', 'BEE', 'ANT', 'BUTTERFLY', 'MOSQUITO'],
+    };
+    for (const [cls, animals] of Object.entries(CLASSES)) {
+      expect(ancestors(cls, byId)).toEqual(['ANIMAL']);
+      for (const id of animals) expect([id, ancestors(id, byId)]).toEqual([id, [cls, 'ANIMAL']]);
+    }
+    expect(ancestors('COW', byId)).toEqual(['BOVINE', 'MAMMAL', 'ANIMAL']);
+    expect(ancestors('SPIDER', byId)).toEqual(['ANIMAL']);
+    expect(ancestors('ANIMAL', byId)).toEqual([]);
   });
 
   test('relates hypernyms within one role', () => {
