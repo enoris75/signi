@@ -23,7 +23,7 @@ export const NOUNS = [
   c('CHILD', 'noun', 'child', 'bambino', { gendered: true, animate: true, human: true }),
   c('MAN', 'noun', 'man', 'uomo', { animate: true, human: true }),
   c('FOOD', 'noun', 'food', 'cibo', { countable: false }),
-  c('BOOK', 'noun', 'book', 'libro'),
+  c('BOOK', 'noun', 'book', 'libro', { classes: ['OBJECT_THING'] }),
   c('HOUSE', 'noun', 'house', 'casa'),
   // Times for the temporal box, and a second human for the purpose's beneficiary (P09-E12b).
   c('DAY', 'noun', 'day', 'giorno'),
@@ -37,6 +37,10 @@ export const NOUNS = [
   c('PHRASE', 'noun', 'phrase', 'frase'),
   c('CREATOR', 'noun', 'creator', 'creatore', { gendered: true }),
   c('SAIL', 'noun', 'sail', 'vela'),
+  // A noun with a modifier relation of its own and one by the head's class (P14, P16), and two heads
+  // with classes as the API serves them: under a bomb "time" is its feature, under a book its domain.
+  c('TIME', 'noun', 'time', 'tempo', { modifierRelation: 'domain', modifierRelationByHead: { DEVICE: 'feature' } }),
+  c('BOMB', 'noun', 'bomb', 'bomba', { gendered: true, classes: ['DEVICE', 'OBJECT_THING'] }),
   c('SPEED', 'noun', 'speed', 'velocità', { mannerRelation: 'measure' }),
   c('CARE', 'noun', 'care', 'cura', { mannerRelation: 'means' }),
   c('LEGEND', 'noun', 'legend', 'leggenda'),

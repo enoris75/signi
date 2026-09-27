@@ -7,6 +7,7 @@ import type {
   GrammaticalRole,
   LanguageCode,
   MannerRelation,
+  ModifierRelation,
   Transitivity,
 } from '@signi/shared';
 import { getDb } from './db.js';
@@ -27,10 +28,12 @@ interface ConceptRow {
   dimension_relation: string | null;
   alarm: number;
   alarm_cry: number;
+  modifier_relation: string | null;
+  modifier_relation_by_head: string | null;
 }
 
 const CONCEPT_COLS =
-  'id, role, description, emoji, transitivity, complements, synonym, countable, modal, clause_object, slot, manner_relation, dimension_relation, alarm, alarm_cry';
+  'id, role, description, emoji, transitivity, complements, synonym, countable, modal, clause_object, slot, manner_relation, dimension_relation, alarm, alarm_cry, modifier_relation, modifier_relation_by_head';
 
 const PRONOUN_META_SQL = `
   SELECT cpl.concept_id, pl.person, pl.number
@@ -276,6 +279,12 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     for (let depth = 0; at && depth < 64; depth++, at = hypernyms.get(at)) if (at === 'RELATIVE') return true;
     return false;
   };
+  // A noun's ancestors, nearest first (`Concept.classes`, P16), bounded like the walk above.
+  const classesOf = (id: string): string[] | undefined => {
+    const chain: string[] = [];
+    for (let at = hypernyms.get(id); at && chain.length < 64; at = hypernyms.get(at)) chain.push(at);
+    return chain.length ? chain : undefined;
+  };
 
   const pronounMeta = db
     .prepare<[], { concept_id: string; person: string; number: string }>(PRONOUN_META_SQL)
@@ -305,6 +314,12 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     slot: (r.slot as ConceptSlot | null) ?? undefined,
     mannerRelation: (r.manner_relation as MannerRelation) ?? undefined,
     dimensionRelation: (r.dimension_relation as DimensionRelation) ?? undefined,
+    modifierRelation: (r.role === 'noun' && (r.modifier_relation as ModifierRelation | null)) || undefined,
+    modifierRelationByHead:
+      r.role === 'noun' && r.modifier_relation_by_head
+        ? (JSON.parse(r.modifier_relation_by_head) as Partial<Record<string, ModifierRelation>>)
+        : undefined,
+    classes: r.role === 'noun' ? classesOf(r.id) : undefined,
     alarm: r.alarm === 1 || undefined,
     alarmCry: r.alarm_cry === 1 || undefined,
     transitivity: (r.transitivity as Transitivity) ?? undefined,

@@ -4,6 +4,7 @@
 // paths re-export them); what a consumer outside it needs is here.
 export type { PhraseContainer, PhraseLink, PhraseSelection } from "./model/interfaces.ts";
 export { selectionToPlan } from "./model/selectionToPlan/index.ts";
+export { defaultModifierRelation } from "./model/functions/modifierRelation.ts";
 export { planToWorkspace, workspaceToPlans, type PlanWorkspace } from "./model/workspacePlan/index.ts";
 export type { WorkspaceSentence } from "./model/workspacePlan/workspacePlan.types.ts";
 export type { ConsoleContext, Vocabulary, WorkspaceState } from "./language/types.ts";

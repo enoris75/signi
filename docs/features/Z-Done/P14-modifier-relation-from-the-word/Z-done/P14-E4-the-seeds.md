@@ -4,7 +4,7 @@
 tempo* without anyone touching the chip.
 **Shape:** seed data with a comment per noun; engine and e2e tests.
 **Scope:** backend seeds, engine tests, e2e.
-**Status:** open. Filed 2026-09-27 from P14 phase 4 and §5, checked against HEAD f35ea20b. Depends on
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27 from P14 phase 4 and §5, checked against HEAD f35ea20b. Depends on
 E1–E3. Reseed `signi.db` after it (see memory: engine dist rebuild).
 
 | plan (TIME modifying FLY_INSECT, relation unset, `/pl /zero`) | today | after |
@@ -21,9 +21,9 @@ E1–E3. Reseed `signi.db` after it (see memory: engine dist rebuild).
 
 | Noun | Seed | `modifierRelation` | The comment says |
 |---|---|---|---|
-| TIME | [`nouns.ts:323`](../../../../packages/backend/src/concepts/nouns.ts#L323) | `domain` | the whole a head belongs to, *le mosche del tempo*, *la macchina del tempo*; a timed thing, *bomba a tempo*, is `feature`, set on the chip |
-| WOOD | [`nouns.ts:7053`](../../../../packages/backend/src/concepts/nouns.ts#L7053) | `material` | what the head is made of, *un tavolo di legno* |
-| WATER | [`nouns.ts:214`](../../../../packages/backend/src/concepts/nouns.ts#L214) | `material` | *un bicchiere d'acqua*. Check this before assigning it: a glass *of* water is the contents, which `material` renders the same way in all four languages. If one of them differs, leave WATER unset |
+| TIME | [`nouns.ts:323`](../../../../../packages/backend/src/concepts/nouns.ts#L323) | `domain` | the whole a head belongs to, *le mosche del tempo*, *la macchina del tempo*; a timed thing, *bomba a tempo*, is `feature`, set on the chip |
+| WOOD | [`nouns.ts:7053`](../../../../../packages/backend/src/concepts/nouns.ts#L7053) | `material` | what the head is made of, *un tavolo di legno* |
+| WATER | [`nouns.ts:214`](../../../../../packages/backend/src/concepts/nouns.ts#L214) | `material` | *un bicchiere d'acqua*. Check this before assigning it: a glass *of* water is the contents, which `material` renders the same way in all four languages. If one of them differs, leave WATER unset |
 
 Put the field next to `mannerRelation` (TIME already has `measure`, which is the manner relation, a
 separate thing). FRUIT, GOLD, SUN, SEA, SAIL, STEAM and BOMB are not seeded. Each takes its value when it is,
@@ -31,7 +31,7 @@ and the `seed` skill should ask for it: add one line to its noun checklist. Leav
 than guess.
 
 Do not change the explicit relations: the 14 `material` entries in
-[`uiStrings.ts`](../../../../packages/shared/src/uiStrings.ts) and the definitions of STICK and
+[`uiStrings.ts`](../../../../../packages/shared/src/uiStrings.ts) and the definitions of STICK and
 REGISTER.
 
 ## Before landing

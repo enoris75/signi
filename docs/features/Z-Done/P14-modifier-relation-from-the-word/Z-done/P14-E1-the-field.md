@@ -5,7 +5,7 @@ database and `Concept`, and nothing reads it yet.
 **Shape:** `mannerRelation`'s path, copied: seed type → `semantic_concepts` column → `seedConcept` and
 `listConcepts` → `Concept`.
 **Scope:** shared, backend. No engine, phrase or frontend change.
-**Status:** open. Filed 2026-09-27 from P14 phase 1, checked against HEAD f35ea20b. First of four; E2
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27 from P14 phase 1, checked against HEAD f35ea20b. First of four; E2
 depends on it.
 
 ## Today
@@ -14,15 +14,15 @@ depends on it.
 
 | Site | `mannerRelation` today |
 |---|---|
-| Seed type | [`concepts/types.ts:35`](../../../../packages/backend/src/concepts/types.ts#L35) |
-| `Concept` | [`shared/src/index.ts:808`](../../../../packages/shared/src/index.ts#L808) |
-| Schema, and the migration for an existing DB | [`db.ts:58`](../../../../packages/backend/src/db.ts#L58), [`db.ts:409`](../../../../packages/backend/src/db.ts#L409) |
-| The insert | [`seed.ts:98`](../../../../packages/backend/src/seed.ts#L98), [`seed.ts:137`](../../../../packages/backend/src/seed.ts#L137) |
-| `listConcepts` | [`conceptList.ts:26`](../../../../packages/backend/src/conceptList.ts#L26), `:33`, `:306` |
-| `seedConcept` | [`concepts/definitionText.ts:76`](../../../../packages/backend/src/concepts/definitionText.ts#L76) |
-| The two held equal | [`definitionText.test.ts:77`](../../../../packages/backend/src/definitionText.test.ts#L77) |
+| Seed type | [`concepts/types.ts:35`](../../../../../packages/backend/src/concepts/types.ts#L35) |
+| `Concept` | [`shared/src/index.ts:808`](../../../../../packages/shared/src/index.ts#L808) |
+| Schema, and the migration for an existing DB | [`db.ts:58`](../../../../../packages/backend/src/db.ts#L58), [`db.ts:409`](../../../../../packages/backend/src/db.ts#L409) |
+| The insert | [`seed.ts:98`](../../../../../packages/backend/src/seed.ts#L98), [`seed.ts:137`](../../../../../packages/backend/src/seed.ts#L137) |
+| `listConcepts` | [`conceptList.ts:26`](../../../../../packages/backend/src/conceptList.ts#L26), `:33`, `:306` |
+| `seedConcept` | [`concepts/definitionText.ts:76`](../../../../../packages/backend/src/concepts/definitionText.ts#L76) |
+| The two held equal | [`definitionText.test.ts:77`](../../../../../packages/backend/src/definitionText.test.ts#L77) |
 
-`mannerRelation` also goes into the engine's lexeme forms ([`lexicon.ts:97`](../../../../packages/backend/src/lexicon.ts#L97)).
+`mannerRelation` also goes into the engine's lexeme forms ([`lexicon.ts:97`](../../../../../packages/backend/src/lexicon.ts#L97)).
 `modifierRelation` does **not**, because the engine always receives the relation in the plan (P14 D1).
 
 ## Design

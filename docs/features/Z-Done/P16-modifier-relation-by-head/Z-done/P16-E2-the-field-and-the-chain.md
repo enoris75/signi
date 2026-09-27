@@ -5,15 +5,15 @@ tell which classes a head belongs to, without a concept list at hand.
 **Shape:** a seed field carried like P14-E1's `modifierRelation`, plus the head's ancestor chain on
 `Concept`.
 **Scope:** shared, backend.
-**Status:** open. Filed 2026-09-27, checked against HEAD f117e564. Depends on E1 and P14-E1.
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27, checked against HEAD f117e564. Depends on E1 and P14-E1.
 
 ## Today
 
-`Concept.isA` ([`shared/src/index.ts:818`](../../../../packages/shared/src/index.ts#L818)) carries the
+`Concept.isA` ([`shared/src/index.ts:818`](../../../../../packages/shared/src/index.ts#L818)) carries the
 direct parent only. Its doc says a client that wants the chain walks it through the concept list. The
 phrase package's functions get one `Concept` (the chip's `held`, the plan's `field<Concept>`, the
 console's `WordInfo`), not the list. The only frontend code that walks `isA` today is the word map
-([`wordMap.ts:73`](../../../../packages/frontend/src/components/WordMap/wordMap.ts#L73)).
+([`wordMap.ts:73`](../../../../../packages/frontend/src/components/WordMap/wordMap.ts#L73)).
 
 ## Design
 
@@ -28,7 +28,7 @@ console's `WordInfo`), not the list. The only frontend code that walks `isA` tod
   `Concept` lean, but every one of the call sites then has to thread a concept list through, and the
   printer has none.
 - `seedConcept` and `listConcepts` are held equal by
-  [`definitionText.test.ts:77`](../../../../packages/backend/src/definitionText.test.ts#L77). Extend
+  [`definitionText.test.ts:77`](../../../../../packages/backend/src/definitionText.test.ts#L77). Extend
   its `pick` with both fields.
 
 ## Tests

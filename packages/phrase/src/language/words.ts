@@ -53,6 +53,7 @@ import {
   NOUN_KEYS,
 } from "../model/slots.ts";
 import { approximatorFor } from "../model/functions/approximatorFor.ts";
+import { slotDefaultModifierRelation, slotModifierRelation } from "../model/functions/modifierRelation.ts";
 import type { Action, Setting } from "./commands.ts";
 import type { WordKindName } from "./diagnostics.ts";
 import type { WordRef } from "./types.ts";
@@ -339,7 +340,7 @@ export function currentSetting(id: Setting["id"], w: WordInfo): string | undefin
     case "degree":
       return sel.adjectiveDegrees?.[w.ref.slot] ?? "positive";
     case "relation":
-      return sel.modifierRelations?.[w.ref.slot] ?? "feature";
+      return slotModifierRelation(sel, w.ref.slot);
   }
 }
 
@@ -377,7 +378,8 @@ export function defaultSetting(id: Setting["id"], w: WordInfo): string {
     case "degree":
       return "positive";
     case "relation":
-      return "feature";
+      // The pair's own relation (P14, P16): TIME's `domain`, or its `feature` under a DEVICE.
+      return slotDefaultModifierRelation(w.slice, w.ref.slot);
   }
 }
 

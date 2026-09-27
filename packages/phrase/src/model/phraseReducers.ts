@@ -22,6 +22,7 @@ import {
   type Voice,
 } from "@signi/shared";
 import { approximatorFor } from "./functions/approximatorFor.ts";
+import { slotModifierRelation } from "./functions/modifierRelation.ts";
 import {
   CONJUNCTION_KEY,
   CONJUNCTS_KEY,
@@ -314,6 +315,13 @@ export function applyConceptSelect(
   // bigger animal than the dog", P09-E50 D3). A pronoun takes no adjective, so it drops it.
   if (concept.role === "pronoun" && (slot === "subject" || slot === "directObject" || slot === "vocative" || COMPLEMENT_KEY_SET.has(slot)))
     delete next[STANDARD_KEY(slot as NounKey)];
+  // A noun modifier's relation is its word's (P14): another word in the slot starts from its own default
+  // rather than the last word's choice ("sail" set to purpose, then "time" is time's domain).
+  if (/Adjective\d?$/.test(slot) && (prev[slot] as Concept | undefined)?.id !== concept.id && prev.modifierRelations?.[slot]) {
+    const { [slot]: _dropped, ...rest } = prev.modifierRelations;
+    if (Object.keys(rest).length) next.modifierRelations = rest;
+    else delete next.modifierRelations;
+  }
   if (opts?.number !== undefined)
     (next as PhraseSelection)[`${slot}Number` as keyof PhraseSelection] = opts.number as never;
   if (opts?.gender !== undefined)
@@ -549,15 +557,15 @@ export function setContrastive(prev: PhraseSelection, which: NounKey, contrastiv
   return next;
 }
 
-// Cycle a noun-modifier's semantic relation (feature → purpose → material → feature),
-// stored per adjective slot key in `modifierRelations`. Only meaningful when that slot
-// holds a noun; ignored otherwise.
+// Cycle a noun-modifier's semantic relation (feature → purpose → material → domain → feature),
+// stored per adjective slot key in `modifierRelations`, starting from the one it renders with — the
+// pair's default when unset (P14). Only meaningful when that slot holds a noun; ignored otherwise.
 export function cycleModifierRelation(
   prev: PhraseSelection,
   slotKey: SlotKey,
   step: CycleStep = 1,
 ): PhraseSelection {
-  const cur = prev.modifierRelations?.[slotKey] ?? "feature";
+  const cur = slotModifierRelation(prev, slotKey);
   return setModifierRelation(prev, slotKey, cycled(MODIFIER_RELATIONS, cur, step));
 }
 

@@ -70,7 +70,7 @@ describe('a seed defined in text (P13)', () => {
   // The facts a line is checked against, as the seed states them and as the database serves them:
   // the definition compiler reads the first, the console the second, and they must not disagree.
   test('knows each word as the API serves it', () => {
-    const FACTS = ['role', 'transitivity', 'complements', 'clauseObject', 'clauseForce', 'prepositionalObject', 'humble', 'relative', 'modal', 'slot', 'person', 'number', 'gendered', 'mannerRelation', 'dimensionRelation'] as const;
+    const FACTS = ['role', 'transitivity', 'complements', 'clauseObject', 'clauseForce', 'prepositionalObject', 'humble', 'relative', 'modal', 'slot', 'person', 'number', 'gendered', 'mannerRelation', 'dimensionRelation', 'modifierRelation', 'modifierRelationByHead', 'classes'] as const;
     const pick = (c: object) => Object.fromEntries(FACTS.flatMap((k) => ((c as Record<string, unknown>)[k] === undefined ? [] : [[k, (c as Record<string, unknown>)[k]]])));
     const served = new Map(listConcepts({ senses: true }).map((c) => [c.id, pick(c)]));
     const byId = conceptIndex(concepts);

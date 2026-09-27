@@ -20,6 +20,7 @@ import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection
 import { conjunctAddress, examplesAddress, governsInfinitive, possessorAddress, standardAddress, subordinateReading } from "../../interfaces.ts";
 import { comparedAdjectiveIndex } from "../../functions/comparison.ts";
 import { approximatorFor } from "../../functions/approximatorFor.ts";
+import { slotDefaultModifierRelation } from "../../functions/modifierRelation.ts";
 import { ADVERB_SLOTS, adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
 
 /**
@@ -468,7 +469,8 @@ class Builder {
       const slot = slots[i++];
       if (!slot) break;
       set(sel, slot, this.concept(m.concept));
-      if (m.relation !== "feature") sel.modifierRelations = { ...sel.modifierRelations, [slot]: m.relation };
+      // Unset is the pair's own relation (P14, P16), so only one that differs from it is stored.
+      if (m.relation !== slotDefaultModifierRelation(sel, slot)) sel.modifierRelations = { ...sel.modifierRelations, [slot]: m.relation };
       if (m.number === "plural") sel.modifierNumbers = { ...sel.modifierNumbers, [slot]: "plural" };
       if (m.adjectives?.length) {
         if (m.adjectives.length > 1) this.unsupported.add("NounModifier.adjectives > 1");

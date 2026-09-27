@@ -5,7 +5,7 @@
 **Shape:** one helper in `@signi/phrase`, read at the model and canvas sites below. The console's
 three sites are E3.
 **Scope:** phrase, frontend.
-**Status:** open. Filed 2026-09-27 from P14 phase 2, checked against HEAD f35ea20b. Depends on E1. Land it
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27 from P14 phase 2, checked against HEAD f35ea20b. Depends on E1. Land it
 with E3. Between the two, a noun with its own relation breaks the round trip: `feature` set on
 TIME is dropped by the printer as the default, and applies back as TIME's own `domain`. Only a seed
 with the field (E4) exposes this, but the test vocabulary in E3 will.
@@ -14,10 +14,10 @@ with the field (E4) exposes this, but the test vocabulary in E3 will.
 
 | Site | Line | Reads |
 |---|---|---|
-| The plan | [`modifiers.ts:19`](../../../../packages/phrase/src/model/selectionToPlan/functions/modifiers.ts#L19) | `sel.modifierRelations?.[key] ?? "feature"` |
-| The chip | [`phraseRender.tsx:390`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L390) | same, for the label and the tooltip |
-| R / Shift+R | [`phraseReducers.ts:560`](../../../../packages/phrase/src/model/phraseReducers.ts#L560) `cycleModifierRelation` | the cycle starts from `feature` |
-| Plan → canvas | [`planToWorkspace.ts:471`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L471) | stores a relation only when it is not `feature` |
+| The plan | [`modifiers.ts:19`](../../../../../packages/phrase/src/model/selectionToPlan/functions/modifiers.ts#L19) | `sel.modifierRelations?.[key] ?? "feature"` |
+| The chip | [`phraseRender.tsx:390`](../../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L390) | same, for the label and the tooltip |
+| R / Shift+R | [`phraseReducers.ts:560`](../../../../../packages/phrase/src/model/phraseReducers.ts#L560) `cycleModifierRelation` | the cycle starts from `feature` |
+| Plan → canvas | [`planToWorkspace.ts:471`](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L471) | stores a relation only when it is not `feature` |
 
 Every one has the modifier's `Concept`: `field<Concept>(sel, key)` in the plan and the reducer,
 `held` in the chip, `this.concept(m.concept)` in the inverse.
@@ -51,11 +51,11 @@ the one TIME modifier is stored as `"domain"` explicitly. Re-check before E4 ass
 The model's tests stayed in the frontend when the language moved (P13 decision 4), so add them beside
 the existing ones:
 
-- [`selectionToPlan/functions/modifiers.test.ts`](../../../../packages/frontend/test/selectionToPlan/functions/modifiers.test.ts):
+- [`selectionToPlan/functions/modifiers.test.ts`](../../../../../packages/frontend/test/selectionToPlan/functions/modifiers.test.ts):
   an unset slot plans the word's relation; an explicit one wins; a word with none plans `feature`.
-- [`phraseReducers.test.ts`](../../../../packages/frontend/test/phraseReducers.test.ts): R and Shift+R
+- [`phraseReducers.test.ts`](../../../../../packages/frontend/test/phraseReducers.test.ts): R and Shift+R
   start from the word's relation; placing another word resets it (`clearSlotSettings`).
-- [`phraseRender.test.tsx`](../../../../packages/frontend/test/phraseRender.test.tsx): the chip reads the
+- [`phraseRender.test.tsx`](../../../../../packages/frontend/test/phraseRender.test.tsx): the chip reads the
   word's relation when unset.
 - The inverse: a plan whose relation equals the word's own round-trips to an unset slot.
 

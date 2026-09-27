@@ -4,7 +4,7 @@
 the modifier names, else the modifier's own relation, else `feature`.
 **Shape:** `defaultModifierRelation(modifier, head)`. Every P14 call site passes the head of the block.
 **Scope:** phrase, frontend.
-**Status:** open. Filed 2026-09-27, checked against HEAD f117e564. Depends on E2 and on P14-E2/E3
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27, checked against HEAD f117e564. Depends on E2 and on P14-E2/E3
 having landed.
 
 ## Design
@@ -46,5 +46,5 @@ the modifier's `/adj ( … )` comes after the head word, so it is expected to ho
   one, no match falls back to `modifierRelation` and then to `feature`, and a missing head uses the
   word's own.
 - Reducer: replacing the head re-reads an unset slot and keeps a set one.
-- Console: give two heads in [`vocab.ts`](../../../../packages/frontend/test/console/vocab.ts) `classes`
+- Console: give two heads in [`vocab.ts`](../../../../../packages/frontend/test/console/vocab.ts) `classes`
   and one modifier a `modifierRelationByHead`. Golden lines for both heads, then `SEEDS=5000`.

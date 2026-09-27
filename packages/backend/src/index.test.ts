@@ -135,6 +135,8 @@ describe('GET /api/concepts', () => {
       emoji: '🐱',
       gendered: true,
       isA: 'MAMMAL',
+      // Its ancestors, nearest first, which a noun modifier's relation is read against (P16).
+      classes: ['MAMMAL', 'ANIMAL'],
     });
   });
 
@@ -159,12 +161,19 @@ describe('GET /api/concepts', () => {
     expect((await find('EAT')).clauseObject).toBeUndefined();
     expect(await find('SPEED')).toMatchObject({ mannerRelation: 'measure' });
     expect(await find('SIZE')).toMatchObject({ dimensionRelation: 'extent' });
+    // P14, P16: the relation a noun takes as a modifier, its own and by the head's class.
+    expect(await find('TIME')).toMatchObject({
+      modifierRelation: 'domain',
+      modifierRelationByHead: { DEVICE: 'feature', EVENT: 'feature', QUANTITY: 'material' },
+    });
+    expect(await find('BOMB')).toMatchObject({ classes: ['DEVICE', 'OBJECT_THING', 'THING'] });
+    expect(await find('QUANTITY')).not.toHaveProperty('classes');
     // A164: the canvas withdraws the determiner of the alarm a cry raises, and it reads both words.
     expect(await find('WOLF')).toMatchObject({ alarm: true });
     expect(await find('CRY_OUT')).toMatchObject({ alarmCry: true });
 
     const divide = await find('DIVIDE');
-    for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'alarm', 'alarmCry', 'person', 'number', 'gendered', 'isA', 'aliases', 'glosses']) {
+    for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'modifierRelation', 'modifierRelationByHead', 'classes', 'alarm', 'alarmCry', 'person', 'number', 'gendered', 'isA', 'aliases', 'glosses']) {
       expect(divide).not.toHaveProperty(key);
     }
   });

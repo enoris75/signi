@@ -81,8 +81,12 @@ export const GSW_NOUNS_3: GswColumn = {
   CONCEPT: { base: 'Begriff', plural: 'Begriff', gender: 'masc', count: 'singular', compound: 'Begriffs' },
   IDEA: { base: 'Idee', plural: 'Idee', gender: 'fem', count: 'singular' },
   ACTION: { base: 'Handlig', plural: 'Handlige', gender: 'fem', count: 'singular' },
+  EVENT: { base: 'Ereignis', plural: 'Ereignis', gender: 'neut', count: 'singular' }, // (verify)
+  RACE: { base: 'Renne', plural: 'Renne', gender: 'neut', count: 'singular' }, // (verify)
   GAME: { base: 'Spiil', plural: 'Spiil', gender: 'neut', count: 'singular' },
   OBJECT_THING: { base: 'Gägestand', plural: 'Gägeständ', gender: 'masc', count: 'singular', compound: 'Gägestands' },
+  DEVICE: { base: 'Grät', plural: 'Grät', gender: 'neut', count: 'singular' }, // (verify)
+  BOMB: { base: 'Bombe', plural: 'Bombe', gender: 'fem', count: 'singular' },
   THING: { base: 'Ding', plural: 'Ding', gender: 'neut', count: 'singular' },
   PROBLEM: { base: 'Problem', plural: 'Problem', gender: 'neut', count: 'singular' },
   ISSUE: { base: 'Fraag', plural: 'Frage', gender: 'fem', count: 'singular' },

@@ -5,7 +5,7 @@ override has heads to find.
 **Shape:** a README update (decisions D1–D4), and seed data made with the `/generalize`, `/specialize`
 and `/attach` skills.
 **Scope:** docs, backend seeds.
-**Status:** open. Filed 2026-09-27, checked against HEAD f117e564. **Blocked on P14** (all of E1–E4) and
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27, checked against HEAD f117e564. **Blocked on P14** (all of E1–E4) and
 on the trigger (D3). E2–E4 depend on this.
 
 ## Today

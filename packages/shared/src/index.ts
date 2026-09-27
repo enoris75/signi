@@ -807,6 +807,24 @@ export interface Concept {
   countable?: boolean;          // false for mass/uncountable nouns (water, food) — changes quantifier words
   mannerRelation?: MannerRelation; // how this noun enters a manner adverbial (SPEED→measure, CARE→means); default means
   dimensionRelation?: DimensionRelation; // how this noun enters an adjective-definition gloss (SIZE→extent "in"); default extent
+  /**
+   * The relation this noun has as a noun modifier when the author sets none (P14): TIME is `domain`
+   * ("le mosche del tempo"), WOOD `material` ("un tavolo di legno"); default `feature`. The phrase
+   * package resolves it into the plan (`defaultModifierRelation`), so the engine never reads it.
+   */
+  modifierRelation?: ModifierRelation;
+  /**
+   * `modifierRelation` by the head this noun modifies (P16), keyed by a concept id: the head
+   * itself, or one of its `classes`. The head's own id wins, then its nearest class; a head that
+   * matches none falls back to `modifierRelation`. Only on nouns that name one.
+   */
+  modifierRelationByHead?: Partial<Record<string, ModifierRelation>>;
+  /**
+   * A noun's ancestors in the isA tree, nearest first (FLY_INSECT → ['INSECT', 'ANIMAL', …]), so a
+   * client holding one concept can tell which classes it belongs to without the whole list (P16).
+   * Only on nouns that have an `isA`.
+   */
+  classes?: string[];
   alarm?: boolean;              // noun naming a danger one cries out a warning of (WOLF, FIRE) — see `alarmCry`
   alarmCry?: boolean;           // verb whose `alarm` object is the shout itself ("cry wolf"): it takes no determiner (A163)
   complements?: ComplementType[]; // complements a verb licenses (motion/locative/cause, or the copular `predicative`)

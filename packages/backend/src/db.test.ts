@@ -227,11 +227,13 @@ describe('migrations', () => {
       'id', 'role', 'description', 'emoji', 'transitivity',
       'complements', 'animate', 'human', 'synonym', 'countable', 'modal', 'clause_object', 'slot', 'proper',
       'manner_relation', 'dimension_relation', 'temporal', 'transient', 'alarm', 'alarm_cry', 'stative', 'sense_of', 'sex',
+      'modifier_relation', 'modifier_relation_by_head',
     ]);
     expect(db.prepare("SELECT * FROM semantic_concepts WHERE id = 'WATER'").get()).toEqual({
       id: 'WATER', role: 'noun', description: 'a clear liquid', emoji: null, transitivity: null,
       complements: null, animate: 0, human: 0, synonym: null, countable: 1, modal: 0, clause_object: null, slot: null, proper: 0,
       manner_relation: null, dimension_relation: null, temporal: 0, transient: 0, alarm: 0, alarm_cry: 0, stative: 0, sense_of: null, sex: null,
+      modifier_relation: null, modifier_relation_by_head: null,
     });
   });
 
@@ -244,6 +246,10 @@ describe('migrations', () => {
     );
     expect(() => db.prepare('UPDATE semantic_concepts SET temporal = 2').run()).toThrow(/CHECK constraint failed/);
     expect(() => db.prepare("UPDATE semantic_concepts SET sex = 'neut'").run()).toThrow(/CHECK constraint failed/);
+    // P14, P16: one of the four relations, and a JSON map by the head.
+    expect(() => db.prepare("UPDATE semantic_concepts SET modifier_relation = 'means'").run()).toThrow(/CHECK constraint failed/);
+    expect(() => db.prepare("UPDATE semantic_concepts SET modifier_relation_by_head = '{DEVICE'").run()).toThrow(/CHECK constraint failed/);
+    db.prepare("UPDATE semantic_concepts SET modifier_relation = 'domain', modifier_relation_by_head = '{\"DEVICE\":\"feature\"}'").run();
   });
 
   test('backfills an existing saved phrase as a whole-workspace phrase', async () => {

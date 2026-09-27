@@ -33,6 +33,14 @@ export interface ConceptSeed {
   alarmCry?: boolean; // verb whose object, when an `alarm` noun, is the shout itself ("cry wolf"): no determiner, and a / à + the article in it/fr (A124, A163)
   transient?: boolean; // adjective ascribing a transient state (tired, saved), not an inherent property (big) — es/pt predicate it with `estar`, not `ser` (A47); default inherent
   mannerRelation?: 'similative' | 'measure' | 'means' | 'mode'; // how the noun enters a manner adverbial (SPEED→measure); default similative
+  modifierRelation?: 'feature' | 'purpose' | 'material' | 'domain'; // the relation this noun has as a noun modifier when the author sets none (TIME→domain, "le mosche del tempo"); default feature (P14)
+  /**
+   * `modifierRelation` by the head this noun modifies (P16): keyed by a concept id — the head
+   * itself, or a class above it in the isA tree — and resolved nearest-first up the head's chain,
+   * so TIME can be `feature` under a DEVICE ("bomba a tempo") while `domain` elsewhere. A key must
+   * be a seeded noun, and a class only one with a noun under it.
+   */
+  modifierRelationByHead?: Partial<Record<string, 'feature' | 'purpose' | 'material' | 'domain'>>;
   temporal?: boolean; // noun naming a point in time, an occasion (TIME), not a rate: a measure adverbial under an adjective keeps its article, "at the other time" not "at high speed" (A235); German says it with "zu", "zu allen Zeiten" (A60)
   dimensionRelation?: 'extent' | 'quality' | 'measure'; // how a dimension noun enters an adjective-definition gloss (SIZE→extent); default extent
   proper?: boolean; // proper noun (Africa) — the language fixes the article, not the user

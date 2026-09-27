@@ -220,6 +220,9 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '💧',
     countable: false,
+    // What the head holds or is made of: "un bicchiere d'acqua" (P14). Its contents render as the
+    // material does in all four Romance languages (di / de / de / de).
+    modifierRelation: 'material',
     isA: 'LIQUID',
     forms: {
       en: { base: 'water', count: 'singular' },
@@ -325,6 +328,12 @@ export const nouns: ConceptSeed[] = [
     description: 'the indefinite continued progress of existence; an occasion',
     emoji: '⏰',
     mannerRelation: 'measure',
+    // As a modifier it is the whole a head belongs to: "le mosche del tempo", "la macchina del tempo"
+    // (P14). A timed thing is its feature, the mechanism or limit it works by: a DEVICE, "la bomba a
+    // tempo", or an EVENT, "la gara a tempo". An amount or a stretch of it is the material: a QUANTITY,
+    // "l'unità di tempo" (P16).
+    modifierRelation: 'domain',
+    modifierRelationByHead: { DEVICE: 'feature', EVENT: 'feature', QUANTITY: 'material' },
     temporal: true,
     forms: {
       en: { base: 'time', plural: 'times', count: 'singular' },
@@ -3136,7 +3145,7 @@ export const nouns: ConceptSeed[] = [
       /subj ( one ) /verb ( SPEAK )
     `,
     emoji: '☎️',
-    isA: 'OBJECT_THING',
+    isA: 'DEVICE', // P16: a device, as BOMB is; its gloss keeps OBJECT_THING, which DEVICE sits under
     forms: {
       en: { base: 'telephone', plural: 'telephones', count: 'singular' },
       it: { base: 'telefono', plural: 'telefoni', gender: 'masc', count: 'singular' },
@@ -5324,6 +5333,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // A quantity chosen as the standard to measure by (P16): the hour is a unit of time. Under it TIME
+    // is `material`, the stuff measured, "l'unità di tempo". Italian "unità" is invariable.
+    id: 'UNIT',
+    role: 'noun',
+    description: 'a quantity chosen as a standard to measure others by',
+    emoji: '📏',
+    synonym: 'of measure',
+    isA: 'QUANTITY',
+    forms: {
+      en: { base: 'unit', plural: 'units', count: 'singular' },
+      it: { base: 'unità', plural: 'unità', gender: 'fem', count: 'singular' },
+      fr: { base: 'unité', plural: 'unités', gender: 'fem', count: 'singular' },
+      de: { base: 'Einheit', plural: 'Einheiten', gender: 'fem', count: 'singular' },
+      es: { base: 'unidad', plural: 'unidades', gender: 'fem', count: 'singular' },
+      ja: { base: '単位', count: 'singular', reading: 'たんい' },
+      pt: { base: 'unidade', plural: 'unidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     // P09-E24's *percent* (rank 265; localization B82). Invariable everywhere: the plural is the
     // singular (five percent, cinque per cento, fünf Prozent, cinq pour cent). It is always counted,
     // and "one part in a hundred" needs 100, which the cardinals do not reach (C31), so it stays on
@@ -7055,6 +7083,7 @@ export const nouns: ConceptSeed[] = [
     description: 'the hard material trees are made of',
     emoji: '🪵',
     countable: false,
+    modifierRelation: 'material', // what the head is made of: "un tavolo di legno" (P14)
     isA: 'MATERIAL',
     forms: {
       en: { base: 'wood', count: 'singular' },
@@ -7250,6 +7279,42 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // Something that happens, an occasion (P16): the head class a noun modifier can read differently
+    // under. TIME is `feature` under an event, the limit it is run by ("la gara a tempo").
+    id: 'EVENT',
+    role: 'noun',
+    description: 'something that happens, especially something important',
+    emoji: '📅',
+    synonym: 'occurrence',
+    forms: {
+      en: { base: 'event', plural: 'events', count: 'singular' },
+      it: { base: 'evento', plural: 'eventi', gender: 'masc', count: 'singular' },
+      fr: { base: 'événement', plural: 'événements', gender: 'masc', count: 'singular' },
+      de: { base: 'Ereignis', plural: 'Ereignisse', gender: 'neut', count: 'singular' },
+      es: { base: 'evento', plural: 'eventos', gender: 'masc', count: 'singular' },
+      ja: { base: '出来事', count: 'singular', reading: 'できごと' },
+      pt: { base: 'evento', plural: 'eventos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A contest of speed, an EVENT (P16). The synonym keeps it apart from a people or a breed.
+    id: 'RACE',
+    role: 'noun',
+    description: 'a contest of speed, as in running or driving',
+    emoji: '🏁',
+    synonym: 'contest of speed',
+    isA: 'EVENT',
+    forms: {
+      en: { base: 'race', plural: 'races', count: 'singular' },
+      it: { base: 'corsa', plural: 'corse', gender: 'fem', count: 'singular' },
+      fr: { base: 'course', plural: 'courses', gender: 'fem', count: 'singular' },
+      de: { base: 'Rennen', plural: 'Rennen', gender: 'neut', count: 'singular' },
+      es: { base: 'carrera', plural: 'carreras', gender: 'fem', count: 'singular' },
+      ja: { base: '競走', count: 'singular', reading: 'きょうそう' },
+      pt: { base: 'corrida', plural: 'corridas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     // P09-E24's *game* (rank 210; localization B82), the game one plays (gioco, jeu, Spiel, juego,
     // ゲーム, jogo); a match (partita, partie, partido, 試合) is another concept. "An action that one
     // does for joy": the purpose complement on DO, near PLAY_GAME's "to act to feel joy" without
@@ -7292,6 +7357,42 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'objeto', plural: 'objetos', gender: 'masc', count: 'singular' },
       ja: { base: '物体', count: 'singular', reading: 'ぶったい' },
       pt: { base: 'objeto', plural: 'objetos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // An object made to do a job (P16): the head class a noun modifier can read differently under.
+    // TIME is `feature` under a device, the mechanism it works by ("la bomba a tempo").
+    id: 'DEVICE',
+    role: 'noun',
+    description: 'an object made for a particular purpose, often a machine',
+    emoji: '⚙️',
+    synonym: 'apparatus',
+    isA: 'OBJECT_THING',
+    forms: {
+      en: { base: 'device', plural: 'devices', count: 'singular' },
+      it: { base: 'dispositivo', plural: 'dispositivi', gender: 'masc', count: 'singular' },
+      fr: { base: 'appareil', plural: 'appareils', gender: 'masc', count: 'singular' },
+      de: { base: 'Gerät', plural: 'Geräte', gender: 'neut', count: 'singular' },
+      es: { base: 'dispositivo', plural: 'dispositivos', gender: 'masc', count: 'singular' },
+      ja: { base: '装置', count: 'singular', reading: 'そうち' },
+      pt: { base: 'dispositivo', plural: 'dispositivos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The head of "time bomb" (P16): a DEVICE, so TIME modifies it as its `feature`, "la bomba a tempo".
+    id: 'BOMB',
+    role: 'noun',
+    description: 'a device made to explode',
+    emoji: '💣',
+    isA: 'DEVICE',
+    forms: {
+      en: { base: 'bomb', plural: 'bombs', count: 'singular' },
+      it: { base: 'bomba', plural: 'bombe', gender: 'fem', count: 'singular' },
+      fr: { base: 'bombe', plural: 'bombes', gender: 'fem', count: 'singular' },
+      de: { base: 'Bombe', plural: 'Bomben', gender: 'fem', count: 'singular' },
+      es: { base: 'bomba', plural: 'bombas', gender: 'fem', count: 'singular' },
+      ja: { base: '爆弾', count: 'singular', reading: 'ばくだん' },
+      pt: { base: 'bomba', plural: 'bombas', gender: 'fem', count: 'singular' },
     },
   },
   // ── P09's everyday nouns (localization B65) ──────────────────────────

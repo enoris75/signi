@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Popover, Tooltip } from "@mui/material";
 import type { SystemStyleObject, Theme } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
+import { slotModifierRelation } from "@signi/phrase/model/functions/modifierRelation.ts";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
 import { type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type ObjectPredication, type PathSpecifier, type TemporalRelation } from "@signi/shared";
 import {
@@ -386,8 +387,8 @@ export function SlotNode({
   // adjective gets the degree — the adjective slots, and the subject complement when its
   // head is a predicate adjective ("seems happier") rather than a predicate noun.
   const isRealAdjective = held?.role === "adjective";
-  const relation: ModifierRelation =
-    (selection.modifierRelations?.[slot.key] as ModifierRelation | undefined) ?? "feature";
+  // The relation it renders with: the author's, else the pair's default (P14 D3: its name only).
+  const relation: ModifierRelation = slotModifierRelation(selection, slot.key);
   const degree: Degree = selection.adjectiveDegrees?.[slot.key] ?? "positive";
   // A noun modifier carries three footer controls: its semantic relation (→ preposition),
   // its own grammatical number, and an optional adjective describing *it* ("di frasi

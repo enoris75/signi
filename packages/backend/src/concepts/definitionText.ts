@@ -75,6 +75,9 @@ export function seedConcept(seed: Omit<ConceptSeed, 'definition'>, byId?: Return
     ...(seed.human ? { human: true } : {}),
     ...(seed.mannerRelation ? { mannerRelation: seed.mannerRelation as MannerRelation } : {}),
     ...(seed.dimensionRelation ? { dimensionRelation: seed.dimensionRelation as DimensionRelation } : {}),
+    ...(seed.role === 'noun' && seed.modifierRelation ? { modifierRelation: seed.modifierRelation } : {}),
+    ...(seed.role === 'noun' && seed.modifierRelationByHead ? { modifierRelationByHead: seed.modifierRelationByHead } : {}),
+    ...(seed.role === 'noun' && byId && ancestors(seed.id, byId).length ? { classes: ancestors(seed.id, byId) } : {}),
   };
 }
 

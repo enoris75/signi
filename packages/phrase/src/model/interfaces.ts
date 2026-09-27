@@ -579,8 +579,9 @@ export interface PhraseSelection {
     mannerAdjective3?: Concept;
     // Semantic relation for any adjective slot whose picked concept is a *noun* used
     // attributively ("sail boat"). Keyed by the adjective slot key (e.g. "subjectAdjective").
-    // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
-    // to 'feature'. See NounModifier / ModifierRelation in @signi/shared.
+    // Only consulted when that slot holds a noun; adjective concepts ignore it. Unset is the
+    // pair's own relation (`defaultModifierRelation`: by the head, the word's, else 'feature'),
+    // so a value here is only ever one the author chose. See NounModifier / ModifierRelation in @signi/shared.
     modifierRelations?: Partial<Record<string, ModifierRelation>>;
     // What a noun's genitive possessor is to it, keyed by the noun block (P13, NounPhrase
     // .possessorRole): the whole it is a part of ("a part of a place", AREA) or the parts it is made

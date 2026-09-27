@@ -68,9 +68,9 @@ describe('the nouns: a singular and a plural in every language', () => {
     expect(partOf('MIND')).toMatchObject({ de: 'der Teil des Verstands.', fr: "la partie de l'esprit.", ja: '頭脳の部分。' });
   });
 
-  test('SAY is an expressing, TELL and ASK sayings, QUESTION a phrase, TELEPHONE an object', () => {
+  test('SAY is an expressing, TELL and ASK sayings, QUESTION a phrase, TELEPHONE a device', () => {
     const isA = (id: string) => concepts.find((c) => c.id === id)?.isA;
-    expect(['SAY', 'TELL', 'ASK', 'QUESTION', 'TELEPHONE'].map(isA)).toEqual(['EXPRESS', 'SAY', 'SAY', 'PHRASE', 'OBJECT_THING']);
+    expect(['SAY', 'TELL', 'ASK', 'QUESTION', 'TELEPHONE'].map(isA)).toEqual(['EXPRESS', 'SAY', 'SAY', 'PHRASE', 'DEVICE']);
     // The picker's disambiguators: two calls, and MEAN in its signify sense only.
     const synonym = (id: string) => concepts.find((c) => c.id === id)?.synonym;
     expect(['CALL', 'CALL_PHONE', 'MEAN'].map(synonym)).toEqual(['summon', 'phone', 'signify']);

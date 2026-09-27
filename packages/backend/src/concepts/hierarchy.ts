@@ -84,3 +84,35 @@ export function assertValidHierarchy(seeds: Node[]): void {
 
   for (const s of seeds) walk(s.id, []);
 }
+
+const MODIFIER_RELATIONS = ['feature', 'purpose', 'material', 'domain'];
+
+/**
+ * Reject a noun-modifier relation the phrase package could not resolve (P14, P16): one on a concept
+ * that is not a noun, a value outside the four, or a `modifierRelationByHead` key that names no head
+ * — a concept that is not seeded, or one that is neither a noun nor a class with a noun under it.
+ * A misspelt class would otherwise match nothing, silently. Called by the seed with the hierarchy
+ * check, so it fails at build time.
+ */
+export function assertValidModifierRelations(
+  seeds: Pick<ConceptSeed, 'id' | 'isA' | 'role' | 'modifierRelation' | 'modifierRelationByHead'>[],
+): void {
+  const byId = conceptIndex(seeds);
+  const classes = new Set(seeds.filter((s) => s.role === 'noun').flatMap((s) => ancestors(s.id, byId)));
+  const heads = (id: string) => classes.has(id) || seeds.some((s) => s.id === id && s.role === 'noun');
+  for (const s of seeds) {
+    if (!s.modifierRelation && !s.modifierRelationByHead) continue;
+    if (s.role !== 'noun') throw new Error(`Concept ${s.id} is a ${s.role}; only a noun takes a modifier relation.`);
+    for (const [head, relation] of [['', s.modifierRelation], ...Object.entries(s.modifierRelationByHead ?? {})]) {
+      if (relation !== undefined && !MODIFIER_RELATIONS.includes(relation)) {
+        throw new Error(`Concept ${s.id} names the modifier relation "${relation}", which is not one of ${MODIFIER_RELATIONS.join(', ')}.`);
+      }
+      if (head && !byId.has(head)) {
+        throw new Error(`Concept ${s.id} takes a modifier relation under "${head}", which is not a seeded concept.`);
+      }
+      if (head && !heads(head)) {
+        throw new Error(`Concept ${s.id} takes a modifier relation under "${head}", which is neither a noun nor a class with a noun under it.`);
+      }
+    }
+  }
+}

@@ -6,15 +6,15 @@ same workspace.
 **Shape:** the console's value, the printer's default and normalising read `defaultModifierRelation`
 (E2) instead of `"feature"`.
 **Scope:** phrase (language), frontend console tests.
-**Status:** open. Filed 2026-09-27 from P14 phase 3, checked against HEAD f35ea20b. Depends on E2.
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27 from P14 phase 3, checked against HEAD f35ea20b. Depends on E2.
 
 ## Today
 
 | Site | Line | Reads |
 |---|---|---|
-| The console's value | [`words.ts:342`](../../../../packages/phrase/src/language/words.ts#L342) `settingValue` | an unset relation reads `feature` |
-| The printer's default | [`words.ts:380`](../../../../packages/phrase/src/language/words.ts#L380) `defaultSetting` | `feature` is the value left out |
-| Normalising | [`normalize.ts:102`](../../../../packages/phrase/src/language/normalize.ts#L102) | a stored `feature` is dropped as the default |
+| The console's value | [`words.ts:342`](../../../../../packages/phrase/src/language/words.ts#L342) `settingValue` | an unset relation reads `feature` |
+| The printer's default | [`words.ts:380`](../../../../../packages/phrase/src/language/words.ts#L380) `defaultSetting` | `feature` is the value left out |
+| Normalising | [`normalize.ts:102`](../../../../../packages/phrase/src/language/normalize.ts#L102) | a stored `feature` is dropped as the default |
 
 `defaultSetting` gets the modifier's `Concept` from its `WordInfo`; `normalize` has the held concept
 as `held` two lines above.
@@ -35,8 +35,8 @@ as `held` two lines above.
 
 ## Tests
 
-- [`roundTrip.test.ts`](../../../../packages/frontend/test/console/roundTrip.test.ts): give a noun in
-  [`vocab.ts`](../../../../packages/frontend/test/console/vocab.ts) a `modifierRelation`, so the walk
+- [`roundTrip.test.ts`](../../../../../packages/frontend/test/console/roundTrip.test.ts): give a noun in
+  [`vocab.ts`](../../../../../packages/frontend/test/console/vocab.ts) a `modifierRelation`, so the walk
   reaches it. Then run the stress: `SEEDS=5000` (from the repo root; see memory: console round trip).
 - Golden: `/adj ( time )` applies to an unset relation and prints back unchanged; `/adj ( time /feature )`
   keeps `feature`; `/adj ( time /domain )` normalises to `/adj ( time )`.

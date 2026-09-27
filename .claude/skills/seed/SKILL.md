@@ -58,6 +58,12 @@ languages only.
      Flags: `animate` (affects motion adpositions), `countable: false` for mass nouns,
      `proper: true` for proper nouns. A handful of columns are **one language's own** and go on that
      language's lexeme only (see *A noun's language-specific columns* below).
+     **As a noun modifier** (P14, P16): which relation does it usually take when it modifies another
+     noun? Set `modifierRelation` (`feature` · `purpose` · `material` · `domain`) with a one-line comment
+     naming the reading ("un tavolo di legno"), as TIME, WOOD and WATER do, and leave it unset rather
+     than guess — unset is `feature`. Then ask whether the reading changes with the head's class
+     (TIME is `feature` under a DEVICE, "la bomba a tempo"): if so, add `modifierRelationByHead`, keyed
+     by a seeded noun or a class with a noun under it. Probe the four Romance renderings first.
    - **verb** — `base` (infinitive) plus the finite paradigm: `1sg_present`…`3pl_present`, and the
      `_past` / `_future` persons each language inflects (en collapses to a single `past`).
      Set `transitivity`, and `complements` for the complement types the verb licenses; `modal: true`

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { ConceptSeed } from './types.js';
-import { ancestors, assertValidHierarchy, conceptIndex } from './hierarchy.js';
+import { ancestors, assertValidHierarchy, assertValidModifierRelations, conceptIndex } from './hierarchy.js';
 
 // Only the fields the walks read; a seed's forms play no part in the hierarchy.
 const seed = (id: string, isA?: string): ConceptSeed => ({
@@ -104,5 +104,36 @@ describe('assertValidHierarchy', () => {
     expect(() => assertValidHierarchy([seed('A', 'B'), seed('B', 'A'), seed('C', 'MISSING')])).toThrow(
       'Concept C is_a "MISSING"',
     );
+  });
+});
+
+describe('assertValidModifierRelations (P14, P16)', () => {
+  const noun = (id: string, extra: Partial<ConceptSeed> = {}): ConceptSeed => ({ ...seed(id), ...extra });
+  const CORPUS = [noun('THING'), noun('DEVICE', { isA: 'THING' }), noun('BOMB', { isA: 'DEVICE' })];
+
+  test('accepts a relation of its own, and one by the head itself or by a class with a noun under it', () => {
+    const time = noun('TIME', { modifierRelation: 'domain', modifierRelationByHead: { DEVICE: 'feature', BOMB: 'feature' } });
+    expect(() => assertValidModifierRelations([...CORPUS, time])).not.toThrow();
+  });
+
+  test('rejects a relation on a concept that is not a noun', () => {
+    const fast = { ...seed('FAST'), role: 'adjective', modifierRelation: 'feature' } as ConceptSeed;
+    expect(() => assertValidModifierRelations([...CORPUS, fast])).toThrow('Concept FAST is a adjective; only a noun takes a modifier relation.');
+  });
+
+  test('rejects a relation outside the four', () => {
+    const time = noun('TIME', { modifierRelationByHead: { DEVICE: 'means' as 'feature' } });
+    expect(() => assertValidModifierRelations([...CORPUS, time])).toThrow('names the modifier relation "means"');
+  });
+
+  test('rejects a head that is not seeded, as a misspelt class', () => {
+    const time = noun('TIME', { modifierRelationByHead: { DEVISE: 'feature' } });
+    expect(() => assertValidModifierRelations([...CORPUS, time])).toThrow('under "DEVISE", which is not a seeded concept.');
+  });
+
+  test('rejects a head that is neither a noun nor a class with a noun under it', () => {
+    const verb = { ...seed('RUN'), role: 'verb' } as ConceptSeed;
+    const time = noun('TIME', { modifierRelationByHead: { RUN: 'feature' } });
+    expect(() => assertValidModifierRelations([...CORPUS, verb, time])).toThrow('under "RUN", which is neither a noun nor a class');
   });
 });

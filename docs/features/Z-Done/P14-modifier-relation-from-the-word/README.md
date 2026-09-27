@@ -10,8 +10,9 @@ seven places where `"feature"` is hard-coded as the default. The console round t
 own relation" as the unset value. The engine does not change: a plan always carries its relation.
 **Languages:** Italian, French, Spanish and Portuguese, the four where the relation shows in the
 output. English, German and Japanese neutralise it (*time flies*, *Zeitfliegen*, 時間のハエ).
-**Status:** planning. D1–D4 are decided (2026-09-25). The head-class refinement (formerly D2) is its own
-feature, [P16](../P16-modifier-relation-by-head/README.md).
+**Status:** done, 2026-09-27, landed together with [P16](../P16-modifier-relation-by-head/README.md),
+which refines the default by the head's class. TIME is `domain`, WOOD and WATER `material`; *time flies*
+renders *le mosche del tempo* from an unset relation. See *What landed differently* at the end.
 
 ---
 
@@ -179,7 +180,32 @@ between them a noun with its own relation breaks the console round trip.
 
 | task | phase | what | status |
 |---|---|---|---|
-| [P14-E1](P14-E1-the-field.md) | 1 | `modifierRelation` on the seed, the `modifier_relation` column, `seedConcept`, `listConcepts`, `Concept` | Open |
-| [P14-E2](P14-E2-the-default.md) | 2 | `defaultModifierRelation`; the plan, the chip, R / Shift+R, plan → canvas | Open, after E1 |
-| [P14-E3](P14-E3-the-console.md) | 3 | `settingValue`, `defaultSetting`, `normalize`; `SEEDS=5000` | Open, with E2 |
-| [P14-E4](P14-E4-the-seeds.md) | 4 | TIME `domain`, WOOD `material`, WATER *(check)*; engine and e2e tests; saved-phrase check | Open, after E3 |
+| [P14-E1](Z-done/P14-E1-the-field.md) | 1 | `modifierRelation` on the seed, the `modifier_relation` column, `seedConcept`, `listConcepts`, `Concept` | Done |
+| [P14-E2](Z-done/P14-E2-the-default.md) | 2 | `defaultModifierRelation`; the plan, the chip, R / Shift+R, plan → canvas | Done |
+| [P14-E3](Z-done/P14-E3-the-console.md) | 3 | `settingValue`, `defaultSetting`, `normalize`; `SEEDS=5000` | Done |
+| [P14-E4](Z-done/P14-E4-the-seeds.md) | 4 | TIME `domain`, WOOD `material`, WATER `material` (checked); engine and e2e tests; saved-phrase check | Done |
+
+## What landed differently
+
+- **One helper for P14 and P16.** `defaultModifierRelation(modifier, head)` in
+  [`modifierRelation.ts`](../../../../packages/phrase/src/model/functions/modifierRelation.ts) takes the head
+  from the start, beside `slotModifierRelation` / `slotDefaultModifierRelation`, which read the head off
+  the slot's block. The seven sites call those, so P16-E3 needed no second pass.
+- **Placing another word did not reset the relation.** §*Today* says `clearSlotSettings` clears a slot's
+  settings when a new word is placed; it does so only when a slot is cleared or a head replaced.
+  `applyConceptSelect` now drops the relation (only that; a degree or a number still carries over, as
+  before) when a *different* word goes into an adjective slot, so *sail* set to `purpose` and then
+  replaced by *time* reads TIME's `domain`.
+- **The seed check is in the seed, not only in a test.** `assertValidModifierRelations`
+  ([`hierarchy.ts`](../../../../packages/backend/src/concepts/hierarchy.ts)) runs beside
+  `assertValidHierarchy`: a relation on a non-noun, a value outside the four, or an unknown head fails
+  the seed.
+- **WATER checked.** `material` renders it the way the contents read in all four languages (*di acqua*,
+  *d'eau*, *de agua*, *de água*), so it is set.
+- **The engine test** ([`modifier-relation.test.ts`](../../../../packages/engine/test/modifier-relation.test.ts))
+  compiles console lines with a bare modifier against the seeded concepts, so the relation goes through
+  `selectionToPlan` unset, as §Tests asked. The e2e is
+  [`modifier-relation.spec.ts`](../../../../e2e/modifier-relation.spec.ts).
+- The printer writes a bare modifier without brackets: `/adj time`, not `/adj ( time )`.
+- Saved phrases: the one TIME modifier is stored as `domain` explicitly, and still renders it; no other
+  saved phrase has a noun modifier. Definitions: only STICK's and REGISTER's have one, both explicit.

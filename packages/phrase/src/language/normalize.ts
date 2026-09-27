@@ -14,6 +14,7 @@ import {
   type PhraseSelection,
 } from "../model/interfaces.ts";
 import { pointerHolds } from "../model/functions/linksToSubject.ts";
+import { slotDefaultModifierRelation } from "../model/functions/modifierRelation.ts";
 import type { WorkspaceState } from "./types.ts";
 
 /**
@@ -99,7 +100,8 @@ function normalizeSelection(sel: PhraseSelection, root: PhraseSelection = sel, s
         if (key === "adjectiveDegrees" && held.role !== "adjective") continue;
         if (key !== "adjectiveDegrees" && held.role !== "noun") continue;
         if (key === "adjectiveDegrees" && v === "positive") continue;
-        if (key === "modifierRelations" && v === "feature") continue;
+        // A relation is left out where it is the pair's own (P14, P16), not where it is `feature`.
+        if (key === "modifierRelations" && v === slotDefaultModifierRelation(sel, slot)) continue;
         if (key === "modifierNumbers" && v === "singular") continue;
         map[slot] = isConcept(v) ? v.id : (v as Json);
       }

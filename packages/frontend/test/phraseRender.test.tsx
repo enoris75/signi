@@ -11,11 +11,12 @@ import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
 import { ALL_SLOTS } from '../src/components/PhraseBuilder/slots.ts';
 import { renderWithProviders, type Seed } from './render.tsx';
 
-const concept = (id: string, role: Concept['role']): Concept => ({
+const concept = (id: string, role: Concept['role'], extra: Partial<Concept> = {}): Concept => ({
   id,
   role,
   description: `the ${id.toLowerCase()}`,
   label: id.toLowerCase(),
+  ...extra,
 });
 
 const CAT = concept('CAT', 'noun');
@@ -542,6 +543,25 @@ describe('SlotNode', () => {
       expect(add).toHaveTextContent('');
       expect(within(add).getByTestId('AddIcon')).toBeInTheDocument();
       expect(screen.queryByText('±')).not.toBeInTheDocument();
+    });
+
+    it("names the relation it renders with when none is set: the word's own (P14)", () => {
+      const TIME = concept('TIME', 'noun', {
+        modifierRelation: 'domain',
+        modifierRelationByHead: { DEVICE: 'feature' },
+      });
+      renderNode('subjectAdjective', { selection: { subject: BOAT, subjectAdjective: TIME } });
+      expect(screen.getByLabelText('Relationship: Domain or place — click to change')).toHaveTextContent('domain');
+    });
+
+    it("names the pair's relation under a head of the class the word names (P16)", () => {
+      const TIME = concept('TIME', 'noun', {
+        modifierRelation: 'domain',
+        modifierRelationByHead: { DEVICE: 'feature' },
+      });
+      const BOMB = concept('BOMB', 'noun', { classes: ['DEVICE'] });
+      renderNode('subjectAdjective', { selection: { subject: BOMB, subjectAdjective: TIME } });
+      expect(screen.getByLabelText('Relationship: Feature or means — click to change')).toHaveTextContent('feature');
     });
 
     it('names its chips in the UI language', () => {

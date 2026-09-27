@@ -90,7 +90,16 @@ function initSchema(db: Database.Database): void {
       -- English records no gender on a noun, so a possessor linked to such a subject takes its
       -- possessive from this: "the mother sees her book" (A293). NULL for a person of unknown sex
       -- (PERSON, FRIEND), who keeps the unmarked possessive, and for any other concept.
-      sex          TEXT CHECK (sex IN ('masc','fem') OR sex IS NULL)
+      sex          TEXT CHECK (sex IN ('masc','fem') OR sex IS NULL),
+      -- The relation a noun takes as a noun modifier when the author sets none (P14): 'domain' for
+      -- TIME ("le mosche del tempo"), 'material' for WOOD ("un tavolo di legno"). NULL means
+      -- 'feature', the first relation. Read by the phrase package, never by the engine: a plan
+      -- always carries its relation. NULL for every non-noun.
+      modifier_relation TEXT CHECK (modifier_relation IN ('feature','purpose','material','domain') OR modifier_relation IS NULL),
+      -- The same, by the class of the head it modifies (P16): a JSON object from a concept id (the
+      -- head itself or one of its ancestors) to a relation — TIME is 'feature' under a DEVICE ("bomba
+      -- a tempo"). The nearest match wins, else modifier_relation. NULL when the noun names none.
+      modifier_relation_by_head TEXT CHECK (modifier_relation_by_head IS NULL OR json_valid(modifier_relation_by_head))
     );
 
     -- ── Per-language concept definitions ──────────────────────────────
@@ -432,6 +441,12 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('sex')) {
     db.exec("ALTER TABLE semantic_concepts ADD COLUMN sex TEXT CHECK (sex IN ('masc','fem') OR sex IS NULL)");
+  }
+  if (!conceptCols.includes('modifier_relation')) {
+    db.exec("ALTER TABLE semantic_concepts ADD COLUMN modifier_relation TEXT CHECK (modifier_relation IN ('feature','purpose','material','domain') OR modifier_relation IS NULL)");
+  }
+  if (!conceptCols.includes('modifier_relation_by_head')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN modifier_relation_by_head TEXT CHECK (modifier_relation_by_head IS NULL OR json_valid(modifier_relation_by_head))');
   }
   widenRoleCheck(db);
   dropLanguageChecks(db);

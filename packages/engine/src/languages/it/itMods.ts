@@ -1,6 +1,7 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { REL_PREP_IT } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
+import { euphonicA } from './euphonicA.js';
 import { isPlural } from './isPlural.js';
 import { joinArt } from './joinArt.js';
 import { prepArt } from './prepArt.js';
@@ -26,7 +27,8 @@ export function itMods(np: ResolvedNounPhrase): string {
         .join(' ');
       const nounPart = adjs ? `${noun} ${adjs}` : noun;
       const prep = REL_PREP_IT[m.relation];
-      return m.relation === 'domain' ? joinArt(prepArt(prep, forms, plural), nounPart) : `${prep} ${nounPart}`;
+      // A bare "a" takes the euphonic d before an a, as A312's complements do: "mulino ad acqua".
+      return m.relation === 'domain' ? joinArt(prepArt(prep, forms, plural), nounPart) : `${euphonicA(prep, nounPart)} ${nounPart}`;
     })
     .filter(Boolean)
     .join(' ');

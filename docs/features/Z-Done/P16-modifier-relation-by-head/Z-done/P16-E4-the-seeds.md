@@ -3,7 +3,7 @@
 **Feature:** *bomba a tempo* and *le mosche del tempo* both render from an unset relation.
 **Shape:** seed data and tests.
 **Scope:** backend seeds, engine and e2e tests.
-**Status:** open. Filed 2026-09-27, checked against HEAD f117e564. Depends on E1–E3. Reseed `signi.db`
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27, checked against HEAD f117e564. Depends on E1–E3. Reseed `signi.db`
 after it.
 
 | TIME modifying… (relation unset) | it | fr | es | pt |

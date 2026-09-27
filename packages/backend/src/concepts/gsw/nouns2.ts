@@ -153,6 +153,7 @@ export const GSW_NOUNS_2: GswColumn = {
   NUMBER: { base: 'Zaal', plural: 'Zaale', gender: 'fem', count: 'singular', compound: 'Zaale' },
   NUMBER_LABEL: { base: 'Nummere', plural: 'Nummere', gender: 'fem', count: 'singular' },
   QUANTITY: { base: 'Mängi', plural: 'Mängene', gender: 'fem', count: 'singular' }, // plural (verify)
+  UNIT: { base: 'Äiheit', plural: 'Äiheite', gender: 'fem', count: 'singular' }, // (verify)
   PERCENT: { base: 'Prozent', plural: 'Prozent', gender: 'neut', count: 'singular' },
   CATEGORY: { base: 'Kategorie', plural: 'Kategorie', gender: 'fem', count: 'singular' },
   KIND_SORT: { base: 'Art', plural: 'Arte', gender: 'fem', count: 'singular' },
