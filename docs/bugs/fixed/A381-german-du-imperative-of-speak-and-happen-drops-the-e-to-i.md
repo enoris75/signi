@@ -4,7 +4,7 @@
 
 A strong verb whose 2/3 singular present raises *e* to *i* / *ie* keeps that vowel in the du command:
 *du sprichst* → *sprich*, *es geschieht* → *geschieh*, as *gib*, *iss*, *lies*, *sieh*, *nimm*, *hilf*,
-*triff* and *stirb*. Since [A48](../fixed/A48-german-du-imperative-forms.md) the rule in
+*triff* and *stirb*. Since [A48](A48-german-du-imperative-forms.md) the rule in
 `deImperativeWord` builds only the regular stem, and a strong verb's vowel change is seeded on the
 lexeme as `2sg_imperative`. SPEAK (`sprechen`) and HAPPEN (`geschehen`) were seeded without it, so
 the command falls through to the bare stem.
@@ -46,3 +46,19 @@ would catch it; deriving the form from `2sg_present` was set aside in A48 (s-ste
 | | |
 |---|---|
 | **Test** | `imperative.test.ts` → *known bugs: the German du-imperative of SPEAK and HAPPEN drops the e→i change (A381)* (1 `test.fails`: both verbs bare, negated, with a complement and as found; plus a regression test for ihr, wir, the instruction register and the finite verb) |
+
+## Resolved
+
+Fixed 2026-09-27.
+
+- **Corpus:** [verbs/intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts).
+  Seeded `'2sg_imperative': 'sprich'` on SPEAK and `'2sg_imperative': 'geschieh'` on HAPPEN, as GIVE,
+  EAT and SEE already carry theirs. No engine change: `deImperativeWord` already prefers the seeded
+  form over the bare stem.
+- **Tests:** [`packages/engine/test/imperative.test.ts`](../../../packages/engine/test/imperative.test.ts)
+  → *known bugs: the German du-imperative of SPEAK and HAPPEN drops the e→i change (A381)*. The
+  pinning `test.fails` is now a passing `test`; the file's existing regression test already covers
+  ihr, the wir cohortative, the instruction register and the finite verb.
+- **Left as a decision for later:** deriving `2sg_imperative` from `2sg_present` (set aside in A48
+  for s-stems and a→ä verbs), or a corpus-wide test requiring the form on every German lexeme whose
+  `2sg_present` raises the stem vowel.

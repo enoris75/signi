@@ -820,7 +820,7 @@ export const GSW_VERBS_TRANSITIVE: GswColumn = {
     participle: 'begleitet', '2sg_imperative': 'begleit',
   },
   ANSWER: {
-    base: 'antworte',
+    base: 'antworte', object_prep: 'uf',
     '1sg_present': 'antwort', '2sg_present': 'antwortsch', '3sg_present': 'antwortet',
     '1pl_present': 'antworted', '2pl_present': 'antworted', '3pl_present': 'antworted',
     participle: 'gantwortet', '2sg_imperative': 'antwort',

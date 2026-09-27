@@ -81,7 +81,7 @@ describe('a seed defined in text (P13)', () => {
   test('serves which verbs take a prepositional object', () => {
     const served = listConcepts({ senses: true }).filter((c) => c.prepositionalObject).map((c) => c.id).sort();
     expect(served).toEqual([
-      'ASK', 'BELIEVE', 'CALL_PHONE', 'CLICK', 'DEPEND', 'FOLLOW', 'LEAVE', 'LIKE',
+      'ANSWER', 'ASK', 'BELIEVE', 'CALL_PHONE', 'CLICK', 'DEPEND', 'FOLLOW', 'LEAVE', 'LIKE',
       'LOOK_AT', 'MARRY', 'MEET', 'NEED', 'PLAY_INSTRUMENT', 'REMEMBER', 'THANK', 'WAIT',
     ]);
   });

@@ -122,7 +122,7 @@ describe('the sweep\'s verbs: a present clause in every language', () => {
     // Spanish and Portuguese take the personal a before a human object.
     ['GOVERN_STATE', { en: 'the man governs the nation.', it: "l'uomo governa la nazione.", fr: "l'homme gouverne la nation.", de: 'der Mann regiert die Nation.', es: 'el hombre gobierna a la nación.', ja: '男は国民を統治します。', pt: 'o homem governa a nação.' }, 'NATION'],
     ['ACCOMPANY', { en: 'the man accompanies the child.', it: "l'uomo accompagna il bambino.", fr: "l'homme accompagne l'enfant.", de: 'der Mann begleitet das Kind.', es: 'el hombre acompaña al niño.', ja: '男は子供を同行します。', pt: 'o homem acompanha a criança.' }, 'CHILD'],
-    ['ANSWER', { en: 'the man answers the word.', it: "l'uomo risponde la parola.", fr: "l'homme répond le mot.", de: 'der Mann antwortet das Wort.', es: 'el hombre responde la palabra.', ja: '男は単語を答えます。', pt: 'o homem responde a palavra.' }, 'WORD'],
+    ['ANSWER', { en: 'the man answers the word.', it: "l'uomo risponde la parola.", fr: "l'homme répond le mot.", de: 'der Mann antwortet auf das Wort.', es: 'el hombre responde la palabra.', ja: '男は単語を答えます。', pt: 'o homem responde a palavra.' }, 'WORD'],
     // The English lemma is "seek": a result is what one seeks, and English "search" takes the place.
     ['SEARCH', { en: 'the man seeks the result.', it: "l'uomo cerca il risultato.", fr: "l'homme cherche le résultat.", de: 'der Mann sucht das Ergebnis.', es: 'el hombre busca el resultado.', ja: '男は結果を探します。', pt: 'o homem procura o resultado.' }, 'RESULT'],
     // anordnen is separable: the particle goes to the end of the clause.

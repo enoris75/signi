@@ -442,7 +442,7 @@ describe('known bugs: German ANSWER takes its object in the accusative (A382)', 
   const WORD = { directObject: the('WORD') };
   const OBJECT_ON_WORD = the('WORD', { relative: { verbPhrase: { verb: 'ANSWER' }, headRole: 'directObject', subject: the('MAN') } });
 
-  test.fails('what is answered takes auf / uf', () => {
+  test('what is answered takes auf / uf', () => {
     expect(say(answers(WORD), 'de')).toBe('der Mann antwortet auf das Wort.');
     expect(say(answers({ directObject: np('FIRST_PERSON') }), 'de')).toBe('der Mann antwortet auf mich.');
     expect(say(answers({ ...WORD, complements: { terminus: { phrase: the('WOMAN') } } }), 'de'))

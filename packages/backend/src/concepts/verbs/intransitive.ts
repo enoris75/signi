@@ -1876,6 +1876,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'sprechen', '2pl_present': 'sprecht', '3pl_present': 'sprechen',
         '1sg_past': 'sprach', '2sg_past': 'sprachst', '3sg_past': 'sprach',
         '1pl_past': 'sprachen', '2pl_past': 'spracht', '3pl_past': 'sprachen',
+        '2sg_imperative': 'sprich', // strong e→i: the du command keeps the vowel change
       },
       es: {
         base: 'hablar',
@@ -2180,6 +2181,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'geschehen', '2pl_present': 'gescheht', '3pl_present': 'geschehen',
         '1sg_past': 'geschah', '2sg_past': 'geschahst', '3sg_past': 'geschah',
         '1pl_past': 'geschahen', '2pl_past': 'geschaht', '3pl_past': 'geschahen',
+        '2sg_imperative': 'geschieh', // strong e→i: the du command keeps the vowel change
       },
       es: {
         base: 'ocurrir',

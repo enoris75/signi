@@ -71,3 +71,24 @@ change: German and Swiss German already render a prepositional object, its relat
 | | |
 |---|---|
 | **Test** | `saying-verbs.test.ts` → *known bugs: German ANSWER takes its object in the accusative (A382)* (1 `test.fails`: an object, a pronoun, an object beside the dative person, the perfect and a relative on the object, in de and gsw; plus a regression test for the dative person alone, the bare verb and the five languages that take a direct object). Moves with the fix: the `ANSWER` row of `sweep-definitions.test.ts` |
+
+## Resolved
+
+Fixed 2026-09-27.
+
+- **Corpus:** `object_prep: 'auf'` on ANSWER's German forms in
+  [verbs/transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts), `object_prep: 'uf'`
+  on its Swiss German forms in
+  [gsw/verbsTransitive.ts](../../../packages/backend/src/concepts/gsw/verbsTransitive.ts). No engine
+  change: German and Swiss German already render a prepositional object, its relative (*auf das*,
+  *druf*) and its place among the complements, as CLICK's `object_prep` already exercises.
+- **The passive:** left as A139's fallback to active (a verb with `object_prep` never passivizes);
+  *beantworten* as a second lemma was not pursued.
+- **Tests:** [`packages/engine/test/saying-verbs.test.ts`](../../../packages/engine/test/saying-verbs.test.ts)
+  → *known bugs: German ANSWER takes its object in the accusative (A382)*. The pinning `test.fails`
+  is now a passing `test`; the file's existing regression test already covers the dative person
+  alone, the bare verb and the five languages that take a direct object. The `ANSWER` row of
+  [`sweep-definitions.test.ts`](../../../packages/engine/test/sweep-definitions.test.ts) moved to
+  `der Mann antwortet auf das Wort.` Also updated:
+  [`packages/backend/src/definitionText.test.ts`](../../../packages/backend/src/definitionText.test.ts)'s
+  *serves which verbs take a prepositional object* list now includes `ANSWER`.

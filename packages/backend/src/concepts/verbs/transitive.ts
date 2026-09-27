@@ -9719,7 +9719,8 @@ export const transitiveVerbs: ConceptSeed[] = [
       },
       de: {
         // A -rt stem takes an epenthetic -e- before the -st/-t endings: antwortest, antwortete.
-        base: 'antworten',
+        // What is answered takes auf + accusative; antworten has no bare accusative slot (A382).
+        base: 'antworten', object_prep: 'auf',
         '1sg_present': 'antworte', '2sg_present': 'antwortest', '3sg_present': 'antwortet',
         '1pl_present': 'antworten', '2pl_present': 'antwortet', '3pl_present': 'antworten',
         '1sg_past': 'antwortete', '2sg_past': 'antwortetest', '3sg_past': 'antwortete',

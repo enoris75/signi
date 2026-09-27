@@ -343,7 +343,7 @@ describe('known bugs: the German du-imperative of SPEAK and HAPPEN drops the eâ†
   const de = (verb: string, extra: Parameters<typeof clause>[2] = {}, subject = np('SECOND_PERSON'), plan: Partial<PhrasePlan> = {}) =>
     sayAll({ ...clause(subject, verb, extra), imperative: true, ...plan }).de;
 
-  test.fails('the du command keeps the vowel change: sprich, geschieh', () => {
+  test('the du command keeps the vowel change: sprich, geschieh', () => {
     expect(de('SPEAK')).toBe('sprich.');
     expect(de('HAPPEN')).toBe('geschieh.');
     expect(de('SPEAK', { verbPhrase: { negative: true } })).toBe('sprich nicht.');
