@@ -17,6 +17,11 @@ import { ALL_SLOTS, BOX_COMPLEMENT_TYPES } from "./slots.ts";
 import { DEFAULT_NODE_SIZE, type Edge } from "./graph.ts";
 import { innerRadius } from "./ringLayout.ts";
 import { useElementSize } from "./hooks/useElementSize.ts";
+import { MIN_CANVAS_WIDTH } from "./hooks/canvasWidth.ts";
+import { useCompactLayout as usePhoneLayout } from "../../hooks/useCompactLayout.ts";
+import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
+import { IconButton, Tooltip } from "@mui/material";
+import { useUiString } from "../../i18n/useUiString.ts";
 import { nodeElRef, SlotNode, type PhraseRenderContext } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 import { useBoxCursor } from "../../keyboard/KeyboardProvider.tsx";
@@ -110,6 +115,18 @@ export function PhraseCanvas({
     slotKind,
     onSlotKindChange,
   } = ctx;
+  const t = useUiString();
+
+  // On a phone (P17 phase 3) the canvas keeps a desktop's real width to lay phrases out in — a
+  // *visual* shrink (a CSS transform) would corrupt every getBoundingClientRect() reading a ring's
+  // own size off its boxes (used throughout: box sizing, ring radii, connector anchors), since a
+  // transform is invisible to ResizeObserver but not to that call — a bug this project has hit
+  // before under a different name (see the canvas-report-loop note). So the canvas is genuinely
+  // that wide, and a wrapper with native `overflow: auto` pans and pinch-zooms it — the browser's
+  // own, not a hand-rolled one, and nothing it does can desync a measurement.
+  const phoneCompact = usePhoneLayout();
+  const zoomWrapperRef = useRef<HTMLDivElement>(null);
+
 
   // What the command box shows. A command that is the *second* clause of a coordination shares the
   // first's person and register — one pair of commands is one speech act — so it shows the
@@ -303,6 +320,48 @@ export function PhraseCanvas({
               />
             </Box>
           )}
+        </Box>
+      ) : phoneCompact ? (
+        <Box sx={{ position: "relative", height: canvasHeight }}>
+          <Box
+            ref={zoomWrapperRef}
+            data-testid="phrase-canvas-viewport"
+            sx={{
+              height: "100%",
+              overflow: "auto",
+              WebkitOverflowScrolling: "touch",
+              // pinch-zoom: the browser's own, on this region alone — a box's own drag still claims
+              // the one-finger gesture that starts on it, via the touchAction its own drag sets.
+              touchAction: "pan-x pan-y pinch-zoom",
+            }}
+          >
+            <Box
+              ref={containerRef}
+              data-testid="phrase-canvas"
+              sx={{ position: "relative", width: MIN_CANVAS_WIDTH, height: canvasHeight }}
+            >
+              {drawing}
+            </Box>
+          </Box>
+          {/* Over the scrolling content, not part of it, so it stays put as the canvas pans. */}
+          <Tooltip title={t("action.fitCanvas")} placement="left">
+            <IconButton
+              aria-label={t("action.fitCanvas")}
+              onClick={() => zoomWrapperRef.current?.scrollTo({ left: 0, top: 0, behavior: "smooth" })}
+              sx={{
+                position: "absolute",
+                bottom: 8,
+                right: 8,
+                bgcolor: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
+                boxShadow: 2,
+                "&:hover": { bgcolor: "background.paper" },
+              }}
+            >
+              <ZoomOutMapIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       ) : (
         <Box

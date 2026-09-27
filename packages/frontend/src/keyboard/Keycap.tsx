@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { keycapLabels } from "./matchKey.ts";
 import { useKeyPlatform } from "./KeyboardProvider.tsx";
+import { TOUCH_ONLY_MEDIA } from "../hooks/useCompactLayout.ts";
 
 /**
  * A key drawn as a key: a small paper cap, the way the shortcuts sheet, the hint line and a menu's
@@ -10,6 +11,8 @@ import { useKeyPlatform } from "./KeyboardProvider.tsx";
  * Hidden from the accessibility tree: a cap beside a menu row would otherwise be read as part of
  * the row's name ("1 Definite the"), and a shortcut belongs in `aria-keyshortcuts`, which is where
  * assistive tech looks for one.
+ *
+ * Not drawn at all on a touch-only device (P17): a phone has no key to press.
  */
 export function Keycap({ spec, dim = false }: { spec: string; dim?: boolean }) {
   const platform = useKeyPlatform();
@@ -17,7 +20,7 @@ export function Keycap({ spec, dim = false }: { spec: string; dim?: boolean }) {
     <Box
       component="span"
       aria-hidden
-      sx={{ display: "inline-flex", gap: 0.25, verticalAlign: "middle" }}
+      sx={{ display: "inline-flex", gap: 0.25, verticalAlign: "middle", [TOUCH_ONLY_MEDIA]: { display: "none" } }}
     >
       {keycapLabels(spec, platform).map((cap, i) => (
         <Box

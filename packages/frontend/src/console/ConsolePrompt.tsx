@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ALL_SLOTS } from "../components/PhraseBuilder/slots.ts";
+import { useCompactLayout } from "../hooks/useCompactLayout.ts";
 import { useUiString } from "../i18n/useUiString.ts";
 import { Keycap } from "../keyboard/Keycap.tsx";
 import { styleTokens } from "./language/parse.ts";
@@ -140,6 +141,9 @@ export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
       <Box
         sx={{
           display: "flex",
+          // On a phone the context sits on a line of its own above the field (P17), which keeps the
+          // whole width to type in.
+          flexWrap: { xs: "wrap", sm: "nowrap" },
           alignItems: "flex-start",
           gap: 1.25,
           px: 2,
@@ -149,7 +153,7 @@ export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
           bgcolor: "background.paper",
         }}
       >
-        <Box sx={{ minHeight: LINE, display: "flex", alignItems: "center", flexShrink: 0 }}>
+        <Box sx={{ minHeight: LINE, display: "flex", alignItems: "center", flexShrink: 0, width: { xs: "100%", sm: "auto" } }}>
           <ContextChip model={model} />
         </Box>
         <Box data-testid="console-prompt-scroll" sx={{ flex: 1, minWidth: 0, maxHeight: LINE * MAX_ROWS, overflowY: "auto" }}>
@@ -358,6 +362,9 @@ function ContextChip({ model }: { model: PhraseConsoleModel }) {
 /** The keys that apply now, at the right of the prompt line. */
 function PromptKeys({ model }: { model: PhraseConsoleModel }) {
   const t = useUiString();
+  // A phone has no keys to name, and no width to name them in.
+  const compact = useCompactLayout();
+  if (compact) return null;
   const keysSx = {
     display: "flex",
     alignItems: "center",

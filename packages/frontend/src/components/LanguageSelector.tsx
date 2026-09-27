@@ -12,7 +12,10 @@ import { useUiString } from '../i18n/useUiString.ts';
 // engine in the current UI language (the `language.*` entries of the UI-string catalog) —
 // the same translation path as the rest of the app. Only a ready language is offered: a preview one
 // (P10-E1) is a row of the translations panel, not yet a language to live in.
-export function LanguageSelector() {
+//
+// On a phone (P17) the closed selector shows the flag and the language's code alone; the open list
+// still names every language in full.
+export function LanguageSelector({ compact = false }: { compact?: boolean }) {
   const { uiLanguage, setUiLanguage } = useUiLanguage();
   const t = useUiString();
 
@@ -26,7 +29,19 @@ export function LanguageSelector() {
       onChange={handleChange}
       size="small"
       startAdornment={
-        <TranslateIcon sx={{ fontSize: '1rem', color: 'text.secondary', mr: 0.75 }} />
+        compact ? undefined : <TranslateIcon sx={{ fontSize: '1rem', color: 'text.secondary', mr: 0.75 }} />
+      }
+      renderValue={
+        compact
+          ? (code) => (
+              <>
+                <Box component="span" sx={{ fontSize: '1rem', lineHeight: 1 }}>
+                  <Flag language={code} />
+                </Box>
+                {code.toUpperCase()}
+              </>
+            )
+          : undefined
       }
       // Through inputProps, so the name lands on the combobox itself rather than its outer box.
       inputProps={{ 'aria-label': t('language.selector') }}
@@ -35,7 +50,7 @@ export function LanguageSelector() {
       sx={{
         fontFamily: '"Inter", sans-serif',
         fontSize: '0.8rem',
-        '& .MuiSelect-select': { display: 'flex', alignItems: 'center', gap: 0.75, py: 0.75 },
+        '& .MuiSelect-select': { display: 'flex', alignItems: 'center', gap: 0.75, py: compact ? 1.25 : 0.75 },
       }}
     >
       {READY_LANGUAGES.map((code) => (

@@ -24,7 +24,14 @@ export class Builder {
     // Canvas geometry (signi:graphHeight) persists there and would leak between runs.
     await this.page.evaluate(() => localStorage.clear());
     await this.page.reload();
-    await expect(this.subjectInput).toBeVisible();
+    // A genuine touch phone (P17) opens on the Phrase view, not the canvas — this only confirms
+    // the page came up; a spec that drives the canvas on such a device switches to it itself. Both
+    // testids exist in the DOM at once (the unshown one stowed, not unmounted — see App's STOWED),
+    // so a combinator locator would be ambiguous; polled visibility is what "either one" means here.
+    const roleSubject = this.page.getByTestId('role-subject');
+    await expect
+      .poll(async () => (await this.subjectInput.isVisible()) || (await roleSubject.isVisible()))
+      .toBe(true);
   }
 
   get subjectInput(): Locator {

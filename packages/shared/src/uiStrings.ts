@@ -519,6 +519,15 @@ export const UI_STRINGS = defineUiStrings({
   // The header's row of controls, as its aria-label: the bare TOOLBAR (it "Barra degli strumenti",
   // de "Symbolleiste", ja ツールバー). It went unnamed until the catalogue had the word.
   'app.toolbar': { plan: nameOf('TOOLBAR'), format: NAME_FORMAT, fallback: 'Toolbar' },
+  // On a phone (P17) the header's controls fold into one ⋯ button, named by what it opens: the bare
+  // MENU (it "Menu", de "Menü", ja メニュー).
+  'app.menu': { plan: nameOf('MENU'), format: NAME_FORMAT, fallback: 'Menu' },
+  // The phone's tab bar names each view by what it shows. The canvas is the bare CANVAS, as the
+  // console's `console.fromCanvas` names it; the translations tab reuses `translations.heading`, the
+  // console's `console.name`.
+  'view.canvas': { plan: nameOf('CANVAS'), format: NAME_FORMAT, fallback: 'Canvas' },
+  // …and the Phrase view, the phone's list of a period's roles: the bare PHRASE (it "Frase").
+  'view.phrase': { plan: nameOf('PHRASE'), format: NAME_FORMAT, fallback: 'Phrase' },
 
   // The heading of the translations area: the TRANSLATION noun in the plural, bare — the
   // panel lists many translations.
@@ -4408,6 +4417,18 @@ export const UI_STRINGS = defineUiStrings({
   // plural WORD — as the object of the SHOW imperative, so the button and the dialog it opens name
   // the same thing in the same words. Definite: there is one corpus and one map of it, and the
   // button opens *that* one ("mostra la mappa di parole", "zeige die Wörterkarte").
+  // The phone canvas's zoom reset (P17 phase 3): SHOW the WHOLE CANVAS, once a pinch has zoomed
+  // past its fit — the same SHOW as the word map's own ("mostra l'intera tela", ja
+  // キャンバス全体を見せる).
+  'action.fitCanvas': {
+    plan: {
+      ...commandOf('SHOW'),
+      directObject: { concept: 'CANVAS', definiteness: 'definite', adjectives: ['WHOLE'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Show the whole canvas',
+  },
+
   'action.showWordMap': {
     plan: {
       ...commandOf('SHOW'),

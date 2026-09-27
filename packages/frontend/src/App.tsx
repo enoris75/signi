@@ -1,12 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import type { UiStringKey } from "@signi/shared";
-import { Box, Container, Typography, Alert, Button, Snackbar } from "@mui/material";
+import { Box, Container, GlobalStyles, Typography, Alert, Button, IconButton, Snackbar } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import { PhraseWorkspace } from "./components/PhraseBuilder/PhraseWorkspace.tsx";
 import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan/index.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
-import { SavedPhrasesToolbar } from "./components/SavedPhrasesToolbar.tsx";
+import { SavedPhrasesToolbar, isEmpty } from "./components/SavedPhrasesToolbar.tsx";
+import { AppMenu } from "./components/AppMenu.tsx";
+import { MobileTabBar, TAB_BAR_HEIGHT, type MobileView } from "./components/MobileTabBar.tsx";
+import { ResultStrip } from "./components/ResultStrip.tsx";
+import { isTouchOnly, useCompactLayout } from "./hooks/useCompactLayout.ts";
+import { useHeaderOffset } from "./hooks/useHeaderOffset.ts";
+import UndoIcon from "@mui/icons-material/Undo";
 import { LanguageSelector } from "./components/LanguageSelector.tsx";
 import { useWindowDrag } from "./hooks/useWindowDrag.ts";
 import { useTranslations } from "./hooks/useTranslation.ts";
@@ -74,6 +80,33 @@ export default function App() {
     },
   });
   const shown = phraseConsole.preview?.state ?? phraseConsole.committed;
+
+  // A phone (P17) shows one view at a time under a tab bar. The console is one of them: shown is
+  // the console tab, so ` and the console's own commands move between tabs as they show and hide it.
+  const compact = useCompactLayout();
+  const headerOffset = useHeaderOffset(compact);
+  // The Phrase view is the phone's default: it exists because a finger can't work the canvas's
+  // rings, so a narrowed *desktop* window (still driven by a mouse) starts on the canvas instead,
+  // which the compact layout already lays out in one column.
+  const [pageView, setPageView] = useState<Exclude<MobileView, "console">>(() =>
+    isTouchOnly() ? "phrase" : "canvas",
+  );
+  const mobileView: MobileView = phraseConsole.open ? "console" : pageView;
+  // Arriving at the phone layout — on load, or a window narrowed past the breakpoint — starts on a
+  // page view, not the console. The console docked on a desktop is not a choice of tab, and would hide the canvas.
+  useEffect(() => {
+    if (compact && phraseConsole.open) phraseConsole.setOpen(false);
+    // Only on the way in: afterwards the console tab is the user's to open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [compact]);
+  function showView(view: MobileView) {
+    if (view === "console") {
+      phraseConsole.setOpen(true);
+      return;
+    }
+    setPageView(view);
+    if (phraseConsole.open) phraseConsole.setOpen(false);
+  }
   // Translations follow the preview a beat behind the keys, so a pause asks for one and a burst of
   // typing asks for none; the committed state is never kept waiting.
   const translated = useDebounced(shown, phraseConsole.preview ? 200 : 0);
@@ -141,9 +174,9 @@ export default function App() {
             borderBottom: "1px solid",
             borderColor: "primary.main",
             borderBottomColor: "divider",
-            py: 2,
-            px: 3,
-            mb: 4,
+            py: compact ? 1 : 2,
+            px: compact ? 0 : 3,
+            mb: compact ? 2 : 4,
           }}
         >
           <Container
@@ -159,6 +192,7 @@ export default function App() {
               <Typography
                 variant="h4"
                 sx={{
+                  fontSize: compact ? "1.6rem" : undefined,
                   fontFamily: '"Playfair Display", serif',
                   fontWeight: 800,
                   lineHeight: 1,
@@ -176,6 +210,8 @@ export default function App() {
                   textTransform: "uppercase",
                   color: "text.secondary",
                   mt: 0.5,
+                  // A phone has the width for the brand, not the tagline beside four controls.
+                  display: compact ? "none" : undefined,
                 }}
               >
                 {payoff}
@@ -193,12 +229,13 @@ export default function App() {
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1,
+                gap: compact ? 0.5 : 1,
                 flexShrink: 0,
               }}
             >
-              {/* The console's own control, for whoever is using the mouse: ` does the same. */}
-              <Button
+              {/* The console's own control, for whoever is using the mouse: ` does the same. On a
+                  phone the console is a tab instead. */}
+              {!compact && <Button
                 variant={phraseConsole.open ? "contained" : "outlined"}
                 size="small"
                 disableElevation
@@ -210,9 +247,30 @@ export default function App() {
               >
                 {t("console.name")}
                 <Keycap spec="Code:Backquote" />
-              </Button>
-              <LanguageSelector />
+              </Button>}
+              <LanguageSelector compact={compact} />
+              {/* On a phone, undo is a tap away rather than a chord, and the rest folds into ⋯. */}
+              {compact && (
+                <IconButton
+                  data-testid="undo-button"
+                  aria-label={t("action.undo")}
+                  disabled={!history.canUndo}
+                  onClick={history.undo}
+                  sx={{ width: 44, height: 44, color: "primary.main" }}
+                >
+                  <UndoIcon />
+                </IconButton>
+              )}
+              {compact && (
+                <AppMenu
+                  empty={isEmpty(containers, links)}
+                  wordsOpen={wordsPanelOpen}
+                  onToggleWords={() => setWordsPanel(!wordsPanelOpen)}
+                  onOpenHelp={() => setHelpOpen(true)}
+                />
+              )}
               <SavedPhrasesToolbar
+                buttonsHidden={compact}
                 containers={containers}
                 links={links}
                 // Loading or importing replaces the whole workspace in one step, so one undo
@@ -221,7 +279,7 @@ export default function App() {
                   history.replace({ containers: nextContainers, links: nextLinks })
                 }
               />
-              <Button
+              {!compact && <Button
                 variant={wordsPanelOpen ? "contained" : "outlined"}
                 size="small"
                 disableElevation
@@ -231,12 +289,18 @@ export default function App() {
                 sx={{ textTransform: "none" }}
               >
                 {t('words.heading')}
-              </Button>
+              </Button>}
             </Box>
           </Container>
         </Box>
 
-        <Container maxWidth="xl">
+        <Container
+          maxWidth="xl"
+          sx={compact ? { pb: `${TAB_BAR_HEIGHT + 16}px`, position: "relative" } : undefined}
+        >
+          {compact && (mobileView === "phrase" || mobileView === "canvas") && (
+            <ResultStrip sentences={results} onOpen={() => showView("translations")} />
+          )}
           <Box
             ref={splitContainerRef}
             sx={{
@@ -244,16 +308,20 @@ export default function App() {
               flexWrap: "wrap",
               alignItems: "flex-start",
               mb: 3,
+              // On a phone the canvas is one tab of several, and the whole width. Stowed, not
+              // unmounted or `display: none`: it measures its own width, and a width of nothing would
+              // have the layout move every box to fit it.
+              ...(compact && mobileView !== "canvas" && mobileView !== "phrase" ? STOWED : {}),
             }}
           >
             {/* Left: stack of phrase containers + their relative-clause links */}
             <Box
               data-kb-region="periods"
               sx={{
-                width: `${leftWidthPct}%`,
+                width: compact ? "100%" : `${leftWidthPct}%`,
                 flexShrink: 0,
                 minWidth: 0,
-                pr: 1.5,
+                pr: compact ? 0 : 1.5,
               }}
             >
               {/* The canvas shows the console's preview while a line is typed, and its edits go
@@ -267,12 +335,14 @@ export default function App() {
                   wordsPanelOpen={wordsPanelOpen}
                   onWordsPanelClose={() => setWordsPanel(false)}
                   onPeriodRemoved={() => setUndoToast("toast.periodRemoved")}
+                  listView={compact && mobileView === "phrase"}
+                  onShowCanvas={() => showView("canvas")}
                 />
               </ConsoleMarksProvider>
             </Box>
 
             {/* Horizontal resize handle */}
-            <Box
+            {!compact && <Box
               onPointerDown={(e) => {
                 e.preventDefault();
                 const startX = e.clientX;
@@ -310,14 +380,17 @@ export default function App() {
                 transition: "opacity 0.15s",
                 "&:hover": { opacity: 1, borderColor: "primary.main" },
               }}
-            />
+            />}
 
             {/* Right: empty space for balance */}
-            <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }} />
+            {!compact && <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }} />}
           </Box>
 
           {/* Translations: one card, each language listing every root sentence in order */}
-          <Box data-kb-region="translations" sx={{ mb: 3 }}>
+          <Box
+            data-kb-region="translations"
+            sx={{ mb: 3, display: compact && mobileView !== "translations" ? "none" : undefined }}
+          >
             {isError && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {t("failure.phraseNotTranslated")} {t("status.isServerActive")}
@@ -331,8 +404,25 @@ export default function App() {
             underneath it. Its prompt line is P01's hint line; hidden, nothing is docked, and the
             key tips and tooltips teach the keys. */}
         <CursorBridge follow={phraseConsole.followCursor} />
-        {phraseConsole.open && <Box sx={{ height: phraseConsole.height }} aria-hidden />}
-        <PhraseConsole model={phraseConsole} wordsPanelOpen={wordsPanelOpen} />
+        {phraseConsole.open && !compact && <Box sx={{ height: phraseConsole.height }} aria-hidden />}
+        {compact ? (
+          // The console tab fills what the header and the tab bar leave.
+          phraseConsole.open && (
+            <Box sx={{ position: "fixed", left: 0, right: 0, top: headerOffset, bottom: TAB_BAR_HEIGHT }}>
+              <PhraseConsole model={phraseConsole} wordsPanelOpen={wordsPanelOpen} docked={false} />
+            </Box>
+          )
+        ) : (
+          <PhraseConsole model={phraseConsole} wordsPanelOpen={wordsPanelOpen} />
+        )}
+        {compact && <MobileTabBar view={mobileView} onChange={showView} />}
+        {/* What scrolls a control into view — a tap on a half-hidden one, the cursor, focus — stops
+            clear of the sticky header and the tab bar rather than under them. */}
+        {compact && (
+          <GlobalStyles
+            styles={{ html: { scrollPaddingTop: headerOffset, scrollPaddingBottom: TAB_BAR_HEIGHT + 8 } }}
+          />
+        )}
         <HelpOverlay
           open={helpOpen}
           onClose={() => setHelpOpen(false)}
@@ -344,10 +434,13 @@ export default function App() {
         />
         {/* Last in the page's tab order, and out of the way of everything but the strip it steps
             over: help is wanted from wherever the work is. */}
-        <HelpButton
-          onClick={() => setHelpOpen(true)}
-          bottom={phraseConsole.open ? phraseConsole.height + 16 : undefined}
-        />
+        {/* On a phone help is in the ⋯ menu, off the tab bar's way. */}
+        {!compact && (
+          <HelpButton
+            onClick={() => setHelpOpen(true)}
+            bottom={phraseConsole.open ? phraseConsole.height + 16 : undefined}
+          />
+        )}
 
         {/* The toast that replaced the confirm dialog: the act has happened, and here is the way
             back. Reuses the filled Alert the app's other toasts use, in `info`. */}
@@ -356,6 +449,7 @@ export default function App() {
           autoHideDuration={8000}
           onClose={() => setUndoToast(null)}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          sx={compact ? { bottom: `${TAB_BAR_HEIGHT + 8}px !important` } : undefined}
         >
           {undoToast ? (
             <Alert
@@ -387,6 +481,18 @@ export default function App() {
     </KeyboardProvider>
   );
 }
+
+/** A view the phone is not showing: laid out at the page's width, but out of sight and out of reach. */
+const STOWED = {
+  position: "absolute",
+  left: 0,
+  right: 0,
+  top: 0,
+  height: 0,
+  overflow: "hidden",
+  visibility: "hidden",
+  pointerEvents: "none",
+} as const;
 
 /**
  * A value that follows `value` after `delay` ms of quiet — or at once, with no delay. Used so the

@@ -1426,6 +1426,23 @@ describe('buildUiStrings', () => {
       en: 'Toolbar', it: 'Barra degli strumenti', fr: "Barre d'outils", de: 'Symbolleiste', es: 'Barra de herramientas',
       ja: 'ツールバー', pt: 'Barra de ferramentas',
     });
+    // The phone's header (P17): its ⋯ button, and the canvas's tab.
+    expect(strings['app.menu']).toEqual({
+      en: 'Menu', it: 'Menu', fr: 'Menu', de: 'Menü', es: 'Menú', ja: 'メニュー', pt: 'Menu',
+    });
+    expect(strings['view.canvas']).toEqual({
+      en: 'Canvas', it: 'Tela', fr: 'Canevas', de: 'Arbeitsfläche', es: 'Lienzo', ja: 'キャンバス', pt: 'Tela',
+    });
+    // …and its Phrase view (P17 phase 2): the list of a period's roles.
+    expect(strings['view.phrase']).toEqual({
+      en: 'Phrase', it: 'Frase', fr: 'Phrase', de: 'Phrase', es: 'Frase', ja: 'フレーズ', pt: 'Frase',
+    });
+    // …and its pinch-zoom reset (P17 phase 3): back to the whole canvas.
+    expect(strings['action.fitCanvas']).toEqual({
+      en: 'Show the whole canvas', it: 'Mostra la tela intera', fr: 'Montrer le canevas entier',
+      de: 'Die ganze Arbeitsfläche zeigen', es: 'Mostrar el lienzo entero', ja: '全体のキャンバスを見せ',
+      pt: 'Mostrar a tela inteira',
+    });
   });
 });
 

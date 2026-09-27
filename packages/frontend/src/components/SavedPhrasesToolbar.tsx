@@ -48,15 +48,20 @@ interface Props {
   containers: PhraseContainer[];
   links: PhraseLink[];
   onLoad: (containers: PhraseContainer[], links: PhraseLink[]) => void;
+  /**
+   * Keep the dialogs, hide the buttons: on a phone (P17) the app menu lists these four, and presses
+   * the buttons here (by `data-kb-control`) as the keys do, so the dialogs stay theirs.
+   */
+  buttonsHidden?: boolean;
 }
 
 // The builder is empty when it's just one blank container and no links — nothing worth
 // saving or exporting yet.
-const isEmpty = (containers: PhraseContainer[], links: PhraseLink[]): boolean =>
+export const isEmpty = (containers: PhraseContainer[], links: PhraseLink[]): boolean =>
   links.length === 0 &&
   containers.every((c) => Object.keys(c.selection).length === 0);
 
-export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
+export function SavedPhrasesToolbar({ containers, links, onLoad, buttonsHidden = false }: Props) {
   const t = useUiString();
   // Prefixes the ids that tie each row's delete button to the name it deletes.
   const rowIdPrefix = useId();
@@ -196,6 +201,8 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
 
   return (
     <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+      {/* The buttons alone: the toast below is not portalled, and must show either way. */}
+      <Box sx={{ display: buttonsHidden ? "none" : "contents" }}>
       <Tooltip title={t("action.save.tooltip")}>
         <span>
           <Button
@@ -249,6 +256,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
           <FileUploadOutlinedIcon fontSize="small" />
         </IconButton>
       </Tooltip>
+      </Box>
       <input
         ref={fileInputRef}
         type="file"

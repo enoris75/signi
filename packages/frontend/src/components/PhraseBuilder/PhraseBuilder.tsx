@@ -27,7 +27,10 @@ import {
   MIN_GRAPH_HEIGHT,
   MUI_COLOR_HEX,
   nounOnlyConjunct,
+  COMPLEMENT_KEY_SET,
 } from "./slots.ts";
+import { slotTypeahead } from "./SlotTypeahead.tsx";
+import { RoleList } from "./RoleList.tsx";
 import {
   applyConceptSelect,
   applyClear,
@@ -95,6 +98,8 @@ import { useStoredNumber } from "./hooks/useStoredNumber.ts";
 import { useSlotFocus } from "./hooks/useSlotFocus.ts";
 import { useOwnersOpen } from "./hooks/useOwnersOpen.ts";
 import { useCompactLayout } from "./hooks/useCompactLayout.ts";
+import { useCompactLayout as usePhoneLayout } from "../../hooks/useCompactLayout.ts";
+import { MIN_CANVAS_WIDTH } from "./hooks/canvasWidth.ts";
 import { useSettleCorefPick } from "./hooks/useSettleCorefPick.ts";
 import { nextActiveSlot } from "./functions/nextActiveSlot.ts";
 import { applyCollapse } from "./functions/applyCollapse.ts";
@@ -118,7 +123,7 @@ import { useUiString } from "../../i18n/useUiString.ts";
 import { BoxScopeProvider, useBoxScope } from "../../keyboard/KeyboardProvider.tsx";
 import { pressControl } from "../../keyboard/controls.ts";
 import { usePickKeys } from "../../keyboard/usePickKeys.ts";
-import { satelliteKey as satelliteKeyFor, type BoxContext } from "../../keyboard/keymap.ts";
+import { KEYMAP, satelliteKey as satelliteKeyFor, type BoxContext, type BoxKeyContext } from "../../keyboard/keymap.ts";
 import { boxScopesOf, nounBlockOf } from "../../keyboard/scope.ts";
 import { markKey, periodMark, useConsoleMarks } from "../../console/ConsoleMarks.tsx";
 
@@ -171,6 +176,13 @@ export interface PhraseBuilderProps {
    * machinery, and reports the ring it drew back (see ConjunctRings, OwnerRings).
    */
   ringHost?: RingHost;
+  /**
+   * Top-level only: show the period as the Phrase view's list of roles (P17) rather than the canvas.
+   * The canvas stays mounted behind it, stowed, so its layout and every handler stay as they are.
+   */
+  listView?: boolean;
+  /** Top-level only, with `listView`: show the canvas, where a control's work is drawn (a ring). */
+  onShowCanvas?: () => void;
 }
 
 export function PhraseBuilder({
@@ -189,6 +201,8 @@ export function PhraseBuilder({
   possessorPath,
   nounPhraseOnly = false,
   ringHost,
+  listView = false,
+  onShowCanvas,
 }: PhraseBuilderProps) {
   const { uiLanguage } = useUiLanguage();
   const t = useUiString();
@@ -602,7 +616,15 @@ export function PhraseBuilder({
   const positionsStaleRef = useHeightRebase({ graphHeight, setPositions, dragRef });
   // The canvas's rendered size. The canvas only mounts once `showCanvas` flips, so the
   // observer re-attaches on that.
-  const svgSize = useElementSize(containerRef, { w: 600, h: GRAPH_HEIGHT }, showCanvas);
+  // On a phone (P17 phase 3) the ring layout keeps a desktop's width to lay phrases out in, so
+  // nothing re-stacks or overhangs; the canvas draws it small and lets a pinch zoom in. Only the
+  // top-level canvas needs the floor — a hosted ring (a conjunct's, an owner's) already takes its
+  // graphSize from the canvas that draws it (see `graphSize` below).
+  const phoneCompact = usePhoneLayout();
+  const measuredSize = useElementSize(containerRef, { w: 600, h: GRAPH_HEIGHT }, showCanvas);
+  const svgSize = phoneCompact && !ringHost
+    ? { ...measuredSize, w: Math.max(measuredSize.w, MIN_CANVAS_WIDTH) }
+    : measuredSize;
   // The period's header controls, which compact view floats over the canvas's top-right corner.
   const periodControlsRef = useRef<HTMLDivElement>(null);
   const controlsCorner = useCornerOverlap(periodControlsRef, containerRef, compact, showCanvas);
@@ -1366,6 +1388,7 @@ export function PhraseBuilder({
       preview={Boolean(markedContainer && marks?.previewPeriods.has(markedContainer))}
       consoleNumber={markedContainer ? marks?.numbers.get(periodMark(markedContainer)) : undefined}
       compact={compact}
+      resizable={!listView}
       showCanvas={showCanvas}
       hasGroups={groupRects.length > 0}
       hasContent={hasContent}
@@ -1403,7 +1426,57 @@ export function PhraseBuilder({
         />
       }
     >
-      {canvas}
+      {listView ? (
+        <>
+          <RoleList
+            selection={selection}
+            slots={renderedSlots}
+            activeSlot={activeSlot}
+            controlsByParent={satelliteIconsByParent}
+            perimeterByNoun={perimeterByNoun}
+            verbControls={[...(directObjectToggle ? [directObjectToggle] : []), ...complementToggleIcons]}
+            onSelectSlot={setActiveSlot}
+            onClear={(slot) =>
+              COMPLEMENT_KEY_SET.has(slot) ? handleRemoveComplement(slot as BoxComplementType) : handleClear(slot)
+            }
+            runCommand={(slot, satelliteKey) => {
+              // A satellite that always carries a value and isn't a direct toggle (tense, aspect,
+              // voice, degree, a modifier's relation, a possessor's role, a conjunction) is a chip a
+              // click *cycles*, not a box a click reveals — the same command the keymap's own key
+              // (T for tense, and so on) runs on the canvas, found by the very regex that ties that
+              // key to this satellite. `false` leaves the icon's own reveal/toggle to run instead.
+              const scopes = boxScopesOf(slot, selection);
+              const cmd = KEYMAP.find((c) => c.satellite?.test(satelliteKey) && scopes.includes(c.scope));
+              if (!cmd) return false;
+              const ctx = boxScope.build(slot);
+              if (!ctx) return false;
+              // No spatial or cross-box movement a satellite's own cycle ever asks for — a real
+              // element in case one reads it, and no-ops for the rest.
+              const nav = { element: document.body, move: () => {}, step: () => false, exit: () => {} };
+              cmd.run({ ...ctx, nav } satisfies BoxKeyContext);
+              return true;
+            }}
+            picker={(slot, editing) =>
+              slotTypeahead({
+                slotKey: slot,
+                activeSlot: slot,
+                selection,
+                onSelect: handleConceptSelect,
+                editing,
+                kind: slotKind(slot),
+                onKindChange: (kind) => setSlotKind(slot, kind),
+              })
+            }
+            onShowCanvas={onShowCanvas}
+          />
+          {/* Stowed, not unmounted: the canvas keeps measuring the card's width (see App's STOWED). */}
+          <Box aria-hidden sx={{ position: "relative", height: 0, overflow: "hidden", visibility: "hidden", pointerEvents: "none" }}>
+            {canvas}
+          </Box>
+        </>
+      ) : (
+        canvas
+      )}
     </PeriodCard>
   );
 

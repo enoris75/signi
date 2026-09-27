@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
@@ -34,6 +34,10 @@ interface Props {
   // Removing a period is destructive and no longer asks first (see HeaderControls): it happens,
   // and the page says so with a toast that offers the undo.
   onPeriodRemoved?: () => void;
+  /** Show every period as the Phrase view's list of roles (P17), not the canvas. */
+  listView?: boolean;
+  /** With `listView`: show the canvas, where a pick or a ring is done. */
+  onShowCanvas?: () => void;
 }
 
 // The workspace: a vertical stack of independent phrase containers plus the cross-container
@@ -46,6 +50,8 @@ export function PhraseWorkspace({
   wordsPanelOpen,
   onWordsPanelClose,
   onPeriodRemoved,
+  listView = false,
+  onShowCanvas,
 }: Props) {
   const t = useUiString();
   // The cross-container link graph — the four relations a period can take part in, plus the
@@ -61,6 +67,12 @@ export function PhraseWorkspace({
   // it — the keyboard's way of pointing (see usePickKeys). A target marks itself; what taking it
   // *does* is the target's own onPick, which a click would have called.
   const modality = useInputModality();
+  // A pick is made by pointing at another period's box, which only the canvas draws: one started
+  // from the Phrase view's list (a relative clause, a condition…) goes on there.
+  useEffect(() => {
+    if (listView && pick.active) onShowCanvas?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pick.active]);
   const { count } = usePickKeys({
     active: pick.active,
     onPick: (target) => target.click(),
@@ -128,7 +140,7 @@ export function PhraseWorkspace({
   return (
     <Box ref={workspaceRef} sx={{ position: "relative" }}>
       {/* Cross-container relative-clause link lines, painted over the whole stack. */}
-      {connectors.length > 0 && (
+      {connectors.length > 0 && !listView && (
         <Box
           component="svg"
           sx={{
@@ -315,6 +327,8 @@ export function PhraseWorkspace({
               // The word palette rides only the first container to avoid ambiguity.
               wordsPanelOpen={i === 0 ? wordsPanelOpen : false}
               onWordsPanelClose={onWordsPanelClose}
+              listView={listView}
+              onShowCanvas={onShowCanvas}
             />
           );
         })}
