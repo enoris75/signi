@@ -21,7 +21,7 @@ that proves the three-folder decision (D4) was needed.
 ## Today
 
 Verified at HEAD (98a65a47), 2026-09-27. `fr`'s bipartite negation lives in
-[`fr/predicateText.ts:190`](../../../../packages/engine/src/languages/fr/predicateText.ts#L190) — `negateFinite`,
+[`fr/predicateText.ts:190`](../../../../../packages/engine/src/languages/fr/predicateText.ts#L190) — `negateFinite`,
 a closure local to `predicateText`, not an exported function — with elision before a vowel. `NO_NEGATIVE_CONCORD` in `singleNegativeWord.ts` lists `de` and `gsw`.
 
 ## Design

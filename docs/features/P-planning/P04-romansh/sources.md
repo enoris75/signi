@@ -1,6 +1,6 @@
 # P04 — Romansh reference works, terms of use and reviewers
 
-[P04 D11](README.md#decisions), [P04-E3 D1, D4](P04-E3-sources-and-reviewers.md). One row per
+[P04 D11](README.md#decisions), [P04-E3 D1, D4](Z-done/P04-E3-sources-and-reviewers.md). One row per
 reference work the three columns (E4–E6) may draw on, with its terms of use and a ruling:
 
 - **copy** — the work's own terms allow forms to be copied into the corpus;

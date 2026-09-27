@@ -55,14 +55,14 @@ The full columns (E4–E6); the review (E19).
 
 Shipped 2026-09-27 alongside E4–E6, each column's author writing its variety's part.
 
-- [`sources.md`](sources.md): **every work is *consult*, none *copy*.** The Pledari Grond carries only
+- [`sources.md`](../sources.md): **every work is *consult*, none *copy*.** The Pledari Grond carries only
   "© Lia Rumantscha" (a third-party paper calls it openly licensed, naming no licence; the Apache-2.0 of
   its GitHub repos covers the code); the Uniun dals Grischs' Vallader dictionary is "All rights
   reserved"; no terms found for the rest. About 45 single Pledari Grond lookups were made for the RG
   verbs; nothing was bulk-downloaded.
-- Style sheets: [`style-rm-rumgr.md`](style-rm-rumgr.md), [`style-rm-sursilv.md`](style-rm-sursilv.md),
-  [`style-rm-vallader.md`](style-rm-vallader.md), each with its variety's marker words for the leak
-  guards. The RG irregular core is [`conjugation-rm-rumgr.md`](conjugation-rm-rumgr.md); the idioms'
+- Style sheets: [`style-rm-rumgr.md`](../style-rm-rumgr.md), [`style-rm-sursilv.md`](../style-rm-sursilv.md),
+  [`style-rm-vallader.md`](../style-rm-vallader.md), each with its variety's marker words for the leak
+  guards. The RG irregular core is [`conjugation-rm-rumgr.md`](../conjugation-rm-rumgr.md); the idioms'
   are in their style sheets.
 - **D4:** the Lia Rumantscha recorded as first contact, with a draft of three questions. **Nobody has
   been contacted.**

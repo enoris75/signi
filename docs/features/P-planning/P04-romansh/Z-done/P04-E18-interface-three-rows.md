@@ -18,8 +18,8 @@ label and arms; this ticket checks that it is enough once the rows are full.
 Verified at HEAD (98a65a47), 2026-09-27.
 
 - The console's completion folds diacritics
-  ([`complete.ts:171`](../../../../packages/frontend/src/console/language/complete.ts#L171), `fold`).
-- The concept picker's search does not: [`useConceptLabel.ts:61`](../../../../packages/frontend/src/i18n/useConceptLabel.ts#L61)
+  ([`complete.ts:171`](../../../../../packages/frontend/src/console/language/complete.ts#L171), `fold`).
+- The concept picker's search does not: [`useConceptLabel.ts:61`](../../../../../packages/frontend/src/i18n/useConceptLabel.ts#L61)
   is `haystack.toLowerCase().includes(q)`. Typing *mangia* finds *mangià* only by prefix luck; *gia*
   does not find *già*. This already affects `it`, `fr`, `es` and `pt` today.
 

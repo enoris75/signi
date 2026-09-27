@@ -2,8 +2,8 @@
 
 The spelling and morphology rules every `rm-vallader` string in the corpus
 (`packages/backend/src/concepts/rm-vallader/`) and the Vallader engine (E8) follow
-([P04 D1, D5, D8, D11](README.md#decisions), [E3 D2](P04-E3-sources-and-reviewers.md#d2-a-style-sheet-per-variety),
-[E6](P04-E6-vallader-column.md)). It covers **Vallader only**, the written standard of the Lower
+([P04 D1, D5, D8, D11](README.md#decisions), [E3 D2](Z-done/P04-E3-sources-and-reviewers.md#d2-a-style-sheet-per-variety),
+[E6](Z-done/P04-E6-vallader-column.md)). It covers **Vallader only**, the written standard of the Lower
 Engadine and the Val Müstair. A Puter form is a leak, not a variant (E6 D2). The same goes for a
 Rumantsch Grischun or Sursilvan form.
 

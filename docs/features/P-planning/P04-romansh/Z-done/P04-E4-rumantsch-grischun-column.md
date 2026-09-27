@@ -4,7 +4,7 @@
 `BORROWED`).
 **Shape:** a column folder `packages/backend/src/concepts/rm-rumgr/`, one file per role, keyed by
 concept id and merged into `forms['rm-rumgr']` by `concepts/index.ts` — the shape
-[P10-E4](../P10-swiss-german/Z-done/P10-E4-corpus-column.md) built for `gsw`.
+[P10-E4](../../P10-swiss-german/Z-done/P10-E4-corpus-column.md) built for `gsw`.
 **Scope:** corpus data, the merge in `concepts/index.ts`, completeness tests. No rendering.
 **Status:** **shipped, 2026-09-27** — see [Done](#done). Filed 2026-09-27 from P04 §1, D5, D7 and D11. Depends on E1 and E3 (sources ruled,
 irregular core filled).

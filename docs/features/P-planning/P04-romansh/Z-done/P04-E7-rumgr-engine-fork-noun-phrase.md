@@ -31,7 +31,7 @@ Verified at HEAD (98a65a47), 2026-09-27.
 - `it` has pieces RG does not need: `belloForm`, `buonoForm`, `quelloForm`, `questoForm` (prenominal
   suppletion), `euphonicA` (*ad*), `nessunForm`, and a clitic system (`itCliticCluster`, `itEnclitic`,
   `reflexiveClitic`).
-- `possessiveIt` in [`possessive.ts:139`](../../../../packages/engine/src/possessive.ts#L139) puts an
+- `possessiveIt` in [`possessive.ts:139`](../../../../../packages/engine/src/possessive.ts#L139) puts an
   article before the possessive; RG does not.
 
 ## Design

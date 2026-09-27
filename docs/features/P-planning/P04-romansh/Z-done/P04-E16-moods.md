@@ -22,8 +22,8 @@ render nothing.
 
 ## Today
 
-Verified at HEAD (98a65a47), 2026-09-27: [`moodForm`](../../../../packages/engine/src/mood.ts#L174),
-[`imperativeForm`](../../../../packages/engine/src/mood.ts#L554) in `mood.ts`. `gsw` keeps its conditional
+Verified at HEAD (98a65a47), 2026-09-27: [`moodForm`](../../../../../packages/engine/src/mood.ts#L174),
+[`imperativeForm`](../../../../../packages/engine/src/mood.ts#L554) in `mood.ts`. `gsw` keeps its conditional
 engine-local.
 
 ## Design

@@ -369,7 +369,8 @@ All three varieties move together through each phase, per the sequencing decisio
 
 ## 7. Tasks (E1–E20)
 
-Filed 2026-09-27, verified against HEAD 98a65a47. Decision numbers are this README's. The groundwork
+Filed 2026-09-27, verified against HEAD 98a65a47. Decision numbers are this README's. **E1–E18
+shipped on 2026-09-27** and are in [`Z-done/`](Z-done/); E19 waits on three native reviewers, E20 on E19. The groundwork
 P04 §0 planned shipped with P10 (E1 builds on it); what changed since this plan was written:
 
 - **§0.2–§0.4, §0.7 done** by P10-E1: one language list, no database CHECK, `preview`/`ready`, the
@@ -383,24 +384,24 @@ P04 §0 planned shipped with P10 (E1 builds on it); what changed since this plan
 
 | task | phase | what | status |
 |---|---|---|---|
-| [P04-E1](P04-E1-register-three-codes.md) | 0 | The three codes on the shipped groundwork; borrowing from the closest language | **Shipped** |
-| [P04-E2](P04-E2-row-identity.md) | 0 | *Romansh (Sursilvan)* labels; names in eleven languages; the league arms | **Shipped**, browser check pending |
-| [P04-E3](P04-E3-sources-and-reviewers.md) | before 1 | Sources and terms of use (D11), a style sheet per variety, the irregular core, reviewer contacts | **Shipped**; reviewers not contacted |
-| [P04-E4](P04-E4-rumantsch-grischun-column.md) | 1–3 | The `rm-rumgr` column, all 836 concepts | **Shipped**, 840/840 |
-| [P04-E5](P04-E5-sursilvan-column.md) | 1–3 | The `rm-sursilv` column, with the predicative adjective form | **Shipped**, 840/840 |
-| [P04-E6](P04-E6-vallader-column.md) | 1–3 | The `rm-vallader` column | **Shipped**, 840/840 |
-| [P04-E7](P04-E7-rumgr-engine-fork-noun-phrase.md) | 1 | RG engine forked from `it`; the noun phrase; the leak guard | **Shipped** |
-| [P04-E8](P04-E8-idiom-engine-forks.md) | 1 | Sursilvan and Vallader forked from RG; the noun phrase | Open |
-| [P04-E9](P04-E9-sursilvan-predicative-adjective.md) | 1 | *il paun ei buns* — the attributive/predicative axis | Open |
-| [P04-E10](P04-E10-clause-core-present.md) | 1 | Subjects kept, *ins*, the present, the copula | **Shipped** for `rm-rumgr` |
-| [P04-E11](P04-E11-three-negation-shapes.md) | 2 | *na … betg*, *buca*, *nu* (D8) | **Shipped** for `rm-rumgr` |
-| [P04-E12](P04-E12-compound-past.md) | 2 | The compound past (D5); `past == resultative` pinned (D6) | **Shipped** for `rm-rumgr` |
-| [P04-E13](P04-E13-periphrastic-future.md) | 2 | *vegnir a* + infinitive (D7) | **Shipped** for `rm-rumgr` |
-| [P04-E14](P04-E14-aspect-modals-degree.md) | 2 | Aspect, modals, degree, BECOME | **Shipped** for `rm-rumgr` |
-| [P04-E15](P04-E15-complements-relatives-coordination.md) | 3 | §2.3's complements, relatives, coordination | **Shipped** for `rm-rumgr` |
-| [P04-E16](P04-E16-moods.md) | 3 | Conditional, imperative (D10), infinitive; no inversion (D9) | **Shipped** for `rm-rumgr` |
-| [P04-E17](P04-E17-ui-strings-and-definitions.md) | 5 | Every UI string and definition renders, per variety | **Done** for `rm-rumgr` (0 / 0) |
-| [P04-E18](P04-E18-interface-three-rows.md) | 3–5 | Three near-identical rows; diacritic folding in the picker | **Shipped**, browser check pending |
+| [P04-E1](Z-done/P04-E1-register-three-codes.md) | 0 | The three codes on the shipped groundwork; borrowing from the closest language | **Shipped** |
+| [P04-E2](Z-done/P04-E2-row-identity.md) | 0 | *Romansh (Sursilvan)* labels; names in eleven languages; the league arms | **Shipped**, browser check pending |
+| [P04-E3](Z-done/P04-E3-sources-and-reviewers.md) | before 1 | Sources and terms of use (D11), a style sheet per variety, the irregular core, reviewer contacts | **Shipped**; reviewers not contacted |
+| [P04-E4](Z-done/P04-E4-rumantsch-grischun-column.md) | 1–3 | The `rm-rumgr` column, all 836 concepts | **Shipped**, 840/840 |
+| [P04-E5](Z-done/P04-E5-sursilvan-column.md) | 1–3 | The `rm-sursilv` column, with the predicative adjective form | **Shipped**, 840/840 |
+| [P04-E6](Z-done/P04-E6-vallader-column.md) | 1–3 | The `rm-vallader` column | **Shipped**, 840/840 |
+| [P04-E7](Z-done/P04-E7-rumgr-engine-fork-noun-phrase.md) | 1 | RG engine forked from `it`; the noun phrase; the leak guard | **Shipped** |
+| [P04-E8](Z-done/P04-E8-idiom-engine-forks.md) | 1 | Sursilvan and Vallader forked from RG; the noun phrase | Open |
+| [P04-E9](Z-done/P04-E9-sursilvan-predicative-adjective.md) | 1 | *il paun ei buns* — the attributive/predicative axis | Open |
+| [P04-E10](Z-done/P04-E10-clause-core-present.md) | 1 | Subjects kept, *ins*, the present, the copula | **Shipped** for `rm-rumgr` |
+| [P04-E11](Z-done/P04-E11-three-negation-shapes.md) | 2 | *na … betg*, *buca*, *nu* (D8) | **Shipped** for `rm-rumgr` |
+| [P04-E12](Z-done/P04-E12-compound-past.md) | 2 | The compound past (D5); `past == resultative` pinned (D6) | **Shipped** for `rm-rumgr` |
+| [P04-E13](Z-done/P04-E13-periphrastic-future.md) | 2 | *vegnir a* + infinitive (D7) | **Shipped** for `rm-rumgr` |
+| [P04-E14](Z-done/P04-E14-aspect-modals-degree.md) | 2 | Aspect, modals, degree, BECOME | **Shipped** for `rm-rumgr` |
+| [P04-E15](Z-done/P04-E15-complements-relatives-coordination.md) | 3 | §2.3's complements, relatives, coordination | **Shipped** for `rm-rumgr` |
+| [P04-E16](Z-done/P04-E16-moods.md) | 3 | Conditional, imperative (D10), infinitive; no inversion (D9) | **Shipped** for `rm-rumgr` |
+| [P04-E17](Z-done/P04-E17-ui-strings-and-definitions.md) | 5 | Every UI string and definition renders, per variety | **Done** for `rm-rumgr` (0 / 0) |
+| [P04-E18](Z-done/P04-E18-interface-three-rows.md) | 3–5 | Three near-identical rows; diacritic folding in the picker | **Shipped**, browser check pending |
 | [P04-E19](P04-E19-review.md) | 4 | Three generated sheets, three reviewers, independent sign-off | Sheet generator shipped; needs three native reviewers |
 | [P04-E20](P04-E20-promotion.md) | 6 | `ready`, per variety | Blocked on E19 |
 

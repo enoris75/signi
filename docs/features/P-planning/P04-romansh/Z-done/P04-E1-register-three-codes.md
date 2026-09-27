@@ -2,7 +2,7 @@
 
 **Feature:** the three Romansh varieties exist as languages: registered, `preview`, each with an empty
 row in the translations panel.
-**Shape:** P04 §0 is **mostly already shipped** — [P10-E1](../P10-swiss-german/Z-done/P10-E1-language-groundwork.md)
+**Shape:** P04 §0 is **mostly already shipped** — [P10-E1](../../P10-swiss-german/Z-done/P10-E1-language-groundwork.md)
 carried the groundwork for P03, P04 and P10. What is left is D2's three codes, the first hyphenated
 ones, on top of it.
 **Scope:** shared, engine registry and per-language tables, backend seed validation, skills. No
@@ -18,9 +18,9 @@ word empties the row rather than borrowing Italian's.
 
 Verified at HEAD (98a65a47), 2026-09-27.
 
-- **The groundwork is shipped** (P10-E1): one list — [`LanguageCode`](../../../../packages/shared/src/index.ts#L8),
-  [`LANGUAGES`](../../../../packages/shared/src/index.ts#L660), `LANGUAGE_CODES`,
-  [`LANGUAGE_STATUS`](../../../../packages/shared/src/index.ts#L693), `READY_LANGUAGES`,
+- **The groundwork is shipped** (P10-E1): one list — [`LanguageCode`](../../../../../packages/shared/src/index.ts#L8),
+  [`LANGUAGES`](../../../../../packages/shared/src/index.ts#L660), `LANGUAGE_CODES`,
+  [`LANGUAGE_STATUS`](../../../../../packages/shared/src/index.ts#L693), `READY_LANGUAGES`,
   `ReadyLanguageCode`, `isPreviewLanguage`; no database CHECK (`dropLanguageChecks` in `db.ts`); the
   boot checks warn for a preview language; `sayAll` and keyed harness helpers render ready languages
   only; a preview row with an unseeded word renders empty. **P04 §0.2–§0.4 and §0.7 are done; do not
@@ -29,13 +29,13 @@ Verified at HEAD (98a65a47), 2026-09-27.
   "after `pt`"; it now means after `gsw`).
 - **Language-keyed sites outside the language folders:** `gsw` had to be added by hand in 14 source
   files (32 lines). The ones that do **not** fail typecheck, and so silently leave a new language out:
-  - [`translator.consts.ts`](../../../../packages/engine/src/translator/translator.consts.ts) — the
+  - [`translator.consts.ts`](../../../../../packages/engine/src/translator/translator.consts.ts) — the
     approximator table (`:36`), `BECOME`'s choice (`:149`), `RELATIVIZES_AGENT` (`:161`),
     `FUTURE_AS_PRESENT_LANGUAGES` (`:218`), the `:228` and `:259` tables;
   - `singleNegativeWord.ts` (`NO_NEGATIVE_CONCORD`), `foldIndefiniteModifier.ts`, `controllerCase.ts`,
     `fuseGovernedVerb.ts`, `existentialPlan.ts`;
-  - [`mood.ts`](../../../../packages/engine/src/mood.ts) and
-    [`possessive.ts`](../../../../packages/engine/src/possessive.ts) (P04 §0.6).
+  - [`mood.ts`](../../../../../packages/engine/src/mood.ts) and
+    [`possessive.ts`](../../../../../packages/engine/src/possessive.ts) (P04 §0.6).
 - **The `Record<LanguageCode, …>` sites** (22, in `shared`, `backend/conceptList.ts`,
   `definitions.ts`, `uiStrings.ts`, `concepts/types.ts`, `flags.tsx`, the translator fixtures) fail
   typecheck until each code has an entry — that is the checklist, not a hazard.

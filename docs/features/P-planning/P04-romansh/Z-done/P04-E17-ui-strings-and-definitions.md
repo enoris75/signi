@@ -21,8 +21,8 @@ Verified at HEAD (98a65a47), 2026-09-27.
   `definition:` plans** now (P09, P11, P13 have grown them). ~1,234 strings per variety, **~3,700 for
   the three** — three times P04's estimate.
 - A preview language's holes are counted and warned, not thrown:
-  [`uiStrings.ts:90-100`](../../../../packages/backend/src/uiStrings.ts#L90-L100),
-  [`definitions.ts:55-65`](../../../../packages/backend/src/definitions.ts#L55-L65).
+  [`uiStrings.ts:90-100`](../../../../../packages/backend/src/uiStrings.ts#L90-L100),
+  [`definitions.ts:55-65`](../../../../../packages/backend/src/definitions.ts#L55-L65).
 
 ## Design
 

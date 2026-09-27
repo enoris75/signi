@@ -1,7 +1,7 @@
 # Rumantsch Grischun (`rm-rumgr`) — the style sheet
 
 The spelling conventions every `rm-rumgr` string in the corpus and the engine follows
-([P04-E3 D2](P04-E3-sources-and-reviewers.md#d2-a-style-sheet-per-variety)). **Rumantsch Grischun
+([P04-E3 D2](Z-done/P04-E3-sources-and-reviewers.md#d2-a-style-sheet-per-variety)). **Rumantsch Grischun
 only**: a Sursilvan or Vallader form is a leak, not a variant (P04 D1).
 
 Drafted 2026-09-27 by the implementer from the RG grammars and dictionary, consulted only

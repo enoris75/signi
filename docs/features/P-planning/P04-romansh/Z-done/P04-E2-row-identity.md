@@ -19,12 +19,12 @@ recognise any cantonal emblem.
 Verified at HEAD (98a65a47), 2026-09-27.
 
 - Language names are concepts under `LANGUAGE` (`proper`, `countable: false`) —
-  [`SWISS_GERMAN`](../../../../packages/backend/src/concepts/nouns.ts#L4510) is the latest. No
+  [`SWISS_GERMAN`](../../../../../packages/backend/src/concepts/nouns.ts#L4510) is the latest. No
   `ROMANSH` concept exists.
-- [`flags.tsx`](../../../../packages/frontend/src/i18n/flags.tsx#L8): `FlagDef = string | { svg:
+- [`flags.tsx`](../../../../../packages/frontend/src/i18n/flags.tsx#L8): `FlagDef = string | { svg:
   'zurich' }` — the widening is shipped; a new SVG is one more member of the union and one drawing.
 - The panel special-cases `gsw` by code for its dialect and tooltip
-  ([`TranslationPanel.tsx:158-160`](../../../../packages/frontend/src/components/TranslationPanel.tsx#L158-L160)).
+  ([`TranslationPanel.tsx:158-160`](../../../../../packages/frontend/src/components/TranslationPanel.tsx#L158-L160)).
 
 ## Design
 

@@ -27,7 +27,7 @@ the one genuinely new piece of grammar in P04.
 Verified at HEAD (98a65a47), 2026-09-27.
 
 - P04's link to `types.ts:290` is stale. The adjective agreement an engine reads comes through
-  `renderWord` and the resolved forms ([`types.ts:575-588`](../../../../packages/engine/src/types.ts#L575-L588));
+  `renderWord` and the resolved forms ([`types.ts:575-588`](../../../../../packages/engine/src/types.ts#L575-L588));
   nothing on a resolved adjective says where it stands.
 - The translator already resolves **predicative** complements separately
   (`translator/functions/predicativeGovernor.ts`, `resolvePhrase.ts`) — the position is known at
