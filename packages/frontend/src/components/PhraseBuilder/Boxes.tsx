@@ -64,6 +64,7 @@ import { KeyTip } from "../../keyboard/KeyTip.tsx";
 import { digitKeys, useMenuKeys } from "../../keyboard/useMenuKeys.ts";
 import { keycapText } from "../../keyboard/matchKey.ts";
 import { useKeyPlatform } from "../../keyboard/KeyboardProvider.tsx";
+import { touchSnapProps } from "../../hooks/useTouchSnap.ts";
 
 // The light wash a set or active box wears in its colour. The theme defines only each colour's
 // main/light/dark (no 50…900 scale), so the wash is `main` at MUI's selected opacity.
@@ -189,6 +190,7 @@ export function ClearButton({
     <Tooltip title={clearTitle(t, label, labelKey)}>
       <IconButton
         size="small"
+        {...touchSnapProps}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={onClear}
         sx={[
@@ -538,6 +540,7 @@ export function SatelliteButton({
       <IconButton
         size="small"
         data-testid={`satellite-${sat.key}`}
+        {...touchSnapProps}
         aria-label={tooltip}
         aria-keyshortcuts={keySpec ? keycapText(keySpec, platform) : undefined}
         onPointerDown={(e) => e.stopPropagation()}
@@ -791,6 +794,7 @@ function RelationToolbar<V extends string>({
           size="small"
           aria-label={labels[v]}
           aria-keyshortcuts={keys[v]}
+          {...touchSnapProps}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={() => onSelect(v)}
           sx={{

@@ -8,6 +8,7 @@ import type { PhraseRenderContext } from "./phraseRender.tsx";
 import { collapseControlKey, removeControlKey } from "./ringSpecs.ts";
 import { collapseTitle, removeTitle } from "./canvasCommands.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { touchSnapProps } from "../../hooks/useTouchSnap.ts";
 
 // A small round chrome button on the dotted ring, centred where the ring layout seats it.
 function RingButton({
@@ -26,6 +27,7 @@ function RingButton({
     <Tooltip title={title}>
       <IconButton
         size="small"
+        {...touchSnapProps}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={onClick}
         sx={{

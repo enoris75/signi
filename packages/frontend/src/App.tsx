@@ -12,6 +12,7 @@ import { MobileTabBar, TAB_BAR_HEIGHT, type MobileView } from "./components/Mobi
 import { ResultStrip } from "./components/ResultStrip.tsx";
 import { isTouchOnly, useCompactLayout } from "./hooks/useCompactLayout.ts";
 import { useHeaderOffset } from "./hooks/useHeaderOffset.ts";
+import { useTouchSnap } from "./hooks/useTouchSnap.ts";
 import UndoIcon from "@mui/icons-material/Undo";
 import { LanguageSelector } from "./components/LanguageSelector.tsx";
 import { useWindowDrag } from "./hooks/useWindowDrag.ts";
@@ -85,6 +86,8 @@ export default function App() {
   // the console tab, so ` and the console's own commands move between tabs as they show and hide it.
   const compact = useCompactLayout();
   const headerOffset = useHeaderOffset(compact);
+  // A finger's tap near one of the canvas's small controls reaches it (a 44 px target).
+  useTouchSnap();
   // The Phrase view is the phone's default: it exists because a finger can't work the canvas's
   // rings, so a narrowed *desktop* window (still driven by a mouse) starts on the canvas instead,
   // which the compact layout already lays out in one column.

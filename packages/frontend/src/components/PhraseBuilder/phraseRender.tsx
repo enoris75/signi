@@ -34,6 +34,7 @@ export type DragBoxProps = {
   onPointerMove: (e: React.PointerEvent) => void;
   onPointerUp: () => void;
   onPointerCancel: () => void;
+  "data-tap-owner"?: string;
   sx: SystemStyleObject<Theme>;
 };
 

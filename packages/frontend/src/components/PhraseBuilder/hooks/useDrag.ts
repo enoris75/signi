@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { DEFAULT_POSITIONS } from "../slots.ts";
+import { TAP_OWNER_ATTR } from "../../../hooks/useTouchSnap.ts";
 
 export type DragState = {
   keys: string[];
@@ -129,6 +130,9 @@ export function useDrag({ positions, setPositions, containerRef, frozen = false 
       onPointerMove: moveDrag,
       onPointerUp: () => endDrag(onActivate),
       onPointerCancel: () => endDrag(),
+      // A tap on the box is its own: it activates on pointer-up, not on a click, so the touch snap
+      // must not hand it to a control nearby as well.
+      [TAP_OWNER_ATTR]: "",
       sx: {
         position: "absolute" as const,
         left: `${at.x}%`,

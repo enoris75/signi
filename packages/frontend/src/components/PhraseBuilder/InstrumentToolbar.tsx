@@ -11,6 +11,7 @@ import { useUiString } from "../../i18n/useUiString.ts";
 import type { Pt } from "./ringLayout.ts";
 import type { RingHost } from "./ringHost.ts";
 import { toolbarControlKey } from "./ringSpecs.ts";
+import { touchSnapProps } from "../../hooks/useTouchSnap.ts";
 
 /** The controls an instrument drawn inside its clause wears at twelve on its first ring (P12). */
 export const INSTRUMENT_TOOLBAR = [...ABSTRACTION_LEVELS, "without", "asPeriod", "pick"] as const;
@@ -69,6 +70,7 @@ export function InstrumentToolbar({
               <IconButton
                 size="small"
                 data-testid={`instrument-${v}`}
+                {...touchSnapProps}
                 aria-label={title(v)}
                 aria-pressed={v === "asPeriod" || v === "pick" ? undefined : on}
                 onPointerDown={(e) => e.stopPropagation()}

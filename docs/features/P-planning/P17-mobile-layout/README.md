@@ -10,7 +10,7 @@ P01 made every control reachable by key, and P02 made the phrase typeable. On a 
 keys nor the width are there. This plan keeps their handlers and their command table: the Phrase
 view's role sheet is P01's keymap listed as buttons, and the console tab is P02's console,
 undocked.
-**Status:** phases 1–4 built (branch `p17-mobile`).
+**Status:** phases 1–4 built and merged into `main`; touch targets built after.
 **Drawings:** the [design canvas](https://claude.ai/artifact/RYyD3YwGnpDfCkJkYKHQva), with six
 phone screens and a note on what breaks today.
 
@@ -166,7 +166,7 @@ the browser's own scrolling pan it.
   inside the phone's viewport — the existing `mr: 64px` gutter (`PeriodContainer.tsx`) already
   reserves their room within whatever width the card is given, so nothing is clipped; the small
   size (~20 px) is the same touch-target problem the satellite controls have everywhere else, not a
-  reachability one, and belongs with that broader sweep (see Open questions). Reimplementing the
+  reachability one, and belongs with that broader sweep (see "Touch targets" below). Reimplementing the
   eight border controls as menu items was also dropped: three of them (conditional, coordinative,
   subordinate) each open their own multi-step cross-period picker, and reproducing that faithfully
   as menu items — untested, under time pressure, in a codebase that had just shown it has subtle
@@ -206,6 +206,30 @@ not a hunt for the slash first.
 - **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('the console command bar
   (P17 phase 4)')`.
 
+### Touch targets (built)
+
+Principle 4's 44 px rule, on the canvas. Its small controls — satellite dots, clear buttons, a ring's
+collapse/remove, the relation and instrument toolbars, a period's header and border controls — are
+still drawn at 18–22 px, and have to be: the ring layout seats them by their measured footprint, and
+the overlap resolver moves boxes around exactly those rects. Padding them, or giving each a larger
+invisible pseudo-element, would either move the layout or let one control's margin lie over its
+neighbour and steal its taps (the seats are separate stacking contexts, so the later one wins).
+
+- **What shipped instead: a tap snaps.** [`hooks/useTouchSnap.ts`](../../../../packages/frontend/src/hooks/useTouchSnap.ts),
+  installed once in `App.tsx`. A finger tap (the `pointerdown`'s `pointerType` is `touch`) that lands
+  on nothing interactive — a ring, the bare canvas — goes to the nearest control marked
+  `data-touch-snap` whose 44 px square, centred on it, holds the tap. A tap on a control's own body
+  is never moved, so the visible control always wins; a mouse or pen click is never moved either.
+- **What counts as interactive** is a button, input, `role="button"` and kin, a pick's target, and
+  anything wearing `data-tap-owner` — which `useDrag`'s `makeDragProps` puts on every box, since a
+  box activates on pointer-up through the drag machinery rather than on a click, and a tap on it
+  must not *also* press a satellite nearby.
+- **Only a control the finger could reach:** the snap checks `elementFromPoint` at the control's
+  centre, so one under a sheet, a popper or a stowed view is skipped. The square is divided by
+  `visualViewport.scale`, so it stays 44 px on the glass when the canvas is pinched.
+- **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('the canvas\'s small
+  controls take a finger (44 px targets)')`; unit: `test/hooks/useTouchSnap.test.ts`.
+
 ## Open questions
 
 - **Tablets.** At 600–1024 px the desktop layout applies unchanged. Should the canvas take the full
@@ -213,12 +237,6 @@ not a hunt for the slash first.
 - **Where the console's preview shows.** On a phone the canvas is a tab away from the prompt. The
   prompt's preview line (the sentence under the line being typed) may be enough, or the result strip
   could follow the preview.
-- **Touch-target sizing, everywhere.** Every small control on the canvas — the ~20 px satellite
-  dots, the clear buttons, the border controls — is still that size on a phone. The design's
-  44 px-minimum rule needs a general fix (an enlarged invisible hit area, not a visual resize, since
-  the ring layout's overlap resolver uses these exact pixel footprints), applied once across
-  `Boxes.tsx`'s button components rather than piecemeal per control. Not attempted in phase 3;
-  see its note on why the border controls specifically were left alone for now.
 - **A tapped box's own quick controls, and the border controls' menu.** Both were phase 3's
   original plan; both turned out to rest on premises the running app didn't bear out (see phase 3's
   "Not attempted" note). Worth another look once the Phrase view (phase 2) has had real use — it

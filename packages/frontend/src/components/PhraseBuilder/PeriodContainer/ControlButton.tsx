@@ -4,6 +4,7 @@ import {
   type IconButtonProps,
   type SvgIcon,
 } from "@mui/material";
+import { touchSnapProps } from "../../../hooks/useTouchSnap.ts";
 
 export type IconComponent = typeof SvgIcon;
 
@@ -27,6 +28,7 @@ export function ControlButton({
     <IconButton
       size="small"
       aria-label={title}
+      {...touchSnapProps}
       {...props}
       sx={[{ p: 0.25 }, ...(Array.isArray(sx) ? sx : [sx])]}
     >

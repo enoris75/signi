@@ -277,6 +277,49 @@ test.describe('the canvas at real width (P17 phase 3)', () => {
   });
 });
 
+test.describe('the canvas\'s small controls take a finger (44 px targets)', () => {
+  test('a tap just outside a satellite reaches it, while the satellite keeps its size', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('role-subject').tap();
+    await page.keyboard.type('cat');
+    await page.locator('[data-testid="typeahead-option"][data-concept="CAT"]').click();
+    await page.keyboard.type('eat');
+    await page.locator('[data-testid="typeahead-option"][data-concept="EAT"]').click();
+    await page.keyboard.type('food');
+    await page.locator('[data-testid="typeahead-option"][data-concept="FOOD"]').click();
+    await page.getByTestId('tab-canvas').tap();
+
+    const number = page.getByTestId('satellite-subjectNumber');
+    await number.scrollIntoViewIfNeeded();
+    // Drawn at its own size: the ring layout seats it by that footprint.
+    const box = (await number.boundingBox())!;
+    expect(box.width).toBe(20);
+    // A spot 15 px off its centre — outside the dot, inside its 44 px square — on nothing that takes
+    // a tap itself, and nearer this control than any other.
+    const spot = await number.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const others = [...document.querySelectorAll('[data-touch-snap]')]
+        .filter((o) => o !== el)
+        .map((o) => o.getBoundingClientRect())
+        .filter((o) => o.width > 0);
+      for (let a = 0; a < 16; a++) {
+        const x = cx + 15 * Math.cos((a * Math.PI) / 8);
+        const y = cy + 15 * Math.sin((a * Math.PI) / 8);
+        const hit = document.elementFromPoint(x, y);
+        if (!hit || hit.closest('button, [role="button"], [data-tap-owner], [data-kb-pick-target], input')) continue;
+        if (others.some((o) => Math.hypot(x - (o.left + o.width / 2), y - (o.top + o.height / 2)) <= 15)) continue;
+        return { x, y };
+      }
+      return null;
+    });
+    expect(spot).not.toBeNull();
+    await page.touchscreen.tap(spot!.x, spot!.y);
+    await expect(page.getByTestId('result-strip')).toHaveText('the cats eat the food.');
+  });
+});
+
 test.describe('the console command bar (P17 phase 4)', () => {
   test('sits above the prompt on the console tab, each key a 44 px target', async ({ app, page }) => {
     void app;
