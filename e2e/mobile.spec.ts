@@ -320,6 +320,73 @@ test.describe('the canvas\'s small controls take a finger (44 px targets)', () =
   });
 });
 
+test.describe('a tapped box\'s bar (P17)', () => {
+  async function buildOnCanvas(page: Page): Promise<void> {
+    await page.getByTestId('role-subject').tap();
+    await page.keyboard.type('cat');
+    await page.locator('[data-testid="typeahead-option"][data-concept="CAT"]').click();
+    await page.keyboard.type('eat');
+    await page.locator('[data-testid="typeahead-option"][data-concept="EAT"]').click();
+    await page.keyboard.type('food');
+    await page.locator('[data-testid="typeahead-option"][data-concept="FOOD"]').click();
+    await page.getByTestId('tab-canvas').tap();
+  }
+
+  test('only a tap raises it: three named 44 px pills, each running its ring icon\'s handler', async ({ app, page }) => {
+    void app;
+    await buildOnCanvas(page);
+    // The picks made in the Phrase view moved the cursor, but no box was tapped.
+    await expect(page.getByTestId('quick-bar')).toHaveCount(0);
+    await page.getByTestId('box-subject').tap();
+    const bar = page.getByTestId('quick-bar');
+    await expect(bar).toHaveAttribute('data-slot', 'subject');
+    for (const id of ['quick-subjectNumber', 'quick-subjectAdjective', 'quick-subjectDefiniteness', 'quick-all']) {
+      const box = (await page.getByTestId(id).boundingBox())!;
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.x + box.width).toBeLessThanOrEqual(390);
+    }
+    await expect(page.getByTestId('quick-subjectNumber')).toHaveText('Singular');
+    await page.getByTestId('quick-subjectNumber').tap();
+    await expect(page.getByTestId('quick-subjectNumber')).toHaveText('Plural');
+    await expect(page.getByTestId('result-strip')).toHaveText('the cats eat the food.');
+  });
+
+  test('a verb\'s pills cycle its tense as its canvas key does', async ({ app, page }) => {
+    void app;
+    await buildOnCanvas(page);
+    await page.getByTestId('box-verb').tap();
+    await expect(page.getByTestId('quick-verbTense')).toHaveText('Present');
+    await page.getByTestId('quick-verbTense').tap();
+    await expect(page.getByTestId('result-strip')).toHaveText('the cat ate the food.');
+  });
+
+  test('⋯ opens the role\'s sheet over the canvas; close puts the bar away', async ({ app, page }) => {
+    void app;
+    await buildOnCanvas(page);
+    await page.getByTestId('box-subject').tap();
+    await page.getByTestId('quick-all').tap();
+    await expect(page.getByTestId('role-sheet')).toBeVisible();
+    await page.getByTestId('role-control-subjectGender').tap();
+    await expect(page.getByTestId('role-control-subjectGender')).not.toContainText('Male');
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('role-sheet')).toHaveCount(0);
+    await expect(page.getByTestId('tab-canvas')).toHaveAttribute('aria-current', 'page');
+    await page.getByTestId('quick-bar').getByRole('button', { name: 'close' }).tap();
+    await expect(page.getByTestId('quick-bar')).toHaveCount(0);
+  });
+
+  test('shows on the canvas only', async ({ app, page }) => {
+    void app;
+    await buildOnCanvas(page);
+    await page.getByTestId('box-subject').tap();
+    await expect(page.getByTestId('quick-bar')).toBeVisible();
+    await page.getByTestId('tab-phrase').tap();
+    await expect(page.getByTestId('quick-bar')).toHaveCount(0);
+    await page.getByTestId('tab-canvas').tap();
+    await expect(page.getByTestId('quick-bar')).toBeVisible();
+  });
+});
+
 test.describe('the console command bar (P17 phase 4)', () => {
   test('sits above the prompt on the console tab, each key a 44 px target', async ({ app, page }) => {
     void app;

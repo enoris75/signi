@@ -4469,6 +4469,14 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Show the whole canvas',
   },
+  // On a phone (P17), the bar a tapped canvas box raises holds three of its controls and this, which
+  // opens the sheet of every control its ring carries: OPTION in the plural under the `all`
+  // quantifier, bare ("All options", "Tutte le opzioni", ja すべての選択肢).
+  'action.allOptions': {
+    plan: { subject: { concept: 'OPTION', number: 'plural', definiteness: 'all' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'All options',
+  },
 
   'action.showWordMap': {
     plan: {

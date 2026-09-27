@@ -10,7 +10,7 @@ P01 made every control reachable by key, and P02 made the phrase typeable. On a 
 keys nor the width are there. This plan keeps their handlers and their command table: the Phrase
 view's role sheet is P01's keymap listed as buttons, and the console tab is P02's console,
 undocked.
-**Status:** phases 1–4 built and merged into `main`; touch targets built after.
+**Status:** phases 1–4 built and merged into `main`; touch targets and a tapped box's bar built after.
 **Drawings:** the [design canvas](https://claude.ai/artifact/RYyD3YwGnpDfCkJkYKHQva), with six
 phone screens and a note on what breaks today.
 
@@ -230,6 +230,37 @@ neighbour and steal its taps (the seats are separate stacking contexts, so the l
 - **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('the canvas\'s small
   controls take a finger (44 px targets)')`; unit: `test/hooks/useTouchSnap.test.ts`.
 
+### A tapped box's bar (built)
+
+Phase 3's first plan, built once the Phrase view had given it the parts. On a phone with a finger,
+on the Canvas tab, **tapping** a filled box raises a bar over the tab bar: the box's three most-used
+controls as named 44 px pills, ⋯ ("All options", `action.allOptions`: OPTION, plural, under `all`),
+which opens that role's sheet over the canvas, and a close button.
+
+- **The same sheet, the same handlers.** The Phrase view's role sheet is now its own component,
+  [`RoleSheet.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/RoleSheet.tsx), with
+  what goes into it in [`roleControls.ts`](../../../../packages/frontend/src/components/PhraseBuilder/roleControls.ts)
+  (`roleControlsOf`). A pill or a sheet control runs `PhraseBuilder.tsx`'s `runSatelliteCommand` (the
+  keymap command a value-cycling satellite answers to, as phase 2's `runCommand`) or else the icon's
+  own `onToggle` — exactly what the Phrase view does.
+- **Which three.** `quickControlsOf`: a noun's number, adjective and determiner; a verb's tense,
+  polarity and adverb; any other role, the first of its ring's own.
+- **One bar for the page.** Every period and every hosted ring is a builder with its own selected
+  box, so the page owns the bar's place and the last builder whose box was tapped owns its content
+  ([`quickBar.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/quickBar.tsx): a host
+  element the builder portals into). `App.tsx` enables it only for a touch phone on the Canvas tab.
+- **Only a tap raises it**: the canvas's `handleSlotClick` claims it. The cursor moving by keyboard,
+  by the console, or by a pick in the Phrase view does not, so the canvas tab opens clean. It stands
+  aside while its box is open for re-picking (the second tap), and returns after.
+- **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('a tapped box\'s bar
+  (P17)')`; unit: `test/roleControls.test.ts`.
+
+**The border controls' menu: not built, on purpose.** Checked again against the running app at
+390 px: the period's eight border controls sit on screen (x 366–387), and the touch snap now gives each
+its 44 px target. Moving them into a menu would buy their names at the cost of the three that open a
+multi-step pick anchored to the button itself (conditional, coordinative, subordinate), and of the
+connectors that run from the column's anchor. Reopen only if someone on a phone misses them.
+
 ## Open questions
 
 - **Tablets.** At 600–1024 px the desktop layout applies unchanged. Should the canvas take the full
@@ -237,7 +268,3 @@ neighbour and steal its taps (the seats are separate stacking contexts, so the l
 - **Where the console's preview shows.** On a phone the canvas is a tab away from the prompt. The
   prompt's preview line (the sentence under the line being typed) may be enough, or the result strip
   could follow the preview.
-- **A tapped box's own quick controls, and the border controls' menu.** Both were phase 3's
-  original plan; both turned out to rest on premises the running app didn't bear out (see phase 3's
-  "Not attempted" note). Worth another look once the Phrase view (phase 2) has had real use — it
-  may turn out to already cover what these would have.

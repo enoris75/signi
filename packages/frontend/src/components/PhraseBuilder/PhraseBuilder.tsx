@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Box } from "@mui/material";
 import { CAUSE_SENTIMENTS, COMPLEMENT_LABELS, OBJECT_PREDICATIONS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept } from "@signi/shared";
 import {
@@ -16,9 +17,11 @@ import {
   possessorAddress,
   standardAddress,
   examplesAddress,
+  SlotConfig,
   SlotKey,
   WorkspaceBinding,
 } from "./interfaces.ts";
+import type { SatelliteIcon } from "./Boxes.tsx";
 import {
   NOUN_KEYS,
   REVEALABLE_SLOT_KEYS,
@@ -31,6 +34,10 @@ import {
 } from "./slots.ts";
 import { slotTypeahead } from "./SlotTypeahead.tsx";
 import { RoleList } from "./RoleList.tsx";
+import { RoleSheet } from "./RoleSheet.tsx";
+import { BoxQuickBar } from "./BoxQuickBar.tsx";
+import { useQuickBar } from "./quickBar.tsx";
+import { RING_CONTROL, adjectiveHead, isAdjectiveSlot, quickControlsOf, roleControlsOf } from "./roleControls.ts";
 import {
   applyConceptSelect,
   applyClear,
@@ -286,6 +293,10 @@ export function PhraseBuilder({
     slotKind,
     setSlotKind,
   } = useSlotFocus(selection);
+  // A tapped box's bar, on a phone's canvas (P17): the page holds one, and a box tapped here claims
+  // it. Only a tap claims — not the keyboard, the console, or a pick in the Phrase view.
+  const quickBarId = useId();
+  const quickBar = useQuickBar();
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   // Which noun's determiner menu is open. Held here rather than in the noun's own renderer so the
   // noun's D key can open it from wherever the cursor is (see the keymap's noun.determiner).
@@ -1286,7 +1297,10 @@ export function PhraseBuilder({
       ? (nodeKeys) => ringHost.makeGroupDragProps([hostKeyOf(dragKeyOf(nodeKeys[0] ?? ""))])
       : makeGroupDragProps,
     slotEls,
-    handleSlotClick: selectSlot,
+    handleSlotClick: (slot: SlotKey) => {
+      selectSlot(slot);
+      quickBar.claim(quickBarId);
+    },
     editingSlot,
     handleEditSlot: editSlot,
     handleCancelEdit: cancelEdit,
@@ -1480,6 +1494,93 @@ export function PhraseBuilder({
       </BoxScopeProvider>
     );
 
+  // A satellite that always carries a value and isn't a direct toggle (tense, aspect, voice, degree,
+  // a modifier's relation, a possessor's role, a conjunction) is a chip a click *cycles*, not a box a
+  // click reveals — the same command the keymap's own key (T for tense, and so on) runs on the canvas,
+  // found by the very regex that ties that key to this satellite. `false` leaves the icon's own
+  // reveal/toggle to run instead. The phone's role sheet and a tapped box's bar both press through it.
+  function runSatelliteCommand(slot: SlotKey, satelliteKey: string): boolean {
+    const scopes = boxScopesOf(slot, selection);
+    const cmd = KEYMAP.find((c) => c.satellite?.test(satelliteKey) && scopes.includes(c.scope));
+    if (!cmd) return false;
+    const ctx = boxScope.build(slot);
+    if (!ctx) return false;
+    // No spatial or cross-box movement a satellite's own cycle ever asks for — a real element in
+    // case one reads it, and no-ops for the rest.
+    const nav = { element: document.body, move: () => {}, step: () => false, exit: () => {} };
+    cmd.run({ ...ctx, nav } satisfies BoxKeyContext);
+    return true;
+  }
+  const clearRole = (slot: SlotKey) =>
+    COMPLEMENT_KEY_SET.has(slot) ? handleRemoveComplement(slot as BoxComplementType) : handleClear(slot);
+  const verbControls = [...(directObjectToggle ? [directObjectToggle] : []), ...complementToggleIcons];
+  const roleLabel = (slot: SlotConfig) => (slot.labelKey ? t(slot.labelKey) : slot.label);
+
+  // Unmounted (a hosted ring dropped, a period removed), it gives the bar back.
+  useEffect(() => () => quickBar.release(quickBarId), [quickBar.release, quickBarId]);
+  const [sheetFor, setSheetFor] = useState<SlotKey | null>(null);
+  const slotConfigOf = (key: SlotKey | null) => (key ? renderedSlots.find((s) => s.key === key) : undefined);
+  // A filled box in hand, not open for re-picking (its picker is what shows then).
+  const barSlot =
+    !listView && quickBar.host && quickBar.owner === quickBarId && activeSlot && selection[activeSlot] && editingSlot !== activeSlot
+      ? slotConfigOf(activeSlot)
+      : undefined;
+  const sheetSlot = !listView && quickBar.host ? slotConfigOf(sheetFor) : undefined;
+  function pressRoleControl(slot: SlotKey, icon: SatelliteIcon) {
+    if (!runSatelliteCommand(slot, icon.key)) icon.onToggle();
+  }
+  const quickBarUi = (
+    <>
+      {barSlot &&
+        quickBar.host &&
+        createPortal(
+          <BoxQuickBar
+            slot={barSlot}
+            label={roleLabel(barSlot)}
+            controls={quickControlsOf(roleControlsOf(barSlot.key, satelliteIconsByParent, perimeterByNoun, verbControls))}
+            onPress={(icon) => pressRoleControl(barSlot.key, icon)}
+            onAll={() => setSheetFor(barSlot.key)}
+            onClose={() => quickBar.release(quickBarId)}
+          />,
+          quickBar.host,
+        )}
+      <RoleSheet
+        slot={sheetSlot}
+        word={sheetFor ? selection[sheetFor] : undefined}
+        adjectives={
+          sheetFor
+            ? renderedSlots
+                .filter((s) => isAdjectiveSlot(s.key) && adjectiveHead(s.key) === sheetFor)
+                .map((adj) => ({ slot: adj, word: selection[adj.key] }))
+            : []
+        }
+        controls={sheetFor ? roleControlsOf(sheetFor, satelliteIconsByParent, perimeterByNoun, verbControls) : []}
+        label={roleLabel}
+        onPress={(icon) => {
+          if (!sheetFor) return;
+          pressRoleControl(sheetFor, icon);
+          // A ring of its own, or a pick, is done on the canvas under the sheet.
+          if (icon.link || (RING_CONTROL.test(icon.key) && !icon.isSet)) setSheetFor(null);
+        }}
+        onReplace={() => {
+          if (!sheetFor) return;
+          setSheetFor(null);
+          editSlot(sheetFor);
+        }}
+        onRemove={() => {
+          if (!sheetFor) return;
+          setSheetFor(null);
+          clearRole(sheetFor);
+        }}
+        onOpenAdjective={(adj) => {
+          setSheetFor(null);
+          selectSlot(adj.key);
+        }}
+        onClose={() => setSheetFor(null)}
+      />
+    </>
+  );
+
   const tree = (
     <PeriodCard
       selection={selection}
@@ -1533,28 +1634,10 @@ export function PhraseBuilder({
             activeSlot={activeSlot}
             controlsByParent={satelliteIconsByParent}
             perimeterByNoun={perimeterByNoun}
-            verbControls={[...(directObjectToggle ? [directObjectToggle] : []), ...complementToggleIcons]}
+            verbControls={verbControls}
             onSelectSlot={setActiveSlot}
-            onClear={(slot) =>
-              COMPLEMENT_KEY_SET.has(slot) ? handleRemoveComplement(slot as BoxComplementType) : handleClear(slot)
-            }
-            runCommand={(slot, satelliteKey) => {
-              // A satellite that always carries a value and isn't a direct toggle (tense, aspect,
-              // voice, degree, a modifier's relation, a possessor's role, a conjunction) is a chip a
-              // click *cycles*, not a box a click reveals — the same command the keymap's own key
-              // (T for tense, and so on) runs on the canvas, found by the very regex that ties that
-              // key to this satellite. `false` leaves the icon's own reveal/toggle to run instead.
-              const scopes = boxScopesOf(slot, selection);
-              const cmd = KEYMAP.find((c) => c.satellite?.test(satelliteKey) && scopes.includes(c.scope));
-              if (!cmd) return false;
-              const ctx = boxScope.build(slot);
-              if (!ctx) return false;
-              // No spatial or cross-box movement a satellite's own cycle ever asks for — a real
-              // element in case one reads it, and no-ops for the rest.
-              const nav = { element: document.body, move: () => {}, step: () => false, exit: () => {} };
-              cmd.run({ ...ctx, nav } satisfies BoxKeyContext);
-              return true;
-            }}
+            onClear={clearRole}
+            runCommand={runSatelliteCommand}
             picker={(slot, editing) =>
               slotTypeahead({
                 slotKey: slot,
@@ -1574,7 +1657,10 @@ export function PhraseBuilder({
           </Box>
         </>
       ) : (
-        canvas
+        <>
+          {canvas}
+          {quickBarUi}
+        </>
       )}
     </PeriodCard>
   );

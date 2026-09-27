@@ -1454,6 +1454,11 @@ describe('buildUiStrings', () => {
       de: 'Die ganze Arbeitsfläche zeigen', es: 'Mostrar el lienzo entero', ja: '全体のキャンバスを見せ',
       pt: 'Mostrar a tela inteira',
     });
+    // …and the tapped box's bar (P17): every control the ring carries.
+    expect(strings['action.allOptions']).toEqual({
+      en: 'All options', it: 'Tutte le opzioni', fr: 'Toutes les options', de: 'Alle Optionen',
+      es: 'Todas las opciones', ja: 'すべての選択肢', pt: 'Todas as opções',
+    });
   });
 });
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { UiStringKey } from "@signi/shared";
-import { Box, Container, GlobalStyles, Typography, Alert, Button, IconButton, Snackbar } from "@mui/material";
+import { Box, Container, GlobalStyles, Typography, Alert, Button, IconButton, Snackbar, useMediaQuery } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import { PhraseWorkspace } from "./components/PhraseBuilder/PhraseWorkspace.tsx";
@@ -10,7 +10,8 @@ import { SavedPhrasesToolbar, isEmpty } from "./components/SavedPhrasesToolbar.t
 import { AppMenu } from "./components/AppMenu.tsx";
 import { MobileTabBar, TAB_BAR_HEIGHT, type MobileView } from "./components/MobileTabBar.tsx";
 import { ResultStrip } from "./components/ResultStrip.tsx";
-import { isTouchOnly, useCompactLayout } from "./hooks/useCompactLayout.ts";
+import { TOUCH_ONLY_QUERY, isTouchOnly, useCompactLayout } from "./hooks/useCompactLayout.ts";
+import { QuickBarProvider } from "./components/PhraseBuilder/quickBar.tsx";
 import { useHeaderOffset } from "./hooks/useHeaderOffset.ts";
 import { useTouchSnap } from "./hooks/useTouchSnap.ts";
 import UndoIcon from "@mui/icons-material/Undo";
@@ -88,6 +89,8 @@ export default function App() {
   const headerOffset = useHeaderOffset(compact);
   // A finger's tap near one of the canvas's small controls reaches it (a 44 px target).
   useTouchSnap();
+  // …and a tapped box raises a bar of its most-used controls, named and finger-sized.
+  const touchOnly = useMediaQuery(TOUCH_ONLY_QUERY, { noSsr: true });
   // The Phrase view is the phone's default: it exists because a finger can't work the canvas's
   // rings, so a narrowed *desktop* window (still driven by a mouse) starts on the canvas instead,
   // which the compact layout already lays out in one column.
@@ -330,17 +333,19 @@ export default function App() {
               {/* The canvas shows the console's preview while a line is typed, and its edits go
                   into that line — clicking and typing are one (see usePhraseConsole). */}
               <ConsoleMarksProvider marks={phraseConsole.marks}>
-                <PhraseWorkspace
-                  containers={shown.containers}
-                  links={shown.links}
-                  setContainers={phraseConsole.canvas.setContainers}
-                  setLinks={phraseConsole.canvas.setLinks}
-                  wordsPanelOpen={wordsPanelOpen}
-                  onWordsPanelClose={() => setWordsPanel(false)}
-                  onPeriodRemoved={() => setUndoToast("toast.periodRemoved")}
-                  listView={compact && mobileView === "phrase"}
-                  onShowCanvas={() => showView("canvas")}
-                />
+                <QuickBarProvider enabled={compact && touchOnly && mobileView === "canvas"} bottom={TAB_BAR_HEIGHT}>
+                  <PhraseWorkspace
+                    containers={shown.containers}
+                    links={shown.links}
+                    setContainers={phraseConsole.canvas.setContainers}
+                    setLinks={phraseConsole.canvas.setLinks}
+                    wordsPanelOpen={wordsPanelOpen}
+                    onWordsPanelClose={() => setWordsPanel(false)}
+                    onPeriodRemoved={() => setUndoToast("toast.periodRemoved")}
+                    listView={compact && mobileView === "phrase"}
+                    onShowCanvas={() => showView("canvas")}
+                  />
+                </QuickBarProvider>
               </ConsoleMarksProvider>
             </Box>
 

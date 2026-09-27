@@ -1,10 +1,8 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { Box, Button, ButtonBase, Drawer, IconButton, Typography } from "@mui/material";
+import { Box, ButtonBase, Drawer, IconButton, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import type { NounKey, PhraseSelection, SlotConfig, SlotKey } from "./interfaces.ts";
 import type { SatelliteIcon } from "./Boxes.tsx";
 import type { PerimeterEntry } from "./satellites/satellites.types.tsx";
@@ -12,6 +10,8 @@ import { MUI_COLOR_HEX } from "./slots.ts";
 import { ConceptWord } from "../../i18n/ConceptWord.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { PickerSheetProvider } from "./hooks/usePickerSheet.tsx";
+import { RoleSheet } from "./RoleSheet.tsx";
+import { RING_CONTROL, adjectiveHead, isAdjectiveSlot, roleControlsOf } from "./roleControls.ts";
 
 /**
  * The Phrase view (P17 phase 2): a period as a list of its roles in reading order, for a phone. A row
@@ -20,13 +20,6 @@ import { PickerSheetProvider } from "./hooks/usePickerSheet.tsx";
  * nothing here is phone-only grammar. The canvas stays mounted behind it (stowed), and a control
  * whose work is drawn on the canvas — a link to another period, a ring of its own — hands over to it.
  */
-
-/** An adjective box rides its noun's row as a chip rather than taking a row of its own. */
-const isAdjectiveSlot = (key: SlotKey) => /Adjective\d?$/.test(key);
-/** The noun an adjective box belongs to: `subjectAdjective2` → `subject`. */
-const adjectiveHead = (key: SlotKey) => key.replace(/Adjective\d?$/, "");
-/** Controls that open a ring of their own, drawn on the canvas: owner, conjunct, standard, examples. */
-const RING_CONTROL = /(Possessor|Conjunct|Standard|ComparisonSet|Examples)$/;
 
 export interface RoleListProps {
   selection: PhraseSelection;
@@ -135,15 +128,7 @@ export function RoleList({
   }
 
   const sheetSlot = sheetFor ? byKey.get(sheetFor) : undefined;
-  const sheetControls = sheetFor
-    ? [
-        ...(controlsByParent[sheetFor] ?? []),
-        ...Object.values(perimeterByNoun[sheetFor as NounKey] ?? {}).filter(
-          (icon): icon is SatelliteIcon => Boolean(icon),
-        ),
-        ...(sheetFor === "verb" ? verbControls : []),
-      ]
-    : [];
+  const sheetControls = sheetFor ? roleControlsOf(sheetFor, controlsByParent, perimeterByNoun, verbControls) : [];
 
   return (
     <Box data-testid="role-list" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -236,121 +221,29 @@ export function RoleList({
       })}
 
       {/* A role's sheet: its word, and every control its ring carries, named. */}
-      <Drawer
-        anchor="bottom"
-        open={Boolean(sheetSlot)}
+      <RoleSheet
+        slot={sheetSlot}
+        word={sheetFor ? selection[sheetFor] : undefined}
+        adjectives={sheetFor ? adjectivesOf(sheetFor).map((adj) => ({ slot: adj, word: selection[adj.key] })) : []}
+        controls={sheetControls}
+        label={label}
+        onPress={press}
+        onReplace={() => {
+          if (!sheetFor) return;
+          setSheetFor(null);
+          openPicker(sheetFor, true);
+        }}
+        onRemove={() => {
+          if (!sheetFor) return;
+          setSheetFor(null);
+          onClear(sheetFor);
+        }}
+        onOpenAdjective={(adj) => {
+          setSheetFor(null);
+          openRow(adj.key);
+        }}
         onClose={() => setSheetFor(null)}
-        // Over the tab bar, which rides above the page's drawers.
-        sx={{ zIndex: (theme) => theme.zIndex.modal }}
-        PaperProps={{ sx: { borderRadius: "16px 16px 0 0", maxHeight: "85vh", borderTop: "3px solid", borderColor: sheetSlot ? MUI_COLOR_HEX[sheetSlot.color] : "divider" } }}
-      >
-        {sheetSlot && (
-          <Box data-testid="role-sheet" sx={{ p: 2, pb: "calc(16px + env(safe-area-inset-bottom))", display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box sx={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, bgcolor: "divider", mt: -0.5 }} />
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography sx={{ fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: MUI_COLOR_HEX[sheetSlot.color] }}>
-                  {label(sheetSlot)}
-                </Typography>
-                <Typography sx={{ fontFamily: '"Lora", Georgia, serif', fontStyle: "italic", fontSize: "1.6rem", lineHeight: 1.2 }}>
-                  {selection[sheetSlot.key] && <ConceptWord concept={selection[sheetSlot.key]!} />}
-                </Typography>
-              </Box>
-              <Button
-                variant="outlined"
-                data-testid="role-sheet-change"
-                onClick={() => {
-                  setSheetFor(null);
-                  openPicker(sheetSlot.key, true);
-                }}
-                sx={{ minHeight: 44, textTransform: "none" }}
-              >
-                {t("action.replaceWord")}
-              </Button>
-              <IconButton
-                data-testid="role-sheet-remove"
-                aria-label={t("action.clearWord")}
-                onClick={() => {
-                  setSheetFor(null);
-                  onClear(sheetSlot.key);
-                }}
-                sx={{ width: 44, height: 44, border: "1px solid", borderColor: "divider", borderRadius: 2 }}
-              >
-                <DeleteOutlineIcon />
-              </IconButton>
-            </Box>
-            {/* A noun's adjectives, each a box of its own with a sheet of its own. */}
-            {adjectivesOf(sheetSlot.key).length > 0 && (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {adjectivesOf(sheetSlot.key).map((adj) => (
-                  <ButtonBase
-                    key={adj.key}
-                    data-testid={`role-adjective-${adj.key}`}
-                    onClick={() => {
-                      setSheetFor(null);
-                      openRow(adj.key);
-                    }}
-                    sx={{
-                      minHeight: 44,
-                      px: 1.75,
-                      borderRadius: 22,
-                      border: `1.5px ${selection[adj.key] ? "solid" : "dashed"}`,
-                      borderColor: MUI_COLOR_HEX[adj.color],
-                      color: MUI_COLOR_HEX[adj.color],
-                      fontFamily: '"Lora", Georgia, serif',
-                      fontStyle: "italic",
-                      fontSize: "1rem",
-                    }}
-                  >
-                    {selection[adj.key] ? <ConceptWord concept={selection[adj.key]!} /> : `${label(adj)}…`}
-                  </ButtonBase>
-                ))}
-              </Box>
-            )}
-            {sheetControls.length > 0 && (
-              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1 }}>
-                {sheetControls.map((icon) => (
-                  <ButtonBase
-                    key={icon.key}
-                    data-testid={`role-control-${icon.key}`}
-                    aria-pressed={icon.directToggle ? icon.isSet : undefined}
-                    onClick={() => press(icon)}
-                    sx={{
-                      minHeight: 48,
-                      px: 1.25,
-                      gap: 1,
-                      justifyContent: "flex-start",
-                      textAlign: "left",
-                      borderRadius: 2,
-                      border: "1px solid",
-                      borderColor: icon.isSet ? MUI_COLOR_HEX[sheetSlot.color] : "divider",
-                      bgcolor: icon.isSet ? `${MUI_COLOR_HEX[sheetSlot.color]}14` : "background.paper",
-                      fontFamily: '"Inter", sans-serif',
-                      fontSize: "0.85rem",
-                      "& svg": { fontSize: 18 },
-                    }}
-                  >
-                    <Box component="span" sx={{ display: "grid", placeItems: "center", color: MUI_COLOR_HEX[sheetSlot.color], flexShrink: 0 }}>
-                      {icon.icon}
-                    </Box>
-                    <Box component="span" sx={{ flex: 1, minWidth: 0 }}>
-                      {icon.label}
-                      {icon.valueLabel && (
-                        <Box component="span" sx={{ display: "block", fontSize: "0.75rem", color: "text.secondary" }}>
-                          {icon.valueLabel}
-                        </Box>
-                      )}
-                    </Box>
-                    {(icon.link || (RING_CONTROL.test(icon.key) && !icon.isSet)) && (
-                      <OpenInNewIcon sx={{ color: "text.secondary", fontSize: "14px !important" }} />
-                    )}
-                  </ButtonBase>
-                ))}
-              </Box>
-            )}
-          </Box>
-        )}
-      </Drawer>
+      />
 
       {/* A role's word, chosen with the canvas's own picker for that box. */}
       <Drawer
