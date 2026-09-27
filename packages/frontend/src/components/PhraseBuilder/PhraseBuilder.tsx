@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
-import { CAUSE_SENTIMENTS, OBJECT_PREDICATIONS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept } from "@signi/shared";
+import { CAUSE_SENTIMENTS, COMPLEMENT_LABELS, OBJECT_PREDICATIONS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept } from "@signi/shared";
 import {
   BoxComplementType,
   adaptPossessorBinding,
@@ -75,8 +75,9 @@ import {
   conjunctKey,
   conjunctLinks,
   dropConjunctPosition,
+  hostedRect,
 } from "./conjunctChain.ts";
-import { ownersUnder, possessionsFor, type OwnerSpot } from "./ownerChain.ts";
+import { ownerLink, ownersUnder, possessionsFor, type OwnerSpot } from "./ownerChain.ts";
 import { standardLink, standardSpotsFor, type StandardSpot } from "./standardRing.ts";
 import { examplesLink, examplesSpotsFor, type ExamplesSpot } from "./examplesRing.ts";
 import { LinkChip } from "./ConjunctRings.tsx";
@@ -115,7 +116,8 @@ import { possessorAims } from "./functions/possessorAims.ts";
 import { clearableKeys, clearControlsFor } from "./functions/clearControls.ts";
 import { hostedRectsFor } from "./functions/hostedRects.ts";
 import { possessionEdges } from "./functions/possessionEdges.ts";
-import { ringHosts } from "./functions/ringHosts.ts";
+import { instrumentKey, isInstrumentKey, ringHosts } from "./functions/ringHosts.ts";
+import { INSTRUMENT_TOOLBAR, INSTRUMENT_TOOLBAR_TYPE, InstrumentToolbar } from "./InstrumentToolbar.tsx";
 import { linkPickHandlers } from "./functions/linkPickHandlers.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
@@ -307,7 +309,7 @@ export function PhraseBuilder({
   const [sidebarWidth, setSidebarWidth] = useStoredNumber(SIDEBAR_WIDTH_KEY, 160);
   // The rings hosted on this canvas — conjuncts' and owners' — as each one's builder reports drawing
   // it, keyed by its node key here (see conjunctKey; an owner's is its address).
-  const { hostedRings, reportRing } = useHostedRings();
+  const { hostedRings, reportRings } = useHostedRings();
   const { ownersOpen, setOwnerOpen } = useOwnersOpen(ringHost);
   // Which standards of comparison are open — their rings drawn — by address: what the user last asked
   // each control for; unset, a named standard shows and an empty one doesn't (P09-E12 D5, P09-E50).
@@ -514,7 +516,7 @@ export function PhraseBuilder({
       return open === undefined ? [] : [[`${which}Possessor`, open]];
     }),
   );
-  const { satellites, shownMap: rawShownMap } = buildSatellites(
+  const { satellites: builtSatellites, shownMap: rawShownMap } = buildSatellites(
     selection,
     { ...revealed, ...ownerReveals },
     uiLanguage,
@@ -535,6 +537,14 @@ export function PhraseBuilder({
       bareHead: ringHost?.kind === "conjunct" && ringHost.role === "vocative",
     },
   );
+
+  // An instrument drawn in its clause (P12) draws no ring but its own: an owner's or a conjunct's ring
+  // is drawn by the period's builder, which never sees the instrument's period. Its nouns take neither
+  // here — drawn as a card of its own, they take both.
+  const satellites =
+    ringHost?.kind === "instrument"
+      ? builtSatellites.map((sat) => (/(Possessor|Conjunct)$/.test(sat.key) ? { ...sat, available: false } : sat))
+      : builtSatellites;
 
   // The key each satellite's control answers to, read off the keymap for the scope of the box that
   // carries it (see keymap.satelliteKey). Built here so a control never has to know the keymap:
@@ -577,6 +587,9 @@ export function PhraseBuilder({
       shownMap,
       collapsedMainKeys,
       linkBinding,
+      // A clause draws the instrument it makes inside itself (P12); a hosted ring's own clause draws
+      // none, so there the toggle picks a period as it always did.
+      onAddInstrument: !ringHost && binding ? binding.instrumental.onAdd : undefined,
       onToggleNumber: commands.handleToggleNumber,
       onToggleGender: commands.handleToggleGender,
       onToggleNegative: commands.handleToggleNegative,
@@ -700,9 +713,10 @@ export function PhraseBuilder({
   })
     // A hosted ring's builder draws one ring — its phrase's — and that ring drops the phrase: a
     // conjunct out of its group, an owner off the noun it owns.
-    .map((g) =>
+    // An instrument's act is one phrase, whichever of its rings carries the control that removes it.
+    .map((g, i) =>
       ringHost
-        ? { ...g, removable: true, ...(roleSlot && { color: MUI_COLOR_HEX[roleSlot.color] }) }
+        ? { ...g, removable: ringHost.kind !== "instrument" || i === 0, ...(roleSlot && { color: MUI_COLOR_HEX[roleSlot.color] }) }
         : g,
     );
 
@@ -715,6 +729,15 @@ export function PhraseBuilder({
   const standards = ringHost ? [] : standardSpotsFor({ selection, groups, open: standardsOpen });
   // The period nouns' examples whose rings are drawn (P09-E48); a hosted ring's builder draws none (D2).
   const exampleSpots = ringHost ? [] : examplesSpotsFor({ selection, groups, open: examplesOpen });
+  // The instrument this clause draws inside itself (P12): a thing's noun, or an act's verb and its
+  // noun — each a ring of this canvas, placed beside the one before it, the first beside the verb.
+  const hostedInstrument = ringHost ? undefined : binding?.hostedInstrument;
+  const instrumentMains = hostedInstrument ? (hostedInstrument.level === "object" ? ["subject"] : ["verb", "directObject"]) : [];
+  const instrumentSpots = instrumentMains.map((main, i) => ({
+    address: instrumentKey(main),
+    possessedKey: i === 0 ? "verb" : instrumentKey(instrumentMains[i - 1]!),
+    named: true,
+  }));
 
   // The owners on this canvas, however deep — an owner's owner, a conjunct's, a standard's — and the
   // nouns that point to theirs. The period's own nouns may take one wherever their possessor control
@@ -724,7 +747,7 @@ export function PhraseBuilder({
     : possessionsFor({ selection, nouns: ownableNouns(groups, satellites), chains, ownersOpen, standards });
   // Every hosted ring placed beside the ring it hangs off: the standards and the examples first — their
   // owners are placed beside them — then the owners, parents first.
-  const besideSpots = [...standards, ...exampleSpots, ...owners];
+  const besideSpots = [...standards, ...exampleSpots, ...owners, ...instrumentSpots];
 
   // The possessed noun phrase each coreference link renders ("his horse", fr "son cheval"), which
   // the backend renders on request: the Romance possessive agrees with the noun possessed, so no
@@ -790,7 +813,9 @@ export function PhraseBuilder({
   // Where a constituent's word sits: its stored position, or the compact packing while compact.
   // A hosted ring's builder paints its one word where the period's canvas puts it.
   const { wordPos, centerOf } = wordPlacement({
-    at: ringHost?.at,
+    // An instrument's act paints each of its rings where the canvas puts that one (P12).
+    at: ringHost?.atOf ? undefined : ringHost?.at,
+    atOf: ringHost?.atOf,
     compactPositions: compactLayout?.positions,
     positions,
     graphSize,
@@ -838,6 +863,13 @@ export function PhraseBuilder({
         ...(hasRelation(selection, "cause") && { cause: CAUSE_SENTIMENTS }),
         ...(selection.objectPredicative && { objectPredicative: OBJECT_PREDICATIONS }),
       },
+      // The instrument drawn in this clause: the toggle faces its first ring (P12)…
+      instrumentAim: instrumentMains[0] ? centerOf(instrumentKey(instrumentMains[0])) : undefined,
+      // …and that ring wears the link's level, polarity and ways out, at twelve.
+      groupToolbars:
+        ringHost?.instrument && groups[0]
+          ? { [groups[0].mainKey]: { type: INSTRUMENT_TOOLBAR_TYPE, values: INSTRUMENT_TOOLBAR } }
+          : undefined,
       centerOf,
       linkPorts: ringHost ? { subject: ringHost.ports } : headLinkPorts,
       possessorAims: ringHost
@@ -860,11 +892,14 @@ export function PhraseBuilder({
   // A satellite is dragged by its constituent: pressing its disc moves the whole ring.
   const dragKeyOf = (key: string) =>
     groups.find((g) => g.nodeKeys.includes(key))?.mainKey ?? key;
+  // The key a hosted ring goes by on the canvas it is drawn on: its host's, or — one of an instrument's
+  // act (P12) — its own there.
+  const hostKeyOf = (mainKey: string) => ringHost?.keyOf?.(mainKey) ?? ringHost?.key ?? mainKey;
 
   // ⇧ + an arrow shifts the box under the cursor, by the same rule a drag follows: a satellite
   // moves its whole constituent, and a hosted ring's builder moves its ring on the period's canvas.
   const nudgeSlot = (key: string, dx: number, dy: number) =>
-    ringHost ? ringHost.nudge(ringHost.key, dx, dy) : nudge(dragKeyOf(key), dx, dy);
+    ringHost ? ringHost.nudge(hostKeyOf(dragKeyOf(key)), dx, dy) : nudge(dragKeyOf(key), dx, dy);
 
   // The hosted rings as constituents of this canvas, once their builders have reported drawing them.
   const headOf = (which: NounKey) => groupRects.find((g) => g.mainKey === which);
@@ -878,7 +913,25 @@ export function PhraseBuilder({
     centerOf,
     compact,
   });
-  const canvasRects = [...groupRects, ...conjunctRects, ...ownerRects, ...standardRects, ...examplesRects];
+  // The instrument's rings, as its builder reports drawing them, at the Instrumental's place (P12).
+  const instrumentRects = hostedInstrument
+    ? Object.entries(hostedRings)
+        .filter(([key]) => isInstrumentKey(key))
+        .map(([key, ring]) => {
+          const at = instrumentMains.findIndex((main) => instrumentKey(main) === key);
+          return hostedRect({
+            key,
+            color: MUI_COLOR_HEX.secondary,
+            kind: "instrument",
+            head: COMPLEMENT_LABELS.instrumental,
+            index: at === -1 ? instrumentMains.length : at,
+            center: centerOf(key),
+            ring,
+            compact,
+          });
+        })
+    : [];
+  const canvasRects = [...groupRects, ...conjunctRects, ...ownerRects, ...standardRects, ...examplesRects, ...instrumentRects];
 
   const { edges, groupEdges } = buildEdges({
     groupRects,
@@ -927,9 +980,20 @@ export function PhraseBuilder({
     return line ? [{ spot, line, color: headOf(spot.role)?.color ?? "" }] : [];
   });
   const examplesEdges: Edge[] = exampleLines.map(({ line, color }) => linkEdge(line, color, false));
+  // The line from the verb's instrument toggle to the instrument drawn in the clause (P12).
+  const instrumentLine = instrumentMains[0]
+    ? ownerLink({
+        owned: ringOf("verb"),
+        owner: ringOf(instrumentKey(instrumentMains[0])),
+        control: controlPos["instrumental"],
+        port: undefined,
+        compact,
+      })
+    : null;
+  const instrumentEdges: Edge[] = instrumentLine ? [linkEdge(instrumentLine, MUI_COLOR_HEX.secondary, false)] : [];
 
   // What each hosted ring borrows from this canvas to draw its ring here.
-  const { conjunctHost, ownerHost, standardHost, examplesHost } = ringHosts({
+  const { conjunctHost, ownerHost, standardHost, examplesHost, instrumentHost } = ringHosts({
     hosting: {
       graphSize,
       compact,
@@ -944,7 +1008,7 @@ export function PhraseBuilder({
     wordPos,
     centerOf,
     possessorToward: aims.toward,
-    reportRing,
+    reportRings,
     onAddConjunct: commands.handleAddConjunct,
     // *Whose* is asked of a top-level owner of the subject or the object (P09-E52 D1), gated as the
     // slots' own marks are: where the engine asks it, and not where the mood is locked, unless the
@@ -961,6 +1025,19 @@ export function PhraseBuilder({
       };
     },
   });
+
+  // What the instrument drawn in this clause borrows from its canvas, and what its toolbar sets (P12).
+  const instrumentRing =
+    hostedInstrument && binding && instrumentMains[0]
+      ? instrumentHost(instrumentMains[0], {
+          level: hostedInstrument.level,
+          negative: hostedInstrument.negative,
+          onLevelChange: binding.instrumental.onLevelChange,
+          onNegativeChange: binding.instrumental.onNegativeChange,
+          onShowAsPeriod: () => binding.instrumental.onHostedChange(false),
+          onPickPeriod: binding.instrumental.onStart,
+        })
+      : undefined;
 
   // Take an owner off the noun it owns. Relative clauses sourced from it, or from an owner it holds,
   // go with it; so does where its rings were, so that one opened again starts beside its noun.
@@ -1021,7 +1098,7 @@ export function PhraseBuilder({
   useSettleCorefPick({ enabled: !ringHost, coref, owners });
 
   // A hosted ring's builder tells the period's canvas about the ring it just drew, and that it is gone.
-  useReportOwnRing(ringHost, ringHost ? groupRects[0] : undefined, controlPos);
+  useReportOwnRing(ringHost, ringHost ? groupRects : [], controlPos);
 
   // The clear button on each word's solid ring.
   const clearControls = clearControlsFor({ clearable, visibleSlots, onClear: handleClear });
@@ -1203,10 +1280,10 @@ export function PhraseBuilder({
     // position; a satellite drags its whole constituent.
     makeDragProps: (key, onActivate) =>
       ringHost
-        ? ringHost.makeDragProps(key, onActivate, pos(key), ringHost.key)
+        ? ringHost.makeDragProps(key, onActivate, pos(key), hostKeyOf(dragKeyOf(key)))
         : makeDragProps(key, onActivate, pos(key), dragKeyOf(key)),
     makeGroupDragProps: ringHost
-      ? () => ringHost.makeGroupDragProps([ringHost.key])
+      ? (nodeKeys) => ringHost.makeGroupDragProps([hostKeyOf(dragKeyOf(nodeKeys[0] ?? ""))])
       : makeGroupDragProps,
     slotEls,
     handleSlotClick: selectSlot,
@@ -1262,6 +1339,8 @@ export function PhraseBuilder({
                   ? ringHost.set ? "action.removeComparisonSet" : "action.removeStandard"
                   : ringHost.kind === "examples"
                     ? "action.removeExamples"
+                  : ringHost.kind === "instrument"
+                    ? "action.removeComplement"
                   : "action.removeConjunct",
             ),
             onRemove,
@@ -1280,7 +1359,7 @@ export function PhraseBuilder({
       canvasHeight={canvasHeight}
       graphSize={graphSize}
       edges={edges}
-      groupEdges={[...groupEdges, ...linkEdges, ...possession.edges, ...standardEdges, ...examplesEdges]}
+      groupEdges={[...groupEdges, ...linkEdges, ...possession.edges, ...standardEdges, ...examplesEdges, ...instrumentEdges]}
       controlPos={controlPos}
       clearControls={clearControls}
       perimeterByNoun={perimeterByNoun}
@@ -1294,6 +1373,21 @@ export function PhraseBuilder({
       vocativeDimmed={vocativeShown && !offersVocative}
       hosted={
         <>
+          {/* The instrument drawn in this clause (P12): its own period, edited by a builder of its own
+              — its binding is its container's, so its nouns link as a card's do — painted here. */}
+          {hostedInstrument && instrumentRing && (
+            <PhraseBuilder
+              key={hostedInstrument.containerId}
+              containerId={hostedInstrument.containerId}
+              selection={hostedInstrument.selection}
+              onPhraseUpdate={hostedInstrument.onPhraseUpdate}
+              binding={hostedInstrument.binding}
+              onRemove={binding?.instrumental.onClear}
+              ringHost={instrumentRing}
+            />
+          )}
+          {/* The link's level, polarity and ways out, on this — the instrument's — first ring (P12). */}
+          {ringHost?.instrument && !compact && <InstrumentToolbar instrument={ringHost.instrument} controlPos={controlPos} />}
           {chains.length > 0 && (
             <ConjunctRings
               chains={chains}
@@ -1373,6 +1467,11 @@ export function PhraseBuilder({
       <BoxScopeProvider scope={boxScope}>
         {ringHost.dimmed ? (
           <Box data-testid="standard-dimmed" sx={{ opacity: 0.45 }}>
+            {canvas}
+          </Box>
+        ) : ringHost.kind === "instrument" ? (
+          // The instrument's rings are its own period's boxes, painted on the clause's canvas (P12).
+          <Box data-testid="hosted-instrument" data-level={ringHost.instrument?.level} sx={{ display: "contents" }}>
             {canvas}
           </Box>
         ) : (

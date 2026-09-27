@@ -5,7 +5,7 @@ instrument (made in place) and a linked one (a pick onto a period that already e
 workspace from before P12).
 **Shape:** README phase 4.
 **Scope:** docs (D2), frontend.
-**Status:** open. Filed 2026-09-27 from P12 phase 4, checked against HEAD fb8af41a. Depends on E3.
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27 from P12 phase 4, checked against HEAD fb8af41a. Depends on E3.
 **D2 is still open**, and it blocks this task only.
 
 ## D2

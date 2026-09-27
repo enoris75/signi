@@ -1,6 +1,7 @@
 import { printPeriod, type Statement } from "./print.ts";
 import type { Vocabulary, WordRef, WorkspaceState } from "./types.ts";
 import { wordInfo } from "./words.ts";
+import { numberedContainers } from "@signi/phrase/model/linkRules.ts";
 
 /**
  * The echo: what a change made on the canvas says in the console's own language.
@@ -41,8 +42,11 @@ const sliceOfKey = (key: string) => key.slice(0, key.indexOf("|"));
 
 export function diffWorkspaces(before: WorkspaceState, after: WorkspaceState, vocab: Vocabulary): Echo[] {
   const echoes: Echo[] = [];
-  after.containers.forEach((c, i) => {
-    const was = before.containers.some((b) => b.id === c.id);
+  // A hosted instrument (P12) is said in its clause's line, so what changes in it is that clause's.
+  const periodsAfter = numberedContainers(after.containers, after.links);
+  const periodsBefore = numberedContainers(before.containers, before.links);
+  periodsAfter.forEach((c, i) => {
+    const was = periodsBefore.some((b) => b.id === c.id);
     const now = printPeriod(after, c.id, vocab).statements;
     if (!was) {
       echoes.push({ containerId: c.id, period: i + 1, parts: [{ text: "/new" }, ...now.filter((s) => !s.anchor && !inScope(s, now)).map((s) => ({ text: s.full ?? s.text }))] });
@@ -52,8 +56,8 @@ export function diffWorkspaces(before: WorkspaceState, after: WorkspaceState, vo
     const parts = diffStatements(then, now, before, after, vocab);
     if (parts.length) echoes.push({ containerId: c.id, period: i + 1, parts });
   });
-  before.containers.forEach((c, i) => {
-    if (!after.containers.some((a) => a.id === c.id))
+  periodsBefore.forEach((c, i) => {
+    if (!periodsAfter.some((a) => a.id === c.id))
       echoes.push({ containerId: c.id, period: i + 1, parts: [{ text: "/del period" }] });
   });
   return echoes;

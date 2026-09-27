@@ -28,6 +28,8 @@ export function periodControls(
       onNegativeChange: instrumental.onNegativeChange,
       isPickTarget: instrumental.isPickTarget,
       onPick: instrumental.onPick,
+      hostsInstrument: Boolean(binding.hostedInstrument),
+      onShowInPeriod: () => instrumental.onHostedChange(true),
     },
     conditional: {
       hasCondition: conditional.hasSource,

@@ -7,7 +7,7 @@ export type RoleSlot = Pick<SlotConfig, "label" | "labelKey" | "required" | "col
 
 /** The part of the canvas's `RingHost` that names a hosted ring's role: what the ring is, and the period noun it goes with. */
 export interface RingRole {
-  kind: "conjunct" | "owner" | "standard" | "examples";
+  kind: "conjunct" | "owner" | "standard" | "examples" | "instrument";
   role: NounKey;
   // A standard under a superlative, which reads as the set it picks from (P09-E51 D2).
   set?: boolean;
@@ -20,6 +20,10 @@ export interface RingRole {
  * builder with no host.
  */
 export function roleSlotFor(ringHost: RingRole | undefined): RoleSlot | undefined {
+  // An instrument drawn inside its clause (P12) is named for what it is, in the colour its link has
+  // always had: a thing's noun, or an act's verb and noun alike.
+  if (ringHost?.kind === "instrument")
+    return { label: "Instrumental", labelKey: "slot.instrumental", required: false, color: "secondary" };
   const hostRole = ringHost && ALL_SLOTS.find((s) => s.key === ringHost.role);
   if (!hostRole) return undefined;
   if (ringHost.kind === "owner")

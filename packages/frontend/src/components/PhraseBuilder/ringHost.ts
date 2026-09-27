@@ -1,5 +1,6 @@
+import type { AbstractionLevel } from "@signi/shared";
 import type { NounAddress, NounKey } from "./interfaces.ts";
-import type { HostedRing } from "./conjunctChain.ts";
+import type { HostedRingGroup } from "./conjunctChain.ts";
 import type { Pt } from "./ringLayout.ts";
 import type { DragBoxProps, GroupDragProps } from "./phraseRender.tsx";
 
@@ -14,7 +15,9 @@ export interface RingHost {
   // A standard of comparison ("bigger than **the dog**", P09-E12 D5) is hosted as an owner is: a noun
   // phrase of its own, joined to the predicate adjective it is compared with.
   // A noun's examples ("animals such as **the cat**", P09-E48) are hosted as an owner is too.
-  kind: "conjunct" | "owner" | "standard" | "examples";
+  // An instrument (P12) is another period's container drawn inside this one: at `object` one noun ring,
+  // at an action level two, the act and its noun, so it is the one host whose builder draws a group.
+  kind: "conjunct" | "owner" | "standard" | "examples" | "instrument";
   // The ring's node key on the period's canvas (see conjunctKey; an owner goes by its address).
   key: string;
   // The period noun the ring belongs with. A conjunct's head plays that noun's role — a direct
@@ -23,6 +26,11 @@ export interface RingHost {
   role: NounKey;
   // Where the ring's word sits, in % of the period's canvas, and that canvas's size in px.
   at: Pt;
+  // For a host whose builder draws several rings (an instrument's act): the node key each ring goes by
+  // on the period's canvas, and where its word sits, by the word's key in the hosted builder. Absent,
+  // the one ring goes by `key` and sits `at`.
+  keyOf?: (mainKey: string) => string;
+  atOf?: (mainKey: string) => Pt;
   graphSize: { w: number; h: number };
   compact: boolean;
   // The period canvas's drag machinery: pressing anything on the ring drags the ring by `key`.
@@ -46,8 +54,18 @@ export interface RingHost {
   question?: { available: boolean; asked: boolean; toggle: () => void };
   // A standard under a superlative is the set it picks from, and is titled so (P09-E51 D2).
   set?: boolean;
-  // Report the ring as drawn, and null once it is gone.
-  onRing: (ring: HostedRing | null) => void;
+  // An instrument's link, which its first ring's toolbar sets (P12): how far it is reified, whether it
+  // is denied, and the two ways out of the clause — drawn as a card of its own, or a period picked.
+  instrument?: {
+    level: AbstractionLevel;
+    negative: boolean;
+    onLevelChange: (level: AbstractionLevel) => void;
+    onNegativeChange: (negative: boolean) => void;
+    onShowAsPeriod: () => void;
+    onPickPeriod: () => void;
+  };
+  // Report the rings as drawn, keyed as `keyOf` names them, and null once they are gone.
+  onRings: (group: HostedRingGroup | null) => void;
   // A conjunct's group: its last ring carries the control that extends the group.
   isLast?: boolean;
   onAddConjunct?: () => void;

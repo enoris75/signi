@@ -60,6 +60,9 @@ export type GroupDef = {
   standard?: { head: string; index: number };
   // And on a noun's examples (P09-E48): after its noun, its conjuncts and its standard.
   examples?: { head: string; index: number };
+  // And on an instrument drawn inside the clause (P12): at the Instrumental's place in the reading
+  // order, its act before its act's noun.
+  instrument?: { head: string; index: number };
 };
 
 export const VERB_PHRASE = "Verb Phrase";
@@ -164,6 +167,8 @@ export function buildRingSpecs({
   linkTargetKeys,
   clearable,
   toolbars,
+  groupToolbars = {},
+  instrumentAim,
   centerOf,
   linkPorts = {},
   possessorAims = {},
@@ -183,6 +188,13 @@ export function buildRingSpecs({
   clearable: ReadonlySet<string>;
   // The relation toolbar each complement wears, by complement: its values, in order.
   toolbars: Partial<Record<BoxComplementType, readonly string[]>>;
+  // A toolbar a constituent wears that is no complement's relation, by its word's key: its control
+  // keys' type and its values, seated at twelve like a relation's. A hosted instrument's first ring
+  // wears its level (P12).
+  groupToolbars?: Record<string, { type: string; values: readonly string[] }>;
+  // Where the verb's instrument toggle faces while the instrument is drawn in this clause (P12): its
+  // ring, which the line from the toggle runs to.
+  instrumentAim?: Pt;
   // A constituent's centre on the canvas, in px, by its word's key.
   centerOf: (mainKey: string) => Pt;
   // Ports for the lines joining a coordinated group's rings, by the word whose ring carries them:
@@ -283,10 +295,12 @@ export function buildRingSpecs({
       );
     }
 
-    const toolbar = group.removeKey ? toolbars[group.removeKey] : undefined;
+    const own = groupToolbars[mainKey];
+    const toolbarType = own?.type ?? group.removeKey;
+    const toolbar = own?.values ?? (group.removeKey ? toolbars[group.removeKey] : undefined);
     toolbar?.forEach((value, i) =>
       outer.push({
-        key: toolbarControlKey(group.removeKey!, value),
+        key: toolbarControlKey(toolbarType!, value),
         aim: { clock: fanned(TOOLBAR_HOUR, i, toolbar.length, false) },
       }),
     );
@@ -296,11 +310,10 @@ export function buildRingSpecs({
       // leaves from the toggle — and otherwise waits in a row at the bottom of the ring.
       complementToggleIcons.forEach((icon, i) => {
         const target = groups.find((g) => g.removeKey === icon.key);
+        const aim = target ? centerOf(target.mainKey) : icon.key === "instrumental" ? instrumentAim : undefined;
         outer.push({
           key: icon.key,
-          aim: target
-            ? { point: centerOf(target.mainKey) }
-            : { clock: fanned(COMPLEMENTS_HOUR, i, complementToggleIcons.length, true) },
+          aim: aim ? { point: aim } : { clock: fanned(COMPLEMENTS_HOUR, i, complementToggleIcons.length, true) },
         });
       });
       if (directObjectToggle) {

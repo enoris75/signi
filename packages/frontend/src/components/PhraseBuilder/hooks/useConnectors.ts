@@ -163,7 +163,8 @@ export function useConnectors(links: PhraseLink[], instrumentalLabel: string, fo
     // border control. The start anchor is inside the canvas (it falls back to the subject box
     // until the verb phrase has one), the end is the card border, like the clause-level links.
     for (const link of links) {
-      if (!isInstrumentalLink(link)) continue;
+      // An instrument drawn inside its clause (P12) is joined to the verb on the clause's own canvas.
+      if (!isInstrumentalLink(link) || link.hosted) continue;
       const srcAnchor =
         verbAnchorEls.current.get(link.source.containerId) ??
         boxEls.current.get(`${link.source.containerId}:subject`);

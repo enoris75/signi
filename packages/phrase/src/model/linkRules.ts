@@ -419,6 +419,7 @@ export function addInstrumental(
   instrumentId: string,
   id: string,
   level: AbstractionLevel = "object",
+  hosted = false,
 ): PhraseLink[] {
   return [
     ...clearInstrumental(links, clauseId),
@@ -426,10 +427,80 @@ export function addInstrumental(
       id,
       kind: "instrumental",
       level,
+      ...(hosted && { hosted: true as const }),
       source: { containerId: clauseId },
       target: { containerId: instrumentId },
     },
   ];
+}
+
+// ── The hosted instrument (P12) ──────────────────────────────────────────────
+
+/**
+ * The periods drawn inside the clause they are the instrument of (P12): made in place, they have no
+ * card, no number and no line of their own in the console, and they belong to that clause — once its
+ * link goes, they go too (see `pruneUnhosted`).
+ */
+export function hostedInstrumentIds(links: readonly PhraseLink[]): Set<string> {
+  return new Set(links.filter((l) => isInstrumentalLink(l) && l.hosted).map((l) => l.target.containerId));
+}
+
+/** The clause a hosted instrument is drawn inside, if `containerId` is one. */
+export function hostOfInstrument(links: readonly PhraseLink[], containerId: string): string | undefined {
+  return links.find((l) => isInstrumentalLink(l) && l.hosted && l.target.containerId === containerId)?.source.containerId;
+}
+
+/** The period a container is said in: its own, or — a hosted instrument's — the clause it is drawn inside. */
+export function periodOf(links: readonly PhraseLink[], containerId: string): string {
+  let at = containerId;
+  for (let hops = 0; hops < links.length; hops++) {
+    const host = hostOfInstrument(links, at);
+    if (host === undefined) return at;
+    at = host;
+  }
+  return at;
+}
+
+/** The periods that are cards and lines of their own, in order: every one but a hosted instrument. */
+export function numberedContainers<T extends { id: string }>(containers: readonly T[], links: readonly PhraseLink[]): T[] {
+  const hosted = hostedInstrumentIds(links);
+  return containers.filter((c) => !hosted.has(c.id));
+}
+
+/**
+ * Draw the instrument a container takes part in inside its clause, or as a card of its own — from
+ * either end, as the level. The plan does not change: only where the instrument is drawn.
+ */
+export function setInstrumentalHosted(links: PhraseLink[], containerId: string, hosted: boolean): PhraseLink[] {
+  return links.map((l) => {
+    if (!isInstrumentalLink(l) || (l.source.containerId !== containerId && l.target.containerId !== containerId)) return l;
+    const { hosted: _dropped, ...rest } = l;
+    return hosted ? { ...rest, hosted: true as const } : rest;
+  });
+}
+
+/**
+ * The workspace without the hosted instruments whose link is gone (P12). A hosted instrument has no
+ * card to fall back on, so it goes with its link — as a complement's word goes with its box — and so
+ * do the links it took part in, and the instruments it hosted in turn. `before` is the links as they
+ * were, which says which periods were hosted. One that is still some clause's instrument stays.
+ */
+export function pruneUnhosted<C extends { id: string }>(
+  state: { containers: C[]; links: PhraseLink[] },
+  before: readonly PhraseLink[],
+): { containers: C[]; links: PhraseLink[] } {
+  let { containers, links } = state;
+  let hosted = hostedInstrumentIds(before);
+  for (;;) {
+    const gone = [...hosted].filter(
+      (id) => containers.some((c) => c.id === id) && !links.some((l) => isInstrumentalLink(l) && l.target.containerId === id),
+    );
+    if (gone.length === 0) return { containers, links };
+    const next = links.filter((l) => !gone.includes(l.source.containerId) && !gone.includes(l.target.containerId));
+    hosted = new Set([...hosted, ...hostedInstrumentIds(links)]);
+    containers = containers.filter((c) => !gone.includes(c.id));
+    links = next;
+  }
 }
 
 // Deny the instrument of the link a container takes part in, or take the denial back — the

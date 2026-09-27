@@ -66,6 +66,9 @@ describe('periodControls', () => {
       onNegativeChange: b.instrumental.onNegativeChange,
       isPickTarget: true,
       onPick: b.instrumental.onPick,
+      // P12: whether the clause draws its instrument inside itself, and the card's switch into it.
+      hostsInstrument: false,
+      onShowInPeriod: expect.any(Function),
     });
     expect(
       periodControls(binding({ instrumental: { hasTarget: true } }), STATEMENT).instrumental,

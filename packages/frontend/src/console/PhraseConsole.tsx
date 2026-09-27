@@ -1,3 +1,4 @@
+import { numberedContainers, periodOf } from "@signi/phrase/model/linkRules.ts";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -32,7 +33,9 @@ export function PhraseConsole({
   const startDrag = useWindowDrag();
   const right = useWordsPanelWidth(wordsPanelOpen);
   if (!model.open) return null;
-  const number = model.committed.containers.findIndex((c) => c.id === model.context.containerId) + 1;
+  // A hosted instrument's number is its clause's, the line it is said in (P12).
+  const { containers, links } = model.committed;
+  const number = numberedContainers(containers, links).findIndex((c) => c.id === periodOf(links, model.context.containerId)) + 1;
 
   return (
     <Box

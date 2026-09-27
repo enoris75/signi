@@ -210,6 +210,45 @@ describe('PhraseWorkspace', () => {
       expect(periodIds()).toEqual(['C', 'A', 'B']);
     });
 
+    // P12: an instrument made in place is drawn inside its clause, so its period has no card; the
+    // clause's builder is handed it, with a binding of its own.
+    it('draws no card for an instrument drawn inside its clause, and hands it to the clause', () => {
+      const HOSTED: PhraseLink = { id: 'inst', kind: 'instrumental', level: 'process', hosted: true, source: { containerId: 'A' }, target: { containerId: 'B' } };
+      renderWorkspace({ containers: [period('A', { subject: CAT }), period('B', { subject: DOG }), period('C')], links: [HOSTED] });
+
+      expect(periodIds()).toEqual(['A', 'C']);
+      const hosted = periodProps('A').binding!.hostedInstrument!;
+      expect(hosted).toMatchObject({ containerId: 'B', level: 'process', negative: false, selection: { subject: DOG } });
+      expect(hosted.binding.containerId).toBe('B');
+      expect(hosted.binding.instrumental.hasTarget).toBe(true);
+      // The cards around it move past it, and the last card is the last one drawn.
+      expect(periodProps('A').onMoveDown).toBeDefined();
+      expect(periodProps('C').onMoveDown).toBeUndefined();
+    });
+
+    it('draws a linked instrument as a card of its own', () => {
+      const LINKED: PhraseLink = { id: 'inst', kind: 'instrumental', level: 'object', source: { containerId: 'A' }, target: { containerId: 'B' } };
+      renderWorkspace({ links: [LINKED] });
+      expect(periodIds()).toEqual(['A', 'B']);
+      expect(periodProps('A').binding!.hostedInstrument).toBeUndefined();
+    });
+
+    it('takes a hosted instrument away with its clause', () => {
+      const HOSTED: PhraseLink = { id: 'inst', kind: 'instrumental', level: 'object', hosted: true, source: { containerId: 'A' }, target: { containerId: 'B' } };
+      const { state } = renderWorkspace({ containers: [period('A', { subject: CAT }), period('B', { subject: DOG }), period('C')], links: [HOSTED] });
+      act(() => periodProps('A').onRemove!());
+      expect(state.containers.map((c) => c.id)).toEqual(['C']);
+      expect(state.links).toEqual([]);
+    });
+
+    it('makes an instrument in place from the clause, one click, drawn inside it', () => {
+      const { state } = renderWorkspace({ containers: [period('A', { subject: CAT })] });
+      act(() => periodProps('A').binding!.instrumental.onAdd());
+      expect(state.containers).toHaveLength(2);
+      expect(state.links).toEqual([expect.objectContaining({ kind: 'instrumental', hosted: true, source: { containerId: 'A' } })]);
+      expect(periodIds()).toEqual(['A']);
+    });
+
     it('stops a period at either end of the stack however often it is moved', () => {
       renderWorkspace({ containers: [period('A'), period('B'), period('C')] });
 

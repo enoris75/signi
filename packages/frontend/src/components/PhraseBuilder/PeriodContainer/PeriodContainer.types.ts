@@ -96,6 +96,11 @@ export interface InstrumentalControl {
   // An instrumental pick is in progress and this period is a legal instrument target.
   isPickTarget: boolean;
   onPick: () => void;
+  // This clause draws its instrument inside itself (P12), so its keys set that instrument's level
+  // and polarity, as the instrument card's own do.
+  hostsInstrument?: boolean;
+  // Draw this instrument period inside the clause it serves instead (P12): the switch on its card.
+  onShowInPeriod?: () => void;
 }
 
 // A mood toggle on the card border: the imperative (command), the infinitive (citation) or the

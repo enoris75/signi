@@ -54,6 +54,8 @@ export function hydrateWorkspace(
           level: ABSTRACTION_LEVELS.includes(l.level as AbstractionLevel) ? (l.level as AbstractionLevel) : "object",
           // The privative (P09-E2): only a literal true denies; anything else is the plain means.
           ...(l.negative === true ? { negative: true } : {}),
+          // Drawn inside its clause (P12): only a literal true; a file from before it links a card.
+          ...((l as { hosted?: unknown }).hosted === true ? { hosted: true as const } : {}),
           source: { containerId: l.source.containerId },
           target: { containerId: l.target.containerId },
         }

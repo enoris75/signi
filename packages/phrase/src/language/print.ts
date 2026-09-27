@@ -18,12 +18,14 @@ import {
   standardAddress,
   type NounAddress,
   type NounKey,
+  type PhraseLink,
   type PhraseSelection,
   type SlotKey,
 } from "../model/interfaces.ts";
 import { readsAsSet } from "../model/functions/comparison.ts";
 import { conjunctsOf } from "../model/phraseReducers.ts";
 import { pointerHolds } from "../model/functions/linksToSubject.ts";
+import { numberedContainers } from "../model/linkRules.ts";
 import { ADVERB_SLOTS, adjectiveSlots, isBoxComplement, MODAL_SLOTS, modalAdverbFor } from "../model/slots.ts";
 import {
   COORD_VALUES,
@@ -63,7 +65,9 @@ import { currentSetting, defaultSetting, settingTakes, wordInfo, type WordInfo }
  * phrase in square brackets, its head word first: `/poss [ child /adj old ]`.
  *
  * Clauses are periods of their own, so each prints on its own line and a link to one is a reference
- * (`/rel #2.subj`) — the braces a new clause is typed in (`/rel subj { … }`) are never printed.
+ * (`/rel #2.subj`) — the braces a new clause is typed in (`/rel subj { … }`) are never printed. The one
+ * exception is an instrument drawn inside its clause (P12): it has no card and no number, so it is
+ * printed in its braces, where it was made — `/inst { /subj ( knife ) }`.
  *
  * **Invariant:** for every reachable state, applying the printed text to an empty workspace gives the
  * state back (see the round-trip tests).
@@ -124,10 +128,14 @@ class Printer {
   statements: Statement[] = [];
   private pos = 0;
   private current = -1;
+  // Set while a hosted instrument is printed inside its clause (P12): its statements are its own, and
+  // must not take the keys of the clause's statements they would otherwise share (`|subject:word`).
+  private keyPrefix = "";
 
   constructor(
     readonly state: WorkspaceState,
-    readonly containerId: string,
+    // The period being printed — the hosted instrument's, while it is printed in its clause's braces.
+    public containerId: string,
     readonly vocab: Vocabulary,
   ) {}
 
@@ -140,7 +148,7 @@ class Printer {
    * that would not say it alone — a phrase's head word, written without its `/subj`.
    */
   statement(s: Omit<Statement, "text"> & { text?: string }): number {
-    this.statements.push({ ...s, text: s.text ?? "" });
+    this.statements.push({ ...s, key: this.keyPrefix + s.key, text: s.text ?? "" });
     this.current = this.statements.length - 1;
     return this.current;
   }
@@ -194,8 +202,9 @@ class Printer {
     return wordInfo(this.state.containers, ref);
   }
 
+  /** A period's `#n`: its place among the periods with a line of their own — a hosted instrument has none (P12). */
   periodNumber(id: string): number {
-    return this.state.containers.findIndex((c) => c.id === id) + 1;
+    return numberedContainers(this.state.containers, this.state.links).findIndex((c) => c.id === id) + 1;
   }
 
   word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "standard" | "examples" | "conjunct" = "period", slice?: NounAddress): string {
@@ -263,7 +272,13 @@ class Printer {
     }
     // The period's own links: its if-clause, its coordinate, its subordinate clause, its instrument.
     for (const link of this.state.links) {
-      if (link.source.containerId !== id || !this.periodNumber(link.target.containerId)) continue;
+      if (link.source.containerId !== id) continue;
+      if (isInstrumentalLink(link) && link.hosted) {
+        this.hostedInstrument(link.target.containerId);
+        this.instrumentSettings(link);
+        continue;
+      }
+      if (!this.periodNumber(link.target.containerId)) continue;
       if (isConditionalLink(link)) {
         this.statement({ key: ":if", removal: "/del if" });
         this.emit("/if", "command", "warning");
@@ -290,18 +305,40 @@ class Printer {
         this.statement({ key: ":inst", removal: "/del inst" });
         this.emit("/inst", "command", "secondary");
         this.emit(printRef(this.periodNumber(link.target.containerId)), "ref", "ref");
-        const level = link.level ?? "object";
-        if (level !== "object") {
-          this.statement({ key: ":level", removal: "/level object" });
-          this.emit("/level", "command", "setting");
-          this.emit(LEVEL_VALUES.find((v) => v.value === level)!.name, "value", "setting");
-        }
-        // The instrument denied, the privative (P09-E2): its own statement, taken back by /posinst.
-        if (link.negative) {
-          this.statement({ key: ":privative", removal: "/posinst" });
-          this.emit("/without", "command", "setting");
-        }
+        this.instrumentSettings(link);
       }
+    }
+  }
+
+  /**
+   * An instrument drawn inside its clause (P12), in the braces it is typed in: its words are the
+   * instrument's period's own, so they are printed as that period, under keys of their own.
+   */
+  hostedInstrument(instrumentId: string): void {
+    const statement = this.statement({ key: ":inst", removal: "/del inst" });
+    this.emit("/inst", "command", "secondary");
+    this.emit("{", "open", "secondary");
+    const [outer, outerPrefix] = [this.containerId, this.keyPrefix];
+    this.containerId = instrumentId;
+    this.keyPrefix = `${outerPrefix}inst>`;
+    this.period(this.root);
+    this.containerId = outer;
+    this.keyPrefix = outerPrefix;
+    this.emit("}", "close", "secondary", { statement });
+  }
+
+  /** How far an instrument is reified, and whether it is denied — the link's, after the link itself. */
+  instrumentSettings(link: Extract<PhraseLink, { kind: "instrumental" }>): void {
+    const level = link.level ?? "object";
+    if (level !== "object") {
+      this.statement({ key: ":level", removal: "/level object" });
+      this.emit("/level", "command", "setting");
+      this.emit(LEVEL_VALUES.find((v) => v.value === level)!.name, "value", "setting");
+    }
+    // The instrument denied, the privative (P09-E2): its own statement, taken back by /posinst.
+    if (link.negative) {
+      this.statement({ key: ":privative", removal: "/posinst" });
+      this.emit("/without", "command", "setting");
     }
   }
 
@@ -653,7 +690,8 @@ export function printWords(text: string, resolved: readonly ResolvedWord[], voca
  * written `/new`, so a blank line never has to mean one — a paste may end in as many as it likes.
  */
 export function printWorkspace(state: WorkspaceState, vocab: Vocabulary): string {
-  return state.containers
+  // A hosted instrument (P12) is printed inside its clause's line, not on one of its own.
+  return numberedContainers(state.containers, state.links)
     .map((c, i) => printPeriod(state, c.id, vocab).text || (i > 0 ? "/new" : ""))
     .join("\n");
 }

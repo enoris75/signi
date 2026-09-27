@@ -8,16 +8,16 @@ import type { RingHost } from '../../src/components/PhraseBuilder/ringHost.ts';
 
 const POSSESSOR = perimeterControlKey('possessor', 'subject');
 
-const host = (key: string, onRing: RingHost['onRing'], portKeys: string[] = []): RingHost =>
-  ({ kind: 'conjunct', key, role: 'subject', ports: portKeys.map((k) => ({ key: k, toward: { x: 0, y: 0 } })), onRing }) as RingHost;
+const host = (key: string, onRings: RingHost['onRings'], portKeys: string[] = [], keyOf?: RingHost['keyOf']): RingHost =>
+  ({ kind: 'conjunct', key, role: 'subject', ports: portKeys.map((k) => ({ key: k, toward: { x: 0, y: 0 } })), onRings, keyOf }) as RingHost;
 
-const drawn = (rOut: number): GroupRect =>
-  ({ mainKey: 'subject', center: { x: 100, y: 200 }, rIn: rOut - 30, orbit: rOut - 20, rOut }) as GroupRect;
+const drawn = (rOut: number, mainKey = 'subject', center = { x: 100, y: 200 }): GroupRect =>
+  ({ mainKey, center, rIn: rOut - 30, orbit: rOut - 20, rOut }) as GroupRect;
 
-type Props = { ringHost: RingHost | undefined; ownRing: GroupRect | undefined; controlPos: Record<string, Pt> };
+type Props = { ringHost: RingHost | undefined; ownRing: GroupRect | undefined; controlPos: Record<string, Pt>; more?: GroupRect[] };
 
 const renderReport = (initialProps: Props) =>
-  renderHook(({ ringHost, ownRing, controlPos }: Props) => useReportOwnRing(ringHost, ownRing, controlPos), {
+  renderHook(({ ringHost, ownRing, controlPos, more = [] }: Props) => useReportOwnRing(ringHost, ownRing ? [ownRing, ...more] : [], controlPos), {
     initialProps,
   });
 
@@ -33,10 +33,12 @@ describe('useReportOwnRing', () => {
     });
 
     expect(onRing).toHaveBeenCalledExactlyOnceWith({
-      rIn: 50,
-      orbit: 60,
-      rOut: 80,
-      ports: { 'subject+1>subject': { x: 0, y: -80 }, [POSSESSOR]: { x: 70, y: 30 } },
+      'subject+1': {
+        rIn: 50,
+        orbit: 60,
+        rOut: 80,
+        ports: { 'subject+1>subject': { x: 0, y: -80 }, [POSSESSOR]: { x: 70, y: 30 } },
+      },
     });
   });
 
@@ -59,7 +61,7 @@ describe('useReportOwnRing', () => {
 
     rerender({ ringHost, ownRing: drawn(90), controlPos: {} });
     expect(onRing).toHaveBeenCalledTimes(2);
-    expect(onRing).toHaveBeenLastCalledWith(expect.objectContaining({ rOut: 90 }));
+    expect(onRing).toHaveBeenLastCalledWith({ 'subject+1': expect.objectContaining({ rOut: 90 }) });
   });
 
   it('reports the ring gone once its builder unmounts', () => {
@@ -79,7 +81,37 @@ describe('useReportOwnRing', () => {
     // A conjunct before it was removed: the same builder now answers to the key one step up.
     rerender({ ringHost: host('subject+1', after), ownRing: drawn(80), controlPos: {} });
 
-    expect(before.mock.calls).toEqual([[expect.objectContaining({ rOut: 80 })], [null]]);
-    expect(after).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ rOut: 80 }));
+    expect(before.mock.calls).toEqual([[{ 'subject+2': expect.objectContaining({ rOut: 80 }) }], [null]]);
+    expect(after).toHaveBeenCalledExactlyOnceWith({ 'subject+1': expect.objectContaining({ rOut: 80 }) });
+  });
+
+  // P12-E1: an instrument's builder draws the act and its noun, each under the key its host names.
+  it('reports every ring it drew, keyed by the host, the ports on the first alone', () => {
+    const onRings = vi.fn();
+    const keyOf = (main: string) => `inst|${main}`;
+
+    renderReport({
+      ringHost: host('inst', onRings, ['port'], keyOf),
+      ownRing: drawn(80, 'verb'),
+      more: [drawn(60, 'directObject', { x: 300, y: 200 })],
+      controlPos: { port: { x: 100, y: 120 } },
+    });
+
+    expect(onRings).toHaveBeenCalledExactlyOnceWith({
+      'inst|verb': { rIn: 50, orbit: 60, rOut: 80, ports: { port: { x: 0, y: -80 } } },
+      'inst|directObject': { rIn: 30, orbit: 40, rOut: 60, ports: {} },
+    });
+  });
+
+  it('reports a group again when a ring leaves it, and not while it only jitters', () => {
+    const onRings = vi.fn();
+    const ringHost = host('inst', onRings, [], (main) => `inst|${main}`);
+    const { rerender } = renderReport({ ringHost, ownRing: drawn(80, 'verb'), more: [drawn(60, 'directObject')], controlPos: {} });
+
+    rerender({ ringHost, ownRing: drawn(80.3, 'verb'), more: [drawn(59.9, 'directObject')], controlPos: {} });
+    expect(onRings).toHaveBeenCalledTimes(1);
+
+    rerender({ ringHost, ownRing: drawn(70, 'subject'), controlPos: {} });
+    expect(onRings).toHaveBeenLastCalledWith({ 'inst|subject': expect.objectContaining({ rOut: 70 }) });
   });
 });

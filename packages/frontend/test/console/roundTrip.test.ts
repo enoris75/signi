@@ -4,6 +4,7 @@
 //
 // States are reached the way a user reaches them — by a random walk of the canvas's own reducers and
 // link rules from an empty workspace — so the generator can only make what the canvas can make.
+import * as PL from '@signi/phrase/model/linkRules.ts';
 import { describe, expect, it } from 'vitest';
 import type { Concept } from '@signi/shared';
 import {
@@ -506,6 +507,26 @@ const OPS: Op[] = [
           : s.containers;
     return { ...s, containers, links };
   },
+  // An instrument made in place, drawn inside its clause (P12) — what the verb's toggle does — and
+  // a noun for it now and then, as its ring's picker takes one.
+  (s, rng, id) => {
+    const source = pick(rng, s.containers)!;
+    if (!source.selection.verb?.complements?.includes('instrumental')) return undefined;
+    if (s.links.some((l) => l.kind === 'relative' && l.target.containerId === source.id && l.target.nounKey === 'instrumental')) return undefined;
+    const instrument = id();
+    const selection = rng() < 0.6 ? R.applyConceptSelect({}, 'subject', pick(rng, NOUNS)!) : {};
+    const next = PL.pruneUnhosted(
+      { containers: [...s.containers, { id: instrument, selection }], links: L.addInstrumental(s.links, source.id, instrument, id(), 'object', true) },
+      s.links,
+    );
+    return { ...s, ...next };
+  },
+  // An instrument drawn as a card of its own, or inside its clause (P12): the switch between the two.
+  (s, rng) => {
+    const link = pick(rng, s.links.filter((l) => l.kind === 'instrumental'));
+    if (!link || link.kind !== 'instrumental') return undefined;
+    return { ...s, links: PL.setInstrumentalHosted(s.links, link.source.containerId, !link.hosted) };
+  },
   // An instrument's level, and — raised to an act — a verb for it.
   (s, rng) => {
     const link = pick(rng, s.links.filter((l) => l.kind === 'instrumental'));
@@ -689,6 +710,25 @@ describe('the round trip', () => {
     expect([...kinds]).toEqual(
       expect.arrayContaining(['content', 'adverbial', 'infinitive', 'purpose', 'contentSubject', 'adverbialGloss']),
     );
+  });
+
+  // P12: the walk reaches the instrument drawn inside its clause, holding words, at an act's level and
+  // beside another period — whose number then skips it — the shapes the printer writes in braces.
+  it('reaches the hosted instrument, filled, raised to an act, and beside another period', () => {
+    const shapes = new Set<string>();
+    for (let seed = 1; seed <= 4000; seed++) {
+      const state = reach(seed, 10 + (seed % 30));
+      const hosted = state.links.filter((l) => l.kind === 'instrumental' && l.hosted);
+      if (hosted.length === 0) continue;
+      shapes.add('hosted');
+      for (const l of hosted) {
+        const instrument = state.containers.find((c) => c.id === l.target.containerId);
+        if (instrument && Object.keys(instrument.selection).length) shapes.add('filled');
+        if (l.kind === 'instrumental' && (l.level ?? 'object') !== 'object') shapes.add('act');
+      }
+      if (PL.numberedContainers(state.containers, state.links).length > 1) shapes.add('beside another period');
+    }
+    expect([...shapes].sort()).toEqual(['act', 'beside another period', 'filled', 'hosted']);
   });
 
   // P11-E8: the walk reaches the vocative in the shapes its ring makes — pluralized, coordinated, owned,

@@ -8,6 +8,8 @@ import { PeriodCaption } from "./PeriodCaption.tsx";
 import type { ClauseControls } from "./PeriodContainer.types.ts";
 import { ReificationSwitch } from "./ReificationSwitch.tsx";
 import { PrivativeSwitch } from "./PrivativeSwitch.tsx";
+import { ControlButton } from "./ControlButton.tsx";
+import VerticalAlignCenterIcon from "@mui/icons-material/VerticalAlignCenter";
 import { ControlSwitch } from "./ControlSwitch.tsx";
 import { PICK_INDEX, PICK_TARGET, pickBadgeSx } from "../../../keyboard/usePickKeys.ts";
 import { useUiString } from "../../../i18n/useUiString.ts";
@@ -177,6 +179,16 @@ export function PeriodContainer({
           <PrivativeSwitch
             negative={instrumental.negative}
             onChange={instrumental.onNegativeChange}
+          />
+        )}
+        {/* An instrument drawn as a card of its own can be drawn inside its clause instead (P12). */}
+        {!compact && instrumental?.isInstrument && instrumental.onShowInPeriod && (
+          <ControlButton
+            title={t("action.showInPeriod")}
+            icon={VerticalAlignCenterIcon}
+            onClick={instrumental.onShowInPeriod}
+            data-testid="instrument-show-in-period"
+            sx={{ ml: 0.5 }}
           />
         )}
         {!compact && subordinate?.objectControl && (

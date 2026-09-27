@@ -113,6 +113,9 @@ export interface BuildSatelliteIconsArgs {
   // own reveal icons.
   collapsedMainKeys: Set<string>;
   linkBinding: WorkspaceBinding | undefined;
+  // Make an instrument in place, drawn inside the clause (P12) — what the instrument toggle does
+  // where there is none. Absent (a hosted ring's own clause, which draws none), it starts a pick.
+  onAddInstrument?: () => void;
   onToggleNumber: (which: NumberSlot) => void;
   onToggleGender: (which: GenderSlot) => void;
   onToggleNegative: (field: NegativeField) => void;

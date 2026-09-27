@@ -187,6 +187,9 @@ export function binding({
       onStart: vi.fn(),
       onClear: vi.fn(),
       onPick: vi.fn(),
+      hosted: false,
+      onHostedChange: vi.fn(),
+      onAdd: vi.fn(),
       ...instrumental,
     },
   };

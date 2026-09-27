@@ -1,3 +1,4 @@
+import { numberedContainers } from "@signi/phrase/model/linkRules.ts";
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useRef } from "react";
 import { useUiString } from "../i18n/useUiString.ts";
@@ -17,7 +18,9 @@ import type { PhraseConsoleModel } from "./usePhraseConsole.ts";
 export function SourceStrip({ model }: { model: PhraseConsoleModel }) {
   const { committed, context, vocab } = model;
   const printed = useMemo(
-    () => committed.containers.map((c) => ({ id: c.id, period: printPeriod(committed, c.id, vocab) })),
+    // A hosted instrument (P12) is printed in its clause's line, not on one of its own.
+    () =>
+      numberedContainers(committed.containers, committed.links).map((c) => ({ id: c.id, period: printPeriod(committed, c.id, vocab) })),
     [committed, vocab],
   );
   const strip = useRef<HTMLElement | null>(null);

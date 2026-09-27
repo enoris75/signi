@@ -5,16 +5,16 @@ noun ("by choosing a word"), with no subject. The level switch sits on the group
 toolbar.
 **Shape:** README §2 (shape by level) and §4, D3.
 **Scope:** frontend.
-**Status:** open. Filed 2026-09-27 from P12 phase 3, checked against HEAD fb8af41a. Depends on E2.
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27 from P12 phase 3, checked against HEAD fb8af41a. Depends on E2.
 
 ## Today
 
 | | Where |
 |---|---|
-| The subject withheld at an action level | `showSubject` in [`phraseRender.tsx:68`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L68) |
-| The level pills in the card header | [`ReificationSwitch.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/ReificationSwitch.tsx) |
-| `R` on the period | `period.level`, [`keymap.ts:1250`](../../../../packages/frontend/src/keyboard/keymap.ts#L1250) |
-| A relation toolbar at twelve | `TOOLBAR_HOUR`, [`ringSpecs.ts:86`](../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L86), seated at `:290` |
+| The subject withheld at an action level | `showSubject` in [`phraseRender.tsx:68`](../../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L68) |
+| The level pills in the card header | [`ReificationSwitch.tsx`](../../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/ReificationSwitch.tsx) |
+| `R` on the period | `period.level`, [`keymap.ts:1250`](../../../../../packages/frontend/src/keyboard/keymap.ts#L1250) |
+| A relation toolbar at twelve | `TOOLBAR_HOUR`, [`ringSpecs.ts:86`](../../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L86), seated at `:290` |
 
 ## Design
 

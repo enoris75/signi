@@ -37,6 +37,8 @@ import {
   addConditional,
   addCoordinative,
   addInstrumental,
+  numberedContainers,
+  pruneUnhosted,
   addRelativeLink,
   addSubordinate,
   canBeCondition,
@@ -250,7 +252,7 @@ type LinkOp =
   | { kind: "condition"; mainId: string; target: Target; span: Span }
   | { kind: "join"; firstId: string; target: Target; conjunction: CoordConjunction; span: Span }
   | { kind: "subordinate"; mainId: string; target: Target; link: SubordinateKind; conjunction?: SubordinatingConjunction; span: Span }
-  | { kind: "instrument"; clauseId: string; target: Target; level: AbstractionLevel; negative?: boolean; span: Span }
+  | { kind: "instrument"; clauseId: string; target: Target; level: AbstractionLevel; negative?: boolean; hosted?: boolean; span: Span }
   | { kind: "level"; containerId: string; level: AbstractionLevel; span: Span }
   | { kind: "privative"; containerId: string; negative: boolean; span: Span }
   | { kind: "control"; containerId: string; object: boolean; span: Span }
@@ -379,7 +381,7 @@ class Run {
     const { context } = opts;
     const here = this.containers.some((c) => c.id === context.containerId)
       ? context.containerId
-      : this.containers[0]?.id ?? "";
+      : this.numbered()[0]?.id ?? "";
     this.top = {
       kind: "period",
       containerId: here,
@@ -413,8 +415,18 @@ class Run {
     return this.containers.find((c) => c.id === containerId)?.selection ?? {};
   }
 
+  /** The periods `#n` counts: every one but a hosted instrument, which is said inside its clause (P12). */
+  numbered(): PhraseContainer[] {
+    return numberedContainers(this.containers, this.links);
+  }
+
   periodNumber(containerId: string): number {
-    return this.containers.findIndex((c) => c.id === containerId) + 1;
+    return this.numbered().findIndex((c) => c.id === containerId) + 1;
+  }
+
+  /** Drop the hosted instruments whose link the line took away (P12): they have no card to fall back on. */
+  pruneHosted(before: PhraseLink[]): void {
+    ({ containers: this.containers, links: this.links } = pruneUnhosted({ containers: this.containers, links: this.links }, before));
   }
 
   updateRoot(containerId: string, fn: (sel: PhraseSelection) => PhraseSelection): void {
@@ -499,7 +511,7 @@ class Run {
   goto(item: Item, frame: Frame): void {
     if (frame !== this.top) fail(item, coded("gotoInsideBracket", nest(frame)));
     const ref = this.readRef(item.ref!);
-    const c = this.containers[ref.period - 1];
+    const c = this.numbered()[ref.period - 1];
     if (!c) fail(item, coded("noSuchPeriod", { period: ref.period }));
     frame.containerId = c!.id;
     frame.words = [];
@@ -901,7 +913,7 @@ class Run {
     else if (kind === "join") this.queue.push({ kind, firstId: id, target, conjunction, span });
     else if (kind === "subordinate")
       this.queue.push({ kind, mainId: id, target, link: subordinate!, ...(subordinator && { conjunction: subordinator }), span });
-    else this.queue.push({ kind, clauseId: id, target, level: "object", span });
+    else this.queue.push({ kind, clauseId: id, target, level: "object", ...(item.body && { hosted: true }), span });
     if (item.body) {
       const containerId = (target as { containerId: string }).containerId;
       this.bracket(item, { kind: "period", containerId, words: [], via: def.name });
@@ -1282,15 +1294,18 @@ class Run {
   removePeriod(item: Item, frame: Frame): void {
     if (frame !== this.top) fail(item.head, coded("removePeriodInBracket", nest(frame)));
     const id = frame.containerId;
-    const at = this.containers.findIndex((c) => c.id === id);
+    const at = this.numbered().findIndex((c) => c.id === id);
+    const before = this.links;
     // The workspace always keeps one period: the last one is emptied rather than removed.
     this.containers =
-      this.containers.length > 1
+      this.numbered().length > 1
         ? this.containers.filter((c) => c.id !== id)
         : this.containers.map((c) => (c.id === id ? { ...c, selection: {} } : c));
     this.links = dropContainerLinks(this.links, id);
+    // Its hosted instrument goes with it (P12).
+    this.pruneHosted(before);
     // The context goes to the period above the one removed — or, the first gone, to the new first.
-    const here = this.containers[Math.max(0, at - 1)]!;
+    const here = this.numbered()[Math.max(0, at - 1)]!;
     frame.containerId = here.id;
     frame.words = [];
     frame.anchor = undefined;
@@ -1310,7 +1325,7 @@ class Run {
         fail({ from: 0, to: 0 }, coded("linkTargetRemoved"));
       return target.containerId;
     }
-    const c = this.containers[target.period - 1];
+    const c = this.numbered()[target.period - 1];
     if (!c) fail(target.span, coded("noSuchPeriod", { period: target.period }));
     return c!.id;
   }
@@ -1394,8 +1409,11 @@ class Run {
             fail(op.span, coded("instrumentThingHasVerb"));
           fail(op.span, this.clauseRefusal(op.clauseId, instrument, "instrument"));
         }
-        this.links = addInstrumental(this.links, op.clauseId, instrument, id(), op.level);
+        const before = this.links;
+        // One typed in its braces is drawn inside the clause (P12); a reference links a card.
+        this.links = addInstrumental(this.links, op.clauseId, instrument, id(), op.level, op.hosted);
         if (op.negative) this.links = setInstrumentalNegative(this.links, op.clauseId, true);
+        this.pruneHosted(before);
         return;
       }
       case "possessorRef": {
@@ -1444,6 +1462,8 @@ class Run {
           fail(op.span, coded("noLinkToRemove", {
             link: op.link === "condition" || op.link === "join" || op.link === "instrument" ? op.link : "subordinate",
           }));
+        // A hosted instrument goes with its link (P12).
+        this.pruneHosted(before);
         return;
       }
     }

@@ -54,19 +54,38 @@ export function sameHostedRing(a: HostedRing | undefined, b: HostedRing): boolea
 }
 
 /**
- * The hosted rings with one builder's report folded in: `ring` as it drew it, or null once it is gone.
+ * What one hosted builder reports: every ring it drew, keyed by the node key each goes by on the canvas
+ * it is hosted on. A conjunct's, an owner's, a standard's or an examples' builder draws one ring; an
+ * instrument's draws one at `object` and two at an action level, the act and its noun (P12).
+ */
+export type HostedRingGroup = Record<string, HostedRing>;
+
+/** Two reports of one builder alike: the same rings, each equal under `sameHostedRing`. */
+export function sameHostedRings(a: HostedRingGroup | undefined, b: HostedRingGroup): boolean {
+  if (!a) return false;
+  const keys = Object.keys(b);
+  return keys.length === Object.keys(a).length && keys.every((k) => sameHostedRing(a[k], b[k]!));
+}
+
+/**
+ * The hosted rings with one builder's report folded in: `group` as it drew it, or null once it is gone.
+ * `previous` are the keys that builder reported last, so a ring it no longer draws — an act's noun,
+ * once the instrument is a thing again — leaves with the report that drops it.
+ *
  * A report that changes nothing hands back `rings` itself, so the canvas storing them can skip the
  * update — a fresh object would re-render every hosted ring, which reports again, without end.
  */
-export function mergeHostedRing(
-  rings: Record<string, HostedRing>,
-  key: string,
-  ring: HostedRing | null,
-): Record<string, HostedRing> {
-  if (ring) return sameHostedRing(rings[key], ring) ? rings : { ...rings, [key]: ring };
-  if (!(key in rings)) return rings;
+export function mergeHostedRings(
+  rings: HostedRingGroup,
+  previous: readonly string[],
+  group: HostedRingGroup | null,
+): HostedRingGroup {
+  const gone = previous.filter((k) => k in rings && !(group && k in group));
+  const changed = Object.entries(group ?? {}).filter(([k, ring]) => !sameHostedRing(rings[k], ring));
+  if (gone.length === 0 && changed.length === 0) return rings;
   const next = { ...rings };
-  delete next[key];
+  for (const k of gone) delete next[k];
+  for (const [k, ring] of changed) next[k] = ring;
   return next;
 }
 
@@ -107,7 +126,7 @@ export function hostedRect({
 }: {
   key: string;
   color: string;
-  kind: "conjunct" | "owner" | "standard" | "examples";
+  kind: "conjunct" | "owner" | "standard" | "examples" | "instrument";
   // The group label of the period noun the ring belongs with, and where it reads among that group's
   // rings (a conjunct's index; an owner's or a standard's fractional order — see possessionsFor,
   // standardSpotsFor).

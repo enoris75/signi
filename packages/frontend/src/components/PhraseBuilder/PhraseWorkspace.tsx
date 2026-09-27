@@ -10,12 +10,14 @@ import {
   COORD_CONJUNCTION_LABEL_KEY,
   subordinateLabelKey,
   forceOfClause,
+  isInstrumentalLink,
   PhraseContainer,
   PhraseLink,
   PhraseSelection,
   WorkspaceBinding,
 } from "./interfaces.ts";
 import { MUI_COLOR_HEX } from "./slots.ts";
+import { hostedInstrumentIds } from "@signi/phrase/model/linkRules.ts";
 import { boxKey, useConnectors } from "./hooks/useConnectors.ts";
 import { uid, useWorkspaceLinks } from "./hooks/useWorkspaceLinks.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
@@ -112,13 +114,21 @@ export function PhraseWorkspace({
     setContainers((cs) => [...cs, { id: uid(), selection: {} }]);
   }
 
-  // Swap a container with its neighbour. Links are keyed by container id, so they follow
+  // An instrument made in place is drawn inside its clause (P12): its period has no card of its own —
+  // except in the Phrase view, which lists every period's roles and has no canvas to draw it on.
+  const hosted = listView ? new Set<string>() : hostedInstrumentIds(links);
+  const cards = containers.filter((c) => !hosted.has(c.id));
+
+  // Swap a card with its neighbour on the stack. Links are keyed by container id, so they follow
   // their containers; the connector overlay re-measures on the resulting render.
   function moveContainer(id: string, delta: -1 | 1) {
     setContainers((cs) => {
+      // Read off the stack as it is now: two moves may be dispatched before it re-renders.
+      const shown = cs.filter((c) => !hosted.has(c.id));
+      const neighbour = shown[shown.findIndex((c) => c.id === id) + delta];
       const i = cs.findIndex((c) => c.id === id);
-      const j = i + delta;
-      if (i < 0 || j < 0 || j >= cs.length) return cs;
+      const j = neighbour ? cs.findIndex((c) => c.id === neighbour.id) : -1;
+      if (i < 0 || j < 0) return cs;
       const next = [...cs];
       [next[i], next[j]] = [next[j], next[i]];
       return next;
@@ -128,13 +138,65 @@ export function PhraseWorkspace({
   function removeContainer(id: string) {
     // The workspace always keeps at least one period: removing the last remaining
     // container clears its content in place rather than leaving an empty workspace.
+    const last = cards.length <= 1;
     setContainers((cs) =>
-      cs.length > 1
-        ? cs.filter((c) => c.id !== id)
-        : cs.map((c) => (c.id === id ? { ...c, selection: {} } : c)),
+      !last ? cs.filter((c) => c.id !== id) : cs.map((c) => (c.id === id ? { ...c, selection: {} } : c)),
     );
+    // Its links go, and with them the instrument it drew inside itself (P12).
     dropContainer(id);
     onPeriodRemoved?.();
+  }
+
+  // A container's hand-off to the workspace: its link compartments, and its boxes' and anchors' places
+  // in the connector registry. A hosted instrument's is built for the clause that draws it (P12), so
+  // its nouns keep registering and linking as a card's would.
+  function bindingFor(c: PhraseContainer): WorkspaceBinding {
+    const binding: WorkspaceBinding = {
+      containerId: c.id,
+      pickActive: pick.active,
+      // The link compartments come off the graph; only the geometry is this component's,
+      // since it wires each container's boxes and anchors into the connector registry.
+      ...compartmentsFor(c),
+      geometry: {
+        registerBox: (nounKey, el) => {
+          const k = boxKey(c.id, nounKey);
+          if (el) boxEls.current.set(k, el);
+          else boxEls.current.delete(k);
+        },
+        registerSourceAnchor: (nounKey, el) => {
+          const k = boxKey(c.id, nounKey);
+          if (el) sourceAnchorEls.current.set(k, el);
+          else sourceAnchorEls.current.delete(k);
+        },
+        registerTargetAnchor: (nounKey, el) => {
+          const k = boxKey(c.id, nounKey);
+          if (el) targetAnchorEls.current.set(k, el);
+          else targetAnchorEls.current.delete(k);
+        },
+        registerBorderAnchor: (el) => {
+          if (el) borderAnchorEls.current.set(c.id, el);
+          else borderAnchorEls.current.delete(c.id);
+        },
+        registerVerbAnchor: (el) => {
+          if (el) verbAnchorEls.current.set(c.id, el);
+          else verbAnchorEls.current.delete(c.id);
+        },
+        onGeometryChange: bumpGeom,
+      },
+    };
+    // The instrument this clause draws inside itself.
+    const link = links.find((l) => isInstrumentalLink(l) && l.source.containerId === c.id && hosted.has(l.target.containerId));
+    const instrument = link && containers.find((x) => x.id === link.target.containerId);
+    if (link && instrument && isInstrumentalLink(link))
+      binding.hostedInstrument = {
+        containerId: instrument.id,
+        selection: instrument.selection,
+        onPhraseUpdate: makeContainerUpdate(instrument.id),
+        binding: bindingFor(instrument),
+        level: link.level ?? "object",
+        negative: link.negative === true,
+      };
+    return binding;
   }
 
   return (
@@ -268,40 +330,8 @@ export function PhraseWorkspace({
       )}
 
       <Stack spacing={2}>
-        {containers.map((c, i) => {
-          const binding: WorkspaceBinding = {
-            containerId: c.id,
-            pickActive: pick.active,
-            // The link compartments come off the graph; only the geometry is this component's,
-            // since it wires each container's boxes and anchors into the connector registry.
-            ...compartmentsFor(c),
-            geometry: {
-              registerBox: (nounKey, el) => {
-                const k = boxKey(c.id, nounKey);
-                if (el) boxEls.current.set(k, el);
-                else boxEls.current.delete(k);
-              },
-              registerSourceAnchor: (nounKey, el) => {
-                const k = boxKey(c.id, nounKey);
-                if (el) sourceAnchorEls.current.set(k, el);
-                else sourceAnchorEls.current.delete(k);
-              },
-              registerTargetAnchor: (nounKey, el) => {
-                const k = boxKey(c.id, nounKey);
-                if (el) targetAnchorEls.current.set(k, el);
-                else targetAnchorEls.current.delete(k);
-              },
-              registerBorderAnchor: (el) => {
-                if (el) borderAnchorEls.current.set(c.id, el);
-                else borderAnchorEls.current.delete(c.id);
-              },
-              registerVerbAnchor: (el) => {
-                if (el) verbAnchorEls.current.set(c.id, el);
-                else verbAnchorEls.current.delete(c.id);
-              },
-              onGeometryChange: bumpGeom,
-            },
-          };
+        {cards.map((c, i) => {
+          const binding = bindingFor(c);
           return (
             <PhraseBuilder
               key={c.id}
@@ -312,12 +342,12 @@ export function PhraseWorkspace({
               onRemove={() => removeContainer(c.id)}
               // The sole container can't be deleted (the workspace always keeps one), so
               // its header control clears the content in place instead of removing it.
-              soleContainer={containers.length === 1}
+              soleContainer={cards.length === 1}
               // Reorder controls, omitted at each end of the stack so the header can
               // disable the button that has nowhere to go.
               onMoveUp={i > 0 ? () => moveContainer(c.id, -1) : undefined}
               onMoveDown={
-                i < containers.length - 1
+                i < cards.length - 1
                   ? () => moveContainer(c.id, 1)
                   : undefined
               }

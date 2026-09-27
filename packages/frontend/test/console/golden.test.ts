@@ -42,8 +42,9 @@ const GOLDEN: Record<string, Golden> = {
   cause: { line: '/verb run /cause her', holds: { cause: 'THIRD_PERSON', causeGender: 'fem' }, prints: '/verb ( run ) /cause ( 3rd /fem )' },
   inst: {
     line: '/subj child /verb eat /inst ( /subj stick )',
-    check: (s) => expect(s.links[0]).toMatchObject({ kind: 'instrumental', level: 'object' }),
-    prints: '/subj ( child ) /verb ( eat ) /inst #2',
+    // Typed in its brackets, it is made in place, so it is drawn inside the clause and printed there (P12).
+    check: (s) => expect(s.links[0]).toMatchObject({ kind: 'instrumental', level: 'object', hosted: true }),
+    prints: '/subj ( child ) /verb ( eat ) /inst { /subj ( stick ) }',
     misuse: { line: '/verb see /inst ( /subj stick )', says: { code: 'takesNoInstrument', args: { verb: 'see' } } },
   },
   adj: {
@@ -413,7 +414,7 @@ const GOLDEN: Record<string, Golden> = {
   level: {
     line: '/subj child /verb start /inst ( /verb choose /obj word ) /level process',
     check: (s) => expect(s.links[0]).toMatchObject({ kind: 'instrumental', level: 'process' }),
-    prints: '/subj ( child ) /verb ( start ) /inst #2 /level process',
+    prints: '/subj ( child ) /verb ( start ) /inst { /verb ( choose ) /obj ( word ) } /level process',
     misuse: { line: '/verb eat /level process', says: { code: 'noInstrumentLink' } },
   },
   // The instrument denied — the privative, "eats without the stick" (P09-E2) — on the link, as the
@@ -421,7 +422,7 @@ const GOLDEN: Record<string, Golden> = {
   without: {
     line: '/subj child /verb eat /inst ( /subj stick ) /without',
     check: (s) => expect(s.links[0]).toMatchObject({ kind: 'instrumental', level: 'object', negative: true }),
-    prints: '/subj ( child ) /verb ( eat ) /inst #2 /without',
+    prints: '/subj ( child ) /verb ( eat ) /inst { /subj ( stick ) } /without',
     misuse: { line: '/verb eat /without', says: { code: 'noInstrumentLink' } },
   },
   // Whose the infinitive is (P13): the object's, a causee's — on the link, as /without is.
@@ -449,7 +450,7 @@ const GOLDEN: Record<string, Golden> = {
   posinst: {
     line: '/subj child /verb eat /inst ( /subj stick ) /without /posinst',
     check: (s) => expect(s.links[0]).not.toHaveProperty('negative'),
-    prints: '/subj ( child ) /verb ( eat ) /inst #2',
+    prints: '/subj ( child ) /verb ( eat ) /inst { /subj ( stick ) }',
   },
   del: {
     line: '/subj cat /adj brown /adj big /del adj 2',

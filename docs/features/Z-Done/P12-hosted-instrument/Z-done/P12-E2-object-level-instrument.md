@@ -6,7 +6,7 @@ noun ring in the verb's row, at the Instrumental rank, and there is no second ca
 `bindingFor(id)`, the instrument rank, the card skipped, the connector suppressed, and "add the
 instrument" on the verb's ring.
 **Scope:** frontend.
-**Status:** open. Filed 2026-09-27 from P12 phase 2, checked against HEAD fb8af41a. Depends on E1.
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27 from P12 phase 2, checked against HEAD fb8af41a. Depends on E1.
 **D2 bears on it:** this task hosts only an instrument created in place. A pick onto an existing period
 stays a card until E4.
 
@@ -14,17 +14,17 @@ stays a card until E4.
 
 | | Where |
 |---|---|
-| The instrument toggle on the verb's ring | [`rawSatellites.tsx:796`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L796) |
-| It registers as the verb anchor | [`VerbPhraseBuilder.tsx:132`](../../../../packages/frontend/src/components/PhraseBuilder/VerbPhraseBuilder.tsx#L132), [`phraseRender.tsx:167`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L167) |
-| The binding, built inside `containers.map` | [`PhraseWorkspace.tsx:259`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L259) |
-| The connector | [`useConnectors.ts:162`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useConnectors.ts#L162) |
-| The link rule | [`linkRules.ts:391`](../../../../packages/phrase/src/model/linkRules.ts#L391) (the model moved to `@signi/phrase` in P13; the old frontend paths are re-exports) |
+| The instrument toggle on the verb's ring | [`rawSatellites.tsx:796`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L796) |
+| It registers as the verb anchor | [`VerbPhraseBuilder.tsx:132`](../../../../../packages/frontend/src/components/PhraseBuilder/VerbPhraseBuilder.tsx#L132), [`phraseRender.tsx:167`](../../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L167) |
+| The binding, built inside `containers.map` | [`PhraseWorkspace.tsx:259`](../../../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L259) |
+| The connector | [`useConnectors.ts:162`](../../../../../packages/frontend/src/components/PhraseBuilder/hooks/useConnectors.ts#L162) |
+| The link rule | [`linkRules.ts:391`](../../../../../packages/phrase/src/model/linkRules.ts#L391) (the model moved to `@signi/phrase` in P13; the old frontend paths are re-exports) |
 
 ## What changed since the README: the instrument's relative gap
 
 P13 made "the knife with which the cat cuts the bread" buildable. A relative link can target a
 period's `instrumental` gap when the verb takes an instrument and none is linked
-([`linkRules.ts:99`](../../../../packages/phrase/src/model/linkRules.ts#L99)), and **that connector
+([`linkRules.ts:99`](../../../../../packages/phrase/src/model/linkRules.ts#L99)), and **that connector
 ends at the same instrument toggle**. The README's out-of-scope note about the gap is out of date.
 
 So the toggle has two jobs, and this task keeps both:
@@ -63,5 +63,5 @@ workspace stack. Rebase over it, or coordinate, before touching `PhraseWorkspace
 - The instrument gap: with a relative gap on the instrument, the toggle is the connector's end and
   "add" is refused.
 - Console round trip at `SEEDS=5000`.
-- e2e ([`period-links.spec.ts`](../../../../e2e/period-links.spec.ts)): build *with the knife* in place,
+- e2e ([`period-links.spec.ts`](../../../../../e2e/period-links.spec.ts)): build *with the knife* in place,
   and read all seven translations.

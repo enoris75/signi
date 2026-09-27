@@ -45,6 +45,7 @@ import {
   setInstrumentalLevel as withInstrumentalLevel,
   setInstrumentalNegative as withInstrumentalNegative,
 } from "../linkRules.ts";
+import { pruneUnhosted, setInstrumentalHosted } from "@signi/phrase/model/linkRules.ts";
 
 /** Fresh ids for both containers and links — one source, so they never collide. */
 export const uid = () =>
@@ -113,8 +114,18 @@ export function useWorkspaceLinks(
     return () => window.removeEventListener("keydown", onKey);
   }, [pick.active]);
 
+  // Set the links, and take away the hosted instruments whose link is gone with them (P12): a hosted
+  // instrument has no card to fall back on. `removed` are containers the caller is taking away itself.
+  function commitLinks(next: PhraseLink[], removed: readonly string[] = []) {
+    const kept = containers.filter((c) => !removed.includes(c.id));
+    const pruned = pruneUnhosted({ containers: kept, links: next }, links);
+    const gone = new Set(kept.filter((c) => !pruned.containers.includes(c)).map((c) => c.id));
+    setLinks(pruned.links);
+    if (gone.size) setContainers?.((cs) => cs.filter((c) => !gone.has(c.id)));
+  }
+
   function dropContainer(id: string) {
-    setLinks((ls) => dropContainerLinks(ls, id));
+    commitLinks(dropContainerLinks(links, id), [id]);
     if (pick.active && pick.source.containerId === id) cancelPick();
   }
 
@@ -238,7 +249,21 @@ export function useWorkspaceLinks(
   }
 
   function clearInstrumental(containerId: string) {
-    setLinks((ls) => withoutInstrumental(ls, containerId));
+    commitLinks(withoutInstrumental(links, containerId));
+  }
+
+  // Make an instrument in place (P12): a new period, linked to the clause and drawn inside it. The
+  // clause whose instrument is a relative clause's gap has one already: the head.
+  function addHostedInstrumental(clauseId: string) {
+    if (links.some((l) => isRelativeLink(l) && l.target.containerId === clauseId && l.target.nounKey === "instrumental")) return;
+    const id = uid();
+    setContainers?.((cs) => [...cs, { id, selection: {} }]);
+    commitLinks(addInstrumental(links, clauseId, id, uid(), "object", true));
+  }
+
+  // Draw the instrument inside its clause, or as a card of its own (P12) — from either end.
+  function setInstrumentalHostedAt(containerId: string, hosted: boolean) {
+    setLinks((ls) => setInstrumentalHosted(ls, containerId, hosted));
   }
 
   // A pick always makes an object-level link: the plain "with a word" the period already holds.
@@ -251,7 +276,7 @@ export function useWorkspaceLinks(
     const clauseId = pick.source.containerId;
     cancelPick();
     if (!canBeInstrument(clauseId, instrumentContainerId)) return;
-    setLinks((ls) => addInstrumental(ls, clauseId, instrumentContainerId, uid()));
+    commitLinks(addInstrumental(links, clauseId, instrumentContainerId, uid()));
   }
 
   // ── Per-container view of the graph ────────────────────────────────────────
@@ -388,6 +413,9 @@ export function useWorkspaceLinks(
         onStart: () => startInstrumental(c.id),
         onClear: () => clearInstrumental(c.id),
         onPick: () => completeInstrumental(c.id),
+        hosted: instLink?.hosted === true,
+        onHostedChange: (hosted) => setInstrumentalHostedAt(c.id, hosted),
+        onAdd: () => addHostedInstrumental(c.id),
       },
     };
   }

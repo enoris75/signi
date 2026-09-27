@@ -7,6 +7,7 @@ import {
   type ImperativePerson,
   type NounAddress,
   type NounKey,
+  type PhraseSelection,
   type ClauseForce,
   type SubordinateKind,
 } from "@signi/phrase/model/interfaces.ts";
@@ -157,6 +158,26 @@ export interface InstrumentalBinding {
   onStart: () => void;
   onClear: () => void;
   onPick: () => void;
+  // Whether the link this container takes part in draws the instrument inside the clause (P12) rather
+  // than as a card of its own, and the switch between the two — from either end, as the level.
+  hosted: boolean;
+  onHostedChange: (hosted: boolean) => void;
+  // Make an instrument in place for this clause: a new period, linked and drawn inside it (P12).
+  onAdd: () => void;
+}
+
+/**
+ * The instrument a clause draws inside itself (P12): the period that holds it, which keeps its own
+ * container and its own binding, so its nouns link and register their boxes as a card's would. The
+ * clause's builder hands it to a builder of its own, painted on the clause's canvas.
+ */
+export interface HostedInstrument {
+  containerId: string;
+  selection: PhraseSelection;
+  onPhraseUpdate: (updater: (prev: PhraseSelection) => PhraseSelection) => void;
+  binding: WorkspaceBinding;
+  level: AbstractionLevel;
+  negative: boolean;
 }
 
 export interface WorkspaceBinding {
@@ -169,6 +190,8 @@ export interface WorkspaceBinding {
   coordinative: CoordinativeBinding;
   subordinate: SubordinateBinding;
   instrumental: InstrumentalBinding;
+  // The instrument this clause draws inside itself, where it has one (P12).
+  hostedInstrument?: HostedInstrument;
 }
 
 // Wrap a container's `binding` for a hosted ring's builder — an owner's or a conjunct's — whose head
@@ -248,6 +271,9 @@ export function adaptPossessorBinding(
       onStart: () => {},
       onClear: () => {},
       onPick: () => {},
+      hosted: false,
+      onHostedChange: () => {},
+      onAdd: () => {},
     },
   };
 }

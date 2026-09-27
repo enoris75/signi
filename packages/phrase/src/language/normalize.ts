@@ -14,6 +14,7 @@ import {
   type PhraseSelection,
 } from "../model/interfaces.ts";
 import { pointerHolds } from "../model/functions/linksToSubject.ts";
+import { hostOfInstrument, numberedContainers } from "../model/linkRules.ts";
 import { slotDefaultModifierRelation } from "../model/functions/modifierRelation.ts";
 import type { WorkspaceState } from "./types.ts";
 
@@ -113,21 +114,35 @@ function normalizeSelection(sel: PhraseSelection, root: PhraseSelection = sel, s
   return out;
 }
 
-function normalizeLink(link: PhraseLink, index: Map<string, number>): { [k: string]: Json } {
+function normalizeLink(link: PhraseLink, index: Map<string, number | string>): { [k: string]: Json } {
   const s = index.get(link.source.containerId) ?? -1;
   const t = index.get(link.target.containerId) ?? -1;
   if (isConditionalLink(link)) return { kind: "conditional", s, t };
   if (isCoordinativeLink(link)) return { kind: "coordinative", s, t, conjunction: link.conjunction };
   if (isSubordinateLink(link))
     return link.kind === "adverbial" ? { kind: link.kind, s, t, conjunction: link.conjunction } : { kind: link.kind, s, t };
-  if (isInstrumentalLink(link)) return { kind: "instrumental", s, t, level: link.level ?? "object" };
+  if (isInstrumentalLink(link))
+    return { kind: "instrumental", s, t, level: link.level ?? "object", ...(link.negative && { negative: true }), ...(link.hosted && { hosted: true }) };
   return { kind: "relative", s, sn: link.source.nounKey, t, tn: link.target.nounKey };
 }
 
 export function normalizeWorkspace(state: WorkspaceState): Json {
-  const index = new Map(state.containers.map((c, i) => [c.id, i]));
+  // A hosted instrument (P12) is no period in the stack: it is said inside its clause, wherever its
+  // container happens to sit, so it is named after that clause rather than by its place.
+  const numbered = numberedContainers(state.containers, state.links);
+  const index = new Map<string, number | string>(numbered.map((c, i) => [c.id, i]));
+  // An instrument hosted by a hosted instrument is named once its host is: a pass per level of nesting.
+  for (let pass = 0; pass < state.containers.length; pass++)
+    for (const c of state.containers) {
+      const host = hostOfInstrument(state.links, c.id);
+      if (host !== undefined && !index.has(c.id) && index.has(host)) index.set(c.id, `inst of ${index.get(host)}`);
+    }
+  const hosted = state.containers.filter((c) => !numbered.includes(c));
   return {
-    periods: state.containers.map((c) => normalizeSelection(c.selection)),
+    periods: numbered.map((c) => normalizeSelection(c.selection)),
+    ...(hosted.length && {
+      hosted: Object.fromEntries(hosted.map((c) => [String(index.get(c.id)), normalizeSelection(c.selection)])),
+    }),
     // A link with an end in no period links nothing.
     links: state.links
       .filter((l) => index.has(l.source.containerId) && index.has(l.target.containerId))

@@ -4413,6 +4413,27 @@ export const UI_STRINGS = defineUiStrings({
   // named by the grammar noun rather than by one complement: the key works on all of them. Definite for
   // the complement already there ("rimuovi il complemento", de "die Ergänzung entfernen"), indefinite
   // for the one the menu has yet to pick ("aggiungi un complemento", ja 補語を追加).
+  // An instrument drawn inside its clause (P12) and one drawn as a card of its own are one link, and
+  // the switch moves it between the two: SHOW with the period as its `role` ("show as a period", it
+  // "mostra come periodo", de "als Satzgefüge zeigen", ja 文として見せ), and with it as its `locative`
+  // ("show in the period", it "mostra nel periodo", ja 文で見せ). The plan does not change, only the
+  // drawing.
+  'action.showAsPeriod': {
+    plan: {
+      ...commandOf('SHOW'),
+      complements: { role: { phrase: { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Show as a period',
+  },
+  'action.showInPeriod': {
+    plan: {
+      ...commandOf('SHOW'),
+      complements: { locative: { phrase: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Show in the period',
+  },
   'action.removeComplement': {
     plan: {
       ...commandOf('REMOVE'),

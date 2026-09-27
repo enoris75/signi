@@ -73,8 +73,9 @@ describe('the examples of the plan', () => {
 
   it('makes an instrument', () => {
     const state = ok('/subj child /verb eat /obj food /inst ( /subj stick )');
-    expect(state.links).toEqual([expect.objectContaining({ kind: 'instrumental', level: 'object' })]);
-    expect(script(state)).toBe('/subj ( child ) /verb ( eat ) /obj ( food ) /inst #2\n/subj ( stick )');
+    // Made in its brackets, it is drawn inside the clause and printed there (P12).
+    expect(state.links).toEqual([expect.objectContaining({ kind: 'instrumental', level: 'object', hosted: true })]);
+    expect(script(state)).toBe('/subj ( child ) /verb ( eat ) /obj ( food ) /inst { /subj ( stick ) }');
   });
 
   it('gives a noun a possessor in brackets, and /pl after them goes back to the head', () => {

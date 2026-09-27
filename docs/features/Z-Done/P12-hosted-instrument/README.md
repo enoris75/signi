@@ -9,8 +9,9 @@ keeps its own container and today's `instrumental` link, so `linkRules`, seriali
 and the plan the engine sees are unchanged.
 **Scope:** frontend only. No engine change, no seed change, no new translation. One new UI surface —
 the level toolbar — reusing strings that exist (`instrumental.level.*`).
-**Status:** planning. Chosen over three alternatives (see [Alternatives](#alternatives)); D1, D3, D4
-and D5 below carry recommendations, **D2 is open** and blocks phase 4 only.
+**Status:** done, 2026-09-27. Chosen over three alternatives (see [Alternatives](#alternatives)); D1–D5
+decided as recommended (D2 on 2026-09-27, with its two sub-questions). See *What landed differently* at
+the end.
 **Drawings:** [design canvas](https://claude.ai/artifact/TAqoxSNjoms8B4s2CbUorf) — artboards *Today —
 the linked period*, *A — box by default, raise for the act*, **B — hosted ring, inline** (this plan),
 *C — menu row and a chip on the link*, *D — any complement can be raised*.
@@ -70,7 +71,7 @@ And the machinery this plan borrows:
 | # | Question | Recommendation | Why |
 |---|---|---|---|
 | D1 | Fold the instrument into the parent's selection (like a possessor), or keep its container and link? | **Keep the container and the link.** The hosted builder takes a lens onto *that container's* selection instead of a slice of this one. | Everything downstream stays put: `linkRules`, `canBeInstrument`, the `level` field, `workspacePlan`, the saved-file format and its `kind: 'instrumental'` links, `/instrument` and `/level`. The plan the engine receives is byte-identical, so no translation test moves. Folding it in would rewrite all of that to change a drawing. |
-| D2 | **Open.** A pick can land on an *existing* period. Host it — pulling that card out of the stack — or leave it a card? | Host an instrument **created in place**; keep the card-and-connector for a pick onto an existing period. Two renderings of one link, chosen by how it was made. | Hosting always means linking an existing clause makes its card vanish into another, which is a surprising way to lose a period you were working on. The cost is that both renderings must be maintained — which is also the migration path for saved workspaces. |
+| D2 | A pick can land on an *existing* period. Host it — pulling that card out of the stack — or leave it a card? | **Decided (2026-09-27):** host an instrument **created in place**; keep the card-and-connector for a pick onto an existing period. Two renderings of one link, chosen by how it was made, with a switch between them on each. A saved workspace from before P12 opens linked. In the console `/inst { … }` makes a hosted one and `/inst #n` a linked one, and each prints back as it was made. | Hosting always means linking an existing clause makes its card vanish into another, which is a surprising way to lose a period you were working on. The cost is that both renderings must be maintained — which is also the migration path for saved workspaces. |
 | D3 | Where does the level switch go? | A **relation toolbar at the group's twelve o'clock**, the way `route`, `locative` and `cause` seat theirs (`TOOLBAR_HOUR` in [`ringSpecs.ts`](../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts)). | The level is the link's field, not the period's; on the group it sits with what it changes. It also frees the instrument card's header, which under D2 still exists for the linked form. |
 | D4 | The host protocol reports one ring. An act draws two constituents. | **Report a group**: `onRings(Record<string, HostedRing> \| null)`; a conjunct and an owner report a one-entry map. | The alternative — a union-footprint "super ring" — invents a second layout concept. A group of ordinary rings packs with the machinery that already packs conjuncts. |
 | D5 | What does compact view show? | The instrument's words, no rings — as compact already does for every constituent (`GroupBox` returns `null` when compact). | A hosted instrument is constituents of this period; compact should not special-case it. |
@@ -196,13 +197,9 @@ Drawn on the canvas, and rejected for this plan:
 
 ## Out of scope
 
-- **The instrumental relative gap.** B moves the drawing, not the model: the instrument is still not
-  a `NOUN_KEY` of the acting period, so "the knife with which the cat cuts the bread" stays
-  unbuildable, though every engine renders it
-  ([`relativeGapComplement.ts`](../../../../packages/engine/src/functions/relativeGapComplement.ts)).
-  That is A's payoff, and it can be had later without undoing B.
-- **The other plan-only complements.** `comitative`, `objectPredicative` and `temporal` have no box
-  and none is added here.
+- **The instrumental relative gap** shipped separately, in P13 (`/rel #n.inst`): its connector ends at
+  the verb's instrument toggle, which keeps that job beside making a hosted instrument.
+- **The comitative and the object complement** have boxes since P13; `temporal` had one already.
 - Any engine, seed or translation work.
 
 ## Tasks (E1–E4)
@@ -222,7 +219,43 @@ was written, and is corrected in the tasks rather than above:
 
 | task | phase | what | status |
 |---|---|---|---|
-| [P12-E1](P12-E1-group-reports.md) | 1 | `sameHostedRings` / `mergeHostedRings`; every host reports a group | Open |
-| [P12-E2](P12-E2-object-level-instrument.md) | 2 | `InstrumentRings`, `bindingFor(id)`, the rank, no card, no connector; the toggle and the instrument gap | Open, after E1 |
-| [P12-E3](P12-E3-act-levels-and-toolbar.md) | 3 | Two rings at an action level; the level toolbar at twelve; `R` | Open, after E2 |
-| [P12-E4](P12-E4-linked-form-and-d2.md) | 4 | **D2**, the linked form beside the hosted one, old saves, compact view | Open, blocked on D2 |
+| [P12-E1](Z-done/P12-E1-group-reports.md) | 1 | `sameHostedRings` / `mergeHostedRings`; every host reports a group | Done |
+| [P12-E2](Z-done/P12-E2-object-level-instrument.md) | 2 | The hosted builder, `bindingFor(id)`, the rank, no card, no connector; the toggle and the instrument gap | Done |
+| [P12-E3](Z-done/P12-E3-act-levels-and-toolbar.md) | 3 | Two rings at an action level; the level toolbar at twelve; `R` | Done |
+| [P12-E4](Z-done/P12-E4-linked-form-and-d2.md) | 4 | **D2**, the linked form beside the hosted one, old saves, compact view | Done |
+
+## What landed differently
+
+- **The model has a flag after all.** D1 keeps the container and the link; which of the two drawings a
+  link gets is `hosted: true` on the instrumental link
+  ([`interfaces.ts`](../../../../packages/phrase/src/model/interfaces.ts)). It is saved and loaded
+  (an old file has none, so it opens linked), normalised, and printed: a hosted instrument prints in
+  its clause's line, in the braces it is typed in — `/inst { /subj ( stick ) }` — and so the console's
+  text for it is *not* today's, as §6 expected. The printer swaps its period in and prefixes its
+  statement keys (`inst>`), so the echo can diff inside the braces.
+- **A hosted instrument belongs to its clause.** It has no card, no number and no console line. `#n`,
+  the completion list, the source strip, the echo and the period chip all count the numbered periods
+  only (`numberedContainers`), and a change inside it is its clause's (`periodOf`). When its link goes —
+  the toggle, `/del inst`, its clause removed or replaced in the console's edit — the period goes too
+  (`pruneUnhosted`), since it has no card to fall back on. `normalizeWorkspace` names it after its
+  clause, not by its place in the stack.
+- **No `InstrumentRings` component.** The clause's builder mounts the instrument's builder directly,
+  with the instrument's own binding (`bindingFor` in `PhraseWorkspace`, handed over as
+  `WorkspaceBinding.hostedInstrument`). Its rings go by `instrumental|<word>` on the clause's canvas
+  (`RingHost.keyOf` / `atOf`), and are placed and compact-packed by the machinery owners use, the first
+  beside the verb. The line runs from the verb's instrument toggle, which faces the ring.
+- **The toggle's three jobs.** No instrument: it makes a hosted one. A relative gap on the instrument:
+  it stays the connector's end, and a hosted one is refused. A made instrument, hosted or linked: it
+  removes it (E2 said *select*; removing is what it did for the linked one, and the ring's own remove
+  control does it too).
+- **The toolbar carries six controls**, not three: the three levels, the privative (the card's other
+  header switch, and ⇧N), *show as a period* (hosted → card) and *link a period* (a pick, which replaces
+  the hosted instrument — the pick's new home, since the toggle now makes one). The linked card has *show
+  in the period* beside its level pills. Two new UI strings, `action.showAsPeriod` and
+  `action.showInPeriod`, rendered by the engine; the pick's tooltip is `pick.instrumental`.
+- **One level of hosting on the canvas.** An instrument of a hosted instrument's act is drawn as a card
+  (the console still prints it in braces), and so is every hosted instrument in the Phrase view (P17),
+  which has no canvas to draw it on.
+- **Its nouns take no owner or conjunct ring**: those rings are drawn by the period's builder, which
+  never sees the instrument's period, so the controls are withheld there. Drawn as a period, it takes both.
+- The `linkInstrument` e2e helper now links through the hosted ring's pick control.

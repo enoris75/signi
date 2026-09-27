@@ -1,3 +1,4 @@
+import { numberedContainers, periodOf, pruneUnhosted } from "@signi/phrase/model/linkRules.ts";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type SetStateAction } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { LanguageCode, PhrasePlan, UiStringKey } from "@signi/shared";
@@ -191,10 +192,14 @@ function withRealIds(state: WorkspaceState, previewIdsMade: string[], realIdsMad
 
 /** A period's words cleared and its own links let go — what `/edit` replaces with the line. */
 function clearedFor(state: WorkspaceState, containerId: string): WorkspaceState {
-  return {
-    containers: state.containers.map((c) => (c.id === containerId ? { ...c, selection: {} } : c)),
-    links: state.links.filter((l) => l.source.containerId !== containerId),
-  };
+  // Its hosted instrument goes with the link it drops (P12): the line being edited says it again.
+  return pruneUnhosted(
+    {
+      containers: state.containers.map((c) => (c.id === containerId ? { ...c, selection: {} } : c)),
+      links: state.links.filter((l) => l.source.containerId !== containerId),
+    },
+    state.links,
+  );
 }
 
 export function usePhraseConsole({ history, actions }: { history: WorkspaceHistory; actions: AppActions }) {
@@ -349,7 +354,9 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     );
   }, [base, text, caret, vocab, lineContext.containerId, lineContext.word && wordMark(lineContext.word)]);
 
-  const number = (id: string, state: WorkspaceState) => state.containers.findIndex((c) => c.id === id) + 1;
+  // A period's number — a hosted instrument's is its clause's, the line it is said in (P12).
+  const number = (id: string, state: WorkspaceState) =>
+    numberedContainers(state.containers, state.links).findIndex((c) => c.id === periodOf(state.links, id)) + 1;
   const chip: Chip = (() => {
     const state = preview?.state ?? base;
     if (caretFrames.length === 0) {
@@ -383,7 +390,8 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
       if (c.number === undefined) continue;
       const ref = parseRef(c.insert.slice(1));
       if ("error" in ref) continue;
-      const target = (preview?.state ?? base).containers[ref.period - 1];
+      const shown = preview?.state ?? base;
+      const target = numberedContainers(shown.containers, shown.links)[ref.period - 1];
       if (!target) continue;
       map.set(ref.address ? wordMark(nounWord(target.id, ref.address)) : periodMark(target.id), c.number);
     }
@@ -767,8 +775,10 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     const shownNow = preview?.state ?? committed;
     if (changedPeriods(shownNow, next)?.size === 0) return;
     const changed = changedPeriods(committed, next);
-    const p = editing ?? (changed?.size === 1 ? [...changed][0] : undefined);
-    if (changed && p && [...changed].every((id) => id === p)) {
+    // A change inside a hosted instrument is its clause's: the line that says it (P12).
+    const periods = changed && new Set([...changed].map((id) => periodOf(next.links, id)));
+    const p = editing ?? (periods?.size === 1 ? [...periods][0] : undefined);
+    if (periods && p && [...periods].every((id) => id === p)) {
       const source = printPeriod(next, p, vocab).text;
       setEditing(p);
       setLine(source ? `${source} ` : "");
@@ -995,7 +1005,9 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
   };
 
   /** Load the focused period's source into the prompt, which ↵ then replaces the period with. */
-  const edit = (id = liveContext.containerId, state = committed) => {
+  const edit = (context = liveContext.containerId, state = committed) => {
+    // A hosted instrument is edited in its clause's line (P12).
+    const id = periodOf(state.links, context);
     setEditing(id);
     const source = printPeriod(state, id, vocab).text;
     setLine(source ? `${source} ` : "");

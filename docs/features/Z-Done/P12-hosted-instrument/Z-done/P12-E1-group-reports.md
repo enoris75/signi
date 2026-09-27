@@ -5,17 +5,17 @@ standards and examples report a one-entry group, and nothing on the canvas chang
 **Shape:** README §1, D4. `sameHostedRing` / `mergeHostedRing` become their group forms, and
 `useReportOwnRing` reports every `GroupRect` its builder drew.
 **Scope:** frontend.
-**Status:** open. Filed 2026-09-27 from P12 phase 1, checked against HEAD fb8af41a. No dependency; E2
+**Status:** done, 2026-09-27 (see the README's *What landed differently*). Was open. Filed 2026-09-27 from P12 phase 1, checked against HEAD fb8af41a. No dependency; E2
 needs it.
 
 ## Today
 
 | | Where |
 |---|---|
-| `RingHost.kind` is `"conjunct" \| "owner" \| "standard" \| "examples"`: four kinds now, the README knew two | [`ringHost.ts:17`](../../../../packages/frontend/src/components/PhraseBuilder/ringHost.ts#L17) |
-| `sameHostedRing`, `mergeHostedRing` | [`conjunctChain.ts:47`](../../../../packages/frontend/src/components/PhraseBuilder/conjunctChain.ts#L47), `:61` |
-| The report | [`useReportOwnRing.ts`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useReportOwnRing.ts) |
-| The hosted rank, read from `g.conjunct ?? g.owner ?? g.standard ?? g.examples` | [`layout.ts:74`](../../../../packages/frontend/src/components/PhraseBuilder/layout.ts#L74) |
+| `RingHost.kind` is `"conjunct" \| "owner" \| "standard" \| "examples"`: four kinds now, the README knew two | [`ringHost.ts:17`](../../../../../packages/frontend/src/components/PhraseBuilder/ringHost.ts#L17) |
+| `sameHostedRing`, `mergeHostedRing` | [`conjunctChain.ts:47`](../../../../../packages/frontend/src/components/PhraseBuilder/conjunctChain.ts#L47), `:61` |
+| The report | [`useReportOwnRing.ts`](../../../../../packages/frontend/src/components/PhraseBuilder/hooks/useReportOwnRing.ts) |
+| The hosted rank, read from `g.conjunct ?? g.owner ?? g.standard ?? g.examples` | [`layout.ts:74`](../../../../../packages/frontend/src/components/PhraseBuilder/layout.ts#L74) |
 
 All four hosts (`OwnerRings`, `ConjunctRings` and the standard's and examples' hosts) move to the group
 form in this task. Grep `mergeHostedRing(` for the full list.

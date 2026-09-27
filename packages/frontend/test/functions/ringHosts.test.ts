@@ -25,7 +25,7 @@ const hosts = (over: Partial<Parameters<typeof ringHosts>[0]> = {}) =>
     wordPos,
     centerOf,
     possessorToward: () => undefined,
-    reportRing: vi.fn(),
+    reportRings: vi.fn(),
     onAddConjunct: vi.fn(),
     ...over,
   });
@@ -62,17 +62,17 @@ describe('ringHosts', () => {
     });
 
     it('reports its ring under its own key, and aims its possessor control as the canvas says', () => {
-      const reportRing = vi.fn();
-      const host = hosts({ reportRing, possessorToward: (key) => (key === 'subject+1' ? { x: 1, y: 2 } : undefined) }).conjunctHost(
+      const reportRings = vi.fn();
+      const host = hosts({ reportRings, possessorToward: (key) => (key === 'subject+1' ? { x: 1, y: 2 } : undefined) }).conjunctHost(
         'subject',
         0,
       );
 
-      host.onRing(RING);
-      host.onRing(null);
+      host.onRings({ 'subject+1': RING });
+      host.onRings(null);
 
-      expect(reportRing.mock.calls).toEqual([
-        ['subject+1', RING],
+      expect(reportRings.mock.calls).toEqual([
+        ['subject+1', { 'subject+1': RING }],
         ['subject+1', null],
       ]);
       expect(host.possessorToward).toEqual({ x: 1, y: 2 });
@@ -113,8 +113,8 @@ describe('ringHosts', () => {
     };
 
     it('is placed under its address, facing its one port at the ring it owns', () => {
-      const reportRing = vi.fn();
-      const host = hosts({ reportRing }).ownerHost(SPOT);
+      const reportRings = vi.fn();
+      const host = hosts({ reportRings }).ownerHost(SPOT);
 
       expect(host).toMatchObject({
         ...HOSTING,
@@ -125,8 +125,8 @@ describe('ringHosts', () => {
         ports: [{ key: ownerPortKey(SPOT), toward: centerOf('directObject') }],
       });
       expect(host.isLast).toBeUndefined();
-      host.onRing(RING);
-      expect(reportRing).toHaveBeenCalledExactlyOnceWith('directObject/possessor', RING);
+      host.onRings({ 'directObject/possessor': RING });
+      expect(reportRings).toHaveBeenCalledExactlyOnceWith('directObject/possessor', { 'directObject/possessor': RING });
     });
   });
 });

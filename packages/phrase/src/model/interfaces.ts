@@ -992,6 +992,11 @@ export type PhraseLink =
       // and its instrument, not a property of either period. Absent ⇒ the plain means. It is the
       // instrument's own negation, as `causeNegative` is the cause's, and never the clause's.
       negative?: boolean;
+      // Whether the instrument is drawn *inside* the clause (P12): made in place, from the verb's
+      // ring or as a bracket in the console (`/inst { … }`), its period has no card, no number and no
+      // console line of its own, and it goes when the link does. Absent ⇒ the linked form: a period
+      // the author picked, drawn as a card and joined by a connector. The plan is the same either way.
+      hosted?: true;
       source: { containerId: string };
       target: { containerId: string };
     };

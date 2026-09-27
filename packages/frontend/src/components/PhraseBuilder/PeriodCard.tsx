@@ -153,9 +153,10 @@ export function PeriodCard({
         start: () => pressControl("subordinate", cardRef.current ?? document),
         clear: subordinate.onClear,
       },
-      // Only an instrument period carries a reification degree, and R walks the three in turn.
+      // Only an instrument period carries a reification degree, and R walks the three in turn — on the
+      // clause too, when it draws its instrument inside itself (P12).
       cycleLevel:
-        instrumental?.isInstrument && binding
+        (instrumental?.isInstrument || instrumental?.hostsInstrument) && binding
           ? () => {
               const levels = ["process", "concept", "object"] as const;
               const at = levels.indexOf(instrumental.level);
@@ -164,7 +165,7 @@ export function PeriodCard({
           : undefined,
       // Only an instrument period can be denied (the privative, "without the knife"), and ⇧N flips it.
       togglePrivative:
-        instrumental?.isInstrument && binding
+        (instrumental?.isInstrument || instrumental?.hostsInstrument) && binding
           ? () => instrumental.onNegativeChange(!instrumental.negative)
           : undefined,
       // Only an infinitive whose governing clause has an object can be the object's, and O flips it (P13).

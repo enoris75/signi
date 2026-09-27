@@ -9,9 +9,10 @@ import {
   conjunctLinks,
   dropConjunctPosition,
   hostedRect,
-  mergeHostedRing,
+  mergeHostedRings,
   openConjunctsFor,
   sameHostedRing,
+  sameHostedRings,
   UNMEASURED_R,
   type HostedRing,
 } from '../src/components/PhraseBuilder/conjunctChain.ts';
@@ -239,17 +240,17 @@ describe('sameHostedRing', () => {
   });
 });
 
-describe('mergeHostedRing', () => {
+describe('mergeHostedRings', () => {
   it('adds a ring newly drawn, and replaces one that changed', () => {
     const rings = { 'subject+1': ring(80) };
 
-    expect(mergeHostedRing(rings, 'subject+2', ring(70))).toEqual({ 'subject+1': ring(80), 'subject+2': ring(70) });
-    expect(mergeHostedRing(rings, 'subject+1', ring(90))).toEqual({ 'subject+1': ring(90) });
+    expect(mergeHostedRings(rings, [], { 'subject+2': ring(70) })).toEqual({ 'subject+1': ring(80), 'subject+2': ring(70) });
+    expect(mergeHostedRings(rings, ['subject+1'], { 'subject+1': ring(90) })).toEqual({ 'subject+1': ring(90) });
     expect(rings).toEqual({ 'subject+1': ring(80) });
   });
 
   it('drops a ring reported gone', () => {
-    expect(mergeHostedRing({ 'subject+1': ring(80), 'subject+2': ring(70) }, 'subject+1', null)).toEqual({
+    expect(mergeHostedRings({ 'subject+1': ring(80), 'subject+2': ring(70) }, ['subject+1'], null)).toEqual({
       'subject+2': ring(70),
     });
   });
@@ -257,7 +258,39 @@ describe('mergeHostedRing', () => {
   it('hands back the very same rings when the report changes nothing', () => {
     const rings = { 'subject+1': ring(80, { p: { x: 1, y: 2 } }) };
 
-    expect(mergeHostedRing(rings, 'subject+1', ring(80.4, { p: { x: 1.2, y: 2 } }))).toBe(rings);
-    expect(mergeHostedRing(rings, 'subject+2', null)).toBe(rings);
+    expect(mergeHostedRings(rings, ['subject+1'], { 'subject+1': ring(80.4, { p: { x: 1.2, y: 2 } }) })).toBe(rings);
+    expect(mergeHostedRings(rings, [], null)).toBe(rings);
+  });
+
+  // P12-E1: a builder that draws a group — an instrument's act and its noun.
+  it('drops the rings a group no longer draws, and keeps the other builders’ rings', () => {
+    const rings = { 'subject+1': ring(80), 'inst|verb': ring(70), 'inst|directObject': ring(60) };
+
+    expect(mergeHostedRings(rings, ['inst|verb', 'inst|directObject'], { 'inst|subject': ring(50) })).toEqual({
+      'subject+1': ring(80),
+      'inst|subject': ring(50),
+    });
+    expect(mergeHostedRings(rings, ['inst|verb', 'inst|directObject'], null)).toEqual({ 'subject+1': ring(80) });
+  });
+
+  it('settles a group that only jitters', () => {
+    const rings = { 'inst|verb': ring(70), 'inst|directObject': ring(60) };
+    const jitter = { 'inst|verb': ring(70.3), 'inst|directObject': ring(59.8) };
+
+    expect(mergeHostedRings(rings, Object.keys(rings), jitter)).toBe(rings);
+  });
+});
+
+describe('sameHostedRings', () => {
+  it('reads two reports of the same rings, jitter aside, as one', () => {
+    expect(sameHostedRings({ a: ring(80), b: ring(60) }, { a: ring(80.2), b: ring(60) })).toBe(true);
+  });
+
+  it('tells a report with a ring more, a ring less or a ring moved apart', () => {
+    expect(sameHostedRings(undefined, { a: ring(80) })).toBe(false);
+    expect(sameHostedRings({ a: ring(80) }, { a: ring(80), b: ring(60) })).toBe(false);
+    expect(sameHostedRings({ a: ring(80), b: ring(60) }, { a: ring(80) })).toBe(false);
+    expect(sameHostedRings({ a: ring(80) }, { b: ring(80) })).toBe(false);
+    expect(sameHostedRings({ a: ring(80) }, { a: ring(90) })).toBe(false);
   });
 });

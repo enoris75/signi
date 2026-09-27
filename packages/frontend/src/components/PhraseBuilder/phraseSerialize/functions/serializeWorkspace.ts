@@ -21,6 +21,8 @@ export function serializeWorkspace(
       ...(l.kind === "coordinative" || l.kind === "adverbial" ? { conjunction: l.conjunction } : {}),
       ...(l.kind === "instrumental" ? { level: l.level } : {}),
       ...(l.kind === "instrumental" && l.negative ? { negative: true } : {}),
+      // An instrument drawn inside its clause (P12).
+      ...(l.kind === "instrumental" && l.hosted ? { hosted: true } : {}),
       // An infinitive the governing clause's object does (P13).
       ...(l.kind === "infinitive" && l.control === "object" ? { control: "object" as const } : {}),
       // A relative clause said alone (P13).

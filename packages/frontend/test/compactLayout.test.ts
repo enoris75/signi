@@ -110,6 +110,40 @@ describe('packPeriod', () => {
     expect(px('Verb Phrase') - px('subject+2')).toBeCloseTo(100 + 20);
   });
 
+  // P12: an instrument drawn inside its clause packs at the Instrumental's rank — one ring for a thing,
+  // the act then its noun for an act, as close as a group's rings.
+  it("packs a hosted instrument's rings at the Instrumental's place, its act before its noun", () => {
+    const inst = (key: string, index: number) => ({ ...rect(key, 100), instrument: { head: 'Instrumental', index } });
+    const { positions } = packPeriod(
+      [
+        rect('Topic', 100),
+        inst('instrumental|directObject', 1),
+        rect('Verb Phrase', 100),
+        inst('instrumental|verb', 0),
+        rect('Terminus', 100),
+        rect('Subject', 100),
+      ],
+      { w: 2000, h: 400 },
+    );
+
+    const order = Object.entries(positions)
+      .sort(([, a], [, b]) => a.x - b.x)
+      .map(([key]) => key);
+    expect(order).toEqual(['Subject', 'Verb Phrase', 'Terminus', 'instrumental|verb', 'instrumental|directObject', 'Topic']);
+    const px = (key: string) => (positions[key]!.x / 100) * 2000;
+    expect(px('instrumental|verb') - px('Terminus')).toBeCloseTo(100 + 20);
+    expect(px('instrumental|directObject') - px('instrumental|verb')).toBeCloseTo(100 + CONJUNCT_GAP);
+  });
+
+  it("packs a thing's one ring where the act's would be", () => {
+    const { positions } = packPeriod(
+      [rect('Topic', 100), { ...rect('instrumental|subject', 100), instrument: { head: 'Instrumental', index: 0 } }, rect('Terminus', 100)],
+      { w: 2000, h: 400 },
+    );
+    const order = Object.entries(positions).sort(([, a], [, b]) => a.x - b.x).map(([key]) => key);
+    expect(order).toEqual(['Terminus', 'instrumental|subject', 'Topic']);
+  });
+
   // P09-E12 D5: "bigger and older than the dog" — the standard after the predicative's conjuncts.
   it('packs a standard of comparison after the predicate adjective and its conjuncts, its owner after it', () => {
     const { positions } = packPeriod(

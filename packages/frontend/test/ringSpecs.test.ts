@@ -313,6 +313,28 @@ describe('buildRingSpecs', () => {
     expect(hour('through')).toBe(12);
   });
 
+  // P12: a hosted instrument's first ring wears its link's toolbar at twelve, as a relation's.
+  it("fans a constituent's own toolbar across the top of its ring", () => {
+    const defs = groups([], ['subject']);
+    const values = ['process', 'concept', 'object', 'without', 'asPeriod', 'pick'];
+    const subject = specs(defs, { groupToolbars: { subject: { type: 'instrument', values } } }).Subject;
+
+    expect(keys(subject.outer).filter((k) => k.startsWith('toolbar:'))).toEqual(values.map((v) => toolbarControlKey('instrument', v)));
+    const hour = (value: string) => (aimOf(subject.outer, toolbarControlKey('instrument', value)) as { clock: number }).clock;
+    expect((hour('object') + hour('without')) / 2).toBeCloseTo(12);
+  });
+
+  // P12: the verb's instrument toggle faces the instrument drawn in the clause; with none, it waits.
+  it('aims the instrument toggle at the instrument drawn in the clause', () => {
+    const defs = groups([], ['subject', 'verb']);
+    const complementToggleIcons = [icon('instrumental')];
+    const ring = { x: 600, y: 400 };
+    const aimed = specs(defs, { complementToggleIcons, instrumentAim: ring })[VERB_PHRASE]!;
+    expect(aimOf(aimed.outer, 'instrumental')).toEqual({ point: ring });
+    const waiting = specs(defs, { complementToggleIcons })[VERB_PHRASE]!;
+    expect(aimOf(waiting.outer, 'instrumental')).toHaveProperty('clock');
+  });
+
   // P09-E12b: the temporal's six relations fan across the top of its ring as the route's do.
   it("fans the temporal's relation toolbar across the top of its ring", () => {
     const defs = groups(['temporal'], ['subject', 'verb', 'temporal']);

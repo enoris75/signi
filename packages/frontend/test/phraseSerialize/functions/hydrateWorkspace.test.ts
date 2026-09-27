@@ -169,6 +169,21 @@ describe('hydrateWorkspace', () => {
     ]);
   });
 
+  // P12: a file from before it has no flag, and opens with its instrument linked as a card.
+  it('restores an instrument drawn inside its clause, and reads anything but a literal true as linked (P12)', () => {
+    expect(
+      linksOf(
+        { id: 'i', kind: 'instrumental', level: 'object', hosted: true, source: { containerId: 'a' }, target: { containerId: 'b' } } as never,
+        { id: 'j', kind: 'instrumental', level: 'object', hosted: 'yes', source: { containerId: 'c' }, target: { containerId: 'd' } } as never,
+        { id: 'k', kind: 'instrumental', level: 'object', source: { containerId: 'e' }, target: { containerId: 'f' } },
+      ),
+    ).toStrictEqual([
+      { id: 'i', kind: 'instrumental', level: 'object', hosted: true, source: { containerId: 'a' }, target: { containerId: 'b' } },
+      { id: 'j', kind: 'instrumental', level: 'object', source: { containerId: 'c' }, target: { containerId: 'd' } },
+      { id: 'k', kind: 'instrumental', level: 'object', source: { containerId: 'e' }, target: { containerId: 'f' } },
+    ]);
+  });
+
   it('restores a relative clause said alone, and reads anything but a literal true as headed (P13)', () => {
     expect(
       linksOf(

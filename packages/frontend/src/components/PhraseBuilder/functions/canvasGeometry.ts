@@ -17,14 +17,17 @@ import { besideRing, type OwnerSpot, type RingAt } from "../ownerChain.ts";
  */
 export function wordPlacement({
   at,
+  atOf,
   compactPositions,
   positions,
   graphSize,
   chains,
   owners,
 }: {
-  // Where a host paints a hosted ring's one word (see RingHost.at).
+  // Where a host paints a hosted ring's one word (see RingHost.at) — or, for a host whose builder
+  // draws several rings, each one's (see RingHost.atOf).
   at: Pt | undefined;
+  atOf?: (key: string) => Pt;
   compactPositions: PositionMap | undefined;
   positions: PositionMap;
   graphSize: CanvasSize;
@@ -32,7 +35,7 @@ export function wordPlacement({
   owners: readonly Pick<OwnerSpot, "address" | "possessedKey">[];
 }): { wordPos: (key: string) => Pt; centerOf: (key: string) => Pt } {
   const wordPos = (key: string): Pt =>
-    at ?? compactPositions?.[key] ?? positions[key] ?? DEFAULT_POSITIONS[key] ?? unplacedRing(key);
+    at ?? atOf?.(key) ?? compactPositions?.[key] ?? positions[key] ?? DEFAULT_POSITIONS[key] ?? unplacedRing(key);
 
   const centerOf = (key: string): Pt => toPx(wordPos(key), graphSize);
 

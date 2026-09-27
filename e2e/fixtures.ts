@@ -337,12 +337,15 @@ export class Builder {
   }
 
   /**
-   * Link period `instrumentIndex` as the instrumental of the verb in period `clauseIndex`. The
-   * instrumental has no target-side control: a pending pick lights the whole card, and a click on
-   * it — clear of the border, where a press starts a card drag instead — makes the link.
+   * Link period `instrumentIndex` as the instrumental of the verb in period `clauseIndex`. The verb's
+   * toggle makes an instrument in place, drawn inside the clause (P12); its ring's pick control links
+   * a period of the workspace in its place. The instrumental has no target-side control: a pending
+   * pick lights the whole card, and a click on it — clear of the border, where a press starts a card
+   * drag instead — makes the link.
    */
   async linkInstrument(clauseIndex: number, instrumentIndex: number): Promise<void> {
     await this.period(clauseIndex).getByTestId('satellite-instrumental').click();
+    await this.period(clauseIndex).getByTestId('instrument-pick').click();
     await this.period(instrumentIndex).click({ position: { x: 20, y: 20 } });
   }
 

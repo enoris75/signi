@@ -19,6 +19,7 @@ export function buildSatelliteIcons({
   shownMap,
   collapsedMainKeys,
   linkBinding,
+  onAddInstrument,
   onToggleNumber,
   onToggleGender,
   onToggleNegative,
@@ -47,7 +48,8 @@ export function buildSatelliteIcons({
     if (!sat.available) continue;
     // The instrumental control is a cross-container link, not a reveal: it rides the verb-phrase
     // dotted ring (with the other complement toggles) and points at the period holding the
-    // instrument. Clicking it starts a pick, or removes the link once one is made. It exists
+    // instrument. Clicking it makes one in place, drawn inside the clause (P12) — or, where the clause
+    // cannot draw one, starts a pick — and removes the link once one is made. It exists
     // only in a workspace container — a standalone period has nowhere to link to.
     if (sat.key === "instrumental") {
       if (!linkBinding) continue;
@@ -76,7 +78,9 @@ export function buildSatelliteIcons({
               ? undefined
               : linked
                 ? linkBinding.instrumental.onClear()
-                : linkBinding.instrumental.onStart(),
+                : onAddInstrument
+                  ? onAddInstrument()
+                  : linkBinding.instrumental.onStart(),
       });
       continue;
     }

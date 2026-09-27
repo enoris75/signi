@@ -93,6 +93,18 @@ describe('serializeWorkspace', () => {
     expect(saved[1]).not.toHaveProperty('negative');
   });
 
+  it('saves an instrument drawn inside its clause as such, and a linked one with no flag (P12)', () => {
+    const links: PhraseLink[] = [
+      { id: 'i', kind: 'instrumental', level: 'object', hosted: true, source: { containerId: 'a' }, target: { containerId: 'b' } },
+      { id: 'j', kind: 'instrumental', level: 'object', source: { containerId: 'c' }, target: { containerId: 'd' } },
+    ];
+
+    const saved = serializeWorkspace([], links).links;
+
+    expect(saved[0]).toHaveProperty('hosted', true);
+    expect(saved[1]).not.toHaveProperty('hosted');
+  });
+
   it('saves a relative clause said alone as such, and a headed one with no flag (P13)', () => {
     const links: PhraseLink[] = [
       { id: 'r', source: { containerId: 'a', nounKey: 'subject' }, target: { containerId: 'b', nounKey: 'subject' }, headless: true },

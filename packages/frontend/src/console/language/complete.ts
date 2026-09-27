@@ -14,6 +14,7 @@ import {
   canStartCoordination,
   canStartSubordinate,
 } from "../../components/PhraseBuilder/linkRules.ts";
+import { numberedContainers } from "@signi/phrase/model/linkRules.ts";
 import { BOX_COMPLEMENT_TYPES } from "../../components/PhraseBuilder/slots.ts";
 import { comparedAdjectiveIndex, readsAsSet } from "@signi/phrase/model/functions/comparison.ts";
 import { vocativeOffered } from "@signi/phrase/model/functions/vocativeOffered.ts";
@@ -840,7 +841,8 @@ const DEL_VALUES: readonly ValueDef[] = [
 function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words: WordInfo[]): Candidate[] {
   const action = def.action;
   const out: Candidate[] = [];
-  state.containers.forEach((c, i) => {
+  // A hosted instrument is no period to reach: it has no number (P12).
+  numberedContainers(state.containers, state.links).forEach((c, i) => {
     const n = i + 1;
     switch (action.kind) {
       case "relative": {
@@ -1022,7 +1024,7 @@ function refCompletion(
     rows = linkTargets(owner, frame, state, words);
   } else {
     // Going to a period, or to a noun of one: every period, then its nouns.
-    rows = state.containers.flatMap((c, i) => {
+    rows = numberedContainers(state.containers, state.links).flatMap((c, i) => {
       const n = i + 1;
       return [
         periodCandidate(n, c.selection),
