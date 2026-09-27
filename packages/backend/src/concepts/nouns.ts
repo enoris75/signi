@@ -8037,6 +8037,45 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'gentileza', gender: 'fem', count: 'singular' },
     },
   },
+  // The pair a wise and a foolish choice sit on, both mass: the quality, not a wise saying or a
+  // foolish act. FOLLY is the lack of good sense, Erasmus's word — "Elogio della follia", "Éloge de
+  // la folie", "Lob der Torheit", "Elogio de la locura", "Elogio da loucura" — not madness; Japanese
+  // 愚かさ, the quality, where 愚行 would be a foolish deed. WISDOM is 知恵, not 賢さ (cleverness).
+  {
+    id: 'WISDOM',
+    role: 'noun',
+    description: 'good judgement that comes from knowledge and experience',
+    emoji: '🦉',
+    countable: false,
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'wisdom', count: 'singular' },
+      it: { base: 'saggezza', gender: 'fem', count: 'singular' },
+      fr: { base: 'sagesse', gender: 'fem', count: 'singular' },
+      de: { base: 'Weisheit', gender: 'fem', count: 'singular' },
+      es: { base: 'sabiduría', gender: 'fem', count: 'singular' },
+      ja: { base: '知恵', count: 'singular', reading: 'ちえ' },
+      pt: { base: 'sabedoria', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'FOLLY',
+    role: 'noun',
+    description: 'the lack of good sense',
+    emoji: '🤪',
+    countable: false,
+    synonym: 'foolishness',
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'folly', count: 'singular' },
+      it: { base: 'follia', gender: 'fem', count: 'singular' },
+      fr: { base: 'folie', gender: 'fem', count: 'singular' },
+      de: { base: 'Torheit', gender: 'fem', count: 'singular' },
+      es: { base: 'locura', gender: 'fem', count: 'singular' },
+      ja: { base: '愚かさ', count: 'singular', reading: 'おろかさ' },
+      pt: { base: 'loucura', gender: 'fem', count: 'singular' },
+    },
+  },
   // ── The geography genera (localization B56) ────────────────────────
   {
     id: 'LAND',

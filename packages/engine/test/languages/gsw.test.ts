@@ -46,6 +46,8 @@ describe('P10-E5: the noun phrase in three cases', () => {
     ['the man', subject(np('MAN')), 'de Maa.'],
     ['the woman', subject(np('WOMAN')), 'd Frau.'],
     ['the water', subject(np('WATER')), 's Wasser.'],
+    ['the wisdom', subject(np('WISDOM')), 'd Wiisheit.'],
+    ['much folly (mass: never plural)', subject(np('FOLLY', { number: 'plural', definiteness: 'many' })), 'vill Tummheit.'],
     ['the cats (plural)', subject(np('CAT', { gender: 'fem', number: 'plural' })), 'd Chatze.'],
     // Accusative = nominative (P10 D7): *de Maa* as subject and as object.
     ['I see the man', clause(I, 'SEE', { directObject: np('MAN') }), 'ich gsee de Maa.'],

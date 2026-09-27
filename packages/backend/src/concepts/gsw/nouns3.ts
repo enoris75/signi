@@ -120,6 +120,8 @@ export const GSW_NOUNS_3: GswColumn = {
   ABILITY: { base: 'Fähigkeit', plural: 'Fähigkeite', gender: 'fem', count: 'singular' },
   DUTY: { base: 'Pflicht', plural: 'Pflichte', gender: 'fem', count: 'singular' },
   KINDNESS: { base: 'Fründlichkeit', gender: 'fem', count: 'singular' },
+  WISDOM: { base: 'Wiisheit', gender: 'fem', count: 'singular' },
+  FOLLY: { base: 'Tummheit', gender: 'fem', count: 'singular' }, // Zürich tumm; Torheit is bookish (verify)
   LAND: { base: 'Land', gender: 'neut', count: 'singular' },
   NATION: { base: 'Nation', plural: 'Natione', gender: 'fem', count: 'singular' },
   SCHOOL: { base: 'Schuel', plural: 'Schuele', gender: 'fem', count: 'singular', compound: 'Schuel' },

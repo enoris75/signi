@@ -118,6 +118,37 @@ describe('determiners', () => {
     });
   });
 
+  // WISDOM and FOLLY, the mass pair a wise and a foolish choice sit on: feminine in every gendered
+  // language, never plural, no indefinite article, and the mass "much".
+  test.each<[string, Record<string, string>, Record<string, string>, Record<string, string>]>([
+    ['WISDOM',
+      { en: 'the cat sees the wisdom.', it: 'il gatto vede la saggezza.', fr: 'le chat voit la sagesse.',
+        de: 'der Kater sieht die Weisheit.', es: 'el gato ve la sabiduría.', ja: '猫は知恵を見ます。',
+        pt: 'o gato vê a sabedoria.' },
+      { en: 'the cat sees wisdom.', it: 'il gatto vede saggezza.', fr: 'le chat voit de la sagesse.',
+        de: 'der Kater sieht Weisheit.', es: 'el gato ve sabiduría.', ja: '猫は知恵を見ます。',
+        pt: 'o gato vê sabedoria.' },
+      { en: 'the cat sees much wisdom.', it: 'il gatto vede molta saggezza.', fr: 'le chat voit beaucoup de sagesse.',
+        de: 'der Kater sieht viel Weisheit.', es: 'el gato ve mucha sabiduría.', ja: '猫は多くの知恵を見ます。',
+        pt: 'o gato vê muita sabedoria.' }],
+    ['FOLLY',
+      { en: 'the cat sees the folly.', it: 'il gatto vede la follia.', fr: 'le chat voit la folie.',
+        de: 'der Kater sieht die Torheit.', es: 'el gato ve la locura.', ja: '猫は愚かさを見ます。',
+        pt: 'o gato vê a loucura.' },
+      { en: 'the cat sees folly.', it: 'il gatto vede follia.', fr: 'le chat voit de la folie.',
+        de: 'der Kater sieht Torheit.', es: 'el gato ve locura.', ja: '猫は愚かさを見ます。',
+        pt: 'o gato vê loucura.' },
+      { en: 'the cat sees much folly.', it: 'il gatto vede molta follia.', fr: 'le chat voit beaucoup de folie.',
+        de: 'der Kater sieht viel Torheit.', es: 'el gato ve mucha locura.', ja: '猫は多くの愚かさを見ます。',
+        pt: 'o gato vê muita loucura.' }],
+  ])('%s is a feminine mass noun — never plural, no indefinite article, "much"', (id, definite, indefinite, many) => {
+    const sees = (extra: Partial<NounPhrase>) =>
+      sayAll(clause(np('CAT'), 'SEE', { directObject: np(id, { number: 'plural', ...extra }) }));
+    expect(sees({})).toEqual(definite);
+    expect(sees({ definiteness: 'indefinite' })).toEqual(indefinite);
+    expect(sees({ definiteness: 'many' })).toEqual(many);
+  });
+
   test('the article elides before a vowel', () => {
     expect(sayAll(clause(np('ANGEL'), 'EAT'))).toMatchObject({
       fr: "l'ange mange.",
