@@ -239,3 +239,68 @@ test.describe('the canvas at real width (P17 phase 3)', () => {
     }
   });
 });
+
+test.describe('the console command bar (P17 phase 4)', () => {
+  test('sits above the prompt on the console tab, each key a 44 px target', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('tab-console').tap();
+    await expect(page.getByTestId('console-command-bar')).toBeVisible();
+    for (const id of ['tab', 'adj', 'pl', 'not', 'slash', 'bracket', 'run']) {
+      const box = await page.getByTestId(`command-bar-${id}`).boundingBox();
+      expect(box!.width).toBeGreaterThanOrEqual(44);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+    }
+  });
+
+  test('/adj, /pl and /not insert their token and keep the field focused', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('tab-console').tap();
+    await prompt(page).tap();
+    await page.getByTestId('command-bar-adj').tap();
+    await expect(prompt(page)).toHaveValue('/adj ');
+    await expect(prompt(page)).toBeFocused();
+    await page.getByTestId('command-bar-pl').tap();
+    await expect(prompt(page)).toHaveValue('/adj /pl ');
+    await page.getByTestId('command-bar-not').tap();
+    await expect(prompt(page)).toHaveValue('/adj /pl /not ');
+    await expect(prompt(page)).toBeFocused();
+  });
+
+  test('the bracket key opens a pair exactly as typing "(" would', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('tab-console').tap();
+    await prompt(page).tap();
+    await page.keyboard.type('/subj');
+    await page.getByTestId('command-bar-bracket').tap();
+    await expect(prompt(page)).toHaveValue('/subj (  )');
+  });
+
+  test('the slash key opens the completion list, as typing "/" would', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('tab-console').tap();
+    await prompt(page).tap();
+    await page.getByTestId('command-bar-slash').tap();
+    await expect(prompt(page)).toHaveValue('/');
+    await expect(page.getByTestId('console-list')).toBeVisible();
+  });
+
+  test('⇥ completes a command exactly as the keyboard’s own Tab does', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('tab-console').tap();
+    await prompt(page).tap();
+    await page.keyboard.type('/su');
+    await page.getByTestId('command-bar-tab').tap();
+    await expect(prompt(page)).toHaveValue('/subj (  )');
+    await expect(prompt(page)).toBeFocused();
+  });
+
+  test('run commits the line, as ↵ does', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('tab-console').tap();
+    await prompt(page).tap();
+    await page.keyboard.type('/subj cat /verb eat');
+    await page.getByTestId('command-bar-run').tap();
+    await expect(prompt(page)).toHaveValue('');
+    await expect(page.getByTestId('source-strip')).toContainText('/subj ( cat ) /verb ( eat )');
+  });
+});

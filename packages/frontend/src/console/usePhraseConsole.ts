@@ -564,6 +564,21 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     setListMode("forced");
   };
 
+  /**
+   * Insert a token at the caret as if it had been typed — the phone's command bar (P17 phase 4), for
+   * the keys a soft keyboard buries. Runs the same one-keystroke structuring a real keystroke would
+   * (a lone "(" auto-opens the pair its command takes), and always parks the caret afterwards: unlike
+   * typing, nothing here moves it for us.
+   */
+  const insertToken = (str: string) => {
+    const at = caret;
+    const next = text.slice(0, at) + str + text.slice(at);
+    const to = at + str.length;
+    const edit = safely(() => structure(text, next, to, editContext()), undefined);
+    setLine(edit?.text ?? next, edit?.caret ?? to);
+    setListMode("auto");
+  };
+
   // ── Committing ──
   // `state` and `here` are what the line left — the workspace and the context, in the period it is in —
   // which the handler's own render has not seen yet.
@@ -1010,6 +1025,8 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     highlight: highlighted,
     setHighlight,
     choose,
+    tab,
+    insertToken,
     diagnostic: showDiagnostic ? diagnostic : undefined,
     unfinished: Boolean(diagnostic?.incomplete && !refused),
     walk: walk === null ? undefined : { at: walk + 1, of: lines.length },

@@ -10,7 +10,7 @@ P01 made every control reachable by key, and P02 made the phrase typeable. On a 
 keys nor the width are there. This plan keeps their handlers and their command table: the Phrase
 view's role sheet is P01's keymap listed as buttons, and the console tab is P02's console,
 undocked.
-**Status:** phases 1–3 built (branch `p17-mobile`); phase 4 planned.
+**Status:** phases 1–4 built (branch `p17-mobile`).
 **Drawings:** the [design canvas](https://claude.ai/artifact/RYyD3YwGnpDfCkJkYKHQva), with six
 phone screens and a note on what breaks today.
 
@@ -174,11 +174,37 @@ the browser's own scrolling pan it.
 - **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('the canvas at real
   width (P17 phase 3)')`.
 
-### Phase 4 — the console's command bar
+### Phase 4 — the console's command bar (built)
 
-A row of keys above the soft keyboard: <kbd>Tab</kbd>, `/adj`, `/pl`, `/not`, `/`, `( )` and run.
-They are the keys a phone keyboard buries, and the ones the console's completion needs. Completions
-become 44 px rows.
+A row of keys above the soft keyboard, each a 44 px target: ⇥, `/adj`, `/pl`, `/not`, `/`, `( )` and
+↵ (run). They are the keys a phone's own keyboard buries — Tab, and the punctuation behind a second
+layer — plus three whole commands, so composing `/adj brown` or `/pl` is one tap into the word,
+not a hunt for the slash first.
+
+- **Where it renders** — [`ConsoleCommandBar.tsx`](../../../../packages/frontend/src/console/ConsoleCommandBar.tsx),
+  the last child of [`PhraseConsole.tsx`](../../../../packages/frontend/src/console/PhraseConsole.tsx)
+  when `docked` is false (the phone's undocked console). Sitting right after the prompt in the same
+  flex column, it lands directly above wherever the soft keyboard opens — no `visualViewport`
+  plumbing needed, since the column already ends where the prompt does.
+- **One handler per act, again.** Every key runs a `usePhraseConsole` action already used elsewhere:
+  ⇥ is `model.tab()` (till now only reachable from `onKeyDown`'s `Tab` case, so it had to be returned
+  from the hook alongside `commit`/`edit`), run is `model.commit()`, and the other five are one new
+  action, `insertToken(str)` — the same one-keystroke `structure()` a typed character runs (so a bare
+  `(` still auto-opens the pair its command takes, e.g. after `/subj` it produces `/subj (  )`,
+  identical to typing the paren by hand), except it always places the caret itself afterwards
+  (`setLine`'s `pendingCaret`), since a programmatic insert is not a real keystroke the browser
+  would move it for.
+- **Never blurs the field.** Each button's `onPointerDown` calls `preventDefault()`: without it,
+  tapping a key would blur the `<textarea>` first, and the soft keyboard — the whole reason this bar
+  exists — would drop out from under it before the click even ran.
+- **No new UI strings.** `/adj`, `/pl`, `/not`, `/` and `( )` are literal command syntax, like the
+  existing `Keycap`'s "Tab"/"Enter". Only the buttons' `aria-label`s need real words, and every one of
+  those already existed in the catalogue: `/adj`'s, `/pl`'s and `/not`'s come straight off their own
+  `CommandDef.descriptionKey` (`category.adjective`, `number.value.plural`,
+  `polarity.value.negative`), ⇥ reuses `console.nextWord` and run reuses `action.apply` — the same
+  keys the desktop hint line already showed for Tab and Enter.
+- **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('the console command bar
+  (P17 phase 4)')`.
 
 ## Open questions
 

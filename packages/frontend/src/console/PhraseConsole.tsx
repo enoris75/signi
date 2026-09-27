@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useWindowDrag } from "../hooks/useWindowDrag.ts";
 import { useUiString } from "../i18n/useUiString.ts";
 import { Keycap } from "../keyboard/Keycap.tsx";
+import { ConsoleCommandBar } from "./ConsoleCommandBar.tsx";
 import { ConsolePrompt } from "./ConsolePrompt.tsx";
 import { SourceStrip } from "./SourceStrip.tsx";
 import { Transcript } from "./Transcript.tsx";
@@ -138,6 +139,9 @@ export function PhraseConsole({
       <Transcript entries={model.transcript} pins={model.pins} onPin={model.pin} vocab={model.vocab} />
       <SourceStrip model={model} />
       <ConsolePrompt model={model} />
+      {/* A phone has no key below the prompt but the soft keyboard's own: this row sits above it,
+          for the keys the soft keyboard buries (P17 phase 4). */}
+      {!docked && <ConsoleCommandBar model={model} />}
     </Box>
   );
 }
