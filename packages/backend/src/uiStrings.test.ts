@@ -1426,6 +1426,13 @@ describe('buildUiStrings', () => {
       en: 'Toolbar', it: 'Barra degli strumenti', fr: "Barre d'outils", de: 'Symbolleiste', es: 'Barra de herramientas',
       ja: 'ツールバー', pt: 'Barra de ferramentas',
     });
+    // The phone's header (P17): its ⋯ button, and the canvas's tab.
+    expect(strings['app.menu']).toEqual({
+      en: 'Menu', it: 'Menu', fr: 'Menu', de: 'Menü', es: 'Menú', ja: 'メニュー', pt: 'Menu',
+    });
+    expect(strings['view.canvas']).toEqual({
+      en: 'Canvas', it: 'Tela', fr: 'Canevas', de: 'Arbeitsfläche', es: 'Lienzo', ja: 'キャンバス', pt: 'Tela',
+    });
   });
 });
 

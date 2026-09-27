@@ -519,6 +519,13 @@ export const UI_STRINGS = defineUiStrings({
   // The header's row of controls, as its aria-label: the bare TOOLBAR (it "Barra degli strumenti",
   // de "Symbolleiste", ja ツールバー). It went unnamed until the catalogue had the word.
   'app.toolbar': { plan: nameOf('TOOLBAR'), format: NAME_FORMAT, fallback: 'Toolbar' },
+  // On a phone (P17) the header's controls fold into one ⋯ button, named by what it opens: the bare
+  // MENU (it "Menu", de "Menü", ja メニュー).
+  'app.menu': { plan: nameOf('MENU'), format: NAME_FORMAT, fallback: 'Menu' },
+  // The phone's tab bar names each view by what it shows. The canvas is the bare CANVAS, as the
+  // console's `console.fromCanvas` names it; the translations tab reuses `translations.heading`, the
+  // console's `console.name`.
+  'view.canvas': { plan: nameOf('CANVAS'), format: NAME_FORMAT, fallback: 'Canvas' },
 
   // The heading of the translations area: the TRANSLATION noun in the plural, bare — the
   // panel lists many translations.

@@ -14,30 +14,8 @@ import {
   SlotConfig,
   SlotKey,
 } from "./interfaces.ts";
+import { useHeaderOffset } from "../../hooks/useHeaderOffset.ts";
 
-/**
- * The height of the page's sticky header, which is painted above this panel: the panel starts
- * below it, or its own title row (and the controls in it) would be covered by the header and
- * unclickable. Measured rather than assumed — the header's height depends on the font the UI
- * language renders its tagline in. Falls back to 0 if the header isn't there.
- */
-function useHeaderOffset(): number {
-  const [offset, setOffset] = useState(0);
-
-  useEffect(() => {
-    const header = document.querySelector("[data-signi-header]");
-    if (!header) return;
-    // The border box, not the entry's contentRect: the header's padding and bottom border are
-    // part of what covers the panel.
-    const observer = new ResizeObserver(() => {
-      setOffset(header.getBoundingClientRect().height);
-    });
-    observer.observe(header);
-    return () => observer.disconnect();
-  }, []);
-
-  return offset;
-}
 
 interface PhraseSidebarProps {
   // Whether the overlay is shown. Owned by the page (App) so a control in the

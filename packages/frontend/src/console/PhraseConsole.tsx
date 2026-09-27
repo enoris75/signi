@@ -14,8 +14,19 @@ import type { PhraseConsoleModel } from "./usePhraseConsole.ts";
  * The phrase console, docked under the page (P02 §2): a title row, the transcript, the focused
  * period's source, and the prompt. It follows the page's own paper — not a dark terminal — and
  * stops at the words panel while that is open. The grip resizes it; ` shows and hides it.
+ *
+ * On a phone (P17) it is not docked but a view of its own, one of the tab bar's: it fills the space
+ * it is given, has no grip, and leaves hiding it to the tab bar.
  */
-export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleModel; wordsPanelOpen: boolean }) {
+export function PhraseConsole({
+  model,
+  wordsPanelOpen,
+  docked = true,
+}: {
+  model: PhraseConsoleModel;
+  wordsPanelOpen: boolean;
+  docked?: boolean;
+}) {
   const t = useUiString();
   const startDrag = useWindowDrag();
   const right = useWordsPanelWidth(wordsPanelOpen);
@@ -27,22 +38,26 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
       data-kb-region="console"
       data-testid="phrase-console"
       sx={{
-        position: "fixed",
-        left: 0,
-        right,
-        bottom: 0,
-        height: model.height,
-        zIndex: (theme) => theme.zIndex.drawer + 2,
+        ...(docked
+          ? {
+              position: "fixed",
+              left: 0,
+              right,
+              bottom: 0,
+              height: model.height,
+              zIndex: (theme) => theme.zIndex.drawer + 2,
+              borderTop: "1px solid",
+              boxShadow: "0 -4px 16px rgba(26, 25, 23, 0.06)",
+            }
+          : { height: "100%", minHeight: 0, pt: 1 }),
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.paper",
-        borderTop: "1px solid",
         borderColor: "divider",
-        boxShadow: "0 -4px 16px rgba(26, 25, 23, 0.06)",
       }}
     >
       {/* The grip: drag to resize, ↑ ↓ from the keyboard. */}
-      <Box
+      {docked && <Box
         role="separator"
         aria-orientation="horizontal"
         aria-label={t("action.resizeConsole")}
@@ -77,7 +92,7 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
           "&:hover::after, &:focus-visible::after": { bgcolor: "primary.main" },
           "&:focus": { outline: "none" },
         }}
-      />
+      />}
       <Box
         sx={{
           display: "flex",
@@ -104,7 +119,7 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
         >
           {t("period.name")} {number}
         </Box>
-        <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1.5 }}>
+        {docked && <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
             <Keycap spec="Code:Backquote" />
             {t("action.hide")}
@@ -118,7 +133,7 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
               <ExpandMoreIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-        </Box>
+        </Box>}
       </Box>
       <Transcript entries={model.transcript} pins={model.pins} onPin={model.pin} vocab={model.vocab} />
       <SourceStrip model={model} />

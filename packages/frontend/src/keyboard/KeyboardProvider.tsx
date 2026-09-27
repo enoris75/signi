@@ -28,6 +28,7 @@ import { boxElements, periodOf, stepBox, stepPeriod } from "./boxes.ts";
 import { stepRegion } from "./regions.ts";
 import { isEditableTarget, resolveScopes, type Scope } from "./scope.ts";
 import { nearestInDirection, type BoxRect, type Direction } from "./spatialNav.ts";
+import { isTouchOnly } from "../hooks/useCompactLayout.ts";
 
 /**
  * The one `keydown` listener in the app.
@@ -237,7 +238,10 @@ export function KeyboardProvider({
 
     const onKeyDown = (event: KeyboardEvent) => {
       // A modifier held on its own is not yet a reason to dress the canvas up in key tips.
-      if (!event.metaKey && !event.ctrlKey && !event.altKey) setModality("keyboard");
+      // Nor is a phone's soft keyboard typing into a field: that is someone tapping, and the canvas
+      // stays as it is for a finger (P17).
+      const softKey = isTouchOnly() && isEditableTarget(event.target);
+      if (!event.metaKey && !event.ctrlKey && !event.altKey && !softKey) setModality("keyboard");
       // An open word picker is a text field, and it owns every key inside it (the plan's §4.5
       // gives it a map of its own in phase 2).
       const matches = (spec: string) => matchesKeySpec(spec, event, value.platform);
