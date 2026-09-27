@@ -437,6 +437,92 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    id: 'LEOPARD',
+    role: 'noun',
+    description: 'a large wild cat of Africa and Asia with a spotted coat',
+    definition: `
+      /subj ( FELINE /adj BIG /adj WILD /a /rel #2.subj )
+      /subj ( FELINE ) /verb ( LIVE_ALIVE ) /loc ( AFRICA )
+    `,
+    emoji: '🐆',
+    animate: true,
+    isA: 'FELINE',
+    forms: {
+      en: { base: 'leopard', plural: 'leopards', count: 'singular' },
+      it: { base: 'leopardo', plural: 'leopardi', gender: 'masc', count: 'singular' },
+      fr: { base: 'léopard', plural: 'léopards', gender: 'masc', count: 'singular' },
+      // An n-declension masculine: "den Leoparden".
+      de: { base: 'Leopard', plural: 'Leoparden', gender: 'masc', count: 'singular', fem: 'Leopardin', fem_plural: 'Leopardinnen', weak: '1' },
+      es: { base: 'leopardo', plural: 'leopardos', gender: 'masc', count: 'singular', fem: 'leoparda', fem_plural: 'leopardas' },
+      ja: { base: '豹', count: 'singular', reading: 'ひょう', counter: '頭' },
+      pt: { base: 'leopardo', plural: 'leopardos', gender: 'masc', count: 'singular', fem: 'leoparda', fem_plural: 'leopardas' },
+    },
+  },
+  {
+    id: 'PANTHER',
+    role: 'noun',
+    description: 'a large wild cat with a black coat',
+    definition: '/subj ( FELINE /adj BIG /adj BLACK /a )',
+    emoji: '🐈‍⬛',
+    animate: true,
+    isA: 'FELINE',
+    forms: {
+      en: { base: 'panther', plural: 'panthers', count: 'singular' },
+      // Feminine in every Romance language for either sex.
+      it: { base: 'pantera', plural: 'pantere', gender: 'fem', count: 'singular' },
+      fr: { base: 'panthère', plural: 'panthères', gender: 'fem', count: 'singular' },
+      de: { base: 'Panther', plural: 'Panther', gender: 'masc', count: 'singular' },
+      es: { base: 'pantera', plural: 'panteras', gender: 'fem', count: 'singular' },
+      // 黒豹, the black leopard, which is what "panther" names in Japanese.
+      ja: { base: '黒豹', count: 'singular', reading: 'くろひょう', counter: '頭' },
+      pt: { base: 'pantera', plural: 'panteras', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'PUMA',
+    role: 'noun',
+    description: 'a large wild cat of the Americas, also called cougar or mountain lion',
+    definition: `
+      /subj ( FELINE /adj BIG /adj WILD /a /rel #2.subj )
+      /subj ( FELINE ) /verb ( LIVE_ALIVE ) /loc ( NORTH_AMERICA )
+    `,
+    emoji: '🐆',
+    animate: true,
+    isA: 'FELINE',
+    forms: {
+      en: { base: 'puma', plural: 'pumas', count: 'singular' },
+      // Invariable in Italian: "i puma".
+      it: { base: 'puma', plural: 'puma', gender: 'masc', count: 'singular' },
+      fr: { base: 'puma', plural: 'pumas', gender: 'masc', count: 'singular' },
+      de: { base: 'Puma', plural: 'Pumas', gender: 'masc', count: 'singular' },
+      es: { base: 'puma', plural: 'pumas', gender: 'masc', count: 'singular' },
+      ja: { base: 'ピューマ', count: 'singular', counter: '頭' },
+      pt: { base: 'puma', plural: 'pumas', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'CHEETAH',
+    role: 'noun',
+    description: 'a wild cat of Africa, the fastest animal on land',
+    definition: `
+      /subj ( FELINE /adj WILD /a /rel #2.subj )
+      /subj ( FELINE ) /verb ( RUN /adv FAST )
+    `,
+    emoji: '🐆',
+    animate: true,
+    isA: 'FELINE',
+    forms: {
+      en: { base: 'cheetah', plural: 'cheetahs', count: 'singular' },
+      it: { base: 'ghepardo', plural: 'ghepardi', gender: 'masc', count: 'singular' },
+      fr: { base: 'guépard', plural: 'guépards', gender: 'masc', count: 'singular' },
+      // A strong masculine, unlike Leopard: "den Gepard", plural "Geparde".
+      de: { base: 'Gepard', plural: 'Geparde', gender: 'masc', count: 'singular' },
+      es: { base: 'guepardo', plural: 'guepardos', gender: 'masc', count: 'singular' },
+      ja: { base: 'チーター', count: 'singular', counter: '頭' },
+      pt: { base: 'guepardo', plural: 'guepardos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'ELEPHANT',
     role: 'noun',
     description: 'a very large mammal with a trunk and tusks',

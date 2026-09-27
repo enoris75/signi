@@ -203,7 +203,7 @@ describe('the concept corpus', () => {
       for (const id of animals) expect([id, ancestors(id, byId)]).toEqual([id, [cls, 'ANIMAL']]);
     }
     expect(ancestors('COW', byId)).toEqual(['BOVINE', 'MAMMAL', 'ANIMAL']);
-    for (const id of ['CAT', 'LION', 'TIGER']) {
+    for (const id of ['CAT', 'LION', 'TIGER', 'LEOPARD', 'PANTHER', 'PUMA', 'CHEETAH']) {
       expect([id, ancestors(id, byId)]).toEqual([id, ['FELINE', 'MAMMAL', 'ANIMAL']]);
     }
     expect(ancestors('SPIDER', byId)).toEqual(['ANIMAL']);

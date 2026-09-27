@@ -116,6 +116,10 @@ export const GSW_NOUNS_1: GswColumn = {
   // Löi, not Löwe.
   LION: { base: 'Löi', plural: 'Löie', gender: 'masc', count: 'singular' },
   TIGER: { base: 'Tiger', plural: 'Tiger', gender: 'masc', count: 'singular' },
+  LEOPARD: { base: 'Leopard', plural: 'Leoparde', gender: 'masc', count: 'singular' },
+  PANTHER: { base: 'Panther', plural: 'Panther', gender: 'masc', count: 'singular' },
+  PUMA: { base: 'Puma', plural: 'Puma', gender: 'masc', count: 'singular' },
+  CHEETAH: { base: 'Gepard', plural: 'Geparde', gender: 'masc', count: 'singular' },
   ELEPHANT: { base: 'Elefant', plural: 'Elefante', gender: 'masc', count: 'singular' },
   MONKEY: { base: 'Aff', plural: 'Affe', gender: 'masc', count: 'singular' },
   DEER: { base: 'Hirsch', plural: 'Hirsche', gender: 'masc', count: 'singular' },

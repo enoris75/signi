@@ -472,6 +472,140 @@ describe('subject: the family noun FELINE', () => {
   });
 });
 
+// The big cats under FELINE. German Leopard is an n-declension masculine (den Leoparden), Gepard a
+// strong one (den Gepard); PANTHER is feminine across Romance; Italian "puma" is invariable.
+describe('subject: the big cats', () => {
+  // [id, the singular subject, the plural subject, an indefinite object with BIG]
+  test.each([
+    [
+      'LEOPARD',
+      {
+        en: 'the leopard runs.',
+        it: 'il leopardo corre.',
+        fr: 'le léopard court.',
+        de: 'der Leopard läuft.',
+        es: 'el leopardo corre.',
+        ja: '豹は走ります。',
+        pt: 'o leopardo corre.',
+      },
+      {
+        en: 'the leopards run.',
+        it: 'i leopardi corrono.',
+        fr: 'les léopards courent.',
+        de: 'die Leoparden laufen.',
+        es: 'los leopardos corren.',
+        ja: '豹は走ります。',
+        pt: 'os leopardos correm.',
+      },
+      {
+        en: 'the person sees a big leopard.',
+        it: 'la persona vede un grande leopardo.',
+        fr: 'la personne voit un grand léopard.',
+        de: 'die Person sieht einen großen Leoparden.',
+        es: 'la persona ve un leopardo grande.',
+        ja: '人は大きい豹を見ます。',
+        pt: 'a pessoa vê um leopardo grande.',
+      },
+    ],
+    [
+      'PANTHER',
+      {
+        en: 'the panther runs.',
+        it: 'la pantera corre.',
+        fr: 'la panthère court.',
+        de: 'der Panther läuft.',
+        es: 'la pantera corre.',
+        ja: '黒豹は走ります。',
+        pt: 'a pantera corre.',
+      },
+      {
+        en: 'the panthers run.',
+        it: 'le pantere corrono.',
+        fr: 'les panthères courent.',
+        de: 'die Panther laufen.',
+        es: 'las panteras corren.',
+        ja: '黒豹は走ります。',
+        pt: 'as panteras correm.',
+      },
+      {
+        en: 'the person sees a big panther.',
+        it: 'la persona vede una grande pantera.',
+        fr: 'la personne voit une grande panthère.',
+        de: 'die Person sieht einen großen Panther.',
+        es: 'la persona ve una pantera grande.',
+        ja: '人は大きい黒豹を見ます。',
+        pt: 'a pessoa vê uma pantera grande.',
+      },
+    ],
+    [
+      'PUMA',
+      {
+        en: 'the puma runs.',
+        it: 'il puma corre.',
+        fr: 'le puma court.',
+        de: 'der Puma läuft.',
+        es: 'el puma corre.',
+        ja: 'ピューマは走ります。',
+        pt: 'o puma corre.',
+      },
+      {
+        en: 'the pumas run.',
+        it: 'i puma corrono.',
+        fr: 'les pumas courent.',
+        de: 'die Pumas laufen.',
+        es: 'los pumas corren.',
+        ja: 'ピューマは走ります。',
+        pt: 'os pumas correm.',
+      },
+      {
+        en: 'the person sees a big puma.',
+        it: 'la persona vede un grande puma.',
+        fr: 'la personne voit un grand puma.',
+        de: 'die Person sieht einen großen Puma.',
+        es: 'la persona ve un puma grande.',
+        ja: '人は大きいピューマを見ます。',
+        pt: 'a pessoa vê um puma grande.',
+      },
+    ],
+    [
+      'CHEETAH',
+      {
+        en: 'the cheetah runs.',
+        it: 'il ghepardo corre.',
+        fr: 'le guépard court.',
+        de: 'der Gepard läuft.',
+        es: 'el guepardo corre.',
+        ja: 'チーターは走ります。',
+        pt: 'o guepardo corre.',
+      },
+      {
+        en: 'the cheetahs run.',
+        it: 'i ghepardi corrono.',
+        fr: 'les guépards courent.',
+        de: 'die Geparde laufen.',
+        es: 'los guepardos corren.',
+        ja: 'チーターは走ります。',
+        pt: 'os guepardos correm.',
+      },
+      {
+        en: 'the person sees a big cheetah.',
+        it: 'la persona vede un grande ghepardo.',
+        fr: 'la personne voit un grand guépard.',
+        de: 'die Person sieht einen großen Gepard.',
+        es: 'la persona ve un guepardo grande.',
+        ja: '人は大きいチーターを見ます。',
+        pt: 'a pessoa vê um guepardo grande.',
+      },
+    ],
+  ])('%s renders, pluralises and agrees in every language', (id, singular, plural, object) => {
+    expect(subject(np(id))).toEqual(singular);
+    expect(subject(np(id, { number: 'plural' }))).toEqual(plural);
+    expect(sayAll(clause(np('PERSON'), 'SEE', {
+      directObject: np(id, { definiteness: 'indefinite', adjectives: ['BIG'] }),
+    }))).toEqual(object);
+  });
+});
+
 // ACTION, seeded for B06 (the VERB definition — "a word that expresses actions"). Feminine in
 // every gendered language (azione / action / Handlung / acción / ação), and vowel-initial in
 // Italian and French so the definite article elides (l'azione / l'action).
