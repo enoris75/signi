@@ -2249,6 +2249,26 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Move this period down',
   },
+  // The translations panel's own reorder controls: the same MOVE-with-direction shape on "this
+  // language", the row the button sits on ("Sposta questa lingua su", ja 「この言語を上に移動」).
+  'action.moveLanguageUp': {
+    plan: {
+      ...commandOf('MOVE'),
+      verbPhrase: { verb: 'MOVE', modifier: 'UP' },
+      directObject: { concept: 'LANGUAGE', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Move this language up',
+  },
+  'action.moveLanguageDown': {
+    plan: {
+      ...commandOf('MOVE'),
+      verbPhrase: { verb: 'MOVE', modifier: 'DOWN' },
+      directObject: { concept: 'LANGUAGE', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Move this language down',
+  },
 
   // The arrow keys on a box, which take the cursor to the nearest box that way: GO with the direction
   // (it "Va' a sinistra", de "Nach links gehen", ja 左に移動 — GO's instruction label, since 行く has no

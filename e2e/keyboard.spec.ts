@@ -373,7 +373,7 @@ test.describe('the canvas by keyboard', () => {
     expect(await region()).toBe('translations');
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('c');
-    await expect(page.getByTestId('translation-it').getByRole('button')).toBeVisible();
+    await expect(page.getByTestId('translation-it').locator('.copy-btn')).toBeVisible();
 
     expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
   });

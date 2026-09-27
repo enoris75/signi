@@ -1001,6 +1001,17 @@ describe('buildUiStrings', () => {
       de: 'Dieses Satzgefüge nach unten verschieben', es: 'Mover este período abajo', ja: 'この文を下に移動',
       pt: 'Mover este período para baixo',
     });
+    // The translations panel's reorder controls take the same shape, on "this language".
+    expect(strings['action.moveLanguageUp']).toEqual({
+      en: 'Move this language up', it: 'Sposta questa lingua su', fr: 'Déplacer cette langue vers le haut',
+      de: 'Diese Sprache nach oben verschieben', es: 'Mover este idioma arriba', ja: 'この言語を上に移動',
+      pt: 'Mover esta língua para cima',
+    });
+    expect(strings['action.moveLanguageDown']).toEqual({
+      en: 'Move this language down', it: 'Sposta questa lingua giù', fr: 'Déplacer cette langue vers le bas',
+      de: 'Diese Sprache nach unten verschieben', es: 'Mover este idioma abajo', ja: 'この言語を下に移動',
+      pt: 'Mover esta língua para baixo',
+    });
     expect(strings['action.resizeContainer']).toMatchObject({
       en: 'Resize this period container',
       it: 'Ridimensiona questo contenitore di periodo',

@@ -174,6 +174,9 @@ const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
       // The ↑ ↓ caps beside it say where.
       { keys: ["ArrowUp", "ArrowDown"], label: "Move between rows", labelKey: "action.move" },
       { keys: ["Enter", "C"], label: "Copy a language", labelKey: "action.copyLanguage" },
+      // ⇧↑ ⇧↓ move the row under the cursor; the order is remembered in this browser.
+      { keys: ["Shift+ArrowUp"], label: "Move this language up", labelKey: "action.moveLanguageUp" },
+      { keys: ["Shift+ArrowDown"], label: "Move this language down", labelKey: "action.moveLanguageDown" },
       // ↵ on a word chooses it for the box, which is what the picker's ↵ is called.
       {
         keys: ["Enter"],

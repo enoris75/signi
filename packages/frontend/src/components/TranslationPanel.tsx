@@ -9,9 +9,12 @@ import {
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import type { LanguageCode, RubySegment, Translation } from '@signi/shared';
-import { LANGUAGE_CODES, isPreviewLanguage } from '@signi/shared';
+import { isPreviewLanguage } from '@signi/shared';
 import type { SentenceResult } from '../hooks/useTranslation.ts';
+import { useLanguageOrder } from '../hooks/useLanguageOrder.ts';
 import { Flag } from '../i18n/flags.tsx';
 import { useUiString } from '../i18n/useUiString.ts';
 import { focusRing } from '../keyboard/focusRing.ts';
@@ -50,13 +53,32 @@ export default function TranslationPanel({ sentences, preview = false }: Props) 
   const t = useUiString();
   const heading = t('translations.heading');
   const listRef = useRef<HTMLDivElement | null>(null);
+  const [order, moveLanguage] = useLanguageOrder();
+
+  // A moved row keeps the cursor: React re-inserts its element, which can drop focus, so whatever
+  // held it (the row, or its arrow button) takes it back once the list has re-rendered.
+  function move(language: LanguageCode, delta: number) {
+    const held = document.activeElement as HTMLElement | null;
+    moveLanguage(language, delta);
+    requestAnimationFrame(() => {
+      if (held && held.isConnected && document.activeElement !== held) held.focus();
+    });
+  }
 
   // The rows are a list, so they are walked like one: ↑ ↓ between languages, and ↵ or C copies
   // the one the cursor is on (the plan's §4.6). Each row is its own tab stop as well, since a
-  // reader may want to tab straight to the language they are checking.
+  // reader may want to tab straight to the language they are checking. ⇧↑ ⇧↓ move the row itself,
+  // as they move a period.
   function onKeyDown(event: KeyboardEvent) {
     const delta = event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0;
     if (!delta) return;
+    if (event.shiftKey) {
+      const row = (event.target as HTMLElement).closest<HTMLElement>('[data-kb-lang]');
+      if (!row) return;
+      event.preventDefault();
+      move(row.dataset.kbLang as LanguageCode, delta);
+      return;
+    }
     const rows = Array.from(
       listRef.current?.querySelectorAll<HTMLElement>('[data-kb-lang]') ?? [],
     );
@@ -91,13 +113,15 @@ export default function TranslationPanel({ sentences, preview = false }: Props) 
         </Typography>
       ) : (
         <Box ref={listRef} onKeyDown={onKeyDown}>
-          {LANGUAGE_CODES.map((language, idx) => (
+          {order.map((language, idx) => (
             <LanguageRow
               key={language}
               language={language}
               sentences={ready}
-              isLast={idx === LANGUAGE_CODES.length - 1}
+              isLast={idx === order.length - 1}
               preview={preview}
+              onMoveUp={idx > 0 ? () => move(language, -1) : undefined}
+              onMoveDown={idx < order.length - 1 ? () => move(language, 1) : undefined}
             />
           ))}
         </Box>
@@ -113,11 +137,17 @@ function LanguageRow({
   sentences,
   isLast,
   preview,
+  onMoveUp,
+  onMoveDown,
 }: {
   language: LanguageCode;
   sentences: SentenceResult[];
   isLast: boolean;
   preview: boolean;
+  // Absent at the end the row cannot move past; the button then stays, disabled, so the cluster
+  // does not shift as a row reaches the top or bottom.
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
   // Named `uiString` rather than `t` — the translation lambdas below already bind `t`.
@@ -168,7 +198,7 @@ function LanguageRow({
         borderColor: 'divider',
         // The copy button is drawn only for the row in hand — under the mouse, or under the
         // cursor. Before this it showed on hover alone, so a keyboard never reached it.
-        '&:hover .copy-btn, &:focus-within .copy-btn': { opacity: 1 },
+        '&:hover .copy-btn, &:focus-within .copy-btn, &:hover .move-btn, &:focus-within .move-btn': { opacity: 1 },
         ...focusRing('primary'),
       }}
     >
@@ -236,30 +266,54 @@ function LanguageRow({
             {uiString('status.preview')}
           </Box>
         )}
-        {text && (
-          <Tooltip title={uiString(copied ? 'status.copied' : 'action.copyTranslation')} placement="top">
-            <IconButton
-              className="copy-btn"
-              onClick={handleCopy}
-              size="small"
-              // The plan can't carry the row's language, so it follows in brackets.
-              aria-label={`${uiString('action.copyTranslation')} (${name})`}
-              sx={{
-                ml: 'auto',
-                p: 0.5,
-                color: copied ? 'success.main' : 'text.secondary',
-                opacity: copied ? 1 : 0,
-                transition: 'opacity 0.15s',
-              }}
-            >
-              {copied ? (
-                <CheckIcon sx={{ fontSize: '0.95rem' }} />
-              ) : (
-                <ContentCopyIcon sx={{ fontSize: '0.95rem' }} />
-              )}
-            </IconButton>
-          </Tooltip>
-        )}
+        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
+          {(
+            [
+              ['up', 'action.moveLanguageUp', ArrowUpwardIcon, onMoveUp],
+              ['down', 'action.moveLanguageDown', ArrowDownwardIcon, onMoveDown],
+            ] as const
+          ).map(([dir, labelKey, Icon, onMove]) => (
+            <Tooltip key={dir} title={onMove ? uiString(labelKey) : ''} placement="top">
+              {/* A disabled button fires no events, so the tooltip hangs on a span around it. */}
+              <span>
+                <IconButton
+                  className="move-btn"
+                  data-testid={`move-language-${dir}`}
+                  onClick={onMove}
+                  disabled={!onMove}
+                  size="small"
+                  aria-label={`${uiString(labelKey)} (${name})`}
+                  sx={{ p: 0.5, color: 'text.secondary', opacity: 0, transition: 'opacity 0.15s' }}
+                >
+                  <Icon sx={{ fontSize: '0.95rem' }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          ))}
+          {text && (
+            <Tooltip title={uiString(copied ? 'status.copied' : 'action.copyTranslation')} placement="top">
+              <IconButton
+                className="copy-btn"
+                onClick={handleCopy}
+                size="small"
+                // The plan can't carry the row's language, so it follows in brackets.
+                aria-label={`${uiString('action.copyTranslation')} (${name})`}
+                sx={{
+                  p: 0.5,
+                  color: copied ? 'success.main' : 'text.secondary',
+                  opacity: copied ? 1 : 0,
+                  transition: 'opacity 0.15s',
+                }}
+              >
+                {copied ? (
+                  <CheckIcon sx={{ fontSize: '0.95rem' }} />
+                ) : (
+                  <ContentCopyIcon sx={{ fontSize: '0.95rem' }} />
+                )}
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Box>
       {lines.map((translation, i) =>
         translation ? (
