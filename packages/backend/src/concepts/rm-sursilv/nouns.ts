@@ -247,6 +247,7 @@ export const RM_SURSILV_NOUNS: LanguageColumn = {
   SWISS_GERMAN: { base: 'tudestg svizzer', gender: 'masc', count: 'singular' },
   // the Sursilvan name of the language (RG rumantsch)
   ROMANSH: { base: 'romontsch', gender: 'masc', count: 'singular' },
+  CATALAN: { base: 'catalan', gender: 'masc', count: 'singular' },
   RUMANTSCH_GRISCHUN: { base: 'rumantsch grischun', gender: 'masc', count: 'singular' },
   SURSILVAN: { base: 'sursilvan', gender: 'masc', count: 'singular' },
   VALLADER: { base: 'vallader', gender: 'masc', count: 'singular' },

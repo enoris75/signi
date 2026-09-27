@@ -5,7 +5,7 @@
  */
 export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb' | 'interjection';
 
-export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt' | 'gsw' | 'rm-rumgr' | 'rm-sursilv' | 'rm-vallader';
+export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt' | 'gsw' | 'rm-rumgr' | 'rm-sursilv' | 'rm-vallader' | 'ca';
 
 export type Transitivity = 'intransitive' | 'transitive' | 'ditransitive';
 
@@ -672,6 +672,8 @@ export const LANGUAGES: Record<LanguageCode, string> = {
   'rm-rumgr': 'Rumantsch Grischun',
   'rm-sursilv': 'Sursilvan',
   'rm-vallader': 'Vallader',
+  // Catalan (P03): Central Catalan in the IEC standard (P03 D1). Appended (D7).
+  ca: 'Catalan',
 };
 
 /** Every language code, in row order — the one list the rest of the code derives from (P10-E1). */
@@ -707,6 +709,7 @@ export const LANGUAGE_STATUS = {
   'rm-rumgr': 'preview',
   'rm-sursilv': 'preview',
   'rm-vallader': 'preview',
+  ca: 'preview',
 } as const satisfies Record<LanguageCode, LanguageStatus>;
 
 /**

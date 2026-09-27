@@ -4711,6 +4711,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P03: the language of the Catalan row. No definition, as ROMANSH: CATALONIA is not seeded.
+    id: 'CATALAN',
+    role: 'noun',
+    description: 'the Romance language of Catalonia, Valencia, the Balearic Islands and Andorra',
+    emoji: '🗣️',
+    proper: true,
+    countable: false,
+    isA: 'LANGUAGE',
+    forms: {
+      en: { base: 'Catalan', count: 'singular' },
+      it: { base: 'catalano', gender: 'masc', count: 'singular' },
+      fr: { base: 'catalan', gender: 'masc', count: 'singular' },
+      de: { base: 'Katalanisch', gender: 'neut', count: 'singular', genitive: 'Katalanisch' },
+      es: { base: 'catalán', gender: 'masc', takes_article: '1', count: 'singular' },
+      ja: { base: 'カタルーニャ語', count: 'singular', reading: 'かたるーにゃご' },
+      pt: { base: 'catalão', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The conventional way a language writes its words (P10-E2: "Dieth's spelling", "no standard
     // spelling"). Countable: a language may have several.
     id: 'SPELLING',

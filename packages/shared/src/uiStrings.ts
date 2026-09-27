@@ -5437,6 +5437,7 @@ export const UI_STRINGS = defineUiStrings({
   'language.rm-rumgr': { word: 'ROMANSH', format: { capitalize: true }, fallback: 'Romansh' },
   'language.rm-sursilv': { word: 'ROMANSH', format: { capitalize: true }, fallback: 'Romansh' },
   'language.rm-vallader': { word: 'ROMANSH', format: { capitalize: true }, fallback: 'Romansh' },
+  'language.ca': { word: 'CATALAN', format: { capitalize: true }, fallback: 'Catalan' },
   'language.rm-rumgr.dialect': { word: 'RUMANTSCH_GRISCHUN', fallback: 'Rumantsch Grischun' },
   'language.rm-sursilv.dialect': { word: 'SURSILVAN', fallback: 'Sursilvan' },
   'language.rm-vallader.dialect': { word: 'VALLADER', fallback: 'Vallader' },

@@ -239,6 +239,7 @@ export const RM_RUMGR_NOUNS: LanguageColumn = {
   PORTUGUESE: m('portugais'),
   SWISS_GERMAN: m('tudestg svizzer'),
   ROMANSH: m('rumantsch'),
+  CATALAN: m('catalan'),
   RUMANTSCH_GRISCHUN: m('rumantsch grischun'),
   SURSILVAN: m('sursilvan'),
   VALLADER: m('vallader'),

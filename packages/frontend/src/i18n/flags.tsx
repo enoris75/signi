@@ -14,7 +14,7 @@ export type FlagDef = string | { svg: ArmsId };
  * Grischun, the Grey League (the Surselva) for Sursilvan, the League of God's House (the Engadine)
  * for Vallader.
  */
-export type ArmsId = 'zurich' | 'graubuenden' | 'grey-league' | 'gods-house';
+export type ArmsId = 'zurich' | 'graubuenden' | 'grey-league' | 'gods-house' | 'senyera';
 
 // Shared by the header language selector and the translations panel so the two stay in lock-step.
 export const FLAG: Record<LanguageCode, FlagDef> = {
@@ -29,6 +29,9 @@ export const FLAG: Record<LanguageCode, FlagDef> = {
   'rm-rumgr': { svg: 'graubuenden' },
   'rm-sursilv': { svg: 'grey-league' },
   'rm-vallader': { svg: 'gods-house' },
+  // Catalan has no flag emoji of its own (the tag sequence draws a plain black flag), so the Senyera
+  // is drawn inline (P03 D3).
+  ca: { svg: 'senyera' },
 };
 
 const SVG_STYLE = { display: 'inline-block', verticalAlign: '-0.125em' } as const;
@@ -135,11 +138,27 @@ function GraubuendenArms() {
   );
 }
 
+/**
+ * The Senyera, *or, four pallets gules* laid flat as a flag: nine equal horizontal stripes, gold
+ * and red, gold at the top and the bottom (P03 D3).
+ */
+function Senyera() {
+  return (
+    <svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" data-testid="flag-senyera" style={SVG_STYLE}>
+      <rect x="0" y="0" width="16" height="16" fill="#fcdd09" />
+      {[1, 3, 5, 7].map((i) => (
+        <rect key={i} x="0" y={(i * 16) / 9} width="16" height={16 / 9} fill="#da121a" />
+      ))}
+    </svg>
+  );
+}
+
 const ARMS: Record<ArmsId, () => ReactElement> = {
   zurich: ZurichArms,
   graubuenden: GraubuendenArms,
   'grey-league': GreyLeagueArms,
   'gods-house': GodsHouseArms,
+  senyera: Senyera,
 };
 
 /**
