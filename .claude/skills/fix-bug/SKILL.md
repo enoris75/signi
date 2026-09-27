@@ -59,7 +59,7 @@ fails, fix that first; a plan built on an invalid literal makes a working featur
 
 ### 3. Fix the engine
 The engine is [packages/engine/src/](../../packages/engine/src/): one folder per language
-(`languages/{en,it,fr,es,pt,de,ja,gsw,rm-rumgr,rm-sursilv,rm-vallader}/`, one file per function plus `<lang>.consts.ts` /
+(`languages/{en,it,fr,es,pt,de,ja,gsw,rm-rumgr,rm-sursilv,rm-vallader,ca}/`, one file per function plus `<lang>.consts.ts` /
 `<lang>.types.ts`), with shared plumbing in `translator.ts` (resolves a `PhrasePlan` into
 per-language `ConceptForms`) and `mood.ts`; the plan model is typed in
 [packages/shared/src/index.ts](../../packages/shared/src/index.ts). Edit the language folder named by
@@ -70,7 +70,8 @@ a `de` function, grep `gsw/` for the same function name and decide whether Swiss
 defect — if it does, fix it there too and pin it in `test/languages/gsw.test.ts`; `gsw/` has no colocated
 tests of its own. Likewise **`rm-rumgr/` is a fork of `it/`, and `rm-sursilv/` / `rm-vallader/` forks
 of `rm-rumgr/`** (P04-E7, E8): after a Romance fix, grep the three and pin any shared defect in
-`test/languages/rm-*.test.ts`. A few defects (A7, A8,
+`test/languages/rm-*.test.ts`. **`ca/` is a fork of `es/`** (P03): after a Spanish fix, grep `ca/`
+and pin a shared defect in `test/languages/ca.test.ts`. A few defects (A7, A8,
 A21) need a corpus/schema change, not just an engine edit — the bug file says so; follow it.
 
 ### 4. Verify, then flip the marker

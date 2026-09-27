@@ -27,14 +27,14 @@ Add the preview languages' forms too — Swiss German and the three Romansh vari
 | The loader (wipes + reinserts everything) | [packages/backend/src/seed.ts](packages/backend/src/seed.ts) |
 | Engine tests (one file per role/feature) | [packages/engine/test/](packages/engine/test/) — `adjectives.test.ts`, `verb.test.ts`, `subject.test.ts`, `nounPhrase.test.ts`, `coordination.test.ts`, … |
 | Test harness (seeds the real corpus, renders every language) | [packages/engine/test/harness.ts](packages/engine/test/harness.ts) |
-| The preview columns | [packages/backend/src/concepts/gsw/](packages/backend/src/concepts/gsw/), [rm-rumgr/](packages/backend/src/concepts/rm-rumgr/), [rm-sursilv/](packages/backend/src/concepts/rm-sursilv/), [rm-vallader/](packages/backend/src/concepts/rm-vallader/) — one file per role, keyed by concept id, merged into `forms[code]` by `concepts/index.ts` (`columns.ts`) |
+| The preview columns | [packages/backend/src/concepts/gsw/](packages/backend/src/concepts/gsw/), [rm-rumgr/](packages/backend/src/concepts/rm-rumgr/), [rm-sursilv/](packages/backend/src/concepts/rm-sursilv/), [rm-vallader/](packages/backend/src/concepts/rm-vallader/), [ca/](packages/backend/src/concepts/ca/) — one file per role, keyed by concept id, merged into `forms[code]` by `concepts/index.ts` (`columns.ts`) |
 
 Languages: the **ready** ones, `en`, `it`, `fr`, `de`, `es`, `ja`, `pt` — every one mandatory — and the
-**preview** ones, `gsw` (Swiss German, P10) and `rm-rumgr`, `rm-sursilv`, `rm-vallader` (Romansh, P04;
+**preview** ones, `gsw` (Swiss German, P10) and `rm-rumgr`, `rm-sursilv`, `rm-vallader` (Romansh, P04), `ca` (Catalan, P03;
 `LANGUAGE_STATUS` in `@signi/shared`). **A word is never missing.** Give each preview column its own form
 when you can; if you cannot, leave the concept out of the column and it **borrows the closest
 language's forms** when the seeds are assembled — `gsw` from `de`, `rm-rumgr` from `it`, `rm-sursilv`
-and `rm-vallader` from `rm-rumgr` (`COLUMNS` in `concepts/columns.ts`) — and is listed in `BORROWED`
+and `rm-vallader` from `rm-rumgr`, `ca` from `es` (`COLUMNS` in `concepts/columns.ts`) — and is listed in `BORROWED`
 to be given its own word later. Do not copy the borrowed forms into the column by hand: the column
 holds only the language's own words, so `BORROWED` stays the true list.
 
@@ -46,6 +46,14 @@ Sursilvan or Vallader form from the Rumantsch Grischun one. The keys are `it`'s 
 conditional cells; every verb takes `participle`, and `aux: 'be'` where the variety selects *esser*;
 every Sursilvan adjective takes `predicative_masc_sg` (P04-E9). Sentences are pinned in
 `packages/engine/test/languages/rm-*.test.ts`.
+
+**Catalan** is Central Catalan in the IEC standard (P03 D1): follow
+[the style sheet](../../../docs/features/P-planning/P03-catalan/style-ca.md), which lists the column's keys.
+Nouns and adjectives take `es`'s keys (every adjective all four of `base, fem, plural, fem_plural`; a
+feminine noun in unstressed *i-/u-/hi-/hu-* takes `no_elision`); a verb stores its whole paradigm —
+present, imperfect, future, conditional, both subjunctives, `gerund`, the four participle forms and three
+imperatives — and **no** `*_past` (the past is *va* + infinitive, P03 D2). Sentences are pinned in
+`packages/engine/test/languages/ca.test.ts`.
 
 **Swiss German** is Zürichdeutsch in Dieth spelling: follow
 [the style sheet](../../../docs/features/P-planning/P10-swiss-german/dieth-style-sheet.md). Its forms go in
