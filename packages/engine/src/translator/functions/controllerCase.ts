@@ -1,7 +1,8 @@
 import type { ResolvedVerbPhrase } from '../../types.js';
 
 /** The preposition a Romance dative takes: *al gatto*, *au chat*, *al gato*, *ao gato*. */
-const ROMANCE_DATIVE: Record<string, string> = { it: 'a', fr: 'à', es: 'a', pt: 'a' };
+// Romansh's *a* (P04 E1 D1): "el lubescha al giat da currer" (verify).
+const ROMANCE_DATIVE: Record<string, string> = { it: 'a', fr: 'à', es: 'a', pt: 'a', 'rm-rumgr': 'a', 'rm-sursilv': 'a', 'rm-vallader': 'a' };
 
 /**
  * The verb phrase of a clause whose infinitive complement its **direct object** controls (see

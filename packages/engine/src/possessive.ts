@@ -143,6 +143,61 @@ export function possessiveIt(feats: PronominalPossessor, agree: PossessedAgreeme
   return typeof forms === 'string' ? forms : forms[romanceIndex(agree)];
 }
 
+// ── Rumantsch Grischun (P04-E7 D4) ──────────────────────────────────────────
+// Attributive and article-less, agreeing with the possessed (masc-sg / fem-sg / masc-pl / fem-pl):
+// "mes giat", "mia chasa", "mes giats", "mias chasas". The masculine singular and plural share one
+// form; "lur" is invariable. The generic subject binds *agen* ("ins vesa ses agen cudesch" is left
+// to the lexicon's OWN_ADJECTIVE), so *ins* takes the 3sg here. Every form *(verify)*, P04-E19.
+const RUMGR: Record<PN, [string, string, string, string] | string> = {
+  '1sg': ['mes', 'mia', 'mes', 'mias'],
+  '2sg': ['tes', 'tia', 'tes', 'tias'],
+  '3sg': ['ses', 'sia', 'ses', 'sias'],
+  '1pl': ['noss', 'nossa', 'noss', 'nossas'],
+  '2pl': ['voss', 'vossa', 'voss', 'vossas'],
+  '3pl': 'lur',
+};
+
+export function possessiveRumgr(feats: PronominalPossessor, agree: PossessedAgreement): string {
+  const forms = RUMGR[pn(feats)];
+  return typeof forms === 'string' ? forms : forms[romanceIndex(agree)];
+}
+
+// ── Sursilvan (P04-E8 D4) ───────────────────────────────────────────────────
+// Attributive and article-less, as RG's, agreeing with the possessed (masc-sg / fem-sg / masc-pl /
+// fem-pl): "miu bab", "mia mumma", "mes cudischs" (the style sheet), "mias casas"; *nies / vies* in the
+// first and second plural; "lur" invariable. *ins* takes the 3sg. Every form *(verify)*, P04-E19.
+const SURSILV: Record<PN, [string, string, string, string] | string> = {
+  '1sg': ['miu', 'mia', 'mes', 'mias'],
+  '2sg': ['tiu', 'tia', 'tes', 'tias'],
+  '3sg': ['siu', 'sia', 'ses', 'sias'],
+  '1pl': ['nies', 'nossa', 'nos', 'nossas'],
+  '2pl': ['vies', 'vossa', 'vos', 'vossas'],
+  '3pl': 'lur',
+};
+
+export function possessiveSursilv(feats: PronominalPossessor, agree: PossessedAgreement): string {
+  const forms = SURSILV[pn(feats)];
+  return typeof forms === 'string' ? forms : forms[romanceIndex(agree)];
+}
+
+// ── Vallader (P04-E8 D4) ────────────────────────────────────────────────────
+// Attributive and article-less, agreeing with the possessed (masc-sg / fem-sg / masc-pl / fem-pl):
+// "meis giat", "mia chasa", "meis giats", "mias chasas". The masculine singular and plural share one
+// form; "lur" is invariable. The style sheet is silent: every form the author's draft *(verify)*, P04-E19.
+const VALLADER: Record<PN, [string, string, string, string] | string> = {
+  '1sg': ['meis', 'mia', 'meis', 'mias'],
+  '2sg': ['teis', 'tia', 'teis', 'tias'],
+  '3sg': ['seis', 'sia', 'seis', 'sias'],
+  '1pl': ['nos', 'nossa', 'noss', 'nossas'],
+  '2pl': ['vos', 'vossa', 'voss', 'vossas'],
+  '3pl': 'lur',
+};
+
+export function possessiveVallader(feats: PronominalPossessor, agree: PossessedAgreement): string {
+  const forms = VALLADER[pn(feats)];
+  return typeof forms === 'string' ? forms : forms[romanceIndex(agree)];
+}
+
 // ── French ──────────────────────────────────────────────────────────────────
 // Agrees with the possessed. In the singular masc/fem split (mon/ma, son/sa); mon/ton/son also
 // stand in before a vowel-initial feminine ("mon amie"). The plural is gender-invariant.

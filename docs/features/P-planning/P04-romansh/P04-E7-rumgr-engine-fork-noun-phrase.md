@@ -5,7 +5,7 @@ contractions, adjective agreement and position, determiners, possessives and deg
 **Shape:** copy `it`, rename, delete what RG has no counterpart for, re-source every word from the
 `rm-rumgr` lexemes. The same move P10-E5 made from `de`.
 **Scope:** engine; the `rm-rumgr` suite (`packages/engine/test/languages/rm-rumgr.test.ts`) starts here.
-**Status:** open. Filed 2026-09-27 from P04 §2, §2.1 and phase 1. Depends on E1 and E4's first
+**Status:** **shipped, 2026-09-27** — see [Done](#done). Filed 2026-09-27 from P04 §2, §2.1 and phase 1. Depends on E1 and E4's first
 batches.
 
 | plan | `it` | `rm-rumgr` *(verify)* |
@@ -74,3 +74,40 @@ helper names in `rm-rumgr/`.
 ## Out of scope
 
 The clause (E10 on). The two idiom engines (E8).
+
+## Done
+
+Shipped 2026-09-27. `packages/engine/src/languages/rm-rumgr/` is a fork of `it/`'s source (58 files,
+~1,960 LOC — smaller than `it`'s 2,717: the clitic system, the passive *si* and the prenominal
+suppletion are gone), `italianEngine` → `rumantschGrischunEngine`, `it.consts` → `rumgr.consts`.
+
+- **D1, fork:** every Italian word re-sourced from the `rm-rumgr` lexemes or from `rumgr.consts.ts`.
+  Deleted: `belloForm`, `buonoForm`, `quelloForm`, `questoForm`, `euphonicA`, `itCliticCluster`,
+  `itEnclitic`, `prenominalSurface`, `agreementForms`, `aspectVerb`, `auxFinite`, `conjugate`,
+  `verbGroupInfinitive` (the last four replaced by `verbGroup` / `finiteCell`, E10–E16).
+- **D2, names and the guard:** `artFor` → `rgArticle`, `itMods` → `rgMods`, `itDeg` → `rgDeg`,
+  `itStandard` → `rgStandard`, `itPossessedHeadForms` → `rgPossessedHeadForms`, `itExamples` →
+  `rgExamples`, `nessunForm` → `naginForm`, `IT_*` → `RG_*`; `git grep -i "italian\|\bit[A-Z]" rm-rumgr/`
+  finds comments only. The suite's leak guard fails on Italian-only words and on the idioms' markers
+  from the style sheet (Vallader *es* left out: it is RG's 2sg of *esser*).
+- **Articles:** *il / la / l' / ils / las*, *l'* before a vowel for both genders in the singular only;
+  *in / ina*, never elided; the indefinite plural bare. **Contractions** *al, als, dal, dals* only (a
+  or da + masculine *il / ils*); *a l', da la, en il, sin il* stay apart. *a* is *ad* before a vowel
+  (`adBeforeVowel`, which replaces `euphonicA`).
+- **Adjectives** agree from the stored `base / fem / masc_plural / fem_plural` (`agreeAdj`), with the
+  participle rule (`agreeByRule`) only as a fallback; `position: 'pre'` places them, one qualifying
+  adjective before the noun as in `it`, the determiner-like ones (`PRENOMINAL_DETERMINER`) beside it.
+- **Determiners:** *quest / questa*, *quel / quella*, *nagin / nagina*, *insaquants*, *blers*,
+  *paucs*, *tuts ils*, *mintga*, *omadus ils*, *plirs*, *avunda*, *in tal*, *la gronda part dals*;
+  cardinals *in / ina, dus / duas, trais …*. All *(verify)*.
+- **D4, possessives:** `possessiveRumgr` in `engine/src/possessive.ts` — *mes, mia, mes, mias*; *tes*,
+  *ses*, *noss*, *voss*, invariable *lur* — with no article (`rgPossessedHeadForms`).
+- **Degree:** *pli*, *il pli*, *main*, *uschè … sco*; the standard under *che* (*ch'* before a vowel).
+- **D3, object pronouns:** the tonic after the verb (*jau ves el*), pinned `test.fails` with the
+  clitic RG writes (*jau al ves*, *il giat ma vesa*).
+- **E1 D1** landed here: every language-keyed table in `translator.consts.ts` and the translator
+  functions names the three codes, with RG's value for all three (see E1's Done).
+
+Tests: `packages/engine/test/languages/rm-rumgr.test.ts` "P04-E7" — the ticket's table, elision in
+both genders, every contraction, *en il* apart, the determiners, possessives, degree, the leak guard;
+"P04-E7 D3" — the tonic object and its two `test.fails` rows.

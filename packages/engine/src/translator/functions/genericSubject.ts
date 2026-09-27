@@ -6,7 +6,8 @@ import { OTHER_REPLACES_INDEFINITE } from '../translator.consts.js';
  * article there — *i gatti corrono*, *les chats courent*, *los gatos corren*, *os gatos correm*,
  * *l'acqua scorre* — where English, German and Japanese leave it bare ("cats run", "Kater laufen").
  */
-export const GENERIC_DEFINITE_SUBJECT: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt']);
+// Romansh too (P04 E1 D1): "ils giats curran", "l'aua cula" (verify).
+export const GENERIC_DEFINITE_SUBJECT: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /**
  * A clause's **subject** read as the generic (A376): a bare plural or mass noun there takes the

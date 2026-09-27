@@ -5,7 +5,7 @@ accented typing finds concepts in the picker once a variety is an interface lang
 **Shape:** a check of the panel with the three rows filled, and diacritic folding in the concept
 picker's search.
 **Scope:** frontend. Phase 3–5.
-**Status:** open. Filed 2026-09-27 from P04 §3 and §6. Depends on E2 and enough of E10–E16 for the
+**Status:** **shipped, 2026-09-27**, but for the real-browser check — see [Done](#done). Filed 2026-09-27 from P04 §3 and §6. Depends on E2 and enough of E10–E16 for the
 rows to carry text.
 
 ## Why
@@ -51,3 +51,16 @@ In a real browser, both themes, desktop and phone width.
 ## Out of scope
 
 Row reordering (already shipped, remembered in the browser).
+
+## Done
+
+- **D1:** `fold` moved to `@signi/shared` (`fold.ts`); the console imports it, and the picker's search
+  (`useConceptSearch`) folds query and haystack. It also folds Japanese voicing marks (か finds が), as
+  the console already did.
+- **The arms**, rendered at the panel's 14.4px and at 4×, light and dark: the hairline is now mid-grey
+  (the black fields vanished on dark), and the ibex was redrawn — it reads as a rearing goat at 4×, as a
+  black mark on white at 14.4px. All four are distinct from each other and from the emoji flags.
+- **D2 not done:** the panel in a real browser, dark theme and phone width, and whether *Romansh
+  (Rumantsch Grischun)* truncates.
+
+Tests: `VerbTypeahead.test.tsx` (*gia* finds *già*, *creer* finds *créer*).

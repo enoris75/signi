@@ -73,6 +73,39 @@ describe('VerbTypeahead', () => {
     });
   });
 
+  // Accents fold on both sides of the search (P04-E18 D1), as in the console's completion.
+  describe('finding a verb whatever its accents', () => {
+    const create: Concept = { ...verb('CREATE', 'create'), labels: { en: 'create', fr: 'créer' } };
+    const already: Concept = { ...verb('ALREADY', 'already'), labels: { en: 'already', it: 'già' } };
+    const seed = { concepts: { verb: [create, already, verb('RUN', 'run')] } };
+
+    it('finds già by typing gia, and by typing già', () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      renderWithProviders(<VerbTypeahead onSelect={() => {}} />, seed);
+      const input = screen.getByTestId('typeahead-verb');
+
+      typeInto(input, 'gia');
+      expect(listed()).toEqual(['ALREADY']);
+      expect(row('ALREADY')).toHaveTextContent('già');
+
+      typeInto(input, 'già');
+      expect(listed()).toEqual(['ALREADY']);
+    });
+
+    it('finds créer by typing creer, and by typing it in capitals', () => {
+      localStorage.setItem('signi:uiLanguage', 'fr');
+      renderWithProviders(<VerbTypeahead onSelect={() => {}} />, seed);
+      const input = screen.getByTestId('typeahead-verb');
+
+      typeInto(input, 'creer');
+      expect(listed()).toEqual(['CREATE']);
+      expect(row('CREATE')).toHaveTextContent('créer');
+
+      typeInto(input, 'CRÉER');
+      expect(listed()).toEqual(['CREATE']);
+    });
+  });
+
   it('prompts for a verb in the UI language', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
     renderWithProviders(<VerbTypeahead onSelect={() => {}} />, {

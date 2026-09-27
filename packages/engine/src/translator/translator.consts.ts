@@ -6,6 +6,9 @@ import { italianEngine } from '../languages/it/index.js';
 import { japaneseEngine } from '../languages/ja/index.js';
 import { portugueseEngine } from '../languages/pt/index.js';
 import { swissGermanEngine } from '../languages/gsw/index.js';
+import { rumantschGrischunEngine } from '../languages/rm-rumgr/index.js';
+import { sursilvanEngine } from '../languages/rm-sursilv/index.js';
+import { valladerEngine } from '../languages/rm-vallader/index.js';
 import type { LanguageEngine } from '../types.js';
 import type { SubordinatingConjunction } from '@signi/shared';
 
@@ -18,6 +21,9 @@ export const engines: LanguageEngine[] = [
   japaneseEngine,
   portugueseEngine,
   swissGermanEngine,
+  rumantschGrischunEngine,
+  sursilvanEngine,
+  valladerEngine,
 ];
 
 /** Determiners that are inherently plural, so they render the plural noun surface. */
@@ -37,6 +43,13 @@ export const APPROXIMATOR_WORDS: Readonly<Record<string, { about: (fem: boolean)
   es: { about: (fem) => (fem ? 'unas ' : 'unos '), almost: 'casi ' },
   pt: { about: () => 'cerca de ', almost: 'quase ' },
   ja: { about: () => '約', almost: 'ほとんど' },
+  // P04 (E1 D1): Rumantsch Grischun *var* (about), *bunamain* (almost), verify. The two idioms carry
+  // RG's words until their own columns rule (P04-E8): their agents change the values, not the lines.
+  'rm-rumgr': { about: () => 'var ', almost: 'bunamain ' },
+  // Sursilvan (P04-E8): *circa* (about), *bunamein* (almost, the idiom's -mein), verify.
+  'rm-sursilv': { about: () => 'circa ', almost: 'bunamein ' },
+  // Vallader (P04-E8): *circa* (about), *bunamaing* (almost), the author's draft, verify.
+  'rm-vallader': { about: () => 'circa ', almost: 'bunamaing ' },
 };
 
 // The determiners `almost` modifies (P09-E38 D1) live in shared (the builder gates its approximator
@@ -59,7 +72,8 @@ export const MASS_DETERMINER: Readonly<Record<string, string>> = { several: 'som
  * "a maioria dos gatos corre". French agrees with the noun ("la plupart des chats courent"), as do
  * English and German, whose *most* is a plain determiner (P09-E25 D4).
  */
-export const MOST_AGREES_SINGULAR: ReadonlySet<string> = new Set(['it', 'es', 'pt']);
+// Romansh (P04 E1 D1): "la gronda part dals giats curra", as Italian (verify).
+export const MOST_AGREES_SINGULAR: ReadonlySet<string> = new Set(['it', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /**
  * The determiners a relative superlative cannot stand under, which it makes definite: "the biggest
@@ -78,7 +92,8 @@ export { STANDARD_DEGREES, SUPERLATIVE_DEGREES } from '@signi/shared';
  * frase", fr "aucune phrase", es "ninguna frase", pt "nenhuma frase" — never "*aucune phrases". English
  * and German keep the number ("no phrases", "keine Phrasen"); Japanese marks none.
  */
-export const NO_TAKES_SINGULAR: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt']);
+// Romansh: "nagina frasa" (P04 §2.1, verify).
+export const NO_TAKES_SINGULAR: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /** The agreement keys a group carries — see ResolvedNounElement.agreement. Nothing renderable. */
 export const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
@@ -109,6 +124,8 @@ export const OTHER_REPLACES_INDEFINITE: ReadonlySet<string> = new Set(['es', 'pt
  */
 export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
   it: 'presentSubjunctive', fr: 'presentSubjunctive', es: 'presentSubjunctive', pt: 'presentSubjunctive',
+  // Romansh's *conjunctiv*, stored per verb (P04-E4): "jau crai ch'el saja" (verify).
+  'rm-rumgr': 'presentSubjunctive', 'rm-sursilv': 'presentSubjunctive', 'rm-vallader': 'presentSubjunctive',
 };
 
 /**
@@ -118,7 +135,9 @@ export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
  * Mann glaubte nicht, dass der Kater läuft"), which is standard, and Japanese's clause tense is
  * relative to its governor already (猫が走ると信じていませんでした).
  */
-export const SEQUENCE_OF_TENSES_LANGUAGES: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'es', 'pt']);
+// Romansh shifts back as the Romance four do (P04 E1 D1, verify): its past is then the compound past
+// ("el ha ditg ch'il giat è currì"), a state verb's the imperfect.
+export const SEQUENCE_OF_TENSES_LANGUAGES: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /**
  * The languages that say a future **in the past** in the perfect conditional, not the simple one
@@ -147,6 +166,9 @@ export const POSSESSOR_OWN_ADJECTIVE = 'OWN_ADJECTIVE';
  */
 export const PASSIVE_AUXILIARY: Record<string, string> = {
   en: 'BE', it: 'BE', fr: 'BE', es: 'BE', pt: 'BE', de: 'BECOME', gsw: 'BECOME',
+  // Romansh builds its passive on *vegnir* (COME), as German on *werden*: "la mieur vegn mangiada"
+  // (P04 E1 D1, verify); *esser* + participle is the state.
+  'rm-rumgr': 'COME', 'rm-sursilv': 'COME', 'rm-vallader': 'COME',
 };
 
 /**
@@ -158,7 +180,7 @@ export const PASSIVE_AUXILIARY: Record<string, string> = {
  * with its に-agent simply missing (本が書かれる子供) no longer says that the head is the one who acts —
  * it reads as a child a book is written *about* or *for*. There the relative stays active.
  */
-export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt', 'gsw']);
+export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /** Verb transitivities that have a patient to promote, and can therefore be passivized. */
 export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditransitive']);
@@ -177,9 +199,10 @@ export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditrans
  * *aunque* asserts a fact and keeps the indicative (D4).
  */
 export const SUBJUNCTIVE_CONJUNCTIONS: Readonly<Partial<Record<SubordinatingConjunction, ReadonlySet<string>>>> = {
-  before: new Set(['it', 'fr', 'es', 'pt']),
+  // Romansh: *avant che* and *schebain che* with the *conjunctiv* (P04 E1 D1, verify).
+  before: new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']),
   until: new Set(['fr', 'es', 'pt']),
-  though: new Set(['it', 'fr', 'pt']),
+  though: new Set(['it', 'fr', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']),
 };
 
 /**
@@ -196,7 +219,8 @@ export const IMPERFECTIVE_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = 
  * `IMPERFECTIVE_CONJUNCTIONS` word takes the imperfect: the four Romance ones. English and German have
  * one simple past, and Japanese already says the duration with its progressive (〜ている間に).
  */
-export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt']);
+// Romansh stores the imperfect too (P04-E12 D3): "durant ch'il giat mangiava".
+export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /**
  * The **temporal** subordinating conjunctions — *when, while, before, after* — which place the main
@@ -215,7 +239,10 @@ export const TEMPORAL_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new 
  * laufen, wenn der Kater **frisst**". Italian and French keep the future ("quando il gatto mangerà",
  * "quand le chat mangera"), and Japanese has none to drop.
  */
-export const FUTURE_AS_PRESENT_LANGUAGES: ReadonlySet<string> = new Set(['en', 'de', 'gsw']);
+// Romansh (P04-E13 D1): the main clause's future is *vegnir a* + infinitive, but a future under a
+// temporal conjunction is the present, as German's — "il giat vegn a mangiar cura ch'il chaun
+// curra" (verify).
+export const FUTURE_AS_PRESENT_LANGUAGES: ReadonlySet<string> = new Set(['en', 'de', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /**
  * The temporal conjunctions under which a `FUTURE_AS_PRESENT_LANGUAGES` language says the future
@@ -245,7 +272,8 @@ export const FUTURE_TEMPORAL_MOOD: Readonly<Record<string, 'presentSubjunctive' 
  * language keeps the present ("avant que le chat mange") — and the engines' `'subjunctive'` in
  * French is the imparfait a condition takes, which would be wrong here.
  */
-export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'es', 'pt']);
+// Romansh's past subjunctive is its conditional series (P04-E16 D1): "avant ch'il giat mangiass".
+export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /**
  * The verb each language says the **existential** with (P09-E6 D5, see PhrasePlan.existential): the
@@ -257,6 +285,9 @@ export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'e
  */
 export const EXISTENTIAL_VERBS: Readonly<Record<string, string>> = {
   en: 'BE', it: 'BE', fr: 'HAVE', de: 'GIVE', es: 'HAVE', pt: 'HAVE', ja: 'BE', gsw: 'GIVE',
+  // Romansh: RG *i dat* (es gibt) under the expletive *i*, impersonal in the 3sg — chosen over *igl
+  // ha / hai* (P04 E1 D1, verify).
+  'rm-rumgr': 'GIVE', 'rm-sursilv': 'GIVE', 'rm-vallader': 'GIVE',
 };
 
 /**

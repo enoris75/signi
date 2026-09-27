@@ -5,7 +5,7 @@ correction is a data edit in `packages/backend/src/concepts/gsw/` or a pin in
 `packages/engine/test/languages/gsw.test.ts`, and the sheet is regenerated. Mark each row in the
 review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](dieth-style-sheet.md)).
 
-**2228 rows** in nine sections, re-measured at generation (E14 D1: P10 §4's 630 is stale).
+**2370 rows** in nine sections, re-measured at generation (E14 D1: P10 §4's 630 is stale).
 
 ## 1. Verbs (205)
 
@@ -217,7 +217,7 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | SHOULD | sollen | söle | sött | söttsch | sött | sötted | söle | haa |  |
 | MIGHT | können | chöne | chönnt | chönntsch | chönnt | chönnted | chöne | haa |  |
 
-## 2. Nouns (385)
+## 2. Nouns (434)
 
 | concept | `de` | `gsw` | plural | gender | other forms |
 |---|---|---|---|---|---|
@@ -225,6 +225,40 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | MAMMAL | Säugetier | Süügetier | Süügetier | neut |  |
 | CAT | Kater | Chater | Chater | masc | fem: Chatz; fem_plural: Chatze |
 | DOG | Hund | Hund | Hünd | masc | fem: Hündin; fem_plural: Hündine; compound: Hunde |
+| BIRD | Vogel | Vogel | Vögel | masc |  |
+| FISH | Fisch | Fisch | Fisch | masc |  |
+| REPTILE | Reptil | Reptil | Reptilie | neut | compound: Reptilie |
+| AMPHIBIAN | Amphibie | Amphibie | Amphibie | fem |  |
+| INSECT | Insekt | Insekt | Insekte | neut | compound: Insekte |
+| HORSE | Pferd | Ross | Ross | neut |  |
+| PIG | Schwein | Sau | Säu | fem |  |
+| SHEEP | Schaf | Schaaf | Schaaf | neut |  |
+| GOAT | Ziege | Geiss | Geisse | fem |  |
+| RABBIT | Kaninchen | Chüngel | Chüngel | masc |  |
+| BEAR | Bär | Bär | Bäre | masc | fem: Bärin; fem_plural: Bärine |
+| LION | Löwe | Löi | Löie | masc |  |
+| TIGER | Tiger | Tiger | Tiger | masc |  |
+| ELEPHANT | Elefant | Elefant | Elefante | masc |  |
+| MONKEY | Affe | Aff | Affe | masc |  |
+| DEER | Hirsch | Hirsch | Hirsche | masc |  |
+| WHALE | Wal | Wal | Wal | masc |  |
+| CHICKEN | Huhn | Huen | Hüener | neut | compound: Hüener |
+| DUCK | Ente | Änte | Änte | fem |  |
+| EAGLE | Adler | Adler | Adler | masc |  |
+| OWL | Eule | Üüle | Üüle | fem |  |
+| PENGUIN | Pinguin | Pinguin | Pinguin | masc |  |
+| SHARK | Hai | Hai | Hai | masc |  |
+| SALMON | Lachs |  |  |  |  |
+| SNAKE | Schlange | Schlange | Schlange | fem |  |
+| TURTLE | Schildkröte | Schildchrott | Schildchrotte | fem |  |
+| CROCODILE | Krokodil | Krokodil | Krokodil | neut |  |
+| LIZARD | Eidechse | Eidechs | Eidechse | fem |  |
+| FROG | Frosch | Frosch | Frösch | masc |  |
+| BEE | Biene | Bii | Bii | neut |  |
+| ANT | Ameise | Ameisi | Ameise | fem |  |
+| BUTTERFLY | Schmetterling | Schmetterling | Schmetterling | masc |  |
+| MOSQUITO | Mücke | Mugge | Mugge | fem |  |
+| SPIDER | Spinne | Spinne | Spinne | fem |  |
 | BOOK | Buch | Buech | Büecher | neut |  |
 | AIR | Luft | Luft | Lüft | fem |  |
 | GROUND | Boden | Bode | Böde | masc |  |
@@ -289,6 +323,7 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | ANGEL | Engel | Ängel | Ängel | masc | compound: Ängels |
 | LIFE | Leben | Läbe | Läbe | neut | compound: Läbes |
 | END | Ende | Änd | Änd | neut | compound: Änd; place_prep: a |
+| BEGINNING | Anfang | Aafang | Aafäng | masc | compound: Aafangs |
 | DEATH | Tod | Tod | Tod | masc | compound: Todes |
 | FEELING | Gefühl | Gfüül | Gfüül | neut | compound: Gfüüls |
 | AFFECTION | Zuneigung | Zueneigig |  | fem |  |
@@ -395,6 +430,10 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | JAPANESE | Japanisch | Japanisch |  | neut |  |
 | PORTUGUESE | Portugiesisch | Portugiisisch |  | neut |  |
 | SWISS_GERMAN | Schweizerdeutsch | Schwiizerdütsch |  | neut |  |
+| ROMANSH | Rätoromanisch | Rätoromanisch |  | neut |  |
+| RUMANTSCH_GRISCHUN | Rumantsch Grischun | Rumantsch Grischun |  | neut |  |
+| SURSILVAN | Surselvisch | Surselvisch |  | neut |  |
+| VALLADER | Vallader | Vallader |  | neut |  |
 | SPELLING | Rechtschreibung | Rächtschriibig | Rächtschriibige | fem |  |
 | PERIOD_TIME | Zeitraum | Ziitruum | Ziitrüüm | masc |  |
 | MOMENT | Augenblick | Augeblick | Augeblick | masc |  |
@@ -461,12 +500,16 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | NUMBER | Zahl | Zaal | Zaale | fem | compound: Zaale |
 | NUMBER_LABEL | Nummer | Nummere | Nummere | fem |  |
 | QUANTITY | Menge | Mängi | Mängene | fem |  |
+| UNIT | Einheit | Äiheit | Äiheite | fem |  |
 | PERCENT | Prozent | Prozent | Prozent | neut |  |
 | CATEGORY | Kategorie | Kategorie | Kategorie | fem |  |
 | KIND_SORT | Art | Art | Arte | fem |  |
 | NUMBER_GRAMMAR | Numerus | Numerus | Numeri | masc |  |
 | SINGULAR_GRAMMAR | Singular | Singular | Singular | masc |  |
 | PLURAL_GRAMMAR | Plural | Plural | Plural | masc |  |
+| CASE_GRAMMAR | Kasus | Fall | Fäll | masc |  |
+| DATIVE | Dativ | Dativ | Dativ | masc |  |
+| GENITIVE | Genitiv | Genitiv | Genitiv | masc |  |
 | GENDER | Geschlecht | Gschlächt | Gschlächter | neut | compound: Gschlächts |
 | TENSE | Tempus | Tempus | Tempora | neut |  |
 | PRESENT_TENSE | Präsens | Präsens | Präsentia | neut |  |
@@ -549,8 +592,12 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | CONCEPT | Begriff | Begriff | Begriff | masc | compound: Begriffs |
 | IDEA | Idee | Idee | Idee | fem |  |
 | ACTION | Handlung | Handlig | Handlige | fem |  |
+| EVENT | Ereignis | Ereignis | Ereignis | neut |  |
+| RACE | Rennen | Renne | Renne | neut |  |
 | GAME | Spiel | Spiil | Spiil | neut |  |
 | OBJECT_THING | Gegenstand | Gägestand | Gägeständ | masc | compound: Gägestands |
+| DEVICE | Gerät | Grät | Grät | neut |  |
+| BOMB | Bombe | Bombe | Bombe | fem |  |
 | THING | Ding | Ding | Ding | neut |  |
 | PROBLEM | Problem | Problem | Problem | neut |  |
 | ISSUE | Frage | Fraag | Frage | fem |  |
@@ -584,6 +631,8 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | ABILITY | Fähigkeit | Fähigkeit | Fähigkeite | fem |  |
 | DUTY | Pflicht | Pflicht | Pflichte | fem |  |
 | KINDNESS | Freundlichkeit | Fründlichkeit |  | fem |  |
+| WISDOM | Weisheit | Wiisheit |  | fem |  |
+| FOLLY | Torheit | Tummheit |  | fem |  |
 | LAND | Land | Land |  | neut |  |
 | NATION | Nation | Nation | Natione | fem |  |
 | SCHOOL | Schule | Schuel | Schuele | fem | compound: Schuel |
@@ -828,7 +877,7 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 |---|---|---|---|
 | HEY | hey | he |  |
 
-## 7. The suite's sentences (82)
+## 7. The suite's sentences (125)
 
 Each row is a pin in `gsw.test.ts`; the rows in its `test.fails` blocks are the order the review is
 asked to rule on (P10 D11), not what ships.
@@ -838,6 +887,8 @@ asked to rule on (P10 D11), not what ships.
 | the man | de Maa. |
 | the woman | d Frau. |
 | the water | s Wasser. |
+| the wisdom | d Wiisheit. |
+| much folly (mass: never plural) | vill Tummheit. |
 | the cats (plural) | d Chatze. |
 | I see the man | ich gsee de Maa. |
 | with the man | ich spring mit em Maa. |
@@ -895,6 +946,11 @@ asked to rule on (P10 D11), not what ships.
 | the house of a man — vo for an indefinite owner | s Huus vo emene Maa. |
 | my house — a pronominal possessor, unchanged | mis Huus. |
 | the roof of the house — vo for a thing | d Tür vom Huus. |
+| the dative is the death of the genitive — vo for a case name | de Dativ isch de Tod vom Genitiv. |
+| the predicate | s Huus isch s gröscht de Stadt. |
+| the object | de Maa gseet s gröscht Huus de Stadt. |
+| least | de Maa gseet s am wenigschte gross Huus de Stadt. |
+| the subject | s gröscht Huus de Stadt springt. |
 | Peter runs | de Peter springt. |
 | I see Mary | ich gsee d Maria. |
 | Mom runs — a kin word used as a name keeps the article | s Mami springt. |
@@ -905,6 +961,39 @@ asked to rule on (P10 D11), not what ships.
 | the cat and the dog run | d Chatz und de Hund springed. |
 | I go home | ich gang hei. |
 | the cat runs into the house | d Chatz springt is Huus. |
+| BIRD | d Vögel. |
+| FISH | d Fisch. |
+| REPTILE | d Reptilie. |
+| AMPHIBIAN | d Amphibie. |
+| INSECT | d Insekte. |
+| HORSE | d Ross. |
+| PIG | d Säu. |
+| SHEEP | d Schaaf. |
+| GOAT | d Geisse. |
+| RABBIT | d Chüngel. |
+| BEAR | d Bäre. |
+| LION | d Löie. |
+| TIGER | d Tiger. |
+| ELEPHANT | d Elefante. |
+| MONKEY | d Affe. |
+| DEER | d Hirsche. |
+| WHALE | d Wal. |
+| CHICKEN | d Hüener. |
+| DUCK | d Änte. |
+| EAGLE | d Adler. |
+| OWL | d Üüle. |
+| PENGUIN | d Pinguin. |
+| SHARK | d Hai. |
+| SNAKE | d Schlange. |
+| TURTLE | d Schildchrotte. |
+| CROCODILE | d Krokodil. |
+| LIZARD | d Eidechse. |
+| FROG | d Frösch. |
+| BEE | d Bii. |
+| ANT | d Ameise. |
+| BUTTERFLY | d Schmetterling. |
+| MOSQUITO | d Mugge. |
+| SPIDER | d Spinne. |
 | | si springt. |
 | | ich gsee in. |
 | | ich spring mit ire. |
@@ -917,13 +1006,19 @@ asked to rule on (P10 D11), not what ships.
 | | em Vatter vo de Mueter sis Huus. |
 | | Mami, spring. |
 | | wenn de Hund würd springe, würd d Chatz frässe. |
+| | de Lachs. |
+| | de Chater redt, indem er es Wort oft langsam wäält. |
+| | de Chater redt, indem er es Wort langsam wäält. |
 
-## 8. UI strings (778)
+## 8. UI strings (792)
 
 | key | `en` | `de` | `gsw` |
 |---|---|---|---|
 | app.payoff | semantic phrase creator | Schöpfer semantischer Phrasen | Schöpfer vo semantische Phrase |
 | app.toolbar | Toolbar | Symbolleiste | Symbolliiste |
+| app.menu | Menu | Menü | Menü |
+| view.canvas | Canvas | Arbeitsfläche | Arbetsflächi |
+| view.phrase | Phrase | Phrase | Phrase |
 | translations.heading | Translations | Übersetzungen | Übersetzige |
 | action.copyTranslation | Copy the translation | Die Übersetzung kopieren | D Übersetzig kopiere |
 | action.copyLanguage | Copy a language | Eine Sprache kopieren | E Spraach kopiere |
@@ -1157,6 +1252,8 @@ asked to rule on (P10 D11), not what ships.
 | action.expandPeriod | Expand this period | Dieses Satzgefüge erweitern | Das Satzgfüeg erwiitere |
 | action.movePeriodUp | Move this period up | Dieses Satzgefüge nach oben verschieben | Das Satzgfüeg ufe verschiebe |
 | action.movePeriodDown | Move this period down | Dieses Satzgefüge nach unten verschieben | Das Satzgfüeg abe verschiebe |
+| action.moveLanguageUp | Move this language up | Diese Sprache nach oben verschieben | Die Spraach ufe verschiebe |
+| action.moveLanguageDown | Move this language down | Diese Sprache nach unten verschieben | Die Spraach abe verschiebe |
 | action.go.left | Go left | Nach links gehen | Nach links gaa |
 | action.go.up | Go up | Nach oben gehen | Ufe gaa |
 | action.go.right | Go right | Nach rechts gehen | Nach rächts gaa |
@@ -1600,8 +1697,11 @@ asked to rule on (P10 D11), not what ships.
 | action.remove.purpose | Remove the purpose | Die adverbiale Bestimmung des Zwecks entfernen | D adverbial Bestimmig vom Zwäck entferne |
 | action.remove.topic | Remove the topic | Die adverbiale Bestimmung des Themas entfernen | D adverbial Bestimmig vom Thema entferne |
 | action.remove.cause | Remove the cause | Die adverbiale Bestimmung des Grundes entfernen | D adverbial Bestimmig vom Grund entferne |
+| action.showAsPeriod | Show as a period | Als Satzgefüge zeigen | Als Satzgfüeg zeige |
+| action.showInPeriod | Show in the period | Im Satzgefüge zeigen | Im Satzgfüeg zeige |
 | action.removeComplement | Remove the complement | Die Ergänzung entfernen | D Ergänzig entferne |
 | action.addComplement | Add a complement | Eine Ergänzung hinzufügen | E Ergänzig dezuefüege |
+| action.fitCanvas | Show the whole canvas | Die ganze Arbeitsfläche zeigen | D ganz Arbetsflächi zeige |
 | action.showWordMap | Show the word map | Die Wortkarte zeigen | D Wortcharte zeige |
 | action.closeWordMap | Close the word map | Die Wortkarte schließen | D Wortcharte zuemache |
 | action.close | close | schließen | zuemache |
@@ -1696,12 +1796,18 @@ asked to rule on (P10 D11), not what ships.
 | language.ja | Japanese | Japanisch | Japanisch |
 | language.pt | Portuguese | Portugiesisch | Portugiisisch |
 | language.gsw | Swiss German | Schweizerdeutsch | Schwiizerdütsch |
+| language.rm-rumgr | Romansh | Rätoromanisch | Rätoromanisch |
+| language.rm-sursilv | Romansh | Rätoromanisch | Rätoromanisch |
+| language.rm-vallader | Romansh | Rätoromanisch | Rätoromanisch |
+| language.rm-rumgr.dialect | Rumantsch Grischun | Rumantsch Grischun | Rumantsch Grischun |
+| language.rm-sursilv.dialect | Sursilvan | Surselvisch | Surselvisch |
+| language.rm-vallader.dialect | Vallader | Vallader | Vallader |
 | language.gsw.dialect | Zurich | Zürich | Züri |
 | language.gsw.spelling | Dieth's spelling | Die Rechtschreibung Dieths | Em Dieth sini Rächtschriibig |
 | language.gsw.caveat | Swiss German does not have a standard spelling. | Schweizerdeutsch hat keine normierte Rechtschreibung. | Schwiizerdütsch hät kei normierti Rächtschriibig. |
 | language.selector | Interface language | Interfacesprache | Interfacespraach |
 
-## 9. Engine-composed definitions (577)
+## 9. Engine-composed definitions (613)
 
 | concept | `en` | `de` | `gsw` |
 |---|---|---|---|
@@ -1715,6 +1821,38 @@ asked to rule on (P10 D11), not what ships.
 | MAMMAL | an animal that produces milk | ein Tier, das Milch erzeugt | es Tier, wo Milch erzüügt |
 | CAT | a small mammal | ein kleines Säugetier | es chliines Süügetier |
 | DOG | a domestic canine mammal | ein zahmes hundeartiges Säugetier | es zahmes hundeartiges Süügetier |
+| BIRD | an animal that has wings | ein Tier, das Flügel hat | es Tier, wo Flügel hät |
+| FISH | an animal that lives in the water | ein Tier, das im Wasser lebt | es Tier, wo im Wasser läbt |
+| INSECT | a small animal | ein kleines Tier | es chliines Tier |
+| HORSE | a big domestic mammal | ein großes zahmes Säugetier | es grosses zahmes Süügetier |
+| PIG | a domestic mammal | ein zahmes Säugetier | es zahmes Süügetier |
+| SHEEP | a white domestic mammal | ein weißes zahmes Säugetier | es wiisses zahmes Süügetier |
+| GOAT | a domestic mammal that produces milk | ein zahmes Säugetier, das Milch erzeugt | es zahmes Süügetier, wo Milch erzüügt |
+| RABBIT | a small mammal that jumps | ein kleines Säugetier, das springt | es chliines Süügetier, wo gumpt |
+| BEAR | a big strong wild mammal | ein großes starkes wildes Säugetier | es grosses starches wildes Süügetier |
+| LION | a big wild mammal that lives in Africa | ein großes wildes Säugetier, das in Afrika lebt | es grosses wildes Süügetier, wo i Afrika läbt |
+| TIGER | a big wild mammal that lives in Asia | ein großes wildes Säugetier, das in Asien lebt | es grosses wildes Süügetier, wo i Asie läbt |
+| ELEPHANT | a big mammal that eats grass | ein großes Säugetier, das Gras frisst | es grosses Süügetier, wo Gras frisst |
+| MONKEY | a wild mammal that has hands | ein wildes Säugetier, das Hände hat | es wildes Süügetier, wo Händ hät |
+| DEER | a wild mammal that eats grass | ein wildes Säugetier, das Gras frisst | es wildes Süügetier, wo Gras frisst |
+| WHALE | a big mammal that lives in the water | ein großes Säugetier, das im Wasser lebt | es grosses Süügetier, wo im Wasser läbt |
+| CHICKEN | a domestic bird | ein zahmer Vogel | en zahme Vogel |
+| DUCK | a bird | ein Vogel | en Vogel |
+| EAGLE | a big wild bird | ein großer wilder Vogel | en grosse wilde Vogel |
+| OWL | a wild bird | ein wilder Vogel | en wilde Vogel |
+| PENGUIN | a bird that does not fly | ein Vogel, der nicht fliegt | en Vogel, wo nöd flüügt |
+| SHARK | a big fish | ein großer Fisch | en grosse Fisch |
+| SALMON | a fish | ein Fisch | en Fisch |
+| SNAKE | a long reptile | ein langes Reptil | es langes Reptil |
+| TURTLE | a reptile | ein Reptil | es Reptil |
+| CROCODILE | a big reptile | ein großes Reptil | es grosses Reptil |
+| LIZARD | a small reptile | ein kleines Reptil | es chliines Reptil |
+| FROG | a small amphibian | eine kleine Amphibie | e chliini Amphibie |
+| BEE | an insect that flies | ein Insekt, das fliegt | es Insekt, wo flüügt |
+| ANT | a small insect | ein kleines Insekt | es chliines Insekt |
+| BUTTERFLY | a beautiful insect | ein schönes Insekt | es schönes Insekt |
+| MOSQUITO | an insect that bites | ein Insekt, das beißt | es Insekt, wo biisst |
+| SPIDER | a small animal that kills insects | ein kleines Tier, das Insekten tötet | es chliines Tier, wo Insekte tötet |
 | BOOK | a written object | ein geschriebener Gegenstand | en gschribene Gägestand |
 | AIR | gas that one breathes | Gas, das man atmet | Gas, wo me schnuuft |
 | GROUND | solid substance | fester Stoff | feschte Stoff |
@@ -1884,6 +2022,9 @@ asked to rule on (P10 D11), not what ships.
 | NUMBER_GRAMMAR | a category that indicates quantities | eine Kategorie, die Mengen bezeichnet | e Kategorie, wo Mängene bezeichnet |
 | SINGULAR_GRAMMAR | a sole category | eine einzige Kategorie | e einzigi Kategorie |
 | PLURAL_GRAMMAR | a manifold category | eine mehrfache Kategorie | e mehrfachi Kategorie |
+| CASE_GRAMMAR | a category that indicates participants | eine Kategorie, die Partizipanten bezeichnet | e Kategorie, wo Partizipante bezeichnet |
+| DATIVE | a case that indicates recipients | ein Kasus, der Empfänger bezeichnet | en Fall, wo Empfänger bezeichnet |
+| GENITIVE | a case that indicates possessors | ein Kasus, der Besitzer bezeichnet | en Fall, wo Bsitzer bezeichnet |
 | GENDER | a category that governs words | eine Kategorie, die Wörter regiert | e Kategorie, wo Wörter regiert |
 | TENSE | a feature that indicates times | ein Merkmal, das Zeiten bezeichnet | es Märkmaal, wo Ziite bezeichnet |
 | PRESENT_TENSE | a present tense | ein gegenwärtiges Tempus | es gägewärtiges Tempus |
@@ -2092,6 +2233,7 @@ asked to rule on (P10 D11), not what ships.
 | WORK_LABOUR | to act to acquire money | handeln, um Geld zu erwerben | handle, für Gäld z erwerbe |
 | PLAY_GAME | to act to feel joy | handeln, um Freude zu fühlen | handle, für Freud z füele |
 | LOSE_GAME | not to win in a game | nicht in einem Spiel gewinnen | nöd i emene Spiil gwünne |
+| BEGIN | to have a beginning | einen Anfang haben | en Aafang haa |
 | STOP_DOING | not to continue acting | nicht weiterhandeln | nöd wiiterhandle |
 | STOP_ONESELF | no longer to move | sich nicht mehr bewegen | sich nüme bewege |
 | CONTINUE_DOING | still to act | noch handeln | no handle |

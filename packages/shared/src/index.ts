@@ -5,7 +5,7 @@
  */
 export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb' | 'interjection';
 
-export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt' | 'gsw';
+export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt' | 'gsw' | 'rm-rumgr' | 'rm-sursilv' | 'rm-vallader';
 
 export type Transitivity = 'intransitive' | 'transitive' | 'ditransitive';
 
@@ -667,6 +667,11 @@ export const LANGUAGES: Record<LanguageCode, string> = {
   pt: 'Portuguese',
   // Zürichdeutsch in Dieth spelling (P10): appended, so every existing row keeps its place (P10 D13).
   gsw: 'Swiss German',
+  // Romansh (P04): three written standards as three peer languages (P04 D1), named by their BCP 47
+  // variant subtags (D2) — the first codes that are not two or three letters. Appended (D12).
+  'rm-rumgr': 'Rumantsch Grischun',
+  'rm-sursilv': 'Sursilvan',
+  'rm-vallader': 'Vallader',
 };
 
 /** Every language code, in row order — the one list the rest of the code derives from (P10-E1). */
@@ -699,6 +704,9 @@ export const LANGUAGE_STATUS = {
   ja: 'ready',
   pt: 'ready',
   gsw: 'preview',
+  'rm-rumgr': 'preview',
+  'rm-sursilv': 'preview',
+  'rm-vallader': 'preview',
 } as const satisfies Record<LanguageCode, LanguageStatus>;
 
 /**
@@ -2211,3 +2219,6 @@ export interface SavedPhrasesResponse {
 // The catalog of engine-rendered UI strings (keys, plans, fallbacks), shared so the keys
 // are typed on both sides of the wire.
 export * from './uiStrings.js';
+
+// Search folding (lower case, accents off), shared by the console and the concept pickers.
+export * from './fold.js';

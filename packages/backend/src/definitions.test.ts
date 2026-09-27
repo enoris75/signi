@@ -46,10 +46,30 @@ afterEach(() => {
   vi.mocked(translate).mockReset();
 });
 
+
 describe('buildConceptDefinitions', () => {
   test('renders every concept that has a definition plan, and only those', () => {
     const definitions = buildConceptDefinitions();
     expect([...definitions.keys()].sort()).toEqual(planned.map((c) => c.id).sort());
+  });
+
+  // P04-E17: Rumantsch Grischun renders every definition — the count of unrendered ones pinned at its
+  // Done value, 0 (all 613 before its engine).
+  test('leaves no definition unrendered in Rumantsch Grischun', () => {
+    const definitions = buildConceptDefinitions();
+    expect([...definitions].filter(([, byLanguage]) => !byLanguage['rm-rumgr']).map(([id]) => id)).toEqual([]);
+  });
+
+  // P04-E17: Sursilvan likewise, pinned at its Done value, 0 (all 613 before its engine, P04-E8).
+  test('leaves no definition unrendered in Sursilvan', () => {
+    const definitions = buildConceptDefinitions();
+    expect([...definitions].filter(([, byLanguage]) => !byLanguage['rm-sursilv']).map(([id]) => id)).toEqual([]);
+  });
+
+  // P04-E17: Vallader's count too, pinned at its Done value, 0 (all 613 before its engine).
+  test('leaves no definition unrendered in Vallader', () => {
+    const definitions = buildConceptDefinitions();
+    expect([...definitions].filter(([, byLanguage]) => !byLanguage['rm-vallader']).map(([id]) => id)).toEqual([]);
   });
 
   test('renders each plan through the engine with the lexicon', () => {
@@ -69,6 +89,11 @@ describe('buildConceptDefinitions', () => {
       pt: 'um mamífero pequeno',
       // P10: Swiss German renders too, as a preview row (verify at P10-E14).
       gsw: 'es chliines Süügetier',
+      // P04-E7: Rumantsch Grischun renders too, as a preview row (verify at P04-E19).
+      'rm-rumgr': 'in pitschen mammifer',
+      // P04-E8: Sursilvan too — *pign* follows the noun (verify at P04-E19).
+      'rm-sursilv': 'in mamifer pign',
+      'rm-vallader': 'ün pitschen mammifer',
     });
   });
 

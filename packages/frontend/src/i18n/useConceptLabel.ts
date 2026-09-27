@@ -1,4 +1,4 @@
-import type { Concept } from '@signi/shared';
+import { fold, type Concept } from '@signi/shared';
 import { useCallback } from 'react';
 import { conceptGloss, conceptWord } from './conceptWord.ts';
 import { useUiLanguage } from './LanguageContext.tsx';
@@ -44,7 +44,7 @@ export function useConceptDefinition(): (concept: Concept) => string {
  * word can still find it while browsing in another language. It also hits the word's reading,
  * so a Japanese word can be found by typing the kana a keyboard actually produces (ねこ → 猫), and
  * its aliases in the current language and in English (P09-E23): *talk* finds SPEAK, *cominciare*
- * finds BEGIN (shown as *iniziare*).
+ * finds BEGIN (shown as *iniziare*). Accents fold on both sides, so *gia* finds *già* (P04-E18).
  */
 export function useConceptSearch(): (concept: Concept, query: string) => boolean {
   const { uiLanguage } = useUiLanguage();
@@ -52,13 +52,13 @@ export function useConceptSearch(): (concept: Concept, query: string) => boolean
 
   return useCallback(
     (concept: Concept, query: string) => {
-      const q = query.trim().toLowerCase();
+      const q = fold(query.trim());
       if (!q) return true;
       const reading = concept.readings?.[uiLanguage] ?? '';
       const aliases = [...(concept.aliases?.[uiLanguage] ?? []), ...(concept.aliases?.en ?? [])].join(' ');
       const gloss = concept.glosses?.[uiLanguage] ?? '';
       const haystack = `${word(concept)} ${reading} ${concept.label ?? ''} ${concept.synonym ?? ''} ${gloss} ${aliases}`;
-      return haystack.toLowerCase().includes(q);
+      return fold(haystack).includes(q);
     },
     [word, uiLanguage],
   );

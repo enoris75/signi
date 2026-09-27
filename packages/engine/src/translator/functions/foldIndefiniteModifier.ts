@@ -6,6 +6,9 @@ import { indefiniteModifierFr } from '../../languages/fr/indefiniteModifier.js';
 import { indefiniteModifierIt } from '../../languages/it/indefiniteModifier.js';
 import { indefiniteModifierPt } from '../../languages/pt/indefiniteModifier.js';
 import { indefiniteModifierGsw } from '../../languages/gsw/indefiniteModifier.js';
+import { indefiniteModifierRumgr } from '../../languages/rm-rumgr/indefiniteModifier.js';
+import { indefiniteModifierSursilv } from '../../languages/rm-sursilv/indefiniteModifier.js';
+import { indefiniteModifierVallader } from '../../languages/rm-vallader/indefiniteModifier.js';
 import type { IndefiniteKey, IndefiniteSpeller } from '../translator.types.js';
 
 /**
@@ -21,6 +24,12 @@ const SPELLERS: Partial<Record<string, IndefiniteSpeller>> = {
   gsw: indefiniteModifierGsw,
   es: indefiniteModifierEs,
   pt: indefiniteModifierPt,
+  // P04: RG's *insatge grond*.
+  'rm-rumgr': indefiniteModifierRumgr,
+  // Sursilvan's own (P04-E8): *enzatgei grond*.
+  'rm-sursilv': indefiniteModifierSursilv,
+  // Vallader's own speller (P04-E8), the same shape: *alch grond*.
+  'rm-vallader': indefiniteModifierVallader,
 };
 
 const KEYS: readonly IndefiniteKey[] = ['base', 'object', 'disjunctive'];

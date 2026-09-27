@@ -6,6 +6,8 @@ import type { LexiconLookup } from '../translator.types.js';
  * raconte*, *te cuenta*, *te conta* say "tells you" as they stand, where the addressee moved to the
  * terminus would come out as the heavier tonic "racconta a te".
  */
+// Not Romansh (P04 E1 D1): its object pronoun is the tonic after the verb (P04-E7 D3), so the addressee
+// moves to the terminus like a noun's, "el raquinta a mai ch'il giat curra".
 const SHARED_CLITIC_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt']);
 
 /**

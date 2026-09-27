@@ -1,9 +1,9 @@
 # P04-E5. The Sursilvan column — every concept, with the predicative adjective form
 
-**Feature:** every seeded concept carries an `rm-sursilv` lexeme, or is named in `RM_SURSILV_PENDING`.
+**Feature:** every seeded concept carries an `rm-sursilv` lexeme, or borrows Rumantsch Grischun's (listed in `BORROWED`).
 **Shape:** `packages/backend/src/concepts/rm-sursilv/`, the same shape as E4's column.
 **Scope:** corpus data and its tests. No rendering.
-**Status:** open. Filed 2026-09-27 from P04 §1, D1, D5, D11 and the predicative-agreement note.
+**Status:** **shipped, 2026-09-27** — see [Done](#done). Filed 2026-09-27 from P04 §1, D1, D5, D11 and the predicative-agreement note.
 Depends on E1, E3 and E4's merge code.
 
 ## Why
@@ -28,10 +28,11 @@ too.
 the two agree the forms will simply match; starting from a copy makes every unchecked RG form look like
 a Sursilvan one — the leak P04's preface warns about (*"a guess that reads well is worse than a hole"*).
 
-### D3. Pending is expected to be long
+### D3. Borrowing is expected to be long
 
-P04 §6 plans for this. A long `RM_SURSILV_PENDING` with a preview row that is often empty is the
-honest state until a Sursilvan source or reviewer fills it.
+A concept the column does not give borrows Rumantsch Grischun's (E1 D2 as ruled) and is listed in
+`BORROWED['rm-sursilv']`. A long list is the honest state until a Sursilvan source or reviewer fills
+it — but D2 still holds: a borrowed word is left to the merge, never copied into the column.
 
 ## Tests
 
@@ -39,8 +40,16 @@ As E4's, for `rm-sursilv`, plus: every adjective has `predicative_masc_sg`.
 
 ## Verification
 
-The completeness report, with the pending count stated in this ticket's Done section.
+The `BORROWED` count stated in this ticket's Done section.
 
 ## Out of scope
 
 Vallader (E6); rendering (E8, E9).
+
+## Done
+
+Shipped 2026-09-27: **all 840 concepts have their own `rm-sursilv` form; `BORROWED['rm-sursilv']` is empty**
+and pinned so. Every form is drafted, not sourced — *(verify)* throughout (see E3's `sources.md`). Every adjective carries `predicative_masc_sg`; EAT is *magliar / magliau*, not the README's *mangiau* — the reviewer rules; a participle after *esser* takes the predicative *-s* (*el ei vegnius*), derived, not stored.
+
+Tests: `packages/backend/src/concepts/rm-sursilv/*.test.ts` (the cells each role must carry, no
+`*_past`/`*_future`/`gerund`, the borrowed list, spot checks).

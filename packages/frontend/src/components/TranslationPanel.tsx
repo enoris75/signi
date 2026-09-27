@@ -11,8 +11,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import type { LanguageCode, RubySegment, Translation } from '@signi/shared';
-import { isPreviewLanguage } from '@signi/shared';
+import type { LanguageCode, RubySegment, Translation, UiStringKey } from '@signi/shared';
+import { isPreviewLanguage, UI_STRINGS } from '@signi/shared';
 import type { SentenceResult } from '../hooks/useTranslation.ts';
 import { useLanguageOrder } from '../hooks/useLanguageOrder.ts';
 import { Flag } from '../i18n/flags.tsx';
@@ -152,10 +152,12 @@ function LanguageRow({
   const [copied, setCopied] = useState(false);
   // Named `uiString` rather than `t` — the translation lambdas below already bind `t`.
   const uiString = useUiString();
-  // A row whose variety is not recoverable from its text names it (P10-E2): Swiss German says which
-  // dialect it writes, "Swiss German (Zürich)", and says in its tooltip how, and that no standard
-  // spelling exists to be checked against.
-  const dialect = language === 'gsw' ? uiString('language.gsw.dialect') : '';
+  // A row whose variety is not recoverable from its text names it (P10-E2, P04-E2): Swiss German
+  // says which dialect it writes, "Swiss German (Zürich)", and each Romansh row which written
+  // standard, "Romansh (Sursilvan)". Swiss German also says in its tooltip how it spells, and that no
+  // standard spelling exists to be checked against.
+  const dialectKey = `language.${language}.dialect`;
+  const dialect = dialectKey in UI_STRINGS ? uiString(dialectKey as UiStringKey) : '';
   const name = dialect ? `${uiString(`language.${language}`)} (${dialect})` : uiString(`language.${language}`);
   const about = language === 'gsw' ? [uiString('language.gsw.spelling'), uiString('language.gsw.caveat')] : [];
   const unready = isPreviewLanguage(language);

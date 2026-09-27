@@ -9,6 +9,8 @@ import { tonicPronoun } from '../../functions/tonicPronoun.js';
  * would deny it again. German says "der Kater gibt niemandem etwas", "niemand läuft mit jemandem",
  * never "*gibt niemandem nichts" (A308 follow-up).
  */
+// Romansh is not among them (P04-E11 D3): RG concords, *na* staying beside the negative word — "el na
+// vesa nagin chaun", "nagin na sa" (verify); the idioms follow RG until their reviewers rule.
 export const NO_NEGATIVE_CONCORD: ReadonlySet<string> = new Set(['de', 'gsw']);
 
 /** The clause's slots as they were before `negativePolarity` swapped them. */

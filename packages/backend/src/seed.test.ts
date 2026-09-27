@@ -4,13 +4,13 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { LANGUAGES } from '@signi/shared';
-import { concepts, GSW_PENDING, NONFINITE } from './concepts/index.js';
+import { concepts, NONFINITE } from './concepts/index.js';
 import type { ConceptSeed } from './concepts/types.js';
 import { getDb } from './db.js';
 // The seed does its work on import, into this file's in-memory database (see vitest.config.ts).
 import './seed.js';
 
-const LANGUAGE_COUNT = Object.keys(LANGUAGES).length;
+const LANGUAGE_CODES = Object.keys(LANGUAGES);
 const ROLES = ['pronoun', 'noun', 'verb', 'adjective', 'adverb', 'interjection'] as const;
 
 const count = (db: Database.Database, sql: string, ...params: unknown[]): number =>
@@ -77,7 +77,7 @@ describe('seeding the corpus', () => {
     expect(
       count(db, `SELECT COUNT(*) AS n FROM ${role}_lexemes l
                  JOIN concept_${role}_links k ON k.lexeme_id = l.id AND k.is_primary = 1`),
-    ).toBe(seeds.length * LANGUAGE_COUNT - seeds.filter((c) => GSW_PENDING.includes(c.id)).length);
+    ).toBe(seeds.length * LANGUAGE_CODES.length);
     // Exactly one per concept and language — the constraint the schema cannot state, and the one
     // every lookup's `.get()` relies on (P09-E23).
     expect(
@@ -225,7 +225,7 @@ describe('seeding a database again', () => {
   }
 
   function withCorpus(seeds: ConceptSeed[], nonfinite: typeof NONFINITE = {}): void {
-    vi.doMock('./concepts/index.js', () => ({ concepts: seeds, NONFINITE: nonfinite }));
+    vi.doMock('./concepts/index.js', () => ({ concepts: seeds, NONFINITE: nonfinite, COLUMNS: {}, BORROWED: {} }));
   }
 
   const snapshot = (db: Database.Database) => ({
@@ -304,7 +304,7 @@ describe('seeding a database again', () => {
 
   test('reports how many concepts it seeded, in how many languages', async () => {
     await seedFile();
-    expect(console.log).toHaveBeenLastCalledWith(`Seeded ${concepts.length} concepts across ${LANGUAGE_COUNT} languages.`);
+    expect(console.log).toHaveBeenLastCalledWith(`Seeded ${concepts.length} concepts across ${LANGUAGE_CODES.length} languages.`);
   });
 
   test('reads non-finite forms for verbs only', async () => {

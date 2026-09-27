@@ -1,5 +1,6 @@
 import {
   canCoordinateImperative,
+  fold,
   type Concept,
   type UiStringKey,
 } from "@signi/shared";
@@ -166,9 +167,6 @@ function matchClass(query: string, name: string): number | undefined {
   for (const ch of n) if (ch === q[i]) i++;
   return i === q.length ? 4 : undefined;
 }
-
-/** Lower case, accents off: what two spellings of one word have in common. */
-export const fold = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 
 // ── Where the caret is ───────────────────────────────────────────────────────
 

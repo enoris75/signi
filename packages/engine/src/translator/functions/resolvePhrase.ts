@@ -20,6 +20,7 @@ import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { negativeComplements, negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
+import { predicativePosition } from './predicativePosition.js';
 import { experiencerGap } from './experiencerGap.js';
 import { genericSubject } from './genericSubject.js';
 import { passiveGap } from './passiveGap.js';
@@ -266,7 +267,10 @@ export function resolvePhrase(
   // The dative is the one who likes, unless the question gaps it.
   const dative = experiencer && asked?.role !== 'terminus'
     && !(generic && (genericWithoutDative(subject) || verbPhrase?.mood === 'infinitive'));
-  const positiveComplements = resolveComplements(complements, language, lookup, verbPhrase?.verb.forms);
+  // A copula's or BECOME's adjective is flagged predicative, which only Sursilvan reads (P04-E9 D1); a
+  // clausal subject's predicate is not (the impersonal, E9 D2's open point).
+  const positiveComplements = predicativePosition(
+    resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), verbPhrase?.verb.conceptId, !!plan.contentSubject);
   // A bare plural or mass subject is the generic, which the Romance four say with the definite article
   // (A376, see `genericSubject`): the clause's grammatical subject, whichever slot of the plan it came
   // from, and the one who likes in the dative an experiencer verb gives it. The agent a passive demotes

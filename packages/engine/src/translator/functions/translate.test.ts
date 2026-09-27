@@ -21,14 +21,16 @@ const YOU_RUN: PhrasePlan = { subject: { concept: 'YOU' }, verbPhrase: { verb: '
 const find = (translations: Translation[], language: LanguageCode) => translations.find((t) => t.language === language);
 const en = (plan: PhrasePlan) => find(translate(plan, LOOKUP), 'en')?.text;
 
+
 describe('translate', () => {
   test('renders the plan into every language, in engine order', () => {
-    expect(translate(CAT_RUNS, LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw']);
+    expect(translate(CAT_RUNS, LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
   });
 
   test("closes every sentence with its language's full stop", () => {
     const translations = translate(CAT_RUNS, LOOKUP);
     expect(find(translations, 'en')?.text).toBe('the cat runs.');
+    // An empty engine says nothing, not a bare full stop.
     for (const t of translations) expect(t.text.endsWith(t.language === 'ja' ? '。' : '.')).toBe(true);
   });
 

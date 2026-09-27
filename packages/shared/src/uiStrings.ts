@@ -5432,6 +5432,14 @@ export const UI_STRINGS = defineUiStrings({
   'language.ja': { word: 'JAPANESE', format: { capitalize: true }, fallback: 'Japanese' },
   'language.pt': { word: 'PORTUGUESE', format: { capitalize: true }, fallback: 'Portuguese' },
   'language.gsw': { word: 'SWISS_GERMAN', format: { capitalize: true }, fallback: 'Swiss German' },
+  // The three Romansh rows share their language's name, and say which variety in brackets (P04-E2
+  // D1): "Romansh (Sursilvan)", it "Romancio (sursilvano)", de "Rätoromanisch (Surselvisch)".
+  'language.rm-rumgr': { word: 'ROMANSH', format: { capitalize: true }, fallback: 'Romansh' },
+  'language.rm-sursilv': { word: 'ROMANSH', format: { capitalize: true }, fallback: 'Romansh' },
+  'language.rm-vallader': { word: 'ROMANSH', format: { capitalize: true }, fallback: 'Romansh' },
+  'language.rm-rumgr.dialect': { word: 'RUMANTSCH_GRISCHUN', fallback: 'Rumantsch Grischun' },
+  'language.rm-sursilv.dialect': { word: 'SURSILVAN', fallback: 'Sursilvan' },
+  'language.rm-vallader.dialect': { word: 'VALLADER', fallback: 'Vallader' },
 
   // What the Swiss German row cannot say in its text (P10-E2): which dialect it writes, in brackets
   // after its name — "Swiss German (Zürich)", de "Schweizerdeutsch (Zürich)" — and, in its tooltip,

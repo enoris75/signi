@@ -7,7 +7,7 @@ carried the groundwork for P03, P04 and P10. What is left is D2's three codes, t
 ones, on top of it.
 **Scope:** shared, engine registry and per-language tables, backend seed validation, skills. No
 sentence renders yet.
-**Status:** open. Filed 2026-09-27 from P04 §0 and phase 0, verified against HEAD 98a65a47.
+**Status:** **shipped, 2026-09-27** — see [Done](#done). Filed 2026-09-27 from P04 §0 and phase 0, verified against HEAD 98a65a47.
 
 ## Why
 
@@ -52,11 +52,12 @@ ticket from P04 §2 and mark the entry `// (verify)`; where P04 has no answer, l
 and name the table in the variety's suite as a `test.todo`. Copying `it`'s membership is how `de` would
 have leaked into `gsw`.
 
-### D2. The pending lists
+### D2. ~~The pending lists~~ Borrowing — ruled 2026-09-27
 
-`/seed` today knows one preview column (`GSW_PENDING`). **Recommendation:** generalise to one
-`PENDING` per preview language (`RM_RUMGR_PENDING`, …) exported beside the column (E4–E6), and have
-the seed skill's checklist say *each preview language* rather than naming `gsw`.
+**Superseded by a ruling of the user: a word is never missing.** A column that does not give a
+concept borrows the closest language's forms — `rm-sursilv` and `rm-vallader` from `rm-rumgr`,
+`rm-rumgr` from `it`, `gsw` from `de` — and the concept is listed as borrowed, to be given its own word
+later. This reverses P10-E1 D1 (*"a preview row never borrows"*) and P10-E4 D2 for `gsw` too.
 
 ## Implementation
 
@@ -85,3 +86,37 @@ and frontend suites green; typecheck and build clean; e2e green.
 ## Out of scope
 
 Names, labels, flags (E2); any Romansh form (E4 on).
+
+## Done
+
+Shipped 2026-09-27, with E2.
+
+- **Three codes** in `LanguageCode`, `LANGUAGES` (after `gsw`) and `LANGUAGE_STATUS` (`preview`).
+  Three empty engines in `languages/rm-*/`, registered after `swissGermanEngine`.
+- **D1 deferred to E7:** the Set-typed grammar tables in `translator.consts.ts` and the translator
+  functions are left for the Rumantsch Grischun engine ticket, which adds all three codes at once so the
+  idiom tickets change values rather than lines.
+- **D2 as ruled — borrowing.** `concepts/columns.ts` lists each column with its closest language;
+  `concepts/index.ts` merges each column and fills every concept it does not give from the closest
+  language, recording it in `BORROWED` (exported). The pending lists are gone: `GSW_PENDING`'s one
+  entry, SALMON, now borrows German's *Lachs*. With the three Romansh columns still empty, every
+  concept borrows (Romansh reads *gatto*), so every word exists in every language from here on.
+- **Skills:** `seed` (the borrowing rule, the Romansh column keys), `localize`, `localize-seed`,
+  `fix-bug` (grep the `rm-*/` forks after a Romance fix), `generalize`, `specialize`.
+- **Tests:** the engine-order lists name eleven languages; `index.test.ts` pins the borrowed Romansh
+  labels until E4–E6; the tests that iterate every language let a preview row be empty while its
+  engine is (`translate`, `translateSubordinator`, `sweep-definitions`, `definitions`);
+  `concepts/index.test.ts` pins `BORROWED.gsw` as `['SALMON']`.
+
+**D1 shipped with P04-E7** (2026-09-27): the tables name all three codes on the same line, with
+Rumantsch Grischun's answer (the idiom forks change values, not lines). In `translator.consts.ts`:
+approximators *var / bunamain*; `MOST_AGREES_SINGULAR`, `NO_TAKES_SINGULAR`, `CONTENT_CLAUSE_MOOD`
+(the *conjunctiv*), `SEQUENCE_OF_TENSES_LANGUAGES`, `RELATIVIZES_AGENT`, `SUBJUNCTIVE_CONJUNCTIONS`
+(*before*, *though*), `IMPERFECT_PAST_LANGUAGES`, `FUTURE_AS_PRESENT_LANGUAGES` (temporal clauses only,
+P04-E13), `PAST_SUBJUNCTIVE_LANGUAGES`; `PASSIVE_AUXILIARY` → `COME` (*vegnir*); `EXISTENTIAL_VERBS` →
+`GIVE` (*i dat*, chosen over *igl ha*). In the functions: `foldIndefiniteModifier` (*insatge grond*),
+`controllerCase` (dative *a*), `genericSubject` (the definite generic subject). Left out, with a comment
+saying why: `NO_NEGATIVE_CONCORD` (RG concords, P04-E11 D3), `addresseeObject`'s shared clitics (the
+object pronoun is tonic, P04-E7 D3), `OR_RESOLVES_MIXED_PERSONS`, `OTHER_REPLACES_INDEFINITE`,
+`FUTURE_IN_PAST_PERFECT_LANGUAGES`, `FUTURE_TEMPORAL_MOOD`, `EXISTENTIAL_AGREEING_LANGUAGES`,
+`TONIC_ADDRESS`. Every entry *(verify)*.

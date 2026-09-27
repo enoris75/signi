@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { COMPLEMENT_RENDER_ORDER, LANGUAGES } from '@signi/shared';
 import type { GrammaticalRole } from '@signi/shared';
-import { concepts, GSW_PENDING, NONFINITE } from './index.js';
+import { BORROWED, concepts, NONFINITE } from './index.js';
 import { ancestors, assertValidHierarchy } from './hierarchy.js';
 
 // Integrity of the seed corpus: the rules the seed and the engine rely on but that neither the
@@ -27,9 +27,8 @@ describe('the concept corpus', () => {
   test('seeds every concept in exactly the supported languages, each with a base form', () => {
     const bad = concepts.flatMap((c) => {
       const languages = Object.keys(c.forms);
-      // A concept in GSW_PENDING is seeded without its Swiss German form, by design (P10-E4 D2).
+      // No word is ever missing: a preview column borrows what it does not give (`columns.ts`).
       const missing = LANGUAGE_CODES.filter((l) => !languages.includes(l))
-        .filter((l) => !(l === 'gsw' && GSW_PENDING.includes(c.id)))
         .map((l) => `${c.id}: no ${l}`);
       const unknown = languages.filter((l) => !LANGUAGE_CODES.includes(l)).map((l) => `${c.id}: unknown ${l}`);
       const noBase = languages.filter((l) => !c.forms[l]?.['base']).map((l) => `${c.id}: no ${l} base`);
@@ -241,12 +240,15 @@ describe('NONFINITE', () => {
 // P10-E4: the Swiss German column. While `gsw` is a preview language its forms are optional to the
 // seed skills (P10-E1 D1), so completeness is a report, not a boot check — this is it, at 100%.
 describe('the Swiss German column (P10-E4)', () => {
-  test('gives every concept a gsw lexeme, or names it pending', () => {
-    expect(concepts.filter((c) => !c.forms['gsw']).map((c) => c.id)).toEqual([...GSW_PENDING]);
+  // The concepts the column does not give borrow German's forms (`columns.ts`): the list to work
+  // through. SALMON: Lachs, but the Zürich plural (Lachs or Lächs) wants a native reviewer.
+  test('gives every concept its own gsw lexeme but the ones it borrows from German', () => {
+    expect(BORROWED['gsw']).toEqual(['SALMON']);
   });
+  const own = (c: (typeof concepts)[number]) => !BORROWED['gsw']?.includes(c.id);
 
   test('stores no preterite and no genitive — the cells Swiss German does not have (P10 D5, D7)', () => {
-    const bad = concepts.flatMap((c) =>
+    const bad = concepts.filter(own).flatMap((c) =>
       Object.keys(c.forms['gsw'] ?? {})
         .filter((key) => /_past$/.test(key) || key === 'genitive' || key === 'weak')
         .map((key) => `${c.id}: ${key}`),
@@ -279,7 +281,7 @@ describe('the Swiss German column (P10-E4)', () => {
   });
 
   test('spells no ß and no apostrophe (the Dieth style sheet)', () => {
-    const bad = concepts.flatMap((c) =>
+    const bad = concepts.filter(own).flatMap((c) =>
       Object.entries(c.forms['gsw'] ?? {}).filter(([, v]) => /[ß']/.test(v)).map(([k, v]) => `${c.id}.${k}: ${v}`),
     );
     expect(bad).toEqual([]);

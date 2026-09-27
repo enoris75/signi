@@ -5,23 +5,40 @@ import { verbs } from './verbs/index.js';
 import { adjectives } from './adjectives.js';
 import { adverbs } from './adverbs.js';
 import { interjections } from './interjections.js';
-import { GSW } from './gsw/index.js';
+import { COLUMNS } from './columns.js';
+import type { LanguageCode } from '@signi/shared';
 import type { ConceptSeed } from './types.js';
 
+/** Per column, the concepts whose forms it borrowed from its closest language (see `COLUMNS`). */
+export const BORROWED: Partial<Record<LanguageCode, string[]>> = {};
+
 /**
- * Each seed with its Swiss German forms folded in as `forms.gsw` (P10-E4): the column lives in
- * `gsw/`, keyed by concept id, and an entry naming no seeded concept is refused here rather than
- * silently dropped.
+ * Each seed with the preview languages' columns folded in as `forms[code]` (P10-E4, P04-E1): each
+ * column lives in its language's folder, keyed by concept id, and an entry naming no seeded concept
+ * is refused here rather than silently dropped. A concept the column does not give borrows its
+ * closest language's forms, so no word is ever missing, and is recorded in `BORROWED`.
  */
-function withSwissGerman(seeds: ConceptSeed[]): ConceptSeed[] {
+function withColumns(seeds: ConceptSeed[]): ConceptSeed[] {
   const ids = new Set(seeds.map((c) => c.id));
-  const stray = Object.keys(GSW).filter((id) => !ids.has(id));
-  if (stray.length > 0) throw new Error(`gsw forms for unknown concept${stray.length > 1 ? 's' : ''}: ${stray.join(', ')}`);
-  return seeds.map((c) => (GSW[c.id] ? { ...c, forms: { ...c.forms, gsw: GSW[c.id]! } } : c));
+  let merged = seeds;
+  for (const [code, { forms, closest }] of Object.entries(COLUMNS) as [LanguageCode, NonNullable<(typeof COLUMNS)[LanguageCode]>][]) {
+    const stray = Object.keys(forms).filter((id) => !ids.has(id));
+    if (stray.length > 0) throw new Error(`${code} forms for unknown concept${stray.length > 1 ? 's' : ''}: ${stray.join(', ')}`);
+    const borrowed: string[] = [];
+    merged = merged.map((c) => {
+      const own = forms[c.id];
+      const lent = own ? undefined : c.forms[closest];
+      if (!own && !lent) return c;
+      if (lent) borrowed.push(c.id);
+      return { ...c, forms: { ...c.forms, [code]: own ?? lent! } };
+    });
+    BORROWED[code] = borrowed;
+  }
+  return merged;
 }
 
 // Every seed, with each definition written in the phrase language compiled to its plan (P13).
-export const concepts: DefinedConceptSeed[] = compileSeedDefinitions(withSwissGerman([
+export const concepts: DefinedConceptSeed[] = compileSeedDefinitions(withColumns([
   ...pronouns,
   ...nouns,
   ...verbs,
@@ -32,5 +49,9 @@ export const concepts: DefinedConceptSeed[] = compileSeedDefinitions(withSwissGe
 
 export { NONFINITE } from './verbs/index.js';
 export type { ConceptSeed } from './types.js';
-export { GSW, GSW_PENDING } from './gsw/index.js';
+export { GSW } from './gsw/index.js';
+export { RM_RUMGR } from './rm-rumgr/index.js';
+export { RM_SURSILV } from './rm-sursilv/index.js';
+export { RM_VALLADER } from './rm-vallader/index.js';
+export { COLUMNS } from './columns.js';
 export type { DefinedConceptSeed } from './definitionText.js';

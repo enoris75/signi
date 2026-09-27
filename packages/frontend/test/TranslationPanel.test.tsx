@@ -89,6 +89,21 @@ describe('TranslationPanel', () => {
     expect(lines('gsw')).toEqual(['The cat sleeps (gsw)']);
   });
 
+  // P04-E2: the three Romansh rows share their language's name and say which written standard each
+  // is, under the arms of the league it belongs to (P04 D3).
+  it.each([
+    ['rm-rumgr', 'Romansh (Rumantsch Grischun)', 'flag-graubuenden'],
+    ['rm-sursilv', 'Romansh (Sursilvan)', 'flag-grey-league'],
+    ['rm-vallader', 'Romansh (Vallader)', 'flag-gods-house'],
+  ])('labels the %s row "%s" under its arms, as a preview', (language, name, arms) => {
+    renderPanel([translated('The cat sleeps')]);
+
+    const row = languageRow(language as LanguageCode);
+    expect(within(row).getByTestId(`row-name-${language}`)).toHaveTextContent(name);
+    expect(within(row).getByTestId(arms)).toBeInTheDocument();
+    expect(within(row).getByTestId('row-language-preview')).toBeInTheDocument();
+  });
+
   it("lists each language's translation of every sentence, in period order", () => {
     renderPanel([translated('The cat sleeps'), translated('The dog barks')]);
 

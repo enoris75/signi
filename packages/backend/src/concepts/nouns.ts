@@ -4633,6 +4633,84 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P04: the language of the three Romansh rows, named with each variety in brackets after it
+    // (P04-E2 D1, "Romansh (Sursilvan)"). No definition, as SWISS_GERMAN: a language of Switzerland.
+    id: 'ROMANSH',
+    role: 'noun',
+    description: 'the Romance language of the canton of Graubünden, a national language of Switzerland',
+    emoji: '🗣️',
+    proper: true,
+    countable: false,
+    isA: 'LANGUAGE',
+    forms: {
+      en: { base: 'Romansh', count: 'singular' },
+      it: { base: 'romancio', gender: 'masc', count: 'singular' },
+      fr: { base: 'romanche', gender: 'masc', count: 'singular' },
+      de: { base: 'Rätoromanisch', gender: 'neut', count: 'singular', genitive: 'Rätoromanisch' },
+      es: { base: 'romanche', gender: 'masc', takes_article: '1', count: 'singular' },
+      ja: { base: 'ロマンシュ語', count: 'singular', reading: 'ろまんしゅご' },
+      pt: { base: 'romanche', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P04 D1: the supraregional written standard, the first of the three Romansh rows. Kept in its
+    // own spelling in every language, as the languages that name it do.
+    id: 'RUMANTSCH_GRISCHUN',
+    role: 'noun',
+    description: 'the supraregional written standard of Romansh, created in 1982',
+    emoji: '🗣️',
+    proper: true,
+    countable: false,
+    isA: 'ROMANSH',
+    forms: {
+      en: { base: 'Rumantsch Grischun', count: 'singular' },
+      it: { base: 'rumantsch grischun', gender: 'masc', count: 'singular' },
+      fr: { base: 'rumantsch grischun', gender: 'masc', count: 'singular' },
+      de: { base: 'Rumantsch Grischun', gender: 'neut', count: 'singular', genitive: 'Rumantsch Grischun' },
+      es: { base: 'rumantsch grischun', gender: 'masc', takes_article: '1', count: 'singular' },
+      ja: { base: 'ルマンチュ・グリシュン', count: 'singular', reading: 'るまんちゅぐりしゅん' },
+      pt: { base: 'rumantsch grischun', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P04 D1: the written standard of the Surselva, the Rhenish pole; German says Surselvisch.
+    id: 'SURSILVAN',
+    role: 'noun',
+    description: 'the Romansh written standard of the Surselva, the valley of the Vorderrhein',
+    emoji: '🗣️',
+    proper: true,
+    countable: false,
+    isA: 'ROMANSH',
+    forms: {
+      en: { base: 'Sursilvan', count: 'singular' },
+      it: { base: 'sursilvano', gender: 'masc', count: 'singular' },
+      fr: { base: 'sursilvan', gender: 'masc', count: 'singular' },
+      de: { base: 'Surselvisch', gender: 'neut', count: 'singular', genitive: 'Surselvisch' },
+      es: { base: 'sursilvano', gender: 'masc', takes_article: '1', count: 'singular' },
+      ja: { base: 'スルシルヴァン語', count: 'singular', reading: 'するしるゔぁんご' },
+      pt: { base: 'sursilvano', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P04 D1: the written standard of the Lower Engadine, the Engadine pole.
+    id: 'VALLADER',
+    role: 'noun',
+    description: 'the Romansh written standard of the Lower Engadine and the Val Müstair',
+    emoji: '🗣️',
+    proper: true,
+    countable: false,
+    isA: 'ROMANSH',
+    forms: {
+      en: { base: 'Vallader', count: 'singular' },
+      it: { base: 'vallader', gender: 'masc', count: 'singular' },
+      fr: { base: 'vallader', gender: 'masc', count: 'singular' },
+      de: { base: 'Vallader', gender: 'neut', count: 'singular', genitive: 'Vallader' },
+      es: { base: 'vallader', gender: 'masc', takes_article: '1', count: 'singular' },
+      ja: { base: 'ヴァラダー語', count: 'singular', reading: 'ゔぁらだーご' },
+      pt: { base: 'vallader', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The conventional way a language writes its words (P10-E2: "Dieth's spelling", "no standard
     // spelling"). Countable: a language may have several.
     id: 'SPELLING',

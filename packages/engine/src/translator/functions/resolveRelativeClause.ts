@@ -7,6 +7,7 @@ import { bindComplements, bindCoreferents, subjectBinding } from './bindCorefere
 import { copulaSwap, expletiveSubject } from './lexicalCopula.js';
 import { passiveGap } from './passiveGap.js';
 import { refuseGenericObject } from './refuseGenericObject.js';
+import { predicativePosition } from './predicativePosition.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { genericSubject } from './genericSubject.js';
@@ -97,7 +98,9 @@ export function resolveRelativeClause(
   // The relative's own subject is a clause's subject, generic where it is bare (A376, see
   // `genericSubject`): "il topo che i gatti vedono".
   const slots = remapped.subject ? { ...remapped, subject: genericSubject(remapped.subject, language) } : remapped;
-  const complements = resolveComplements(bindComplements(clause.complements, binding), language, lookup, verbPhrase.verb.forms);
+  // A copula's or BECOME's adjective is flagged predicative (P04-E9): "il paun che ei buns".
+  const complements = predicativePosition(
+    resolveComplements(bindComplements(clause.complements, binding), language, lookup, verbPhrase.verb.forms), verbPhrase.verb.conceptId);
   // A predicate adjective may name the verb it is said with in place of BE, as in a main clause
   // (P09-E31, see `lexicalCopula`): "il gatto che sta bene". Under German's experiencer frame the head
   // gapped as the subject is the dative gap, with *es* as the subject: "der Kater, dem es gut geht".

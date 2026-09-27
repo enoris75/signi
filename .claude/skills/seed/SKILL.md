@@ -15,7 +15,7 @@ as UI strings is one downstream consumer among others, and is not what seeding i
 
 Ask nothing if the user names the concept and its role is obvious. Seed the concept in all seven
 ready languages; a concept missing one is a bug, not a partial success (see "Definition of done").
-Add the Swiss German form too (the preview language, below).
+Add the preview languages' forms too — Swiss German and the three Romansh varieties (below).
 
 ## Where things live
 
@@ -27,10 +27,25 @@ Add the Swiss German form too (the preview language, below).
 | The loader (wipes + reinserts everything) | [packages/backend/src/seed.ts](packages/backend/src/seed.ts) |
 | Engine tests (one file per role/feature) | [packages/engine/test/](packages/engine/test/) — `adjectives.test.ts`, `verb.test.ts`, `subject.test.ts`, `nounPhrase.test.ts`, `coordination.test.ts`, … |
 | Test harness (seeds the real corpus, renders every language) | [packages/engine/test/harness.ts](packages/engine/test/harness.ts) |
-| The Swiss German column (preview) | [packages/backend/src/concepts/gsw/](packages/backend/src/concepts/gsw/) — one file per role, keyed by concept id, merged into `forms.gsw` by `concepts/index.ts` |
+| The preview columns | [packages/backend/src/concepts/gsw/](packages/backend/src/concepts/gsw/), [rm-rumgr/](packages/backend/src/concepts/rm-rumgr/), [rm-sursilv/](packages/backend/src/concepts/rm-sursilv/), [rm-vallader/](packages/backend/src/concepts/rm-vallader/) — one file per role, keyed by concept id, merged into `forms[code]` by `concepts/index.ts` (`columns.ts`) |
 
 Languages: the **ready** ones, `en`, `it`, `fr`, `de`, `es`, `ja`, `pt` — every one mandatory — and the
-**preview** one, `gsw` (Swiss German, P10; `LANGUAGE_STATUS` in `@signi/shared`).
+**preview** ones, `gsw` (Swiss German, P10) and `rm-rumgr`, `rm-sursilv`, `rm-vallader` (Romansh, P04;
+`LANGUAGE_STATUS` in `@signi/shared`). **A word is never missing.** Give each preview column its own form
+when you can; if you cannot, leave the concept out of the column and it **borrows the closest
+language's forms** when the seeds are assembled — `gsw` from `de`, `rm-rumgr` from `it`, `rm-sursilv`
+and `rm-vallader` from `rm-rumgr` (`COLUMNS` in `concepts/columns.ts`) — and is listed in `BORROWED`
+to be given its own word later. Do not copy the borrowed forms into the column by hand: the column
+holds only the language's own words, so `BORROWED` stays the true list.
+
+**Romansh** is three peer languages (P04 D1), each its own column and its own engine: Rumantsch
+Grischun, Sursilvan, Vallader. Follow each variety's style sheet in
+[docs/features/P-planning/P04-romansh/](../../../docs/features/P-planning/P04-romansh/); never derive a
+Sursilvan or Vallader form from the Rumantsch Grischun one. The keys are `it`'s **minus** every
+`*_past`, `*_future` and `gerund` (the past and future are periphrastic, P04 D5, D7), plus the six
+conditional cells; every verb takes `participle`, and `aux: 'be'` where the variety selects *esser*;
+every Sursilvan adjective takes `predicative_masc_sg` (P04-E9). Sentences are pinned in
+`packages/engine/test/languages/rm-*.test.ts`.
 
 **Swiss German** is Zürichdeutsch in Dieth spelling: follow
 [the style sheet](../../../docs/features/P-planning/P10-swiss-german/dieth-style-sheet.md). Its forms go in
@@ -38,9 +53,7 @@ Languages: the **ready** ones, `en`, `it`, `fr`, `de`, `es`, `ja`, `pt` — ever
 preterite), `genitive` and `weak` (no genitive, no case ending on a noun); a verb always takes
 `participle`, `2sg_imperative`, one plural form for all three persons, and `aux: 'be'` where Zürich
 selects *sii*. The lemma is the Zürich word, which is not always the German one respelled (*springe*
-for run, *luege* for look). While `gsw` is in preview its form is optional: if you cannot give a
-Zürich word, **do not copy the German one** (an empty cell renders nothing; a copied one lies) —
-leave it out and add the id to `GSW_PENDING` in `concepts/gsw/index.ts`. Its sentences are pinned in
+for run, *luege* for look). If you cannot give a Zürich word, leave it out: it borrows German's (above). Its sentences are pinned in
 `packages/engine/test/languages/gsw.test.ts`, not in the exhaustive tables, which render the ready
 languages only.
 
@@ -157,7 +170,7 @@ a column with no reading leaves none behind — お母さん must not be read �
 ## Definition of done
 
 - The concept appears in `npm run seed`'s count and the backend boots without throwing.
-- All seven ready languages have forms, and Swiss German has its own or the id is in `GSW_PENDING`.
+- All seven ready languages have forms; each preview language has its own, or borrows (listed in `BORROWED`).
   The word's paradigm is complete for its role — an adjective
   that agrees, a verb that conjugates across the persons and tenses its language inflects. A concept
   that renders in only some of the phrases it is grammatically eligible for is not seeded, it is

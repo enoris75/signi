@@ -25,8 +25,8 @@ const knowThat = (content: PhrasePlan): PhrasePlan =>
 const subject = (element: NounElement): PhrasePlan => ({ subject: element });
 
 describe('P10-E1: a preview row', () => {
-  test('renders in the translation list, last, after the seven', () => {
-    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw']);
+  test('renders in the translation list after the seven, before the Romansh rows', () => {
+    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
   });
 
   // E1 D1: a word the column has not got empties the row — no sentence with a hole in it, and never
@@ -311,8 +311,8 @@ describe('P10-E13: the rest of the sentence suite', () => {
 });
 
 // The common animals (seeded with their classes): Zürich words where they differ from German — s Ross,
-// d Sau, d Geiss, de Chüngel, de Löi, s Huen, d Üüle, s Bii. SALMON is in GSW_PENDING, so its row is
-// empty.
+// d Sau, d Geiss, de Chüngel, de Löi, s Huen, d Üüle, s Bii. SALMON has no Zürich form yet, so it
+// borrows German's (the closest language, `concepts/columns.ts`): a word is never missing.
 describe('the animals', () => {
   test.each<[string, string, string]>([
     ['BIRD', 'de Vogel.', 'd Vögel.'],
@@ -357,8 +357,8 @@ describe('the animals', () => {
     expect(gsw(subject(np(id, { number: 'plural' })))).toBe(thePlural);
   });
 
-  test('SALMON, pending review, empties the row', () => {
-    expect(gsw(subject(np('SALMON')))).toBe('');
+  test('SALMON, not yet given a Zürich form, borrows the German word', () => {
+    expect(gsw(subject(np('SALMON')))).toBe('de Lachs.');
   });
 });
 

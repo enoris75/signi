@@ -135,6 +135,25 @@ describe('buildUiStrings', () => {
     expect(blank).toEqual([]);
   });
 
+  // P04-E17: Rumantsch Grischun, a preview language, renders every entry — its count of unrendered UI
+  // strings is pinned at its Done value, 0 (639 of 792 before its engine), so a regression shows.
+  test('leaves no entry unrendered in Rumantsch Grischun', () => {
+    const strings = buildUiStrings();
+    expect(Object.entries(strings).filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['rm-rumgr']).map(([key]) => key)).toEqual([]);
+  });
+
+  // P04-E17: Sursilvan likewise, pinned at its Done value, 0 (all 792 before its engine, P04-E8).
+  test('leaves no entry unrendered in Sursilvan', () => {
+    const strings = buildUiStrings();
+    expect(Object.entries(strings).filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['rm-sursilv']).map(([key]) => key)).toEqual([]);
+  });
+
+  // P04-E17: Vallader's count too, pinned at its Done value, 0 (639 of 792 before its engine).
+  test('leaves no entry unrendered in Vallader', () => {
+    const strings = buildUiStrings();
+    expect(Object.entries(strings).filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['rm-vallader']).map(([key]) => key)).toEqual([]);
+  });
+
   test('renders each entry through the engine function for its kind', () => {
     // The catalog has entries of every kind; this spec is only meaningful while it does.
     expect(Object.values(byKind).every((entries) => entries.length > 0)).toBe(true);

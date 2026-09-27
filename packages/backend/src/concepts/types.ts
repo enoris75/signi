@@ -62,3 +62,10 @@ export interface ConceptSeed {
   aliases?: Partial<Record<LanguageCode, string[]>>;
   forms: Record<string, Record<string, string>>; // language -> form_key -> value
 }
+
+/**
+ * A preview language's column (P10-E4, P04-E4): one concept's forms in that language, keyed by
+ * concept id, kept in the language's own folder (`gsw/`, `rm-rumgr/`, …) rather than inline in the
+ * role files, so it can be authored, reviewed and counted as one body of text.
+ */
+export type LanguageColumn = Record<string, Record<string, string>>;

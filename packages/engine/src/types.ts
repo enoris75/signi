@@ -6,6 +6,14 @@ export type { RubySegment, PronominalPossessor };
 export interface ConceptForms {
   conceptId: string;
   forms: Record<string, string>;
+  /**
+   * Where a resolved **adjective** stands, where that is the predicate (P04-E9 D1): `'predicative'` on
+   * the adjective a copula or BECOME predicates of its subject ("the bread is **good**", "the cat
+   * becomes **big**"), set by the translator (`predicativePosition`) and absent everywhere else. Only
+   * Sursilvan reads it — its masculine singular differs there (*il paun ei buns*, *in paun bun*); every
+   * other engine ignores it. Not the lexeme's `forms.position` (`'pre'`), which places an attributive.
+   */
+  position?: 'predicative';
 }
 
 /**

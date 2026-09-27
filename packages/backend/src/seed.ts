@@ -1,8 +1,20 @@
 import { LANGUAGES } from '@signi/shared';
 import { getDb } from './db.js';
 import { clearLexiconCache } from './lexicon.js';
-import { concepts, NONFINITE } from './concepts/index.js';
+import { BORROWED, COLUMNS, concepts, NONFINITE } from './concepts/index.js';
 import { assertValidHierarchy, assertValidModifierRelations } from './concepts/hierarchy.js';
+
+/**
+ * A verb's non-finite forms in `lang` (participle, gerund, `aux`, …): its own, or — for a verb a
+ * preview column borrowed from its closest language — the closest language's, followed down the
+ * chain (`rm-sursilv` → `rm-rumgr` → `it`), so a borrowed verb is borrowed whole.
+ */
+function nonfiniteFor(id: string, lang: string): Record<string, string> | undefined {
+  const own = NONFINITE[id]?.[lang];
+  if (own) return own;
+  const column = COLUMNS[lang as keyof typeof COLUMNS];
+  return column && BORROWED[lang as keyof typeof BORROWED]?.includes(id) ? nonfiniteFor(id, column.closest) : undefined;
+}
 
 const db = getDb();
 
@@ -148,7 +160,7 @@ function seed() {
 
       for (const [lang, baseForms] of Object.entries(c.forms)) {
         // Fold in the non-finite aspect forms (gerund / participle / te-form) for verbs.
-        const extra = c.role === 'verb' ? NONFINITE[c.id]?.[lang] : undefined;
+        const extra = c.role === 'verb' ? nonfiniteFor(c.id, lang) : undefined;
         const forms = extra ? { ...baseForms, ...extra } : baseForms;
         const lemma = forms['base'] ?? '';
         // Pass language via a temporary augmented object so lexemeArgs can access it

@@ -6,7 +6,7 @@ carries its league's arms (P04 D3) instead of 🇨🇭.
 inline SVGs in the `Flag` component P10-E2 built.
 **Scope:** corpus (names in all eleven languages), `uiStrings.ts`, frontend `i18n/flags.tsx` and the
 panel row header.
-**Status:** open. Filed 2026-09-27 from P04 D1, D3, §0.5 and §3. Depends on E1.
+**Status:** **shipped, 2026-09-27**, but for the real-browser check — see [Done](#done). Filed 2026-09-27 from P04 D1, D3, §0.5 and §3. Depends on E1.
 
 ## Why
 
@@ -42,7 +42,7 @@ panel names no code.
 Each variety needs its own word for every language in `LANGUAGES` — eleven per variety. RG draft from
 P04 §0.5: *englais, talian, franzos, tudestg, spagnol, portugais, giapunais* *(verify all)*;
 *tudestg svizzer* for Swiss German *(verify)*; the variety names themselves *rumantsch grischun,
-sursilvan, vallader*. **The Sursilvan and Vallader columns are E3's sources' to fill**, or pending.
+sursilvan, vallader*. **The Sursilvan and Vallader columns are E3's sources' to fill**, or borrow.
 All lowercase; `NAME_FORMAT` capitalises.
 
 ### D3. The three arms
@@ -77,3 +77,21 @@ from Zürich's and from 🇩🇪 / 🇮🇹. Switching the UI to Italian makes t
 ## Out of scope
 
 Any sentence form (E4 on). A description tooltip beyond the label.
+
+## Done
+
+Shipped 2026-09-27, with E1.
+
+- **Seeded** `ROMANSH` (isA LANGUAGE) and `RUMANTSCH_GRISCHUN`, `SURSILVAN`, `VALLADER` (isA ROMANSH),
+  in the seven, with Swiss German forms (*Rätoromanisch, Surselvisch*). German says *Rätoromanisch* and
+  *Surselvisch*; Japanese *ロマンシュ語*, *ルマンチュ・グリシュン*, *スルシルヴァン語*, *ヴァラダー語* *(verify
+  the last two)*. Their Romansh forms are E4–E6's (D2); until then they borrow.
+- **D1 as recommended.** `language.rm-*` render ROMANSH; `language.rm-*.dialect` the variety. The
+  panel reads any `language.<code>.dialect` key, no longer `gsw` by name: "Romansh (Sursilvan)".
+- **D3.** Three arms in `flags.tsx`, `aria-hidden`, with the Zürich hairline factored out. **Correction
+  to P04 D3:** the cantonal arms (1932) are *divided, the chief split* — Grey League top left, Ten
+  Jurisdictions top right, God's House across the base — not three equal fields. The ibex is a
+  purpose-drawn silhouette.
+
+Tests: `TranslationPanel.test.tsx` (each Romansh row's label, arms and preview chip). Not done: the
+real-browser check at icon size in both themes (E18).

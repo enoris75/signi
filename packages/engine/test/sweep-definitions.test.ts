@@ -210,6 +210,7 @@ const GLOSSES_SHARED_BY_DESIGN: [string, string, string][] = [
   ['HOT', 'HOT_CLIMATE', 'B48 again, the other pole'],
 ];
 
+
 describe('no two concepts are glossed alike', () => {
   const allowed = new Set(GLOSSES_SHARED_BY_DESIGN.map(([a, b]) => [a, b].sort().join(' = ')));
 

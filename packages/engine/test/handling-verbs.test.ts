@@ -4,7 +4,7 @@ import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
-import { isPreviewLanguage } from '@signi/shared';
+import { isPreviewLanguage, LANGUAGE_CODES } from '@signi/shared';
 
 // docs/localization B61: P09's handling and leaving verbs — GET, PUT, KEEP, BRING, LEAVE_BEHIND,
 // TURN, LOOK_AT, LEAVE_DEPART and GO_OUT, seeded here, and TAKE, seeded in the shared base — with the
@@ -83,7 +83,7 @@ describe('where the words hang, and what the picker says beside them', () => {
   });
 
   test('OUTSIDE is a direction adverb, as UP and DOWN are', () => {
-    expect(Object.values(seed('OUTSIDE')!.forms).map((f) => f['subtype'])).toEqual(Array(8).fill('direction'));
+    expect(Object.values(seed('OUTSIDE')!.forms).map((f) => f['subtype'])).toEqual(Array(LANGUAGE_CODES.length).fill('direction'));
   });
 });
 
