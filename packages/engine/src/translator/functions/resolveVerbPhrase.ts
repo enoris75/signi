@@ -4,6 +4,7 @@ import { PASSIVE_AUXILIARY, PASSIVIZABLE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolve } from './resolve.js';
 import { asFrequencyAdverb, preverbalSentenceMood } from './sentenceAdverb.js';
+import { fusedAdverbs } from './fusedAdverbs.js';
 import { verbAdverbs } from './verbAdverbs.js';
 
 /** Resolve a verb phrase (the shared predicate head of a plan or a relative clause). Only
@@ -35,6 +36,8 @@ export function resolveVerbPhrase(
   hasObject = false,
   subjectForms?: Record<string, string>,
   hasInfinitive = false,
+  // A question that is not denied, whose NEVER is *ever* (see `fusedAdverbs`).
+  asksEver = false,
 ): ResolvedVerbPhrase {
   // An imperative or an infinitive is a mood that occupies the finite/mood slot: it is always
   // present-tense, neutral-aspect and modal-free. The UI already enforces this, but normalise
@@ -76,7 +79,9 @@ export function resolveVerbPhrase(
   const adverbs = [...new Set([vp.modifier, ...(vp.modifiers ?? [])])]
     .filter((id): id is string => !!id)
     .map((id) => asFrequencyAdverb(resolve(id, language, lookup))!);
-  const { modifier, moreAdverbs } = verbAdverbs(adverbs);
+  // A pair with one word of its own is said as that word: NEVER + AGAIN is "mai più" (A384).
+  const ranked = verbAdverbs(adverbs);
+  const { modifier, moreAdverbs } = asksEver ? ranked : fusedAdverbs(ranked.modifier, ranked.moreAdverbs);
   const resolved: ResolvedVerbPhrase = {
     verb,
     negative: governed ? finiteModal?.negative : vp.negative,

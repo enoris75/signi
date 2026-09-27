@@ -142,9 +142,10 @@ describe('P15: several adverbs in Spanish and Portuguese', () => {
       es: 'el gato debe no comer nunca rápido el ratón.',
       pt: 'o gato deve não comer nunca rapidamente o rato.',
     });
+    // NEVER + AGAIN is one word, "never again" (A384).
     expect(catEatsMouse({ modifier: 'NEVER', modifiers: ['AGAIN'] })).toEqual({
-      es: 'el gato nunca come de nuevo el ratón.',
-      pt: 'o gato nunca come de novo o rato.',
+      es: 'el gato nunca más come el ratón.',
+      pt: 'o gato nunca mais come o rato.',
     });
   });
 

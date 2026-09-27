@@ -41,3 +41,27 @@ clause uses (`moreAdverbsOf` / `moreAdverbText`):
 | | |
 |---|---|
 | **Test** | `multiple-adverbs.test.ts` → *known bugs: an instrument's act says one adverb of several (A387)* (1 `test.fails` over seven languages, plus a regression test for one adverb) |
+
+## Resolved
+
+**2026-09-27.** A shared [`allAdverbs`](../../../packages/engine/src/functions/adverbClass.ts) lists an act's adverbs, the
+primary first and the extras class by class, and every instrument renderer says them all where it
+said the primary: [en](../../../packages/engine/src/languages/en/complementsPhrase.ts),
+[it](../../../packages/engine/src/languages/it/complementsPhrase.ts), [fr](../../../packages/engine/src/languages/fr/complementsPhrase.ts),
+[es](../../../packages/engine/src/languages/es/complementsPhrase.ts), [pt](../../../packages/engine/src/languages/pt/complementsPhrase.ts),
+[de](../../../packages/engine/src/languages/de/complementsPhrase/instrumentActionPhrase.ts) and its
+[gsw](../../../packages/engine/src/languages/gsw/complementsPhrase/instrumentActionPhrase.ts) fork (the concept level
+declines each one on the nominalised infinitive). Japanese
+([`complementSegs.ts`](../../../packages/engine/src/languages/ja/complementSegs.ts)) now uses `jaAdverbSegs`, the finite
+clause's order, which brings A385's 上手に along. English puts a frequency adverb before the process
+level's gerund, as before a finite verb: *by often choosing a word slowly* (and a lone one, *by often
+choosing a word*, which no test pinned); the concept level's nominal gerund keeps them all after it.
+
+- **Tests:** [`multiple-adverbs.test.ts`](../../../packages/engine/test/multiple-adverbs.test.ts) → *known bugs: an
+  instrument's act says one adverb of several (A387)*. The pinning `test.fails` is now a passing
+  `test`; added: the exact rendering in all seven, a lone frequency adverb in English, 上手に on the act,
+  and the concept level. [`gsw.test.ts`](../../../packages/engine/test/languages/gsw.test.ts) pins the fork, and
+  [`adverbClass.test.ts`](../../../packages/engine/src/functions/adverbClass.test.ts) covers `allAdverbs`.
+- **Not filed, noticed:** at the concept level German declines a frequency adverb as an adjective,
+  *mit dem often Wählen* ("oft" has no attributive form; *häufigen* would be right). It predates this
+  fix and is the same for a lone OFTEN.

@@ -37,3 +37,27 @@ French *plus jamais* reverses the order and takes *ne … plus jamais*. Japanese
 | | |
 |---|---|
 | **Test** | `multiple-adverbs.test.ts` → *known bugs: NEVER + AGAIN is said word for word (A384)* (1 `test.fails` over six languages, plus a regression test for English and the lone adverbs) |
+
+## Resolved
+
+**2026-09-27.** A lexeme-driven fold, not a class change. NEVER's lexeme names its partner and the
+word for the pair in each language that has one ([`adverbs.ts`](../../../packages/backend/src/concepts/adverbs.ts),
+`fuses_with: 'AGAIN'` and `fused`: *mai più*, *plus jamais*, *nie wieder*, *nunca más*, *nunca mais*,
+二度と with `fused_reading` にどと); English names none and keeps *never runs again*. The new
+[`fusedAdverbs.ts`](../../../packages/engine/src/translator/functions/fusedAdverbs.ts), called from
+[`resolveVerbPhrase.ts`](../../../packages/engine/src/translator/functions/resolveVerbPhrase.ts) after `verbAdverbs`,
+replaces the primary's word with the fused one and drops the partner from the extras, so every
+engine places the pair in NEVER's own slot, polarity and all: *non aveva mai più corso*, *n'avait plus
+jamais couru*, 二度と走っていませんでした. A question that is not denied keeps the two words, since its
+NEVER is the positive *ever* (`interrogativeAdverb`); [`resolvePhrase.ts`](../../../packages/engine/src/translator/functions/resolvePhrase.ts)
+passes that as the new `asksEver` argument.
+
+- **Tests:** [`multiple-adverbs.test.ts`](../../../packages/engine/test/multiple-adverbs.test.ts) → *known bugs: NEVER +
+  AGAIN is said word for word (A384)*. The pinning `test.fails` is now a passing `test`; added: the
+  other ranking (AGAIN named first), the pluperfect in all seven, a further manner adverb beside the
+  pair, and a regression for the question (*does the cat ever run again?*, *corre mai di nuovo?*).
+  New colocated [`fusedAdverbs.test.ts`](../../../packages/engine/src/translator/functions/fusedAdverbs.test.ts). Two
+  older pins of the word-for-word output moved to the fused one:
+  [`multiple-adverbs.es-pt.test.ts`](../../../packages/engine/test/multiple-adverbs.es-pt.test.ts) (*nunca más come el
+  ratón*, *nunca mais come o rato*) and [`multiple-adverbs.ja.test.ts`](../../../packages/engine/test/multiple-adverbs.ja.test.ts)
+  (猫は二度と走りません).

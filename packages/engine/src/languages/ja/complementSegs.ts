@@ -26,6 +26,7 @@ import { jaParticleSegs } from './jaParticleSegs.js';
 import { npSegs } from './npSegs.js';
 import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
+import { jaAdverbSegs } from './jaAdverbSegs.js';
 
 // The cause particle, denied where the plan denies the cause rather than the clause (see
 // `Complement.negative`). Japanese negates such a phrase with ではなく in place of the particle's own
@@ -144,8 +145,8 @@ export function complementSegs(
       if (level !== 'object') {
         const v = c.action.verb.forms;
         segs.push(...slotSegs(c.phrase, 'を'));
-        const adverb = c.action.modifier;
-        if (adverb) segs.push(wordSeg(adverb.forms['base'] ?? '', adverb.forms['reading']));
+        // The act's adverbs stand as a finite verb's do, every one of them (A387): 単語をよくゆっくり選んで.
+        segs.push(...jaAdverbSegs(c.action));
         // Denied (the privative, P09-E2), the te-form becomes the ない-form + で — 単語を選ばないで
         // 始める, "starts without choosing a word" — and the nominalised act takes なしで for its で:
         // 単語を選ぶことなしで. A verb seeding no ない-form keeps the positive te-form rather than

@@ -65,13 +65,11 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
-| A383 | [A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md](A-must-fix/A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md) | French | a bare infinitive splits OFTEN + WELL round the verb: *bien manger souvent la souris* for *souvent bien manger la souris* |
-| A384 | [A384-never-again-is-said-word-for-word.md](A-must-fix/A384-never-again-is-said-word-for-word.md) | it, fr, de, es, pt, ja | NEVER + AGAIN word for word: *non corre mai di nuovo* for *mai più*, *nie erneut* for *nie wieder* |
-| A385 | [A385-japanese-often-and-well-together-say-yokuyoku.md](A-must-fix/A385-japanese-often-and-well-together-say-yokuyoku.md) | Japanese | OFTEN + WELL say よくよく ("thoroughly") for よく上手に |
-| A386 | [A386-english-yet-before-a-further-adverb.md](A-must-fix/A386-english-yet-before-a-further-adverb.md) | English | *does not run yet fast* for *does not run fast yet* |
-| A387 | [A387-instrument-act-says-one-adverb-of-several.md](A-must-fix/A387-instrument-act-says-one-adverb-of-several.md) | all seven, gsw | an instrument's act ("by choosing a word") drops every adverb but the primary |
 
-**Five open.** **A383–A387**, filed on 2026-09-27 from P15's follow-ups, each re-probed at aa554c6b.
+**None open.** A383–A387 were all fixed on 2026-09-27 and are listed under **Fixed** below. The
+history below is kept as it was written.
+
+**A383–A387**, filed on 2026-09-27 from P15's follow-ups, each re-probed at aa554c6b.
 Not filed, because a test already pins the output as right: a manner adverb before a noun object in
 it / fr / es / pt / de (A142's regression, A191's positive-clause decision), and English putting a manner
 adverb after a place complement or adverb, *runs here fast* (A156's regression in `adverb.test.ts`).
@@ -771,6 +769,11 @@ is listed under **Fixed** below.
 | A380 | [A380-superlative-set-beside-a-possessor-stacks-two-genitives.md](fixed/A380-superlative-set-beside-a-possessor-stacks-two-genitives.md) | German, Portuguese | 2026-09-25 |
 | A381 | [A381-german-du-imperative-of-speak-and-happen-drops-the-e-to-i.md](fixed/A381-german-du-imperative-of-speak-and-happen-drops-the-e-to-i.md) | German | 2026-09-27 |
 | A382 | [A382-german-answer-takes-its-object-in-the-accusative.md](fixed/A382-german-answer-takes-its-object-in-the-accusative.md) | German, Swiss German | 2026-09-27 |
+| A383 | [A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md](fixed/A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md) | French | 2026-09-27 |
+| A384 | [A384-never-again-is-said-word-for-word.md](fixed/A384-never-again-is-said-word-for-word.md) | Italian, French, German, Spanish, Portuguese, Japanese | 2026-09-27 |
+| A385 | [A385-japanese-often-and-well-together-say-yokuyoku.md](fixed/A385-japanese-often-and-well-together-say-yokuyoku.md) | Japanese | 2026-09-27 |
+| A386 | [A386-english-yet-before-a-further-adverb.md](fixed/A386-english-yet-before-a-further-adverb.md) | English | 2026-09-27 |
+| A387 | [A387-instrument-act-says-one-adverb-of-several.md](fixed/A387-instrument-act-says-one-adverb-of-several.md) | all, Swiss German | 2026-09-27 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

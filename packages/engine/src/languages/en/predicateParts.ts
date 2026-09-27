@@ -79,7 +79,17 @@ function withTrailingManner(parts: string[], verbPhrase: ResolvedVerbPhrase): st
   const more = moreAdverbText(verbPhrase, 'manner');
   if (!more || (verbPhrase.modifier && adverbClass(verbPhrase.modifier) === 'manner')) return parts;
   const out = [...parts];
-  out[out.length - 1] = [out[out.length - 1], more].filter(Boolean).join(' ');
+  const last = out.length - 1;
+  // A primary postposed under the negation ("yet", "either") closes the clause, so the manner
+  // adverb goes ahead of it: "does not run fast yet", not "*does not run yet fast" (A386).
+  // Under a modal the denied group is the governed one ("can not eat the mouse fast yet").
+  const negated = verbPhrase.negative === true || (verbPhrase.governedNegative === true && verbPhrase.modals.length > 0);
+  const neg = negativeAdverb(verbPhrase.modifier, negated);
+  if (neg?.slot === 'final' && neg.text && (out[last] === neg.text || out[last].endsWith(` ${neg.text}`))) {
+    out[last] = [out[last].slice(0, -neg.text.length).trimEnd(), more, neg.text].filter(Boolean).join(' ');
+    return out;
+  }
+  out[last] = [out[last], more].filter(Boolean).join(' ');
   return out;
 }
 

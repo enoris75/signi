@@ -50,7 +50,8 @@ describe('several adverbs (ja)', () => {
   test('a negative primary leads, the manner adverb after it', () => {
     expect(run({ modifier: 'NEVER', modifiers: ['FAST'] })).toBe('猫は決して速く走りません。');
     expect(run({ modifier: 'NEVER', modifiers: ['FAST'], tense: 'past' })).toBe('猫は決して速く走りませんでした。');
-    expect(run({ modifier: 'NEVER', modifiers: ['AGAIN'] })).toBe('猫は決してもう一度走りません。');
+    // NEVER + AGAIN is 二度と, which replaces both words (A384).
+    expect(run({ modifier: 'NEVER', modifiers: ['AGAIN'] })).toBe('猫は二度と走りません。');
   });
 
   test('a sentence adverb heads the clause, the frequency one stays by the verb', () => {
@@ -101,8 +102,21 @@ describe('several adverbs (ja)', () => {
 describe('known bugs: Japanese OFTEN and WELL together say よくよく (A385)', () => {
   const eat = (verbPhrase: Partial<VerbPhrase>) => ja(clause(np('CAT'), 'EAT', { verbPhrase, directObject: np('MOUSE') }));
 
-  test.fails('WELL beside a frequency よく says 上手に', () => {
+  test('WELL beside a frequency よく says 上手に', () => {
     expect(eat({ modifier: 'OFTEN', modifiers: ['WELL'] })).toBe('猫はネズミをよく上手に食べます。');
+  });
+
+  test('上手に in the infinitive, in either ranking, under a negation, with its reading', () => {
+    expect(ja({ ...clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'OFTEN', modifiers: ['WELL'] }, directObject: np('MOUSE') }), infinitive: true }))
+      .toBe('ネズミをよく上手に食べる。');
+    expect(eat({ modifier: 'WELL', modifiers: ['OFTEN'] })).toBe('猫はネズミをよく上手に食べます。');
+    expect(eat({ modifier: 'OFTEN', modifiers: ['WELL'], negative: true })).toBe('猫はネズミをよく上手に食べません。');
+    expect(furigana(clause(np('CAT'), 'RUN', { verbPhrase: { modifier: 'OFTEN', modifiers: ['WELL'] } })))
+      .toEqual(['ねこ', 'じょうずに', 'はしります']);
+  });
+
+  test('regression: WELL beside an adverb with another word keeps よく', () => {
+    expect(eat({ modifier: 'WELL', modifiers: ['SLOWLY'] })).toBe('猫はネズミをよくゆっくり食べます。');
   });
 
   test('regression: WELL alone and OFTEN alone are よく', () => {

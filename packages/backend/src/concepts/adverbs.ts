@@ -82,7 +82,9 @@ export const adverbs: ConceptSeed[] = [
       fr: { base: 'bien', pre_nonfinite: '1' },
       de: { base: 'gut' },
       es: { base: 'bien' },
-      ja: { base: 'よく' },
+      // よく is also OFTEN's word, and the two side by side say よくよく, "thoroughly". Beside another
+      // adverb that says よく, WELL takes its gloss's word, `distinct` (A385): よく上手に食べます.
+      ja: { base: 'よく', distinct: '上手に', distinct_reading: 'じょうずに' },
       pt: { base: 'bem' },
     },
   },
@@ -597,14 +599,19 @@ export const adverbs: ConceptSeed[] = [
     // Asked, and not denied, it is *ever* (P09-E28, `interrogativeAdverb`): a positive word in the
     // same slot. Japanese has no adverb for it — 〜たことがある is a verb construction, deferred —
     // and asks with いつか "at some time" meanwhile.
+    //
+    // With AGAIN it is each language's fixed "never again" (A384, `fusedAdverbs`): `fuses_with` names
+    // the partner and `fused` the word, in NEVER's own slot. English says the two words, *never runs
+    // again*, so it names none. French reverses the pair (*ne court plus jamais*), and Japanese 二度と
+    // replaces both words.
     forms: {
       en: { base: 'never', subtype: 'frequency', polarity: 'negative', interrogative: 'ever' },
-      it: { base: 'mai', subtype: 'frequency', polarity: 'negative', interrogative: 'mai' },
-      fr: { base: 'jamais', subtype: 'frequency', polarity: 'negative', interrogative: 'déjà' },
-      de: { base: 'nie', subtype: 'frequency', polarity: 'negative', interrogative: 'je' },
-      es: { base: 'nunca', subtype: 'frequency', polarity: 'negative', interrogative: 'alguna vez' },
-      ja: { base: '決して', subtype: 'frequency', polarity: 'negative', reading: 'けっして', interrogative: 'いつか' },
-      pt: { base: 'nunca', subtype: 'frequency', polarity: 'negative', interrogative: 'alguma vez' },
+      it: { base: 'mai', subtype: 'frequency', polarity: 'negative', interrogative: 'mai', fuses_with: 'AGAIN', fused: 'mai più' },
+      fr: { base: 'jamais', subtype: 'frequency', polarity: 'negative', interrogative: 'déjà', fuses_with: 'AGAIN', fused: 'plus jamais' },
+      de: { base: 'nie', subtype: 'frequency', polarity: 'negative', interrogative: 'je', fuses_with: 'AGAIN', fused: 'nie wieder' },
+      es: { base: 'nunca', subtype: 'frequency', polarity: 'negative', interrogative: 'alguna vez', fuses_with: 'AGAIN', fused: 'nunca más' },
+      ja: { base: '決して', subtype: 'frequency', polarity: 'negative', reading: 'けっして', interrogative: 'いつか', fuses_with: 'AGAIN', fused: '二度と', fused_reading: 'にどと' },
+      pt: { base: 'nunca', subtype: 'frequency', polarity: 'negative', interrogative: 'alguma vez', fuses_with: 'AGAIN', fused: 'nunca mais' },
     },
   },
   {

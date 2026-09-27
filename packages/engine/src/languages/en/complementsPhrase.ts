@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounPhrase } from '../../types.js';
+import { adverbClass, allAdverbs } from '../../functions/adverbClass.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionGerund } from '../../functions/actionGerund.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
@@ -58,11 +59,17 @@ export function complementsPhrase(
         const level = abstractionLevel(c);
         if (level !== 'object') {
           const object = coordinate(c.phrase, npText);
-          const adverb = c.action.modifier?.forms['base'] ?? '';
+          // Every adverb of the act, not just its primary (A387). The gerund of the process level is
+          // a verb, so a frequency adverb goes before it, as it does before a finite verb: "by often
+          // choosing a word slowly". The nominal gerund of the concept level takes them all after it.
+          const adverbs = allAdverbs(c.action);
+          const spell = (as: ConceptForms[]) => as.map((a) => a.forms['base'] ?? '').filter(Boolean).join(' ');
+          const frequency = level === 'process' ? adverbs.filter((a) => adverbClass(a) === 'frequency') : [];
+          const adverb = spell(adverbs.filter((a) => !frequency.includes(a)));
           const privative = isPrivative(type, c);
           const words =
             level === 'process'
-              ? [privative ? PRIVATIVE : 'by', actionGerund(c.action), object]
+              ? [privative ? PRIVATIVE : 'by', spell(frequency), actionGerund(c.action), object]
               : [privative ? `${PRIVATIVE} the` : 'with the', actionGerund(c.action), 'of', object];
           return [...words, adverb].filter(Boolean).join(' ');
         }

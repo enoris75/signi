@@ -40,3 +40,13 @@ export function moreAdverbText(
 ): string {
   return moreAdverbsOf(vp, cls).map(spell).filter(Boolean).join(separator);
 }
+
+/**
+ * Every adverb of a verb phrase that has no clause of its own to place them in — an instrument's act,
+ * "by choosing a word" (A387) — in the order they are said: the primary, then its extras class by
+ * class, frequency, place, direction, manner. The engines say them where they say the primary.
+ */
+export function allAdverbs(vp: Pick<ResolvedVerbPhrase, 'modifier' | 'moreAdverbs'>): ConceptForms[] {
+  const classes: AdverbClass[] = ['frequency', 'place', 'direction', 'manner'];
+  return [...(vp.modifier ? [vp.modifier] : []), ...classes.flatMap((cls) => moreAdverbsOf(vp, cls))];
+}

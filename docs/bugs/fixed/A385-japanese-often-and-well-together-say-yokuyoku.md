@@ -27,3 +27,18 @@ Whether WELL beside any other adverb takes 上手に is a question of style.
 | | |
 |---|---|
 | **Test** | `multiple-adverbs.ja.test.ts` → *known bugs: Japanese OFTEN and WELL together say よくよく (A385)* (1 `test.fails`, plus a regression test for each adverb alone) |
+
+## Resolved
+
+**2026-09-27.** WELL's Japanese lexeme seeds a `distinct` form, 上手に (read じょうずに), in
+[`adverbs.ts`](../../../packages/backend/src/concepts/adverbs.ts).
+[`jaAdverbSegs.ts`](../../../packages/engine/src/languages/ja/jaAdverbSegs.ts) says it for any adverb whose word another
+adverb in the same clause also says, so OFTEN + WELL is よく上手に, and WELL alone keeps よく. The rule is
+by shared word, not by pair, so WELL beside SLOWLY stays よくゆっくり (the style question the file left
+open). An instrument's act goes through the same function since A387, and takes it too.
+
+- **Tests:** [`multiple-adverbs.ja.test.ts`](../../../packages/engine/test/multiple-adverbs.ja.test.ts) → *known bugs:
+  Japanese OFTEN and WELL together say よくよく (A385)*. The pinning `test.fails` is now a passing
+  `test`; added: the infinitive, the other ranking, the negated clause, the furigana (じょうずに), and a
+  regression for WELL + SLOWLY. Colocated [`jaAdverbSegs.test.ts`](../../../packages/engine/src/languages/ja/jaAdverbSegs.test.ts)
+  gains a case for the `distinct` form.

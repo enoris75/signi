@@ -25,3 +25,15 @@ them.
 | | |
 |---|---|
 | **Test** | `multiple-adverbs.en.test.ts` → *known bugs: English "yet" ahead of a further adverb (A386)* (1 `test.fails`, plus a regression test for "yet" alone and the positive clause) |
+
+## Resolved
+
+**2026-09-27.** [`en/predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts), in
+`withTrailingManner`: a primary postposed under the negation (`negative_slot: 'final'`, "yet" and
+"either") closes the clause, so a further manner adverb goes ahead of it: *the cat does not run fast
+yet*. The negation is read as `negativeAdverb`'s callers do, the governed one under a modal included
+(*can not eat the mouse fast yet*).
+
+- **Tests:** [`multiple-adverbs.en.test.ts`](../../../packages/engine/test/multiple-adverbs.en.test.ts) → *known bugs:
+  English "yet" ahead of a further adverb (A386)*. The pinning `test.fails` is now a passing `test`;
+  added: an object, the pluperfect, a modal, and ALSO's *either*.

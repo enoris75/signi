@@ -357,3 +357,14 @@ describe('the animals', () => {
     expect(gsw(subject(np('SALMON')))).toBe('');
   });
 });
+
+// A387: the fork's indem-clause says every adverb of an instrument's act, as German's does.
+describe('an instrument\'s act with several adverbs (gsw)', () => {
+  test('both adverbs stand before the verb-final finite', () => {
+    const act = (action: Partial<VerbPhrase>) => gsw(clause(np('CAT'), 'SPEAK', {
+      complements: { instrumental: { phrase: np('WORD', { definiteness: 'indefinite' }), specifiers: [{ kind: 'abstraction', value: 'process' }], action: { verb: 'CHOOSE', ...action } } },
+    }));
+    expect(act({ modifier: 'SLOWLY', modifiers: ['OFTEN'] })).toBe('de Chater redt, indem er es Wort oft langsam wäält.');
+    expect(act({ modifier: 'SLOWLY' })).toBe('de Chater redt, indem er es Wort langsam wäält.');
+  });
+});

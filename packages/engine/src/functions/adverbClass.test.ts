@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { concept } from '../languages/resolved.fixtures.js';
-import { adverbClass, moreAdverbText, moreAdverbsOf } from './adverbClass.js';
+import { adverbClass, allAdverbs, moreAdverbText, moreAdverbsOf } from './adverbClass.js';
 
 describe('adverbClass', () => {
   test('frequency, and a sentence adverb left in its clause', () => {
@@ -44,5 +44,21 @@ describe('moreAdverbText', () => {
 
   test('with the caller\'s own spelling and separator', () => {
     expect(moreAdverbText(vp, 'manner', (a) => a.forms['base']!.toUpperCase(), '')).toBe('FASTWELL');
+  });
+});
+
+describe('allAdverbs', () => {
+  const base = (as: { forms: Record<string, string> }[]) => as.map((a) => a.forms['base']);
+  const often = concept({ base: 'often', subtype: 'frequency' });
+  const fast = concept({ base: 'fast' });
+  const up = concept({ base: 'up', subtype: 'direction' });
+  const here = concept({ base: 'here', subtype: 'place' });
+  const already = concept({ base: 'already', subtype: 'frequency' });
+
+  // A387: an instrument's act says every adverb, the primary first, then the extras class by class.
+  test('the primary, then frequency, place, direction and manner extras', () => {
+    expect(base(allAdverbs({ modifier: often, moreAdverbs: [fast, up, here, already] }))).toEqual(['often', 'already', 'here', 'up', 'fast']);
+    expect(base(allAdverbs({ modifier: fast }))).toEqual(['fast']);
+    expect(allAdverbs({})).toEqual([]);
   });
 });

@@ -121,8 +121,22 @@ describe('known bugs: French bien before an infinitive leaves souvent behind it 
   const eatInf = (verbPhrase: Partial<VerbPhrase>) =>
     fr({ ...clause(np('CAT'), 'EAT', { verbPhrase, directObject: np('MOUSE') }), infinitive: true });
 
-  test.fails('the frequency adverb leads the manner adverb before the infinitive', () => {
+  test('the frequency adverb leads the manner adverb before the infinitive', () => {
     expect(eatInf({ modifier: 'OFTEN', modifiers: ['WELL'] })).toBe('souvent bien manger la souris.');
+  });
+
+  test('the pair stays together under a negation, beside a clitic, in a passive and in an instruction', () => {
+    expect(eatInf({ modifier: 'WELL', modifiers: ['OFTEN'] })).toBe('souvent bien manger la souris.');
+    expect(eatInf({ modifier: 'OFTEN', modifiers: ['WELL'], negative: true })).toBe('ne pas souvent bien manger la souris.');
+    expect(eatInf({ modifier: 'ALREADY', modifiers: ['WELL'], negative: true })).toBe('ne pas encore bien manger la souris.');
+    expect(fr({ ...clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', modifiers: ['WELL'] }, directObject: np('FIRST_PERSON') }), infinitive: true }))
+      .toBe('toujours bien me manger.');
+    expect(eatInf({ modifier: 'OFTEN', modifiers: ['WELL'], voice: 'passive' })).toBe('être souvent bien mangée par le chat.');
+  });
+
+  test('regression: a long manner extra and a negative primary keep their places', () => {
+    expect(eatInf({ modifier: 'OFTEN', modifiers: ['SLOWLY'] })).toBe('manger souvent lentement la souris.');
+    expect(eatInf({ modifier: 'NEVER', modifiers: ['WELL'] })).toBe('ne jamais bien manger la souris.');
   });
 
   test('regression: a lone frequency adverb, and the modal, are unchanged', () => {

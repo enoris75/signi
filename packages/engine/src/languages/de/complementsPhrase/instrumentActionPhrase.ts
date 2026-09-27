@@ -1,4 +1,5 @@
 import type { ResolvedComplement } from '../../../types.js';
+import { allAdverbs } from '../../../functions/adverbClass.js';
 import { abstractionLevel } from '../../../functions/abstractionLevel.js';
 import { isPrivative } from '../../../functions/isPrivative.js';
 import { actionInfinitive } from '../../../functions/actionInfinitive.js';
@@ -33,7 +34,9 @@ export function instrumentActionPhrase(c: ResolvedComplement, doer?: Record<stri
   const action = c.action;
   const level = abstractionLevel(c);
   if (!action || level === 'object') return undefined;
-  const adverb = action.modifier?.forms['base'] ?? '';
+  // Every adverb of the act, not just its primary (A387): "indem er ein Wort oft langsam wählt".
+  const adverbs = allAdverbs(action).map((a) => a.forms['base'] ?? '').filter(Boolean);
+  const adverb = adverbs.join(' ');
   const privative = isPrivative('instrumental', c);
   if (level === 'process' && privative) {
     const object = coordinate(c.phrase, (np) => nounPhrase(np, 'acc'));
@@ -60,6 +63,6 @@ export function instrumentActionPhrase(c: ResolvedComplement, doer?: Record<stri
   const act = infinitive.charAt(0).toUpperCase() + infinitive.slice(1);
   // Weak declension: the adjective sits behind the definite "dem" (dative neuter → -en), or behind
   // the privative's accusative "das" (neuter → -e).
-  const attr = adverb ? declineAdj(adverb, privative ? 'acc' : 'dat', 'neut', false, 'definite') : '';
+  const attr = adverbs.map((a) => declineAdj(a, privative ? 'acc' : 'dat', 'neut', false, 'definite')).join(' ');
   return [privative ? 'ohne das' : 'mit dem', attr, act, object].filter(Boolean).join(' ');
 }

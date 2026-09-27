@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounPhrase } from '../../types.js';
+import { allAdverbs } from '../../functions/adverbClass.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionGerund } from '../../functions/actionGerund.js';
 import { actionInfinitive } from '../../functions/actionInfinitive.js';
@@ -151,7 +152,8 @@ export function complementsPhrase(
             level === 'process'
               ? actionGerund(c.action)
               : `com o ${actionInfinitive(c.action)}`;
-          const adverb = c.action.modifier?.forms['base'] ?? '';
+          // Every adverb of the act, not just its primary (A387): "spesso lentamente".
+          const adverb = allAdverbs(c.action).map((a) => a.forms['base'] ?? '').filter(Boolean).join(' ');
           return [verb, object, adverb].filter(Boolean).join(' ');
         }
       }

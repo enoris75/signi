@@ -1,11 +1,14 @@
 # A-must-fix — confirmed bugs
 
+**None open.** A383–A387 were all fixed on 2026-09-27 and moved to [`../fixed/`](../fixed/). The
+history below is kept as it was written.
+
 **Five open.** **A383–A387**, filed on 2026-09-27 from P15's follow-ups, at aa554c6b.
-[A383](A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md), a French bare infinitive splits OFTEN + WELL round the verb (*bien manger souvent*).
-[A384](A384-never-again-is-said-word-for-word.md), NEVER + AGAIN is said word for word (*mai di nuovo* for *mai più*) in six languages.
-[A385](A385-japanese-often-and-well-together-say-yokuyoku.md), Japanese OFTEN + WELL say よくよく.
-[A386](A386-english-yet-before-a-further-adverb.md), English *does not run yet fast*.
-[A387](A387-instrument-act-says-one-adverb-of-several.md), an instrument's act drops every adverb but one, in all seven.
+[A383](../fixed/A383-french-bien-before-an-infinitive-leaves-souvent-behind-it.md), a French bare infinitive splits OFTEN + WELL round the verb (*bien manger souvent*).
+[A384](../fixed/A384-never-again-is-said-word-for-word.md), NEVER + AGAIN is said word for word (*mai di nuovo* for *mai più*) in six languages.
+[A385](../fixed/A385-japanese-often-and-well-together-say-yokuyoku.md), Japanese OFTEN + WELL say よくよく.
+[A386](../fixed/A386-english-yet-before-a-further-adverb.md), English *does not run yet fast*.
+[A387](../fixed/A387-instrument-act-says-one-adverb-of-several.md), an instrument's act drops every adverb but one, in all seven.
 
 A381 and A382 were fixed on 2026-09-27 and moved to [`../fixed/`](../fixed/). The history below is
 kept as it was written.

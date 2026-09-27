@@ -32,3 +32,19 @@ the verb, which is grammatical. Leave it.
 | | |
 |---|---|
 | **Test** | `multiple-adverbs.fr.test.ts` → *known bugs: French bien before an infinitive leaves souvent behind it (A383)* (1 `test.fails`, plus a regression test for the lone frequency adverb and the modal) |
+
+## Resolved
+
+**2026-09-27.** [`fr/predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts): where a short manner
+extra leads the infinitive, a frequency primary (`frequencyLead`) goes with it, ahead of it, as under
+a modal: *souvent bien manger la souris*. A lone frequency adverb keeps its place behind the
+infinitive (*manger souvent*), and a negative one stays the negator (*ne jamais bien manger*). The
+passive infinitive gets the same order before its participe, *être souvent bien mangée*, and so does
+the instruction register, which shares `negateInfinitive`. The command is left as it was (the
+decision the file left open).
+
+- **Tests:** [`multiple-adverbs.fr.test.ts`](../../../packages/engine/test/multiple-adverbs.fr.test.ts) → *known bugs:
+  French bien before an infinitive leaves souvent behind it (A383)*. The pinning `test.fails` is now a
+  passing `test`; added: WELL + OFTEN in the other ranking, the negated infinitive (*ne pas souvent
+  bien*, *ne pas encore bien*), a clitic object (*toujours bien me manger*), the passive, and a
+  regression for a long manner extra (*manger souvent lentement*) and a negative primary.

@@ -19,8 +19,16 @@ describe('several adverbs (en)', () => {
 // A386. ALREADY under a negation is "yet", which closes the clause: "does not run fast yet". As the
 // primary it takes the manner adverb's place, and the manner extra follows it: "does not run yet fast".
 describe('known bugs: English "yet" ahead of a further adverb (A386)', () => {
-  test.fails('"yet" follows the manner adverb', () => {
+  test('"yet" follows the manner adverb', () => {
     expect(run({ modifier: 'ALREADY', modifiers: ['FAST'], negative: true })).toBe('the cat does not run fast yet.');
+  });
+
+  test('"yet" and "either" close the clause after the object, a compound tense and a modal', () => {
+    const eat = (verbPhrase: Partial<VerbPhrase>) => en(clause(np('CAT'), 'EAT', { verbPhrase, directObject: np('MOUSE') }));
+    expect(eat({ modifier: 'ALREADY', modifiers: ['FAST'], negative: true })).toBe('the cat does not eat the mouse fast yet.');
+    expect(eat({ modifier: 'ALREADY', modifiers: ['FAST'], negative: true, tense: 'past', aspect: 'resultative' })).toBe('the cat had not eaten the mouse fast yet.');
+    expect(eat({ modifier: 'ALREADY', modifiers: ['FAST'], negative: true, modals: ['CAN'] })).toBe('the cat can not eat the mouse fast yet.');
+    expect(eat({ modifier: 'ALSO', modifiers: ['FAST'], negative: true })).toBe('the cat does not eat the mouse fast either.');
   });
 
   test('regression: "yet" alone, and ALREADY in a positive clause', () => {

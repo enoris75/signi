@@ -350,15 +350,20 @@ export function predicateText(
   // takes "ne" alone ("ne manger aucune souris"), as `negateFinite` has it; "ne" elides against the
   // word after it ("n'aimer aucun chat"). Shared by the instruction register and the infinitive mood.
   const negativeAdverb = isNegativeAdverb(modifier);
-  const infinitiveMod = [negativeAdverb || preInfinitive ? '' : modifierText, postMore].filter(Boolean).join(' ');
+  // A frequency primary goes with a short manner extra that leads the infinitive, ahead of it, as
+  // under a modal ("doit souvent bien manger"): "souvent bien manger", not "*bien manger souvent"
+  // (A383). Alone it keeps its place behind the infinitive ("manger souvent"). A passive puts both
+  // before the participe: "être souvent bien mangée".
+  const frequencyLead = isFrequency && !negativeAdverb && preMore ? modifierText : '';
+  const infinitiveMod = [negativeAdverb || preInfinitive || frequencyLead ? '' : modifierText, postMore].filter(Boolean).join(' ');
   // A passive citation is the infinitive of the auxiliary plus the participe ("être mangée"), a short
   // adverb before the participe ("être bien mangée", A294).
   const infinitiveGroup = passive
-    ? [finiteVerb.forms['base'] ?? '', preGroup, passiveParticipleText].filter(Boolean).join(' ')
+    ? [finiteVerb.forms['base'] ?? '', frequencyLead, preGroup, passiveParticipleText].filter(Boolean).join(' ')
     : '';
   const negateInfinitive = (inf: string): string => {
     // "bien" leads the infinitive here too, behind any "ne pas": "bien manger", "ne pas bien manger".
-    const group = [auxiliaryPreInfinitive, frCliticize(clitic, inf)].filter(Boolean).join(' ');
+    const group = [passive ? '' : frequencyLead, auxiliaryPreInfinitive, frCliticize(clitic, inf)].filter(Boolean).join(' ');
     if (!verbNegative && !aucun && !negativeAdverb) return group;
     return negateNonFinite(negativeAdverb ? modifierText : verbNegative && !aucun ? 'pas' : '', group);
   };

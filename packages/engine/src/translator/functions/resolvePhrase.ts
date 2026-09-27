@@ -189,6 +189,7 @@ export function resolvePhrase(
         citation ? undefined : subject.agreement,
         // Governing an infinitive selects an `infinitive_sense` (P09-E43): TELL_ORDER for TELL.
         !!plan.infinitiveComplement,
+        question && !clauseNegative,
       )
     : undefined;
   const verbPhrase = resolvedVerbPhrase
