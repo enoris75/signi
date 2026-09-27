@@ -1,3 +1,179 @@
 import type { LanguageColumn } from '../types.js';
 
-export const CA_ADJECTIVES: LanguageColumn = {};
+// The adjectives, each with its four agreeing forms stored — `base` (masc sg), `fem`, `plural`
+// (masc pl) and `fem_plural` (P03 D6) — since Catalan's are not derivable from a Spanish rule
+// (*blanc, blanques*; *boig, boja*; *nou, nova*; *fresc, fresques*; *propi, pròpia*). Written out,
+// never computed by the engine. A one-ending adjective repeats its masculine (*gran, grans*), and a
+// sibilant one takes *-os* in both plurals (*feliç, feliços*). Every other key mirrors Spanish's.
+// Every form is (verify) until the native review (P03-E11); the ones marked are the least sure.
+type Forms = Record<string, string>;
+const a = (base: string, fem: string, plural: string, fem_plural: string, extra: Forms = {}): Forms => ({
+  base, fem, plural, fem_plural, ...extra,
+});
+/** A word or phrase that does not inflect (*zero*, *sense títol*). */
+const inv = (base: string, extra: Forms = {}): Forms => a(base, base, base, base, extra);
+/** A one-ending adjective: the same form for both genders, plural in -s (*gran, grans*). */
+const one = (base: string, plural: string = `${base}s`, extra: Forms = {}): Forms => a(base, base, plural, plural, extra);
+
+export const CA_ADJECTIVES: LanguageColumn = {
+  BIG: one('gran'),
+  SMALL: a('petit', 'petita', 'petits', 'petites'),
+  HIGH: a('alt', 'alta', 'alts', 'altes'),
+  LONG: a('llarg', 'llarga', 'llargs', 'llargues'),
+  GREAT: one('gran'),
+  LOW: a('baix', 'baixa', 'baixos', 'baixes'),
+  NEAR: a('proper', 'propera', 'propers', 'properes'),
+  FAR: a('llunyà', 'llunyana', 'llunyans', 'llunyanes'),
+  GOOD: a('bo', 'bona', 'bons', 'bones', { content_clause_mood: 'subjunctive' }),
+  BAD: a('dolent', 'dolenta', 'dolents', 'dolentes'),
+  HAPPY: one('feliç', 'feliços'),
+  // *estic bé*: the adverb, invariable, as Spanish *estoy bien*.
+  OKAY: inv('bé'),
+  SAD: a('trist', 'trista', 'tristos', 'tristes'),
+  OLD: a('vell', 'vella', 'vells', 'velles'),
+  YOUNG: one('jove'),
+  // Of siblings Catalan says *el germà gran*, *la germana petita* (verify: against *major*, *menor*).
+  ELDER: one('gran'), // (verify)
+  YOUNGER: a('petit', 'petita', 'petits', 'petites'), // (verify)
+  ADULT: a('adult', 'adulta', 'adults', 'adultes'),
+  MALE: a('masculí', 'masculina', 'masculins', 'masculines'),
+  FEMALE: a('femení', 'femenina', 'femenins', 'femenines'),
+  CASTRATED: a('castrat', 'castrada', 'castrats', 'castrades'),
+  NEW: a('nou', 'nova', 'nous', 'noves'),
+  BEAUTIFUL: a('bonic', 'bonica', 'bonics', 'boniques'),
+  STRONG: a('fort', 'forta', 'forts', 'fortes'),
+  WEAK: one('feble'),
+  TIRED: a('cansat', 'cansada', 'cansats', 'cansades'),
+  HUNGRY: a('afamat', 'afamada', 'afamats', 'afamades'), // (verify) against *famolenc*
+  COLD: a('fred', 'freda', 'freds', 'fredes'),
+  COLD_CLIMATE: a('fred', 'freda', 'freds', 'fredes'),
+  WARM: a('càlid', 'càlida', 'càlids', 'càlides'),
+  HOT: a('calent', 'calenta', 'calents', 'calentes'),
+  HOT_CLIMATE: a('calorós', 'calorosa', 'calorosos', 'caloroses'),
+  INTERESTING: one('interessant'),
+  IMPORTANT: one('important'),
+  QUICK: a('ràpid', 'ràpida', 'ràpids', 'ràpides'),
+  BROWN: one('marró', 'marrons'),
+  BLACK: a('negre', 'negra', 'negres', 'negres'),
+  WHITE: a('blanc', 'blanca', 'blancs', 'blanques'),
+  DARK: a('fosc', 'fosca', 'foscos', 'fosques'),
+  WILD: one('salvatge'),
+  DOMESTIC: a('domèstic', 'domèstica', 'domèstics', 'domèstiques'),
+  CANINE: a('caní', 'canina', 'canins', 'canines'),
+  LAZY: a('mandrós', 'mandrosa', 'mandrosos', 'mandroses'),
+  CAREFUL: a('curós', 'curosa', 'curosos', 'curoses'),
+  POSSIBLE: one('possible', 'possibles', { content_clause_mood: 'subjunctive' }),
+  // *capaç de fer*. (verify) the feminine plural: *capaços* as *feliços*, against *capaces*.
+  ABLE: one('capaç', 'capaços', { infinitive_link: 'de' }),
+  OBLIGED: a('obligat', 'obligada', 'obligats', 'obligades', { infinitive_link: 'a' }),
+  ALLOWED: a('autoritzat', 'autoritzada', 'autoritzats', 'autoritzades', { infinitive_link: 'a' }), // (verify) *a* against *per a*
+  WHOLE: a('sencer', 'sencera', 'sencers', 'senceres'),
+  ROUND: a('rodó', 'rodona', 'rodons', 'rodones'),
+  SHARP: a('esmolat', 'esmolada', 'esmolats', 'esmolades'),
+  LOUD: a('fort', 'forta', 'forts', 'fortes'),
+  WRITTEN: a('escrit', 'escrita', 'escrits', 'escrites'),
+  LOADED: a('carregat', 'carregada', 'carregats', 'carregades'),
+  TIDY: a('ordenat', 'ordenada', 'ordenats', 'ordenades'),
+  // *desar*, the software term for saving a file.
+  SAVED: a('desat', 'desada', 'desats', 'desades'),
+  ADDED: a('afegit', 'afegida', 'afegits', 'afegides'),
+  REMOVED: a('eliminat', 'eliminada', 'eliminats', 'eliminades'), // (verify) against *tret*
+  FAILED: a('fallit', 'fallida', 'fallits', 'fallides'),
+  COPIED: a('copiat', 'copiada', 'copiats', 'copiades'),
+  LINKED: a('enllaçat', 'enllaçada', 'enllaçats', 'enllaçades'),
+  PINNED: a('fixat', 'fixada', 'fixats', 'fixades'),
+  UNPINNED: a('desfixat', 'desfixada', 'desfixats', 'desfixades'), // (verify)
+  RECENT: one('recent'),
+  NUMBERED: a('numerat', 'numerada', 'numerats', 'numerades'),
+  ACTIVE: a('actiu', 'activa', 'actius', 'actives'),
+  UNTITLED: inv('sense títol'),
+  EMPTY: a('buit', 'buida', 'buits', 'buides'),
+  VALID: a('vàlid', 'vàlida', 'vàlids', 'vàlides'),
+  MISSING: one('mancant'), // (verify) against *absent*
+  UNKNOWN: a('desconegut', 'desconeguda', 'desconeguts', 'desconegudes'),
+  KNOWN: a('conegut', 'coneguda', 'coneguts', 'conegudes'),
+  UNEXPECTED: a('inesperat', 'inesperada', 'inesperats', 'inesperades'),
+  SINGULAR: one('singular'),
+  PLURAL: one('plural'),
+  NEUTER: a('neutre', 'neutra', 'neutres', 'neutres'),
+  DEFINITE: a('definit', 'definida', 'definits', 'definides'),
+  INDEFINITE: a('indefinit', 'indefinida', 'indefinits', 'indefinides'),
+  ZERO: inv('zero'),
+  PROXIMAL: one('proximal'), // (verify)
+  DISTAL: one('distal'),
+  PARTITIVE: a('partitiu', 'partitiva', 'partitius', 'partitives'),
+  NEGATIVE: a('negatiu', 'negativa', 'negatius', 'negatives'),
+  MULTAL: one('multal'), // (verify) a coinage, as Spanish's
+  PAUCAL: one('paucal'),
+  UNIVERSAL: one('universal'),
+  DISTRIBUTIVE: a('distributiu', 'distributiva', 'distributius', 'distributives'),
+  EXHAUSTIVE: a('exhaustiu', 'exhaustiva', 'exhaustius', 'exhaustives'),
+  DUAL: one('dual'),
+  PROPORTIONAL: one('proporcional'),
+  MULTIPLE: one('múltiple'),
+  SUFFICIENT: one('suficient'),
+  APPROXIMATE: a('aproximat', 'aproximada', 'aproximats', 'aproximades'),
+  SIMILATIVE: a('similatiu', 'similativa', 'similatius', 'similatives'), // (verify) a coinage, as Spanish's
+  FIRST: a('primer', 'primera', 'primers', 'primeres'),
+  SECOND: a('segon', 'segona', 'segons', 'segones'),
+  THIRD: a('tercer', 'tercera', 'tercers', 'terceres'),
+  NEXT: one('següent'),
+  PREVIOUS: one('anterior'),
+  LAST_FINAL: a('últim', 'última', 'últims', 'últimes'),
+  // *la setmana passada*.
+  LAST_PREVIOUS: a('passat', 'passada', 'passats', 'passades'),
+  // *la setmana pròxima* (verify: against *vinent*).
+  NEXT_COMING: a('pròxim', 'pròxima', 'pròxims', 'pròximes'),
+  SAME: a('mateix', 'mateixa', 'mateixos', 'mateixes', { predicate_article: '1' }),
+  DIFFERENT: one('diferent'),
+  SURE: a('segur', 'segura', 'segurs', 'segures'),
+  REAL_EXISTING: one('real'),
+  REAL_GENUINE: one('veritable'),
+  AMERICAN: a('nord-americà', 'nord-americana', 'nord-americans', 'nord-americanes'),
+  RIGHT_CORRECT: a('correcte', 'correcta', 'correctes', 'correctes', { content_clause_mood: 'subjunctive' }),
+  RIGHT_SIDE: a('dret', 'dreta', 'drets', 'dretes'),
+  IMPERSONAL: one('impersonal'),
+  // *alguna cosa més*, *ningú més*: the pronoun's *else*.
+  OTHER: a('altre', 'altra', 'altres', 'altres', { after_pronoun: 'més' }),
+  OPPOSITE: a('oposat', 'oposada', 'oposats', 'oposades'),
+  MAIN: one('principal'),
+  CONDITIONAL: one('condicional'),
+  COORDINATED: a('coordinat', 'coordinada', 'coordinats', 'coordinades'),
+  SUBORDINATE: a('subordinat', 'subordinada', 'subordinats', 'subordinades'),
+  COPULATIVE: a('copulatiu', 'copulativa', 'copulatius', 'copulatives'),
+  DISJUNCTIVE: a('disjuntiu', 'disjuntiva', 'disjuntius', 'disjuntives'),
+  ADVERSATIVE: a('adversatiu', 'adversativa', 'adversatius', 'adversatives'),
+  EXPLICATIVE: a('explicatiu', 'explicativa', 'explicatius', 'explicatives'),
+  CONCLUSIVE: a('conclusiu', 'conclusiva', 'conclusius', 'conclusives'),
+  TEMPORAL: one('temporal'),
+  SPATIAL: one('espacial'),
+  NATIONAL: one('nacional'),
+  SOCIAL: one('social'),
+  POLITICAL: a('polític', 'política', 'polítics', 'polítiques'),
+  PUBLIC: a('públic', 'pública', 'públics', 'públiques'),
+  NEUTRAL: one('neutral'),
+  ACTIVE_VOICE: a('actiu', 'activa', 'actius', 'actives'),
+  PASSIVE: a('passiu', 'passiva', 'passius', 'passives'),
+  HUMBLE_GRAMMAR: one('humil'),
+  PROGRESSIVE: a('progressiu', 'progressiva', 'progressius', 'progressives'),
+  PROSPECTIVE: a('prospectiu', 'prospectiva', 'prospectius', 'prospectives'),
+  RESULTATIVE: a('resultatiu', 'resultativa', 'resultatius', 'resultatives'),
+  POSITIVE: a('positiu', 'positiva', 'positius', 'positives'),
+  SEMANTIC: a('semàntic', 'semàntica', 'semàntics', 'semàntiques'),
+  DIRECT: a('directe', 'directa', 'directes', 'directes'),
+  INDIRECT: a('indirecte', 'indirecta', 'indirectes', 'indirectes'),
+  UNCONNECTED: a('no connectat', 'no connectada', 'no connectats', 'no connectades'),
+  HIDDEN: a('amagat', 'amagada', 'amagats', 'amagades'),
+  CLOSED: a('tancat', 'tancada', 'tancats', 'tancades'),
+  OPEN_ADJECTIVE: a('obert', 'oberta', 'oberts', 'obertes'),
+  VISIBLE: one('visible'),
+  SWEET: a('dolç', 'dolça', 'dolços', 'dolces'),
+  SOLID: a('sòlid', 'sòlida', 'sòlids', 'sòlides'),
+  PRESENT: one('present'),
+  PAST: a('passat', 'passada', 'passats', 'passades'),
+  FUTURE: a('futur', 'futura', 'futurs', 'futures'),
+  OWN_ADJECTIVE: a('propi', 'pròpia', 'propis', 'pròpies'),
+  SOLE: a('únic', 'única', 'únics', 'úniques'),
+  STANDARD: one('estàndard'),
+  MANIFOLD: one('múltiple'),
+};
