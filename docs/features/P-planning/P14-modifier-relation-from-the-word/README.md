@@ -6,11 +6,12 @@ A noun seed says which relation it takes when it modifies another noun (`modifie
 plan all start from that value. The author still changes it with R, Shift+R or `/feature` · `/purpose`
 · `/material` · `/domain`.
 **Shape:** a new seed field, carried onto `Concept`, and one helper in `@signi/phrase` that replaces the
-six places where `"feature"` is hard-coded as the default. The console round trip treats "the word's
+seven places where `"feature"` is hard-coded as the default. The console round trip treats "the word's
 own relation" as the unset value. The engine does not change: a plan always carries its relation.
 **Languages:** Italian, French, Spanish and Portuguese, the four where the relation shows in the
 output. English, German and Japanese neutralise it (*time flies*, *Zeitfliegen*, 時間のハエ).
-**Status:** planning. D1 and D3 carry recommendations. **D2 is open** and blocks phase 5 only.
+**Status:** planning. D1–D4 are decided (2026-09-25). The head-class refinement (formerly D2) is its own
+feature, [P16](../P16-modifier-relation-by-head/README.md).
 
 ---
 
@@ -63,15 +64,17 @@ FRUIT, TIME and SEA are usually `domain`, GOLD and WOOD `material`, SUN `purpose
 | | Where | The default |
 |---|---|---|
 | The plan | [`modifiers.ts:19`](../../../../packages/phrase/src/model/selectionToPlan/functions/modifiers.ts#L19) | `sel.modifierRelations?.[key] ?? "feature"` |
-| The chip | [`phraseRender.tsx:383`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L383) | same, to label the chip and its tooltip |
-| R / Shift+R | [`phraseReducers.ts:535`](../../../../packages/phrase/src/model/phraseReducers.ts#L535) `cycleModifierRelation` | the cycle starts from `feature` |
-| The console's value | [`words.ts:338`](../../../../packages/phrase/src/language/words.ts#L338) | an unset relation reads `feature` |
-| Normalising | [`normalize.ts:86`](../../../../packages/phrase/src/language/normalize.ts#L86) | a stored `feature` is dropped as the default |
-| Plan → canvas | [`planToWorkspace.ts:430`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L430) | only a relation other than `feature` is stored |
+| The chip | [`phraseRender.tsx:390`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L390) | same, to label the chip and its tooltip |
+| R / Shift+R | [`phraseReducers.ts:560`](../../../../packages/phrase/src/model/phraseReducers.ts#L560) `cycleModifierRelation` | the cycle starts from `feature` |
+| The console's value | [`words.ts:342`](../../../../packages/phrase/src/language/words.ts#L342) `settingValue` | an unset relation reads `feature` |
+| The printer's default | [`words.ts:380`](../../../../packages/phrase/src/language/words.ts#L380) `defaultSetting` | `feature` is the value the printer leaves out |
+| Normalising | [`normalize.ts:102`](../../../../packages/phrase/src/language/normalize.ts#L102) | a stored `feature` is dropped as the default |
+| Plan → canvas | [`planToWorkspace.ts:471`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L471) | only a relation other than `feature` is stored |
 
 Placing a new word in the slot already clears the slot's settings (`clearSlotSettings` in
 [`phraseReducers.ts`](../../../../packages/phrase/src/model/phraseReducers.ts)), so a relation set for
-one word never carries over to the next. Every one of the six sites has the modifier's `Concept` at hand.
+one word never carries over to the next. Every one of the seven sites has the modifier's `Concept` at
+hand; `defaultSetting` gets it from its `WordInfo`.
 
 The pattern to copy is `mannerRelation`: a seed field, stored as the lexeme column `manner_relation`
 ([`lexicon.ts:97`](../../../../packages/backend/src/lexicon.ts#L97)), put onto `Concept` by
@@ -101,7 +104,7 @@ export function defaultModifierRelation(modifier: Concept): ModifierRelation {
 }
 ```
 
-All six sites read it instead of the literal. The stored value keeps its meaning: *unset* is "the
+All seven sites read it instead of the literal. The stored value keeps its meaning: *unset* is "the
 word's own", and a stored value is only ever one that differs from it. That is what `normalize.ts` and
 `planToWorkspace.ts` both need in order to agree.
 
@@ -116,11 +119,10 @@ Definitions compile through the console, so a definition that names a noun modif
 relation would change when its noun gets a default. Today only two do, STICK (`WOOD /material`) and
 REGISTER (`FORMALITY /material`), both explicit. The boot check re-renders every definition anyway.
 
-### 4. The chip (D3)
+### 4. The chip
 
-The chip shows the relation it will render, whatever its source. With an Italian, French, Spanish or
-Portuguese interface it can add the linking word, *dominio · del*, so the author sees what they get
-without switching the output language. See D3.
+The chip shows the relation it will render, whatever its source: the word's own when the slot is unset.
+It shows the relation's name only, not the linking word (D3).
 
 ### 5. Assigning the defaults
 
@@ -133,24 +135,17 @@ entries there are explicit and do not move.
 
 ## Decisions
 
-- **D1 — Does the plan keep writing the relation?** *Recommended: yes.* `NounModifier.relation` stays
-  required and `selectionToPlan` resolves the default before the plan leaves the phrase package. The
-  engine, the saved workspaces and the backend's plans stay as they are. A default applied in the
-  engine instead would change the meaning of every stored plan whose noun gets a default.
-- **D2 — Refine by the head's class? (open)** A per-head override,
-  `modifierRelations?: { [headIsA: string]: ModifierRelation }` resolved up the head's `isA` chain,
-  would let TIME be `feature` under an event or a device (*gara a tempo*, *bomba a tempo*) and
-  `material` under a quantity (*unità di tempo*). The seeded classes are sparse: ACT, QUANTITY,
-  CONTAINER and SUBSTANCE exist, and there is no DEVICE or EVENT. So this waits until a second pair
-  needs it. It then asks for a head-aware `defaultModifierRelation(modifier, head)`, which the canvas
-  has (the head is in the same block) and the console has too.
-- **D3 — The linking word on the chip.** *Recommended: yes, for the four Romance interface
-  languages.* It needs a small per-language table in `@signi/shared` beside the UI strings, not an
-  export from the engine, whose `REL_PREP_*` tables are internal. It shows the preposition only, not
-  the article of `domain`: *del* is the fused form, and a table of four fused forms per language
-  covers it.
-- **D4 — Refuse `purpose` for TIME?** *Recommended: no.* *Da tempo* is a misreading, not a
-  grammatical error. Once the default is `domain`, authors reach `purpose` only on purpose.
+Decided 2026-09-25.
+
+- **D1 — The plan keeps writing the relation.** `NounModifier.relation` stays required and
+  `selectionToPlan` resolves the default before the plan leaves the phrase package. The engine, the
+  saved workspaces and the backend's plans stay as they are. A default applied in the engine instead
+  would change the meaning of every stored plan whose noun gets a default.
+- **D2 — Refining by the head's class is a feature of its own**,
+  [P16](../P16-modifier-relation-by-head/README.md). P14 gives one relation per modifier noun.
+- **D3 — The chip shows no linking word.** It names the relation only, in every interface language.
+- **D4 — `purpose` stays allowed for TIME.** *Da tempo* is a misreading, not a grammatical error. Once
+  the default is `domain`, authors reach `purpose` only on purpose.
 
 ## Out of scope
 
@@ -161,12 +156,14 @@ entries there are explicit and do not move.
   *bomba a orologeria* (an idiom). These are words of their own and are seeded as concepts, not built
   from a modifier.
 - **English, German and Japanese**, which neutralise the relation.
+- **A relation that depends on the head** (*bomba a tempo* vs *mosche del tempo* by default): P16.
+- **The linking word on the chip** (D3).
 
 ## Phases
 
 1. **The field.** `modifierRelation` on the seed type, the lexeme column, `seedConcept`,
    `listConcepts` and `Concept`, with the test that holds `seedConcept` and `listConcepts` equal.
-2. **The default.** `defaultModifierRelation` and the six sites. Unit tests in `packages/phrase`: an
+2. **The default.** `defaultModifierRelation` and the seven sites. Unit tests in `packages/phrase`: an
    unset slot plans the word's relation; R starts its cycle from it; replacing the word resets it.
 3. **The console.** Printing, applying and normalising against the word's default; the round-trip
    stress run.
@@ -174,4 +171,15 @@ entries there are explicit and do not move.
    tempo*, *les mouches du temps*, *las moscas del tiempo* and *as moscas do tempo* from an unset
    relation. An e2e test picks TIME into FLY's adjective slot and reads *domain* on the chip. Spell
    out constants in the spec, since e2e specs cannot value-import `@signi/shared`.
-5. **The chip's linking word (D3)**, and the head-class refinement once D2 is decided.
+
+## Tasks (E1–E4)
+
+Filed 2026-09-27, checked against HEAD f35ea20b. One task per phase. E2 and E3 land together, because
+between them a noun with its own relation breaks the console round trip.
+
+| task | phase | what | status |
+|---|---|---|---|
+| [P14-E1](P14-E1-the-field.md) | 1 | `modifierRelation` on the seed, the `modifier_relation` column, `seedConcept`, `listConcepts`, `Concept` | Open |
+| [P14-E2](P14-E2-the-default.md) | 2 | `defaultModifierRelation`; the plan, the chip, R / Shift+R, plan → canvas | Open, after E1 |
+| [P14-E3](P14-E3-the-console.md) | 3 | `settingValue`, `defaultSetting`, `normalize`; `SEEDS=5000` | Open, with E2 |
+| [P14-E4](P14-E4-the-seeds.md) | 4 | TIME `domain`, WOOD `material`, WATER *(check)*; engine and e2e tests; saved-phrase check | Open, after E3 |

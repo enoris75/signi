@@ -34,7 +34,7 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 - A concept's definition is its `definition` in the seed, written in the phrase language with every
   word named by its concept id — the line the console prints and applies, compiled to its plan when
-  the seed is assembled ([P13](../features/P-planning/P13-console-definitions/README.md)). Until P13
+  the seed is assembled ([P13](../features/Z-Done/P13-console-definitions/README.md)). Until P13
   the seeds built plans with gloss helpers (`glossOf`, `whoGloss`, `patientGloss`, …), which the
   tickets in [`done/`](done/) still name; each is now the text below. The shapes the corpus uses:
   - **genus + differentia** — `/subj ( MAMMAL /adj SMALL /a )` → "a small mammal".
