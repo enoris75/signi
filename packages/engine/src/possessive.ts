@@ -279,6 +279,24 @@ export function possessiveEsStressed(unstressed: string, agree: PossessedAgreeme
   return (ES_STRESSED[key] ?? ES_STRESSED_DEFAULT)[romanceIndex(agree)];
 }
 
+// ── Catalan (P03 §0.4) ──────────────────────────────────────────────────────
+// Agrees with the possessed in gender/number and rides on the definite article: "el meu gat", "la
+// meva casa", "els meus gats", "les meves cases". The same forms stand after the noun beside a
+// determiner of the noun's own ("aquest llibre meu"). The 3rd plural is *seu* as the 3rd singular
+// (the literary *llur* is not written). Every form *(verify)*, P03-E11.
+const CA: Record<PN, [string, string, string, string]> = {
+  '1sg': ['meu', 'meva', 'meus', 'meves'],
+  '2sg': ['teu', 'teva', 'teus', 'teves'],
+  '3sg': ['seu', 'seva', 'seus', 'seves'],
+  '1pl': ['nostre', 'nostra', 'nostres', 'nostres'],
+  '2pl': ['vostre', 'vostra', 'vostres', 'vostres'],
+  '3pl': ['seu', 'seva', 'seus', 'seves'],
+};
+
+export function possessiveCa(feats: PronominalPossessor, agree: PossessedAgreement): string {
+  return CA[pn(feats)][romanceIndex(agree)];
+}
+
 // ── Portuguese ───────────────────────────────────────────────────────────────
 // Agrees with the possessed in gender/number. 2nd person maps to seu/sua (the seed's "você" is
 // grammatically 3rd person); 3rd person likewise takes seu/sua — the dele/dela alternative, which
