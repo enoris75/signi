@@ -123,6 +123,21 @@ test.describe('the Phrase view', () => {
     await expect(page.getByTestId('result-strip')).toHaveText('the cat eats the food.');
   });
 
+  test('a role\'s word picker fills the sheet, not a small floating card', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('role-subject').tap();
+    await expect(page.getByTestId('word-sheet')).toBeVisible();
+    await page.keyboard.type('c');
+    const list = page.getByTestId('picker-list');
+    await expect(list).toBeVisible();
+    const sheetBox = (await page.getByTestId('word-sheet').boundingBox())!;
+    const listBox = (await list.boundingBox())!;
+    // Full width of the sheet (minus its padding), not a narrow card off to one side.
+    expect(listBox.width).toBeGreaterThan(sheetBox.width * 0.85);
+    // Tall enough to show many rows, not capped to a fixed ~200px card.
+    expect(listBox.height).toBeGreaterThan(300);
+  });
+
   test('a filled role opens its sheet: the ring controls run the canvas\'s own handlers', async ({ app, page }) => {
     void app;
     await fillRole(page, 'subject', 'cat', 'CAT');

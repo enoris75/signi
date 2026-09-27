@@ -8,6 +8,7 @@ import { PickerFooter } from "./PickerFooter.tsx";
 import { PICKER_FONT, PromptWidth } from "./PromptWidth.tsx";
 import { PronounChooser } from "./PronounChooser.tsx";
 import { usePickerKeys } from "./hooks/usePickerKeys.ts";
+import { usePickerSheet } from "./hooks/usePickerSheet.tsx";
 import { pronounFor, usePronounChooser, type PronounChoice, type PronounPerson } from "./hooks/usePronounChooser.ts";
 import { ConceptSelectOpts } from "./interfaces.ts";
 import { useMayTakeFocus } from "../../console/ConsoleMarks.tsx";
@@ -59,6 +60,7 @@ export function SubjectTypeahead({
   const setTab = onKindChange ?? setLocalTab;
   const anchorRef = useRef<HTMLDivElement>(null);
   const mayTakeFocus = useMayTakeFocus();
+  const sheet = usePickerSheet();
 
   const picker = usePickerKeys({
     items: nouns,
@@ -114,8 +116,89 @@ export function SubjectTypeahead({
 
   const showList = tab === "noun" && picker.filtered.length > 0;
 
+  // The dropdown's own content, shared between a floating popper (over a canvas box) and a panel
+  // filling the Phrase view's full-screen sheet (see usePickerSheet.tsx) — only the frame around it
+  // differs.
+  const dropdown = (
+    <Paper
+      data-testid="picker-list"
+      elevation={sheet ? 0 : 4}
+      // preventDefault on mousedown keeps focus on the input so onBlur doesn't close the popper
+      // mid-interaction.
+      onMouseDown={(e) => e.preventDefault()}
+      sx={
+        sheet
+          ? { display: "flex", flexDirection: "column", flex: 1, minHeight: 0, width: "100%", overflow: "hidden" }
+          : { minWidth: 200, overflow: "hidden" }
+      }
+    >
+      <Tabs
+        value={tab}
+        onChange={(_, v) => setTab(v)}
+        variant="fullWidth"
+        data-kb-tabs={picker.inTabs ? "" : undefined}
+        sx={{
+          minHeight: 32,
+          flexShrink: 0,
+          // While the cursor is up here, the tabs are what ← → act on — the row says so.
+          bgcolor: picker.inTabs ? "action.selected" : "transparent",
+          "& .MuiTab-root": {
+            minHeight: 32,
+            py: 0.5,
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.7rem",
+            textTransform: "none",
+          },
+        }}
+      >
+        <Tab value="noun" label={t("category.noun")} data-testid="pronoun-tab-noun" />
+        <Tab value="pronoun" label={t("category.pronoun")} data-testid="pronoun-tab" />
+      </Tabs>
+
+      {tab === "pronoun" ? (
+        <PronounChooser
+          chooser={chooser}
+          pronouns={pronouns}
+          persons={persons}
+          onCommit={() => commitPronoun(chooser.choice)}
+        />
+      ) : (
+        <Box ref={picker.listRef} sx={sheet ? { flex: 1, minHeight: 0, overflow: "auto", py: 0.5 } : { maxHeight: 200, overflow: "auto", py: 0.5 }}>
+          {showList ? (
+            picker.filtered.map((n, i) => (
+              <ConceptOption
+                key={n.id}
+                concept={n}
+                highlighted={!picker.inTabs && i === picker.highlightedIdx}
+                onMouseEnter={() => picker.setHighlightedIdx(i)}
+                onClick={() => picker.commit(i)}
+              />
+            ))
+          ) : (
+            <Box
+              sx={{
+                px: 1.5,
+                py: 0.5,
+                fontFamily: '"Inter", sans-serif',
+                fontSize: "0.75rem",
+                color: "text.disabled",
+              }}
+            >
+              {t("typeahead.noResults")}
+            </Box>
+          )}
+        </Box>
+      )}
+      <PickerFooter kind={tab === "pronoun" ? "grid" : "list"} />
+    </Paper>
+  );
+
   return (
-    <Box ref={anchorRef} onPointerDown={(e) => e.stopPropagation()} sx={{ mt: 0.25 }}>
+    <Box
+      ref={anchorRef}
+      onPointerDown={(e) => e.stopPropagation()}
+      sx={sheet ? { display: "flex", flexDirection: "column", height: "100%", minHeight: 0 } : { mt: 0.25 }}
+    >
       <PromptWidth prompt={prompt}>
         <InputBase
           autoFocus={mayTakeFocus}
@@ -133,79 +216,23 @@ export function SubjectTypeahead({
           sx={{ ...PICKER_FONT, color: "text.primary", width: "100%", "& input": { p: 0 } }}
         />
       </PromptWidth>
-      <Popper
-        open={picker.open}
-        anchorEl={anchorRef.current}
-        placement="bottom-start"
-        style={{ zIndex: 1300 }}
-        modifiers={[{ name: "offset", options: { offset: [0, 4] } }]}
-      >
-        {/* preventDefault on mousedown keeps focus on the input so onBlur doesn't
-            close the popper mid-interaction. */}
-        <Paper
-          elevation={4}
-          onMouseDown={(e) => e.preventDefault()}
-          sx={{ minWidth: 200, overflow: "hidden" }}
+      {sheet ? (
+        picker.open && (
+          <Box sx={{ mt: 1, flex: 1, minHeight: 0, display: "flex" }}>
+            {dropdown}
+          </Box>
+        )
+      ) : (
+        <Popper
+          open={picker.open}
+          anchorEl={anchorRef.current}
+          placement="bottom-start"
+          style={{ zIndex: 1300 }}
+          modifiers={[{ name: "offset", options: { offset: [0, 4] } }]}
         >
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            variant="fullWidth"
-            data-kb-tabs={picker.inTabs ? "" : undefined}
-            sx={{
-              minHeight: 32,
-              // While the cursor is up here, the tabs are what ← → act on — the row says so.
-              bgcolor: picker.inTabs ? "action.selected" : "transparent",
-              "& .MuiTab-root": {
-                minHeight: 32,
-                py: 0.5,
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "0.7rem",
-                textTransform: "none",
-              },
-            }}
-          >
-            <Tab value="noun" label={t("category.noun")} data-testid="pronoun-tab-noun" />
-            <Tab value="pronoun" label={t("category.pronoun")} data-testid="pronoun-tab" />
-          </Tabs>
-
-          {tab === "pronoun" ? (
-            <PronounChooser
-              chooser={chooser}
-              pronouns={pronouns}
-              persons={persons}
-              onCommit={() => commitPronoun(chooser.choice)}
-            />
-          ) : (
-            <Box ref={picker.listRef} sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}>
-              {showList ? (
-                picker.filtered.map((n, i) => (
-                  <ConceptOption
-                    key={n.id}
-                    concept={n}
-                    highlighted={!picker.inTabs && i === picker.highlightedIdx}
-                    onMouseEnter={() => picker.setHighlightedIdx(i)}
-                    onClick={() => picker.commit(i)}
-                  />
-                ))
-              ) : (
-                <Box
-                  sx={{
-                    px: 1.5,
-                    py: 0.5,
-                    fontFamily: '"Inter", sans-serif',
-                    fontSize: "0.75rem",
-                    color: "text.disabled",
-                  }}
-                >
-                  {t("typeahead.noResults")}
-                </Box>
-              )}
-            </Box>
-          )}
-          <PickerFooter kind={tab === "pronoun" ? "grid" : "list"} />
-        </Paper>
-      </Popper>
+          {dropdown}
+        </Popper>
+      )}
     </Box>
   );
 }

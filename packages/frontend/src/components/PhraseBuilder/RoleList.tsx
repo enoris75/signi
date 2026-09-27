@@ -10,6 +10,7 @@ import type { PerimeterEntry } from "./satellites/satellites.types.tsx";
 import { MUI_COLOR_HEX } from "./slots.ts";
 import { ConceptWord } from "../../i18n/ConceptWord.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { PickerSheetProvider } from "./hooks/usePickerSheet.tsx";
 
 /**
  * The Phrase view (P17 phase 2): a period as a list of its roles in reading order, for a phone. A row
@@ -321,10 +322,10 @@ export function RoleList({
             if (field && document.activeElement !== field) field.focus();
           },
         }}
-        PaperProps={{ sx: { borderRadius: "16px 16px 0 0", height: "85vh" } }}
+        PaperProps={{ sx: { borderRadius: "16px 16px 0 0", height: "85vh", width: "100vw", maxWidth: "100vw", boxSizing: "border-box" } }}
       >
         {pickerFor && (
-          <Box data-testid="word-sheet" sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Box data-testid="word-sheet" sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5, height: "100%", minHeight: 0 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography sx={{ flex: 1, fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: byKey.get(pickerFor.slot) ? MUI_COLOR_HEX[byKey.get(pickerFor.slot)!.color] : "text.secondary" }}>
                 {byKey.get(pickerFor.slot) ? label(byKey.get(pickerFor.slot)!) : pickerFor.slot}
@@ -334,7 +335,14 @@ export function RoleList({
               </IconButton>
             </Box>
             <Box
-              sx={{ "& .MuiInputBase-root, & input": { fontSize: "16px" }, "& > *": { width: "100% !important", maxWidth: "none !important" } }}
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+                "& .MuiInputBase-root, & input": { fontSize: "16px" },
+                "& > *": { width: "100% !important", maxWidth: "none !important", flex: "1 !important", minHeight: "0 !important" },
+              }}
               onClickCapture={() => {
                 advancing.current = true;
               }}
@@ -342,7 +350,9 @@ export function RoleList({
                 if (e.key === "Enter") advancing.current = true;
               }}
             >
-              {picker(pickerFor.slot, pickerFor.editing)}
+              {/* Fills the sheet rather than floating a small, canvas-sized dropdown over most of it
+                  left blank (see usePickerSheet.tsx). */}
+              <PickerSheetProvider sheet>{picker(pickerFor.slot, pickerFor.editing)}</PickerSheetProvider>
             </Box>
           </Box>
         )}
