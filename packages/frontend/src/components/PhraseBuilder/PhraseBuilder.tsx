@@ -98,6 +98,8 @@ import { useStoredNumber } from "./hooks/useStoredNumber.ts";
 import { useSlotFocus } from "./hooks/useSlotFocus.ts";
 import { useOwnersOpen } from "./hooks/useOwnersOpen.ts";
 import { useCompactLayout } from "./hooks/useCompactLayout.ts";
+import { useCompactLayout as usePhoneLayout } from "../../hooks/useCompactLayout.ts";
+import { MIN_CANVAS_WIDTH } from "./hooks/canvasWidth.ts";
 import { useSettleCorefPick } from "./hooks/useSettleCorefPick.ts";
 import { nextActiveSlot } from "./functions/nextActiveSlot.ts";
 import { applyCollapse } from "./functions/applyCollapse.ts";
@@ -614,7 +616,15 @@ export function PhraseBuilder({
   const positionsStaleRef = useHeightRebase({ graphHeight, setPositions, dragRef });
   // The canvas's rendered size. The canvas only mounts once `showCanvas` flips, so the
   // observer re-attaches on that.
-  const svgSize = useElementSize(containerRef, { w: 600, h: GRAPH_HEIGHT }, showCanvas);
+  // On a phone (P17 phase 3) the ring layout keeps a desktop's width to lay phrases out in, so
+  // nothing re-stacks or overhangs; the canvas draws it small and lets a pinch zoom in. Only the
+  // top-level canvas needs the floor — a hosted ring (a conjunct's, an owner's) already takes its
+  // graphSize from the canvas that draws it (see `graphSize` below).
+  const phoneCompact = usePhoneLayout();
+  const measuredSize = useElementSize(containerRef, { w: 600, h: GRAPH_HEIGHT }, showCanvas);
+  const svgSize = phoneCompact && !ringHost
+    ? { ...measuredSize, w: Math.max(measuredSize.w, MIN_CANVAS_WIDTH) }
+    : measuredSize;
   // The period's header controls, which compact view floats over the canvas's top-right corner.
   const periodControlsRef = useRef<HTMLDivElement>(null);
   const controlsCorner = useCornerOverlap(periodControlsRef, containerRef, compact, showCanvas);

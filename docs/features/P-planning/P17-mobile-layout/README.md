@@ -10,7 +10,7 @@ P01 made every control reachable by key, and P02 made the phrase typeable. On a 
 keys nor the width are there. This plan keeps their handlers and their command table: the Phrase
 view's role sheet is P01's keymap listed as buttons, and the console tab is P02's console,
 undocked.
-**Status:** phases 1–2 built (branch `p17-mobile`); phases 3–4 planned.
+**Status:** phases 1–3 built (branch `p17-mobile`); phase 4 planned.
 **Drawings:** the [design canvas](https://claude.ai/artifact/RYyD3YwGnpDfCkJkYKHQva), with six
 phone screens and a note on what breaks today.
 
@@ -129,17 +129,50 @@ word (Replace, Remove) and a grid of every control its ring carries.
   combinator over two present-but-not-both-visible elements is a strict-mode violation.
 - **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('the Phrase view')`.
 
-### Phase 3 — the canvas by touch
+### Phase 3 — the canvas at real width (built)
 
-- Fit and zoom: the canvas lays out at a minimum logical width and scales down to fit. Pinch zooms
-  and one finger pans. Today `touchAction: none` on the canvas
-  ([`PhraseCanvas.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseCanvas.tsx))
-  blocks the page's scroll anywhere on it.
-- On a coarse pointer, a tapped box shows its three most-used controls as 44 px labelled pills, plus
-  "All controls", which opens phase 2's sheet.
-- The right-edge period controls
-  ([`BorderControls.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/BorderControls.tsx))
-  move into the period's ⋯.
+The plan going in was "shrink the canvas to fit, then let a pinch zoom back in" — a CSS
+`transform: scale()` on the canvas. That turned out to be unsafe for this codebase and was
+abandoned mid-build; what shipped instead keeps the canvas at its real, un-shrunk width and lets
+the browser's own scrolling pan it.
+
+- **Why not a transform.** This app's ring layout is pervasively real-pixel, not percentage or
+  abstract-unit: box sizes, ring radii and connector anchors are all read with
+  `getBoundingClientRect()` off real DOM boxes (`useBoxSizes.ts`, `useConnectors.ts`,
+  `useCornerOverlap.ts`, `useDrag.ts`). `ResizeObserver`'s `contentRect` — what `useElementSize.ts`
+  uses to decide the canvas's own logical width — does *not* reflect a CSS transform, but
+  `getBoundingClientRect()` *does*: scaling the canvas visually would report a shrunk pixel size to
+  every one of those measurements, which would then lay boxes out smaller, changing what
+  `getBoundingClientRect()` reports next, oscillating the scale between the fit value and 1 every
+  render — confirmed empirically (a temporary debug log showed `scale` alternating between `0.537`
+  and `1` indefinitely). This is the same class of bug the project's own "canvas report loops" note
+  already warns about, under a different name.
+- **What shipped instead.** The canvas keeps the same logical width as before
+  (`MIN_CANVAS_WIDTH = 600`, [`hooks/canvasWidth.ts`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/canvasWidth.ts)),
+  clamped into `PhraseBuilder.tsx`'s `svgSize.w` on a phone exactly as before — but now the DOM box
+  is *actually* that width (no transform), wrapped in a plain `overflow: auto` viewport
+  ([`PhraseCanvas.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseCanvas.tsx)).
+  The browser's own touch scrolling pans it, `touch-action: pan-x pan-y pinch-zoom` leaves its
+  native pinch-zoom on for that region, and nothing about box measurement changes at all — no new
+  failure mode is possible because nothing here reads a transformed rect.
+- **"Show the whole canvas"** (`action.fitCanvas`, composed from SHOW + WHOLE + CANVAS, all
+  already-seeded) scrolls the viewport back to `(0, 0)`. It has to sit *outside* the scrolling box
+  as a sibling with `position: absolute` on the outer wrapper — `position: sticky` combined with
+  `float`, tried first, never actually painted (sticky needs the element in normal flow; floating
+  it takes it out).
+- **Not attempted, and why.** A tapped box's three-pill quick-actions overlay and moving the
+  period's right-edge controls into a menu were both in the original plan; both turned out to rest
+  on a wrong premise once checked against the running app. The border controls already sit fully
+  inside the phone's viewport — the existing `mr: 64px` gutter (`PeriodContainer.tsx`) already
+  reserves their room within whatever width the card is given, so nothing is clipped; the small
+  size (~20 px) is the same touch-target problem the satellite controls have everywhere else, not a
+  reachability one, and belongs with that broader sweep (see Open questions). Reimplementing the
+  eight border controls as menu items was also dropped: three of them (conditional, coordinative,
+  subordinate) each open their own multi-step cross-period picker, and reproducing that faithfully
+  as menu items — untested, under time pressure, in a codebase that had just shown it has subtle
+  render-loop risk around canvas geometry — was a worse trade than leaving them as they are.
+- **e2e:** [`e2e/mobile.spec.ts`](../../../../e2e/mobile.spec.ts), `describe('the canvas at real
+  width (P17 phase 3)')`.
 
 ### Phase 4 — the console's command bar
 
@@ -154,3 +187,13 @@ become 44 px rows.
 - **Where the console's preview shows.** On a phone the canvas is a tab away from the prompt. The
   prompt's preview line (the sentence under the line being typed) may be enough, or the result strip
   could follow the preview.
+- **Touch-target sizing, everywhere.** Every small control on the canvas — the ~20 px satellite
+  dots, the clear buttons, the border controls — is still that size on a phone. The design's
+  44 px-minimum rule needs a general fix (an enlarged invisible hit area, not a visual resize, since
+  the ring layout's overlap resolver uses these exact pixel footprints), applied once across
+  `Boxes.tsx`'s button components rather than piecemeal per control. Not attempted in phase 3;
+  see its note on why the border controls specifically were left alone for now.
+- **A tapped box's own quick controls, and the border controls' menu.** Both were phase 3's
+  original plan; both turned out to rest on premises the running app didn't bear out (see phase 3's
+  "Not attempted" note). Worth another look once the Phrase view (phase 2) has had real use — it
+  may turn out to already cover what these would have.

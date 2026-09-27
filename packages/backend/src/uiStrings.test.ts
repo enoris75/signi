@@ -1437,6 +1437,12 @@ describe('buildUiStrings', () => {
     expect(strings['view.phrase']).toEqual({
       en: 'Phrase', it: 'Frase', fr: 'Phrase', de: 'Phrase', es: 'Frase', ja: 'フレーズ', pt: 'Frase',
     });
+    // …and its pinch-zoom reset (P17 phase 3): back to the whole canvas.
+    expect(strings['action.fitCanvas']).toEqual({
+      en: 'Show the whole canvas', it: 'Mostra la tela intera', fr: 'Montrer le canevas entier',
+      de: 'Die ganze Arbeitsfläche zeigen', es: 'Mostrar el lienzo entero', ja: '全体のキャンバスを見せ',
+      pt: 'Mostrar a tela inteira',
+    });
   });
 });
 

@@ -187,3 +187,55 @@ test.describe('the Phrase view', () => {
     await expect(page.getByTestId('typeahead-noun')).toBeVisible();
   });
 });
+
+
+test.describe('the canvas at real width (P17 phase 3)', () => {
+  async function buildPhrase(page: Page): Promise<void> {
+    await page.getByTestId('role-subject').tap();
+    await page.keyboard.type('cat');
+    await page.locator('[data-testid="typeahead-option"][data-concept="CAT"]').click();
+    await page.keyboard.type('eat');
+    await page.locator('[data-testid="typeahead-option"][data-concept="EAT"]').click();
+    await page.keyboard.type('food');
+    await page.locator('[data-testid="typeahead-option"][data-concept="FOOD"]').click();
+    await page.getByTestId('tab-canvas').tap();
+  }
+
+  test('lays the rings out at a desktop width, panned by native scroll', async ({ app, page }) => {
+    void app;
+    await buildPhrase(page);
+    const canvas = page.getByTestId('phrase-canvas');
+    // The ring layout keeps a desktop's width regardless of the phone's — never squeezed, never
+    // re-stacked to fit 390 px — and carries no CSS transform (see the plan's note on why: a
+    // transform is invisible to the ResizeObserver every box's own size is measured with, but not
+    // to getBoundingClientRect, which the ring geometry also reads — a transform would desync them).
+    await expect(canvas).toHaveCSS('width', '600px');
+    await expect(canvas).toHaveCSS('transform', 'none');
+    // Object sits off to the right at that width; scrolling the viewport reaches it.
+    const viewport = page.getByTestId('phrase-canvas-viewport');
+    await expect(page.getByTestId('box-directObject')).not.toBeInViewport();
+    await viewport.evaluate((el) => el.scrollBy({ left: 300, behavior: 'instant' }));
+    await expect(page.getByTestId('box-directObject')).toBeInViewport();
+  });
+
+  test('"show the whole canvas" scrolls back to the start', async ({ app, page }) => {
+    void app;
+    await buildPhrase(page);
+    const viewport = page.getByTestId('phrase-canvas-viewport');
+    await viewport.evaluate((el) => el.scrollBy({ left: 300, behavior: 'instant' }));
+    await expect.poll(() => viewport.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+    await page.getByRole('button', { name: 'Show the whole canvas' }).click();
+    await expect.poll(() => viewport.evaluate((el) => el.scrollLeft)).toBe(0);
+  });
+
+  test('a build in the Phrase view still shows the whole desktop-width canvas, no page errors', async ({ app, page }) => {
+    void app;
+    await buildPhrase(page);
+    // Every box a filled phrase draws is reachable somewhere in the scroll, none clipped or
+    // collapsed — the smoke test the earlier oscillation bug (a bad transform) would have failed.
+    for (const testId of ['box-subject', 'box-verb', 'box-directObject']) {
+      await page.getByTestId(testId).scrollIntoViewIfNeeded();
+      await expect(page.getByTestId(testId)).toBeVisible();
+    }
+  });
+});

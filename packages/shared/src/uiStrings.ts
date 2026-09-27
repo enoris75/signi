@@ -4417,6 +4417,18 @@ export const UI_STRINGS = defineUiStrings({
   // plural WORD — as the object of the SHOW imperative, so the button and the dialog it opens name
   // the same thing in the same words. Definite: there is one corpus and one map of it, and the
   // button opens *that* one ("mostra la mappa di parole", "zeige die Wörterkarte").
+  // The phone canvas's zoom reset (P17 phase 3): SHOW the WHOLE CANVAS, once a pinch has zoomed
+  // past its fit — the same SHOW as the word map's own ("mostra l'intera tela", ja
+  // キャンバス全体を見せる).
+  'action.fitCanvas': {
+    plan: {
+      ...commandOf('SHOW'),
+      directObject: { concept: 'CANVAS', definiteness: 'definite', adjectives: ['WHOLE'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Show the whole canvas',
+  },
+
   'action.showWordMap': {
     plan: {
       ...commandOf('SHOW'),
