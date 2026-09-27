@@ -8,7 +8,8 @@ import type { LexiconLookup } from '../translator.types.js';
  */
 // Not Romansh (P04 E1 D1): its object pronoun is the tonic after the verb (P04-E7 D3), so the addressee
 // moves to the terminus like a noun's, "el raquinta a mai ch'il giat curra".
-const SHARED_CLITIC_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt']);
+// Catalan's *em, et, ens, us* are object and dative alike: "et diu que el gat corre" (P03, verify).
+const SHARED_CLITIC_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'ca']);
 
 /**
  * A clause whose object is a **content clause** (P09-E4) and whose plan also names a direct object:

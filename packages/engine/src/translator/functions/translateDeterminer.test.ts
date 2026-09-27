@@ -45,7 +45,7 @@ describe('translateDeterminer', () => {
   });
 
   test('a determiner the language spells nothing for shows as an em-dash', () => {
-    expect(translateDeterminer('bare', LOOKUP).map((t) => t.text)).toEqual(Array(11).fill('—'));
+    expect(translateDeterminer('bare', LOOKUP).map((t) => t.text)).toEqual(Array(12).fill('—'));
     expect(text(translateDeterminer('definite', LOOKUP), 'ja')).toBe('—');
     expect(text(translateDeterminer('this', LOOKUP), 'ja')).toBe('この');
   });

@@ -94,6 +94,8 @@ describe('buildConceptDefinitions', () => {
       // P04-E8: Sursilvan too — *pign* follows the noun (verify at P04-E19).
       'rm-sursilv': 'in mamifer pign',
       'rm-vallader': 'ün pitschen mammifer',
+      // P03: Catalan renders too, as a preview row (verify at P03-E11).
+      ca: 'un mamífer petit',
     });
   });
 

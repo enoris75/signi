@@ -130,12 +130,13 @@ describe('GET /api/concepts', () => {
         // P04-E8: Sursilvan too — *pign* follows the noun (verify at P04-E19).
         'rm-sursilv': 'in mamifer pign',
         'rm-vallader': 'ün pitschen mammifer',
+        ca: 'un mamífer petit',
       },
       // The line it is written in (P13), which the console's /define opens.
       definitionText: '/subj ( MAMMAL /adj SMALL /a )',
       label: 'cat',
       labels: { en: 'cat', it: 'gatto', fr: 'chat', de: 'Kater', es: 'gato', ja: '猫', pt: 'gato', gsw: 'Chater',
-        'rm-rumgr': 'giat', 'rm-sursilv': 'gat', 'rm-vallader': 'giat' },
+        'rm-rumgr': 'giat', 'rm-sursilv': 'gat', 'rm-vallader': 'giat', ca: 'gat' },
       readings: { ja: 'ねこ' },
       emoji: '🐱',
       gendered: true,
@@ -188,7 +189,7 @@ describe('GET /api/concepts', () => {
     const begin = await find('BEGIN');
     expect(begin.aliases).toEqual({ it: ['cominciare'], de: ['anfangen'], es: ['comenzar'] });
     expect(begin.labels).toEqual({ en: 'begin', it: 'iniziare', fr: 'commencer', de: 'beginnen', es: 'empezar', pt: 'começar', ja: '始まる', gsw: 'aafange',
-      'rm-rumgr': 'cumenzar', 'rm-sursilv': 'cumenzar', 'rm-vallader': 'cumanzar' });
+      'rm-rumgr': 'cumenzar', 'rm-sursilv': 'cumenzar', 'rm-vallader': 'cumanzar', ca: 'començar' });
     expect(begin.label).toBe('begin');
     expect(await find('SPEAK')).toMatchObject({ label: 'speak', labels: { en: 'speak' }, aliases: { en: ['talk'] } });
     expect(await find('RETURN')).toMatchObject({ label: 'return', aliases: { en: ['come back'] } });

@@ -52,6 +52,9 @@ export const APPROXIMATOR_WORDS: Readonly<Record<string, { about: (fem: boolean)
   'rm-sursilv': { about: () => 'circa ', almost: 'bunamein ' },
   // Vallader (P04-E8): *circa* (about), *bunamaing* (almost), the author's draft, verify.
   'rm-vallader': { about: () => 'circa ', almost: 'bunamaing ' },
+  // Catalan (P03): *uns / unes* before a numeral, agreeing as Spanish's do ("unes cinc cases"), and
+  // *gairebé* (almost), verify.
+  ca: { about: (fem) => (fem ? 'unes ' : 'uns '), almost: 'gairebé ' },
 };
 
 // The determiners `almost` modifies (P09-E38 D1) live in shared (the builder gates its approximator
@@ -75,6 +78,8 @@ export const MASS_DETERMINER: Readonly<Record<string, string>> = { several: 'som
  * English and German, whose *most* is a plain determiner (P09-E25 D4).
  */
 // Romansh (P04 E1 D1): "la gronda part dals giats curra", as Italian (verify).
+// Catalan is left out (P03, verify): "la majoria dels gats corren", the verb agreeing with the plural
+// noun, is the usage the IEC grammar describes as the usual one.
 export const MOST_AGREES_SINGULAR: ReadonlySet<string> = new Set(['it', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /**
@@ -95,7 +100,8 @@ export { STANDARD_DEGREES, SUPERLATIVE_DEGREES } from '@signi/shared';
  * and German keep the number ("no phrases", "keine Phrasen"); Japanese marks none.
  */
 // Romansh: "nagina frasa" (P04 §2.1, verify).
-export const NO_TAKES_SINGULAR: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
+// Catalan: "cap frase" (P03 §2.1, verify).
+export const NO_TAKES_SINGULAR: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /** The agreement keys a group carries — see ResolvedNounElement.agreement. Nothing renderable. */
 export const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
@@ -112,6 +118,7 @@ export const OR_RESOLVES_MIXED_PERSONS: ReadonlySet<string> = new Set(['fr']);
  * "otro gato" and Portuguese "outro gato", never "*un otro gato". Their indefinite phrase with OTHER
  * resolves bare. (English fuses the two into "another" instead, see en/nounPhrase.)
  */
+// Not Catalan (P03): "un altre gat" keeps its article.
 export const OTHER_REPLACES_INDEFINITE: ReadonlySet<string> = new Set(['es', 'pt']);
 
 /**
@@ -128,6 +135,8 @@ export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
   it: 'presentSubjunctive', fr: 'presentSubjunctive', es: 'presentSubjunctive', pt: 'presentSubjunctive',
   // Romansh's *conjunctiv*, stored per verb (P04-E4): "jau crai ch'el saja" (verify).
   'rm-rumgr': 'presentSubjunctive', 'rm-sursilv': 'presentSubjunctive', 'rm-vallader': 'presentSubjunctive',
+  // Catalan's present subjunctive, stored per verb: "és correcte que s'actuï" (P03 §2.4, verify).
+  ca: 'presentSubjunctive',
 };
 
 /**
@@ -139,7 +148,8 @@ export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
  */
 // Romansh shifts back as the Romance four do (P04 E1 D1, verify): its past is then the compound past
 // ("el ha ditg ch'il giat è currì"), a state verb's the imperfect.
-export const SEQUENCE_OF_TENSES_LANGUAGES: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
+// Catalan too (P03, verify): "l'home va dir que el gat va córrer", a state's past the imperfect.
+export const SEQUENCE_OF_TENSES_LANGUAGES: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /**
  * The languages that say a future **in the past** in the perfect conditional, not the simple one
@@ -171,6 +181,8 @@ export const PASSIVE_AUXILIARY: Record<string, string> = {
   // Romansh builds its passive on *vegnir* (COME), as German on *werden*: "la mieur vegn mangiada"
   // (P04 E1 D1, verify); *esser* + participle is the state.
   'rm-rumgr': 'COME', 'rm-sursilv': 'COME', 'rm-vallader': 'COME',
+  // Catalan: *ser* + participle, as Spanish (P03, verify): "el ratolí és menjat pel gat".
+  ca: 'BE',
 };
 
 /**
@@ -182,7 +194,8 @@ export const PASSIVE_AUXILIARY: Record<string, string> = {
  * with its に-agent simply missing (本が書かれる子供) no longer says that the head is the one who acts —
  * it reads as a child a book is written *about* or *for*. There the relative stays active.
  */
-export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
+// Catalan: "el nen per qui el llibre és escrit" (P03, verify).
+export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /** Verb transitivities that have a patient to promote, and can therefore be passivized. */
 export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditransitive']);
@@ -202,8 +215,10 @@ export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditrans
  */
 export const SUBJUNCTIVE_CONJUNCTIONS: Readonly<Partial<Record<SubordinatingConjunction, ReadonlySet<string>>>> = {
   // Romansh: *avant che* and *schebain che* with the *conjunctiv* (P04 E1 D1, verify).
-  before: new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']),
-  until: new Set(['fr', 'es', 'pt']),
+  // Catalan (P03, verify): *abans que* and *fins que* take the subjunctive ("abans que el gat mengi",
+  // "fins que el gat mengi"); *tot i que* asserts a fact and keeps the indicative, as Spanish *aunque*.
+  before: new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']),
+  until: new Set(['fr', 'es', 'pt', 'ca']),
   though: new Set(['it', 'fr', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']),
 };
 
@@ -222,7 +237,8 @@ export const IMPERFECTIVE_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = 
  * one simple past, and Japanese already says the duration with its progressive (〜ている間に).
  */
 // Romansh stores the imperfect too (P04-E12 D3): "durant ch'il giat mangiava".
-export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
+// Catalan stores the imperfect too: "mentre el gat menjava" (P03, verify).
+export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /**
  * The **temporal** subordinating conjunctions — *when, while, before, after* — which place the main
@@ -263,8 +279,9 @@ export const FUTURE_AS_PERFECT: Readonly<Record<string, ReadonlySet<Subordinatin
  * its future subjunctive ("quando o gato **comer**"). *Before* governs the present subjunctive in any
  * tense and is decided first (`SUBJUNCTIVE_CONJUNCTIONS`); Italian and French keep the future.
  */
+// Catalan as Spanish: "quan el gat mengi" (P03, verify).
 export const FUTURE_TEMPORAL_MOOD: Readonly<Record<string, 'presentSubjunctive' | 'futureSubjunctive'>> = {
-  es: 'presentSubjunctive', pt: 'futureSubjunctive',
+  es: 'presentSubjunctive', pt: 'futureSubjunctive', ca: 'presentSubjunctive',
 };
 
 /**
@@ -275,7 +292,8 @@ export const FUTURE_TEMPORAL_MOOD: Readonly<Record<string, 'presentSubjunctive' 
  * French is the imparfait a condition takes, which would be wrong here.
  */
 // Romansh's past subjunctive is its conditional series (P04-E16 D1): "avant ch'il giat mangiass".
-export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
+// Catalan's imperfect subjunctive is living and stored: "abans que el gat mengés" (P03, verify).
+export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /**
  * The verb each language says the **existential** with (P09-E6 D5, see PhrasePlan.existential): the
@@ -290,6 +308,9 @@ export const EXISTENTIAL_VERBS: Readonly<Record<string, string>> = {
   // Romansh: RG *i dat* (es gibt) under the expletive *i*, impersonal in the 3sg — chosen over *igl
   // ha / hai* (P04 E1 D1, verify).
   'rm-rumgr': 'GIVE', 'rm-sursilv': 'GIVE', 'rm-vallader': 'GIVE',
+  // Catalan *haver-hi* (P03, verify): resolved as HAVE for the object's shape, and conjugated by the
+  // engine as `HAVER_EXISTENTIAL`, impersonal ("hi ha gats", the standard keeps the singular).
+  ca: 'HAVE',
 };
 
 /**

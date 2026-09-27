@@ -7,7 +7,8 @@ import { OTHER_REPLACES_INDEFINITE } from '../translator.consts.js';
  * *l'acqua scorre* — where English, German and Japanese leave it bare ("cats run", "Kater laufen").
  */
 // Romansh too (P04 E1 D1): "ils giats curran", "l'aua cula" (verify).
-export const GENERIC_DEFINITE_SUBJECT: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
+// Catalan too (P03): "els gats corren", "l'aigua flueix" (verify).
+export const GENERIC_DEFINITE_SUBJECT: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /**
  * A clause's **subject** read as the generic (A376): a bare plural or mass noun there takes the

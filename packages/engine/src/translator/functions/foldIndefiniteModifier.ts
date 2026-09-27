@@ -9,6 +9,7 @@ import { indefiniteModifierGsw } from '../../languages/gsw/indefiniteModifier.js
 import { indefiniteModifierRumgr } from '../../languages/rm-rumgr/indefiniteModifier.js';
 import { indefiniteModifierSursilv } from '../../languages/rm-sursilv/indefiniteModifier.js';
 import { indefiniteModifierVallader } from '../../languages/rm-vallader/indefiniteModifier.js';
+import { indefiniteModifierCa } from '../../languages/ca/indefiniteModifier.js';
 import type { IndefiniteKey, IndefiniteSpeller } from '../translator.types.js';
 
 /**
@@ -30,6 +31,8 @@ const SPELLERS: Partial<Record<string, IndefiniteSpeller>> = {
   'rm-sursilv': indefiniteModifierSursilv,
   // Vallader's own speller (P04-E8), the same shape: *alch grond*.
   'rm-vallader': indefiniteModifierVallader,
+  // Catalan (P03): *alguna cosa gran*, *algú més*, *res de nou*.
+  ca: indefiniteModifierCa,
 };
 
 const KEYS: readonly IndefiniteKey[] = ['base', 'object', 'disjunctive'];
