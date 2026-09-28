@@ -1508,6 +1508,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '💧',
     countable: false,
+    isA: 'SUBSTANCE',
     forms: {
       en: { base: 'liquid', count: 'singular' },
       it: { base: 'liquido', gender: 'masc', count: 'singular' },
@@ -4900,6 +4901,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a period of sixty minutes',
     glosses: { ja: '六十分' },
     emoji: '🕐',
+    isA: 'PERIOD_TIME',
     forms: {
       en: { base: 'hour', plural: 'hours', count: 'singular' },
       it: { base: 'ora', plural: 'ore', gender: 'fem', count: 'singular' },
@@ -4936,6 +4938,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'a period of about thirty days',
     emoji: '🗓️',
+    isA: 'PERIOD_TIME',
     forms: {
       // Like a week, a stretch one is *in* (C29).
       en: { base: 'month', plural: 'months', count: 'singular', temporal_prep: 'in' },
@@ -5111,6 +5114,7 @@ export const nouns: ConceptSeed[] = [
     `,
     emoji: '🎯',
     synonym: 'grammar',
+    isA: 'PARTICIPANT_GRAMMAR',
     forms: {
       en: { base: 'subject', plural: 'subjects', count: 'singular' },
       it: { base: 'soggetto', plural: 'soggetti', gender: 'masc', count: 'singular' },
@@ -5163,6 +5167,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '🥅',
     synonym: 'grammar',
     glosses: { es: 'directo', pt: 'em gramática' },
+    isA: 'PARTICIPANT_GRAMMAR',
     forms: {
       en: { base: 'object', plural: 'objects', count: 'singular' },
       it: { base: 'complemento oggetto', plural: 'complementi oggetto', gender: 'masc', count: 'singular' },
@@ -6418,6 +6423,7 @@ export const nouns: ConceptSeed[] = [
     definition: '/subj ( CATEGORY /adj SOLE /a )',
     emoji: '1️⃣',
     synonym: 'grammar',
+    isA: 'NUMBER_GRAMMAR',
     forms: {
       en: { base: 'singular', plural: 'singulars', count: 'singular' },
       it: { base: 'singolare', plural: 'singolari', gender: 'masc', count: 'singular' },
@@ -6435,6 +6441,7 @@ export const nouns: ConceptSeed[] = [
     definition: '/subj ( CATEGORY /adj MANIFOLD /a )',
     emoji: '🔟',
     synonym: 'grammar',
+    isA: 'NUMBER_GRAMMAR',
     forms: {
       en: { base: 'plural', plural: 'plurals', count: 'singular' },
       it: { base: 'plurale', plural: 'plurali', gender: 'masc', count: 'singular' },
@@ -8026,6 +8033,7 @@ export const nouns: ConceptSeed[] = [
       /subj ( one ) /verb ( MAKE ) /obj ( OBJECT_THING /a )
     `,
     emoji: '🧶',
+    isA: 'SUBSTANCE',
     forms: {
       en: { base: 'material', plural: 'materials', count: 'singular' },
       it: { base: 'materiale', plural: 'materiali', gender: 'masc', count: 'singular' },
@@ -8600,6 +8608,7 @@ export const nouns: ConceptSeed[] = [
       /subj ( one ) /verb ( SEE )
     `,
     emoji: '👁️',
+    isA: 'ORGAN',
     forms: {
       en: { base: 'eye', plural: 'eyes', count: 'singular' },
       it: { base: 'occhio', plural: 'occhi', gender: 'masc', count: 'singular' },
@@ -8648,6 +8657,7 @@ export const nouns: ConceptSeed[] = [
     description: 'the top part of the body, with the face and the brain',
     definition: '/subj ( PART /adj HIGH /poss [ BODY /a ] /whole )',
     emoji: '👤',
+    isA: 'ORGAN',
     forms: {
       en: { base: 'head', plural: 'heads', count: 'singular' },
       it: { base: 'testa', plural: 'teste', gender: 'fem', count: 'singular' },
@@ -8670,6 +8680,7 @@ export const nouns: ConceptSeed[] = [
       /subj ( PART ) /verb ( HAVE ) /obj ( EYE /pl )
     `,
     emoji: '🙂',
+    isA: 'ORGAN',
     forms: {
       en: { base: 'face', plural: 'faces', count: 'singular' },
       it: { base: 'viso', plural: 'visi', gender: 'masc', count: 'singular' },
@@ -8830,6 +8841,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a substance that is neither solid nor liquid',
     emoji: '💨',
     countable: false,
+    isA: 'SUBSTANCE',
     forms: {
       en: { base: 'gas', count: 'singular' },
       // Italian gas and French gaz are invariable.
@@ -8849,6 +8861,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '😀',
     countable: false,
     dimensionRelation: 'quality',
+    isA: 'FEELING',
     forms: {
       en: { base: 'joy', count: 'singular' },
       it: { base: 'gioia', gender: 'fem', count: 'singular' },
@@ -8866,6 +8879,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '😢',
     countable: false,
     dimensionRelation: 'quality',
+    isA: 'FEELING',
     forms: {
       en: { base: 'sorrow', count: 'singular' },
       it: { base: 'tristezza', gender: 'fem', count: 'singular' },
