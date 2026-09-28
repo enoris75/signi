@@ -57,8 +57,11 @@ dzieci*, *przyjaciel → przyjaciele, przyjaciół*) are too many to derive.
   `fem`, `fem_gen_sg`, …, `fem_plural`, `fem_gen_pl`, …. The feminine agrees as `fem`, its plural never
   virile.
 - **Mass nouns** (concepts marked `countable: false`) store no plural, unless Polish uses one for the
-  sense (*pieniądze* is plural-only: store it as its plural with `plurale_tantum: '1'` and its
-  nominative plural in `base` too, gender as its plural agrees — `masc` non-virile).
+  sense.
+- **Plural-only nouns** (*pieniądze, plecy, drzwi, wiadomości*) carry `plurale_tantum: '1'`, the
+  plural paradigm, and **the same plural forms in every singular key** (`base` = *pieniądze*, `gen_sg`
+  = *pieniędzy*, …, `voc_sg` = the nominative), so a reader of either number gets the plural. Gender
+  `masc` without `virile`: a non-virile plural agrees the same whatever its singular's gender.
 - **Proper nouns and language names**: language names are substantivised adjectives (*polski,
   polskiego, polskiemu, polski, polskim, polskim, polski*), masc inanimate, no plural. A continent or
   country declines as a noun (*Afryka, Afryki, Afryce, Afrykę, Afryką, Afryce, Afryko*).
