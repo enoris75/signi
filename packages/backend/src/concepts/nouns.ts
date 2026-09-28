@@ -708,6 +708,67 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'pinguim', plural: 'pinguins', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // The everyday gull: French "mouette" over "goéland", which is the large gull.
+    id: 'SEAGULL',
+    role: 'noun',
+    description: 'a white and grey sea bird with a loud cry',
+    definition: '/subj ( BIRD /adj WHITE /a )',
+    emoji: '🐦',
+    animate: true,
+    synonym: 'gull',
+    isA: 'BIRD',
+    forms: {
+      en: { base: 'seagull', plural: 'seagulls', count: 'singular' },
+      it: { base: 'gabbiano', plural: 'gabbiani', gender: 'masc', count: 'singular' },
+      fr: { base: 'mouette', plural: 'mouettes', gender: 'fem', count: 'singular' },
+      de: { base: 'Möwe', plural: 'Möwen', gender: 'fem', count: 'singular' },
+      es: { base: 'gaviota', plural: 'gaviotas', gender: 'fem', count: 'singular' },
+      ja: { base: 'カモメ', count: 'singular', reading: 'かもめ', counter: '羽' },
+      pt: { base: 'gaivota', plural: 'gaivotas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'SWALLOW',
+    role: 'noun',
+    description: 'a small fast bird with a forked tail that flies south in winter',
+    definition: '/subj ( BIRD /adj SMALL /a )',
+    emoji: '🐦',
+    animate: true,
+    isA: 'BIRD',
+    forms: {
+      en: { base: 'swallow', plural: 'swallows', count: 'singular' },
+      it: { base: 'rondine', plural: 'rondini', gender: 'fem', count: 'singular' },
+      // h muet: "l'hirondelle".
+      fr: { base: 'hirondelle', plural: 'hirondelles', gender: 'fem', count: 'singular', elides: '1' },
+      de: { base: 'Schwalbe', plural: 'Schwalben', gender: 'fem', count: 'singular' },
+      es: { base: 'golondrina', plural: 'golondrinas', gender: 'fem', count: 'singular' },
+      ja: { base: 'ツバメ', count: 'singular', reading: 'つばめ', counter: '羽' },
+      pt: { base: 'andorinha', plural: 'andorinhas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Spanish "loro" over "papagayo", the everyday word.
+    id: 'PARROT',
+    role: 'noun',
+    description: 'a brightly coloured bird that can learn to say words',
+    definition: `
+      /subj ( BIRD /a /rel #2.subj )
+      /subj ( BIRD ) /verb ( SAY ) /obj ( WORD /pl /zero )
+    `,
+    emoji: '🦜',
+    animate: true,
+    isA: 'BIRD',
+    forms: {
+      en: { base: 'parrot', plural: 'parrots', count: 'singular' },
+      it: { base: 'pappagallo', plural: 'pappagalli', gender: 'masc', count: 'singular' },
+      fr: { base: 'perroquet', plural: 'perroquets', gender: 'masc', count: 'singular' },
+      de: { base: 'Papagei', plural: 'Papageien', gender: 'masc', count: 'singular' },
+      es: { base: 'loro', plural: 'loros', gender: 'masc', count: 'singular' },
+      ja: { base: 'オウム', count: 'singular', reading: 'おうむ', counter: '羽' },
+      pt: { base: 'papagaio', plural: 'papagaios', gender: 'masc', count: 'singular' },
+    },
+  },
   // ── Fish ─────────────────────────────────────────────────────────
   {
     id: 'SHARK',

@@ -131,6 +131,9 @@ export const GSW_NOUNS_1: GswColumn = {
   // Üüle, not Eule.
   OWL: { base: 'Üüle', plural: 'Üüle', gender: 'fem', count: 'singular' },
   PENGUIN: { base: 'Pinguin', plural: 'Pinguin', gender: 'masc', count: 'singular' },
+  SEAGULL: { base: 'Möwe', plural: 'Möwe', gender: 'fem', count: 'singular' },
+  SWALLOW: { base: 'Schwalbe', plural: 'Schwalbe', gender: 'fem', count: 'singular' },
+  PARROT: { base: 'Papagei', plural: 'Papageie', gender: 'masc', count: 'singular' },
   SHARK: { base: 'Hai', plural: 'Hai', gender: 'masc', count: 'singular' },
   SNAKE: { base: 'Schlange', plural: 'Schlange', gender: 'fem', count: 'singular' },
   // Schildchrott, with Zürich ch- for k-.

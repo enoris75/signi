@@ -40,6 +40,9 @@ export const RM_SURSILV_NOUNS: LanguageColumn = {
   // feminine (it il gufo)
   OWL: { base: 'tschuetta', plural: 'tschuettas', gender: 'fem', count: 'singular' },
   PENGUIN: { base: 'pinguin', plural: 'pinguins', gender: 'masc', count: 'singular' },
+  SEAGULL: { base: 'muetta', plural: 'muettas', gender: 'fem', count: 'singular' },
+  SWALLOW: { base: 'randulina', plural: 'randulinas', gender: 'fem', count: 'singular' },
+  PARROT: { base: 'papagagl', plural: 'papagagls', gender: 'masc', count: 'singular' },
   SHARK: { base: 'squagl', plural: 'squagls', gender: 'masc', count: 'singular' },
   SALMON: { base: 'salm', plural: 'salms', gender: 'masc', count: 'singular' },
   SNAKE: { base: 'siarp', plural: 'siarps', gender: 'masc', count: 'singular' },

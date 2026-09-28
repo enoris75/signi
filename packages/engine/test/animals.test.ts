@@ -100,6 +100,19 @@ const ANIMALS: [string, Row, Row, Row][] = [
     { en: 'the penguin runs.', it: 'il pinguino corre.', fr: 'le manchot court.', de: 'der Pinguin läuft.', es: 'el pingüino corre.', ja: 'ペンギンは走ります。', pt: 'o pinguim corre.' },
     { en: 'the penguins run.', it: 'i pinguini corrono.', fr: 'les manchots courent.', de: 'die Pinguine laufen.', es: 'los pingüinos corren.', ja: 'ペンギンは走ります。', pt: 'os pinguins correm.' },
     { en: 'a penguin runs.', it: 'un pinguino corre.', fr: 'un manchot court.', de: 'ein Pinguin läuft.', es: 'un pingüino corre.', ja: 'ペンギンは走ります。', pt: 'um pinguim corre.' }],
+  ['SEAGULL',
+    { en: 'the seagull runs.', it: 'il gabbiano corre.', fr: 'la mouette court.', de: 'die Möwe läuft.', es: 'la gaviota corre.', ja: 'カモメは走ります。', pt: 'a gaivota corre.' },
+    { en: 'the seagulls run.', it: 'i gabbiani corrono.', fr: 'les mouettes courent.', de: 'die Möwen laufen.', es: 'las gaviotas corren.', ja: 'カモメは走ります。', pt: 'as gaivotas correm.' },
+    { en: 'a seagull runs.', it: 'un gabbiano corre.', fr: 'une mouette court.', de: 'eine Möwe läuft.', es: 'una gaviota corre.', ja: 'カモメは走ります。', pt: 'uma gaivota corre.' }],
+  // French "l'hirondelle": an h muet, so the article elides.
+  ['SWALLOW',
+    { en: 'the swallow runs.', it: 'la rondine corre.', fr: "l'hirondelle court.", de: 'die Schwalbe läuft.', es: 'la golondrina corre.', ja: 'ツバメは走ります。', pt: 'a andorinha corre.' },
+    { en: 'the swallows run.', it: 'le rondini corrono.', fr: 'les hirondelles courent.', de: 'die Schwalben laufen.', es: 'las golondrinas corren.', ja: 'ツバメは走ります。', pt: 'as andorinhas correm.' },
+    { en: 'a swallow runs.', it: 'una rondine corre.', fr: 'une hirondelle court.', de: 'eine Schwalbe läuft.', es: 'una golondrina corre.', ja: 'ツバメは走ります。', pt: 'uma andorinha corre.' }],
+  ['PARROT',
+    { en: 'the parrot runs.', it: 'il pappagallo corre.', fr: 'le perroquet court.', de: 'der Papagei läuft.', es: 'el loro corre.', ja: 'オウムは走ります。', pt: 'o papagaio corre.' },
+    { en: 'the parrots run.', it: 'i pappagalli corrono.', fr: 'les perroquets courent.', de: 'die Papageien laufen.', es: 'los loros corren.', ja: 'オウムは走ります。', pt: 'os papagaios correm.' },
+    { en: 'a parrot runs.', it: 'un pappagallo corre.', fr: 'un perroquet court.', de: 'ein Papagei läuft.', es: 'un loro corre.', ja: 'オウムは走ります。', pt: 'um papagaio corre.' }],
   // Fish.
   ['SHARK',
     { en: 'the shark runs.', it: 'lo squalo corre.', fr: 'le requin court.', de: 'der Hai läuft.', es: 'el tiburón corre.', ja: 'サメは走ります。', pt: 'o tubarão corre.' },
@@ -199,6 +212,7 @@ describe('animals: the Japanese counter', () => {
     ['WHALE', '二頭の鯨は走ります。'],
     ['CHICKEN', '二羽の鶏は走ります。'],
     ['PENGUIN', '二羽のペンギンは走ります。'],
+    ['SWALLOW', '二羽のツバメは走ります。'],
     ['RABBIT', '二匹のウサギは走ります。'],
     ['SPIDER', '二匹の蜘蛛は走ります。'],
   ])('%s', (id, ja) => {

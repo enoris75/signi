@@ -14,7 +14,7 @@ PROGRAM_SOFTWARE PROGRAM_SHOW CONCEPT IDEA ACTION EVENT RACE GAME OBJECT_THING D
 CASE_INSTANCE BEING BODY ORGAN TESTICLE OVARY MILK GRASS HEAT EYE HAND HEAD FACE BACK_BODY HEALTH STORY
 HISTORY_PAST NEWS SUBSTANCE STATE GAS JOY SORROW ERROR REALITY REST ATTENTION ABILITY DUTY KINDNESS WISDOM FOLLY
 LAND NATION SCHOOL STUDENT COMPANY_BUSINESS TEAM COMMUNITY UNIVERSITY SERVICE BUSINESS STATE_NATION POWER
-GOVERNMENT PARTY_POLITICAL LAW COURT_LAW RIGHT_NOUN WAR WORLD PICTURE SCREEN PART
+GOVERNMENT PARTY_POLITICAL LAW COURT_LAW RIGHT_NOUN WAR WORLD PICTURE SCREEN PART SEAGULL SWALLOW PARROT
 `.trim().split(/\s+/);
 
 const SG = ['base', 'gen_sg', 'dat_sg', 'acc_sg', 'ins_sg', 'loc_sg', 'voc_sg'];
@@ -23,7 +23,7 @@ const byId = new Map(nouns.map((c) => [c.id, c]));
 
 describe('pl nouns, part C', () => {
   it('covers the whole slice, and only nouns', () => {
-    expect(IDS).toHaveLength(147);
+    expect(IDS).toHaveLength(150);
     expect(Object.keys(PL_NOUNS_C).sort()).toEqual([...IDS].sort());
     for (const id of IDS) expect(byId.get(id)?.role, id).toBe('noun');
   });

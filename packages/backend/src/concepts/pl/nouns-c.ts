@@ -284,5 +284,10 @@ export const PL_NOUNS_C: LanguageColumn = {
   WORLD: m('świat, świata, światu, świat, światem, świecie, świecie', 'światy, światów, światom, światy, światami, światach'),
   PICTURE: m('obraz, obrazu, obrazowi, obraz, obrazem, obrazie, obrazie', 'obrazy, obrazów, obrazom, obrazy, obrazami, obrazach'),
   SCREEN: m('ekran, ekranu, ekranowi, ekran, ekranem, ekranie, ekranie', 'ekrany, ekranów, ekranom, ekrany, ekranami, ekranach'),
+  // Birds: all three feminine, as the animals are in Polish whatever their sex.
+  SEAGULL: f('mewa, mewy, mewie, mewę, mewą, mewie, mewo', 'mewy, mew, mewom, mewy, mewami, mewach'),
+  SWALLOW: f('jaskółka, jaskółki, jaskółce, jaskółkę, jaskółką, jaskółce, jaskółko',
+    'jaskółki, jaskółek, jaskółkom, jaskółki, jaskółkami, jaskółkach'),
+  PARROT: f('papuga, papugi, papudze, papugę, papugą, papudze, papugo', 'papugi, papug, papugom, papugi, papugami, papugach'),
   PART: f('część, części, części, część, częścią, części, części', 'części, części, częściom, części, częściami, częściach'),
 };

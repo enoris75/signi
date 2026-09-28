@@ -191,7 +191,7 @@ describe('the concept corpus', () => {
     const CLASSES: Record<string, string[]> = {
       MAMMAL: ['FELINE', 'DOG', 'FOX', 'WOLF', 'MOUSE', 'BOVINE', 'HORSE', 'PIG', 'SHEEP', 'GOAT', 'RABBIT',
         'BEAR', 'ELEPHANT', 'MONKEY', 'DEER', 'WHALE'],
-      BIRD: ['CHICKEN', 'DUCK', 'EAGLE', 'OWL', 'PENGUIN'],
+      BIRD: ['CHICKEN', 'DUCK', 'EAGLE', 'OWL', 'PENGUIN', 'SEAGULL', 'SWALLOW', 'PARROT'],
       FISH: ['SHARK', 'SALMON'],
       REPTILE: ['SNAKE', 'TURTLE', 'CROCODILE', 'LIZARD'],
       AMPHIBIAN: ['FROG'],

@@ -52,6 +52,9 @@ export const RM_RUMGR_NOUNS: LanguageColumn = {
   EAGLE: f('evla', 'evlas'),
   OWL: f('tschuetta', 'tschuettas'), // (verify)
   PENGUIN: m('pinguin', 'pinguins'),
+  SEAGULL: f('muetta', 'muettas'), // (verify)
+  SWALLOW: f('randulina', 'randulinas'), // (verify)
+  PARROT: m('papagagl', 'papagagls'), // (verify)
   SHARK: m('squal', 'squals'), // (verify)
   SALMON: m('salm', 'salms'),
   SNAKE: m('serp', 'serps'), // (verify) gender

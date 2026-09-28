@@ -47,6 +47,9 @@ export const RM_VALLADER_NOUNS: LanguageColumn = {
   EAGLE: f('aivla'),
   OWL: f('tschuetta'), // (verify)
   PENGUIN: m('pinguin'),
+  SEAGULL: f('muetta'), // (verify)
+  SWALLOW: f('randulina'), // (verify)
+  PARROT: m('papagagl'), // (verify)
   SHARK: m('squal'), // (verify)
   SALMON: m('salm'),
   SNAKE: f('serp'), // feminine (it: il serpente) (verify)
