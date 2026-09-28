@@ -178,13 +178,23 @@ function six(forms: [string, string, string, string, string]): string[] {
 /** A stem's vowel groups: *bū* has one, *valgy* two (the future's 3rd-person shortening, below). */
 const syllables = (stem: string) => (stem.match(/[aeiouyąęėįųūo]+/g) ?? []).length;
 
-/** The present from the 3rd person (*valgo, eina, šaukia, myli → girdžiu*). */
+/** The verbal prefixes, longest first, with the reflexive *-si-* a prefix carries (*nusi-*). */
+const PREFIX = /^(?:ap|at|į|iš|nu|pa|par|per|pra|pri|su|už)(?:si)?/;
+
+/** The root without its prefix: *įgy- → gy-*, *sugriū- → griū-*, *suvalgy- → valgy-*. */
+const root = (stem: string) => {
+  const bare = stem.replace(PREFIX, '');
+  return bare === stem || syllables(bare) === 0 ? stem : bare;
+};
+
+/** The present from the 3rd person (*valgo, eina, šaukia → šauki, keičia → keiti, myli → girdžiu*). */
 function present(p3: string): string[] {
   const s = p3.slice(0, -1);
   switch (p3.slice(-1)) {
     case 'o': return six([`${s}au`, `${s}ai`, p3, `${s}ome`, `${s}ote`]);
     case 'i': return six([`${soften(s)}iu`, `${s}i`, p3, `${s}ime`, `${s}ite`]);
-    case 'a': return six([`${s}u`, s.endsWith('i') ? s : `${s}i`, p3, `${s}ame`, `${s}ate`]);
+    // A soft stem hardens again before the 2sg's *-i* (*keičia → keiti*, *leidžia → leidi*).
+    case 'a': return six([`${s}u`, s.endsWith('i') ? `${harden(s.slice(0, -1))}i` : `${s}i`, p3, `${s}ame`, `${s}ate`]);
     default: throw new Error(`lt present: "${p3}" ends in none of -a, -i, -o`);
   }
 }
@@ -201,12 +211,12 @@ function past(p3: string): string[] {
 
 /**
  * The future from the infinitive stem: *valgy- → valgysiu … valgys*. A sibilant stem takes no second
- * *s* (*neš- → nešiu, neš*; *vež- → vešiu, veš*), and a one-syllable stem in *y / ū* shortens the 3rd
- * person (*bū- → bus*, *gy- → gis*).
+ * *s* (*neš- → nešiu, neš*; *vež- → vešiu, veš*), and a one-syllable root in *y / ū* shortens the 3rd
+ * person, prefixed or not (*bū- → bus*, *įgy- → įgis*, *sugriū- → sugrius*).
  */
 function future(stem: string): string[] {
   const fs = /[sš]$/.test(stem) ? stem : stem.endsWith('z') ? `${stem.slice(0, -1)}s` : stem.endsWith('ž') ? `${stem.slice(0, -1)}š` : `${stem}s`;
-  const third = syllables(stem) === 1 && /[yū]s$/.test(fs) ? fs.replace(/y(s)$/, 'i$1').replace(/ū(s)$/, 'u$1') : fs;
+  const third = syllables(root(stem)) === 1 && /[yū]s$/.test(fs) ? fs.replace(/y(s)$/, 'i$1').replace(/ū(s)$/, 'u$1') : fs;
   return six([`${fs}iu`, `${fs}i`, third, `${fs}ime`, `${fs}ite`]);
 }
 
@@ -241,8 +251,10 @@ function aspect(a: Aspect, prefix: '' | 'pf_'): Forms {
   Object.assign(out, {
     adverbial: `${stem}damas`, adverbial_fem: `${stem}dama`, adverbial_plural: `${stem}dami`, adverbial_fem_plural: `${stem}damos`,
   });
+  // The feminine softens (*-iusi*) only in the *-yti* verbs' *ė*-past (*valgiusi, mačiusi*); a primary
+  // verb's stays hard (*nešusi, ėmusi, davusi, metusi*).
   const ps = past3!.slice(0, -1);
-  const pf = past3!.endsWith('ė') ? `${soften(ps)}i` : ps;
+  const pf = past3!.endsWith('ė') && stem.endsWith('y') ? `${soften(ps)}i` : ps;
   Object.assign(out, {
     past_active: `${ps}ęs`, past_active_fem: `${pf}usi`, past_active_plural: `${ps}ę`, past_active_fem_plural: `${pf}usios`,
     passive: `${stem}tas`, passive_fem: `${stem}ta`, passive_plural: `${stem}ti`, passive_fem_plural: `${stem}tos`, passive_neut: `${stem}ta`,

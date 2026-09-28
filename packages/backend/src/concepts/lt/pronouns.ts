@@ -48,10 +48,11 @@ export const LT_PRONOUNS: LanguageColumn = {
     plural: 'jie', ...cases('plural_', 'jų, jiems, juos, jais, juose'),
     plural_fem: 'jos', ...cases('plural_fem_', 'jų, joms, jas, jomis, jose'),
   },
-  // P18 D7: the subjectless 3rd person (*čia valgo pelę*), so no word (verify: the reviewer may prefer
-  // the neuter passive participle, *valgoma pelė*). Polish's `generic_reflexive` (*człowiek*, to avoid
-  // *się* twice) is dropped: the subjectless reflexive needs no stand-in (*čia prausiasi*).
-  GENERIC_PERSON: { base: '', person: '3', number: 'singular', generic: '1' },
+  // P18 D7: the subjectless 3rd person (*čia valgo pelę*): the engine drops a generic subject, so
+  // `base` is only the label pickers and search show, as Japanese's 人 is (verify: the reviewer may
+  // prefer the neuter passive participle, *valgoma pelė*). Polish's `generic_reflexive` (*człowiek*, to
+  // avoid *się* twice) is dropped: the subjectless reflexive needs no stand-in (*čia prausiasi*).
+  GENERIC_PERSON: { base: 'žmogus', person: '3', number: 'singular', generic: '1' },
   // A predicate agrees with *kažkas*, *viskas* as a neuter (*viskas gražu*); the *else* is *kita*, the
   // neuter (*kažkas kita*), which agrees in the oblique cases (*kažko kito*). Under negation the object
   // is genitive (*nieko nemato*), the engine's; the accusative *nieką* is kept for a preposition (*apie

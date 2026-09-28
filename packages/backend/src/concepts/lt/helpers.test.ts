@@ -134,6 +134,22 @@ describe('verbs from their principal parts (P18 D4)', () => {
     expect(verb('matyti, mato, matė')['3sg_future']).toBe('matys');
   });
 
+  test('a primary verb keeps the feminine participle hard; a -yti verb softens it', () => {
+    expect([verb('nešti, neša, nešė')['past_active_fem'], verb('duoti, duoda, davė')['past_active_fem'], verb('imti, ima, ėmė')['past_active_fem']]).toEqual(['nešusi', 'davusi', 'ėmusi']);
+    expect(verb('valgyti, valgo, valgė')['past_active_fem_plural']).toBe('valgiusios');
+  });
+
+  test('a soft -ia present hardens before the 2sg -i', () => {
+    expect(verb('keisti, keičia, keitė')['2sg_present']).toBe('keiti');
+    expect(verb('leisti, leidžia, leido')['2sg_present']).toBe('leidi');
+    expect(verb('keisti, keičia, keitė')['1sg_present']).toBe('keičiu');
+  });
+
+  test('the 3rd-person future shortens a one-syllable root behind a prefix', () => {
+    expect([verb('įgyti, įgyja, įgijo')['3sg_future'], verb('sugriūti, sugriūva, sugriuvo')['3sg_future'], verb('pabūti, pabūna, pabuvo')['3sg_future']]).toEqual(['įgis', 'sugrius', 'pabus']);
+    expect([verb('suvalgyti, suvalgo, suvalgė')['3sg_future'], verb('pasakyti, pasako, pasakė')['3sg_future']]).toEqual(['suvalgys', 'pasakys']);
+  });
+
   test('the imperative drops a stem-final g or k before -k', () => {
     const run = verb('bėgti, bėga, bėgo');
     expect([run['2sg_imperative'], run['1pl_imperative'], run['2pl_imperative']]).toEqual(['bėk', 'bėkime', 'bėkite']);

@@ -121,7 +121,7 @@ describe('the Lithuanian lexicon: adjectives, adverbs, pronouns, interjections (
       base: 'jis', gen: 'jo', acc: 'jį', ins: 'juo', singular_fem: 'ji', fem_acc: 'ją', fem_loc: 'joje',
       plural: 'jie', plural_acc: 'juos', plural_fem: 'jos', plural_fem_acc: 'jas', plural_fem_ins: 'jomis',
     }],
-    ['GENERIC_PERSON', { base: '', generic: '1' }],
+    ['GENERIC_PERSON', { base: 'žmogus', generic: '1' }],
     ['SOMETHING', { base: 'kažkas', acc: 'kažką', ins: 'kažkuo', negative: 'niekas', negative_gen: 'nieko', with_other: 'kažkas kita', negative_with_other: 'niekas kita' }],
     ['EVERYTHING', { base: 'viskas', gen: 'viso', acc: 'viską', thing: '1', with_other: 'visa kita', with_other_ins: 'visu kitu' }],
     ['SOMEONE', { base: 'kažkas', gender: 'masc', dat: 'kažkam', negative: 'niekas', negative_acc: 'nieką' }],
