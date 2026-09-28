@@ -40,7 +40,7 @@ const LEAKS = /(^|[\s'])(gatto|gatti|cane|topo|gli|lo|della|dello|delle|degli|pi
 
 describe('P04-E1: a preview row', () => {
   test('renders after the Swiss German row, the first of the three Romansh rows', () => {
-    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
+    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
   });
 });
 

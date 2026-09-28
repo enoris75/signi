@@ -10,6 +10,7 @@ import { rumantschGrischunEngine } from '../languages/rm-rumgr/index.js';
 import { sursilvanEngine } from '../languages/rm-sursilv/index.js';
 import { valladerEngine } from '../languages/rm-vallader/index.js';
 import { catalanEngine } from '../languages/ca/index.js';
+import { polishEngine } from '../languages/pl/index.js';
 import type { LanguageEngine } from '../types.js';
 import type { SubordinatingConjunction } from '@signi/shared';
 
@@ -26,6 +27,7 @@ export const engines: LanguageEngine[] = [
   sursilvanEngine,
   valladerEngine,
   catalanEngine,
+  polishEngine,
 ];
 
 /** Determiners that are inherently plural, so they render the plural noun surface. */

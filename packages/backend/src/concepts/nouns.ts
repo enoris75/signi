@@ -4730,6 +4730,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P05: the language of the Polish row. No definition, as CATALAN: POLAND is not seeded.
+    id: 'POLISH',
+    role: 'noun',
+    description: 'the West Slavic language of Poland',
+    emoji: '🗣️',
+    proper: true,
+    countable: false,
+    isA: 'LANGUAGE',
+    forms: {
+      en: { base: 'Polish', count: 'singular' },
+      it: { base: 'polacco', gender: 'masc', count: 'singular' },
+      fr: { base: 'polonais', gender: 'masc', count: 'singular' },
+      de: { base: 'Polnisch', gender: 'neut', count: 'singular', genitive: 'Polnisch' },
+      es: { base: 'polaco', gender: 'masc', takes_article: '1', count: 'singular' },
+      ja: { base: 'ポーランド語', count: 'singular', reading: 'ぽーらんどご' },
+      pt: { base: 'polonês', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The conventional way a language writes its words (P10-E2: "Dieth's spelling", "no standard
     // spelling"). Countable: a language may have several.
     id: 'SPELLING',

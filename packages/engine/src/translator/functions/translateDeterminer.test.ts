@@ -20,7 +20,7 @@ const text = (translations: Translation[], language: LanguageCode) => translatio
 
 describe('translateDeterminer', () => {
   test('names the determiner in every language, in engine order', () => {
-    expect(translateDeterminer('definite', LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
+    expect(translateDeterminer('definite', LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
   });
 
   test('cites the determiner with the noun NOUN unless given another', () => {

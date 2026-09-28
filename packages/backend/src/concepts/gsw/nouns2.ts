@@ -50,6 +50,7 @@ export const GSW_NOUNS_2: GswColumn = {
   SWISS_GERMAN: { base: 'Schwiizerdütsch', gender: 'neut', count: 'singular' },
   ROMANSH: { base: 'Rätoromanisch', gender: 'neut', count: 'singular' },
   CATALAN: { base: 'Katalanisch', gender: 'neut', count: 'singular' },
+  POLISH: { base: 'Polnisch', gender: 'neut', count: 'singular' },
   RUMANTSCH_GRISCHUN: { base: 'Rumantsch Grischun', gender: 'neut', count: 'singular' },
   SURSILVAN: { base: 'Surselvisch', gender: 'neut', count: 'singular' },
   VALLADER: { base: 'Vallader', gender: 'neut', count: 'singular' },

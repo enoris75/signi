@@ -11,7 +11,10 @@ panel and, once complete, as an interface language.
   first carries it.
 - **Engine:** a new folder `packages/engine/src/languages/pl/`.
 
-**Status:** planning. The decisions below are **proposed**, not yet confirmed.
+**Status:** **in progress, 2026-09-28** — D1–D8 taken as recommended (D7: forms drafted from model
+knowledge, SGJP/PoliMorf consulted only, as P03/P04 did). Tasks in [§7](#7-tasks-e1e12). The counts in
+§1 and §2 are stale: the corpus has 846 concepts (440 nouns, 205 verbs, 153 adjectives, 40 adverbs,
+7 pronouns, 1 interjection), and P03 §0's groundwork had already shipped with P10/P04.
 
 | construction | Polish |
 |---|---|
@@ -282,6 +285,27 @@ As P03 §4:
 - **Clitic placement** (*się*, *by*, person markers) in long clauses is simplified, and documented as
   such.
 - **Data licensing** for SGJP/PoliMorf (D7).
+
+## 7. Tasks (E1–E12)
+
+Built as P03 was: the column and the engine in parallel worktrees, then merged. **Every Polish form is
+drafted from model knowledge and is *(verify)* until E11.** The conventions and the column's keys are in
+[style-pl.md](style-pl.md).
+
+| task | what | status |
+|---|---|---|
+| E1 | `pl` registered after `ca`: `LanguageCode`, `LANGUAGES`, `LANGUAGE_STATUS` (`preview`), an engine slot, `COLUMNS` (borrows from `de`, the closest language with cases and three genders) | **Shipped** |
+| E2 | Row identity: the POLISH concept (in every column), `language.pl`, 🇵🇱 (D8); search folds *ł* (*zolw* finds *żółw*, §3) | **Shipped** |
+| E3 | [style-pl.md](style-pl.md) and `concepts/pl/helpers.ts`: the column's keys — 13 case forms per noun (D3, plus the vocative for address), both aspects per verb (D1), `base` + `virile` + comparative per adjective (D4) | **Shipped** |
+| E4 | The noun column, 440 nouns in three files, every case | |
+| E5 | The verb column, 205 verbs in two files, both aspects | |
+| E6 | Adjectives, adverbs (*nigdy* negative), pronouns in every case (*się* generic, D5), interjection | |
+| E7 | The engine's noun phrase: case by slot, adjective declension, demonstratives and quantifier government (§0.4), possessives with *swój* (§0.5), degree | |
+| E8 | The clause and the verb group: pro-drop, the aspect table (§0.3), past and conditional from the *l*-participle, *będzie* + participle, negation with the genitive, modals, *być* + instrumental, *stać się*, *się* impersonal | |
+| E9 | Complements with case government (§2.3), relatives (*który*), coordination, *gdyby*, the imperative (D6), the translator's language tables | |
+| E10 | Every UI string and definition renders in Polish, pinned at 0 missing | |
+| E11 | The native review of the generated sheet | Open — needs a reviewer |
+| E12 | `ready` | Blocked on E11 |
 
 ## Out of scope
 

@@ -32,6 +32,7 @@ export const FLAG: Record<LanguageCode, FlagDef> = {
   // Catalan has no flag emoji of its own (the tag sequence draws a plain black flag), so the Senyera
   // is drawn inline (P03 D3).
   ca: { svg: 'senyera' },
+  pl: '🇵🇱',
 };
 
 const SVG_STYLE = { display: 'inline-block', verticalAlign: '-0.125em' } as const;

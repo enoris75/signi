@@ -201,7 +201,7 @@ test.describe('translation language order', () => {
   test('moves a language and keeps the order across a reload', async ({ app, page }) => {
     await app.setSubject('CAT');
     await expect.poll(() => app.sentence('en')).toBe('the cat.');
-    expect(await rowOrder(page)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
+    expect(await rowOrder(page)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
 
     // The first row cannot go up, the last cannot go down.
     await expect(page.getByTestId('translation-en').getByTestId('move-language-up')).toBeDisabled();
@@ -210,18 +210,18 @@ test.describe('translation language order', () => {
     const ja = page.getByTestId('translation-ja');
     await ja.hover();
     await ja.getByTestId('move-language-up').click();
-    expect(await rowOrder(page)).toEqual(['en', 'it', 'fr', 'de', 'ja', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
+    expect(await rowOrder(page)).toEqual(['en', 'it', 'fr', 'de', 'ja', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
 
     // ⇧↑ on a focused row moves it too, and the row keeps the cursor.
     await ja.focus();
     await page.keyboard.press('Shift+ArrowUp');
     await page.keyboard.press('Shift+ArrowUp');
-    expect(await rowOrder(page)).toEqual(['en', 'it', 'ja', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
+    expect(await rowOrder(page)).toEqual(['en', 'it', 'ja', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
     await expect(ja).toBeFocused();
 
     await page.reload();
     await app.setSubject('CAT');
     await expect.poll(() => app.sentence('en')).toBe('the cat.');
-    expect(await rowOrder(page)).toEqual(['en', 'it', 'ja', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
+    expect(await rowOrder(page)).toEqual(['en', 'it', 'ja', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
   });
 });

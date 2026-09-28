@@ -13,4 +13,10 @@ describe('fold', () => {
     expect(fold('col·legi')).toBe('collegi');
     expect(fold('intel·ligent')).toBe(fold('intelligent'));
   });
+
+  test('folds Polish, ł included, so zolw finds żółw (P05 §3)', () => {
+    expect(fold('żółw')).toBe('zolw');
+    expect(fold('Łódź')).toBe('lodz');
+    expect(fold('źdźbło')).toBe('zdzblo');
+  });
 });

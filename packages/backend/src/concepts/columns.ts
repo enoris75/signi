@@ -4,6 +4,7 @@ import { RM_RUMGR } from './rm-rumgr/index.js';
 import { RM_SURSILV } from './rm-sursilv/index.js';
 import { RM_VALLADER } from './rm-vallader/index.js';
 import { CA } from './ca/index.js';
+import { PL } from './pl/index.js';
 import type { LanguageColumn } from './types.js';
 
 /**
@@ -20,4 +21,7 @@ export const COLUMNS: Partial<Record<LanguageCode, { forms: LanguageColumn; clos
   'rm-vallader': { forms: RM_VALLADER, closest: 'rm-rumgr' },
   // Catalan (P03) borrows from Spanish, the ready language whose paradigms its column is keyed like.
   ca: { forms: CA, closest: 'es' },
+  // Polish (P05) has no Slavic neighbour among the ready languages; German, the one other language
+  // here with cases and three genders, is its closest. The target is nothing borrowed.
+  pl: { forms: PL, closest: 'de' },
 };
