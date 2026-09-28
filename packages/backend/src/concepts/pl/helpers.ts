@@ -51,6 +51,22 @@ export const ma = (sg: string, pl?: string, extra?: Forms) => noun('masc', sg, p
  * (*chłopcy*, accusative *chłopców*; adjectives in *-i/-y* with the consonant change, *dobrzy*).
  */
 export const mp = (sg: string, pl?: string, extra?: Forms) => noun('masc', sg, pl, { animate_acc: '1', virile: '1', ...extra });
+/**
+ * Masculine personal in *-a* (*mężczyzna, tata, twórca*): virile, but its own accusative is not the
+ * genitive (*mężczyznę*), so no `animate_acc`. Its adjective still agrees animate (*dobrego tatę*).
+ */
+export const mv = (sg: string, pl?: string, extra?: Forms) => noun('masc', sg, pl, { virile: '1', ...extra });
+/**
+ * A plural-only noun (*pieniądze, drzwi, Niemcy*): the plural paradigm, and the same forms again in
+ * every singular key (the vocative is `voc`, else the nominative), `plurale_tantum`, agreeing as a
+ * non-virile plural (style-pl.md).
+ */
+export function pluraleTantum(pl: string, voc?: string, extra: Forms = {}): Forms {
+  const [nom, gen, dat, acc, ins, loc] = cells(pl, 6, 'plurale tantum');
+  return noun('masc', [nom, gen, dat, acc, ins, loc, voc ?? nom].join(', '), pl, { plurale_tantum: '1', ...extra });
+}
+/** An indeclinable noun (*kakao, menu*): the base in every singular cell. */
+export const indeclinable = (gender: Gender, base: string, extra?: Forms) => noun(gender, Array(7).fill(base).join(', '), undefined, extra);
 export const f = (sg: string, pl?: string, extra?: Forms) => noun('fem', sg, pl, extra);
 export const n = (sg: string, pl?: string, extra?: Forms) => noun('neut', sg, pl, extra);
 

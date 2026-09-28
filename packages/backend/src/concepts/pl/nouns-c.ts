@@ -1,5 +1,5 @@
 import type { LanguageColumn } from '../types.js';
-import { f, m, mp, n, paradigm } from './helpers.js';
+import { f, m, mp, n, paradigm, pluraleTantum } from './helpers.js';
 
 // The nouns, part C (P05-E4, style-pl.md): grammar terms named as Polish school grammar names them
 // (*celownik, dopełniacz, czas teraźniejszy, tryb, stopień równy*), interface words as Polish software
@@ -9,15 +9,6 @@ import { f, m, mp, n, paradigm } from './helpers.js';
 // a head with a genitive complement declines only the head (*pasek narzędzi*). Every form is
 // (verify) until the native review (P05-E11); the marked ones are the choices most worth a look.
 
-/**
- * A plurale tantum used for a mass sense (*plecy, wiadomości, badania*): the plural in every cell,
- * the singular keys included (so a singular slot still finds a form), agreeing as the plural does —
- * masculine non-virile, as style-pl.md says of *pieniądze*.
- */
-const pt = (pl: string): Record<string, string> => {
-  const [nom, gen, dat, acc, ins, loc] = pl.split(',').map((s) => s.trim());
-  return m(`${nom}, ${gen}, ${dat}, ${acc}, ${ins}, ${loc}, ${nom}`, pl, { plurale_tantum: '1' });
-};
 
 export const PL_NOUNS_C: LanguageColumn = {
   // Grammar.
@@ -173,7 +164,7 @@ export const PL_NOUNS_C: LanguageColumn = {
     'zastosowania, zastosowań, zastosowaniom, zastosowania, zastosowaniami, zastosowaniach'),
   WORK_NOUN: f('praca, pracy, pracy, pracę, pracą, pracy, praco'),
   // Research is plural in Polish (*badania naukowe*); the singular *badanie* is one examination. (verify)
-  RESEARCH: pt('badania, badań, badaniom, badania, badaniami, badaniach'),
+  RESEARCH: pluraleTantum('badania, badań, badaniom, badania, badaniami, badaniach'),
   // A piece of research written up; *studium* is indeclinable in the singular.
   STUDY_NOUN: n('studium, studium, studium, studium, studium, studium, studium',
     'studia, studiów, studiom, studia, studiami, studiach'),
@@ -232,13 +223,13 @@ export const PL_NOUNS_C: LanguageColumn = {
   HEAD: f('głowa, głowy, głowie, głowę, głową, głowie, głowo', 'głowy, głów, głowom, głowy, głowami, głowach'),
   FACE: f('twarz, twarzy, twarzy, twarz, twarzą, twarzy, twarzy', 'twarze, twarzy, twarzom, twarze, twarzami, twarzach'),
   // *plecy* is plural-only; the plural serves every cell.
-  BACK_BODY: pt('plecy, pleców, plecom, plecy, plecami, plecach'),
+  BACK_BODY: pluraleTantum('plecy, pleców, plecom, plecy, plecami, plecach'),
   HEALTH: n('zdrowie, zdrowia, zdrowiu, zdrowie, zdrowiem, zdrowiu, zdrowie'),
   STORY: f('historia, historii, historii, historię, historią, historii, historio',
     'historie, historii, historiom, historie, historiami, historiach'),
   HISTORY_PAST: f('historia, historii, historii, historię, historią, historii, historio'),
   // The news is plural in Polish (*wiadomości*, *oglądać wiadomości*). (verify)
-  NEWS: pt('wiadomości, wiadomości, wiadomościom, wiadomości, wiadomościami, wiadomościach'),
+  NEWS: pluraleTantum('wiadomości, wiadomości, wiadomościom, wiadomości, wiadomościami, wiadomościach'),
   SUBSTANCE: f('substancja, substancji, substancji, substancję, substancją, substancji, substancjo'),
   STATE: m('stan, stanu, stanowi, stan, stanem, stanie, stanie', 'stany, stanów, stanom, stany, stanami, stanach'),
   GAS: m('gaz, gazu, gazowi, gaz, gazem, gazie, gazie'),

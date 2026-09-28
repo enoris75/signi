@@ -1,5 +1,5 @@
 import type { LanguageColumn } from '../types.js';
-import { f, m, ma, mp, n, noun, paradigm } from './helpers.js';
+import { f, m, ma, mp, mv, n, noun, paradigm, pluraleTantum } from './helpers.js';
 
 // Polish nouns, part A (P05-E4): animals, the dimensions and spatial nouns, people and the family.
 // Every case is stored (style-pl.md): the singular nom, gen, dat, acc, ins, loc, voc and the plural
@@ -10,13 +10,6 @@ import { f, m, ma, mp, n, noun, paradigm } from './helpers.js';
 // Polish has no separate feminine (*małpa, kaczka*), the epicene word is repeated there. Every form is
 // (verify) until the native review (P05-E11); the marked ones are the choices most worth a second look.
 
-/** A virile masculine in *-a* or with an accusative of its own: *mężczyzna → mężczyznę*. */
-const mv = (sg: string, pl: string) => noun('masc', sg, pl, { virile: '1' });
-/** A plurale tantum (*pieniądze, drzwi, lody*): the plural in every cell, singular ones included. */
-const pt = (pl: string, voc: string) => {
-  const [nom, gen, dat, acc, ins, loc] = pl.split(',').map((s) => s.trim());
-  return noun('masc', `${nom}, ${gen}, ${dat}, ${acc}, ${ins}, ${loc}, ${voc}`, pl, { plurale_tantum: '1' });
-};
 
 export const PL_NOUNS_A: LanguageColumn = {
   // ── Animals ──────────────────────────────────────────────────
@@ -119,10 +112,10 @@ export const PL_NOUNS_A: LanguageColumn = {
   CIRCLE: n('koło, koła, kołu, koło, kołem, kole, koło', 'koła, kół, kołom, koła, kołami, kołach'), // (verify) vs *okrąg*
   LINE_MARK: f('linia, linii, linii, linię, linią, linii, linio', 'linie, linii, liniom, linie, liniami, liniach'),
   // Plurale tantum: *te pieniądze są*.
-  MONEY: pt('pieniądze, pieniędzy, pieniądzom, pieniądze, pieniędzmi, pieniądzach', 'pieniądze'),
+  MONEY: pluraleTantum('pieniądze, pieniędzy, pieniądzom, pieniądze, pieniędzmi, pieniądzach', 'pieniądze'),
   FOOD: n('jedzenie, jedzenia, jedzeniu, jedzenie, jedzeniem, jedzeniu, jedzenie'),
   // Plurale tantum in the standard language (*jem lody*); the singular *lód* is ice.
-  ICE_CREAM: pt('lody, lodów, lodom, lody, lodami, lodach', 'lody'), // (verify)
+  ICE_CREAM: pluraleTantum('lody, lodów, lodom, lody, lodami, lodach', 'lody'), // (verify)
   SUGAR: m('cukier, cukru, cukrowi, cukier, cukrem, cukrze, cukrze'),
   LIQUID: m('płyn, płynu, płynowi, płyn, płynem, płynie, płynie'),
   CONTENT: f('zawartość, zawartości, zawartości, zawartość, zawartością, zawartości, zawartości', 'zawartości, zawartości, zawartościom, zawartości, zawartościami, zawartościach'),
@@ -152,7 +145,7 @@ export const PL_NOUNS_A: LanguageColumn = {
   ROOM: m('pokój, pokoju, pokojowi, pokój, pokojem, pokoju, pokoju', 'pokoje, pokoi, pokojom, pokoje, pokojami, pokojach'),
   OFFICE: n('biuro, biura, biuru, biuro, biurem, biurze, biuro', 'biura, biur, biurom, biura, biurami, biurach'),
   // Plurale tantum: *te drzwi są otwarte*, one door or several.
-  DOOR: pt('drzwi, drzwi, drzwiom, drzwi, drzwiami, drzwiach', 'drzwi'),
+  DOOR: pluraleTantum('drzwi, drzwi, drzwiom, drzwi, drzwiami, drzwiach', 'drzwi'),
   CAR: m('samochód, samochodu, samochodowi, samochód, samochodem, samochodzie, samochodzie', 'samochody, samochodów, samochodom, samochody, samochodami, samochodach'),
 
   // ── People ───────────────────────────────────────────────────

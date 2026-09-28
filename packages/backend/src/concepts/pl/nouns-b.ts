@@ -1,5 +1,5 @@
 import type { LanguageColumn } from '../types.js';
-import { f, m, mp, n, noun, paradigm } from './helpers.js';
+import { f, indeclinable, m, mp, mv, n, noun, paradigm, pluraleTantum } from './helpers.js';
 
 // The nouns, part B (P05-E4, style-pl.md): kin and people, things, places, languages, time, and the
 // grammar's own terms. Every case is stored, singular nom, gen, dat, acc, ins, loc, voc; plural nom,
@@ -23,24 +23,6 @@ const okolicznik = (of: string) => m(tail(OKOLICZNIK_SG, of), tail(OKOLICZNIK_PL
  */
 const lang = (stem: string) => m(`${stem}i, ${stem}iego, ${stem}iemu, ${stem}i, ${stem}im, ${stem}im, ${stem}i`);
 
-/** An indeclinable noun: the base in every cell. */
-const indecl = (gender: 'masc' | 'fem' | 'neut', base: string) => noun(gender, Array(7).fill(base).join(', '));
-
-/**
- * A plurale tantum (*Włochy, Niemcy*): the plural stored in `base`/`plural` and again in the singular
- * cells, so a lookup of either number finds the right form; agrees as a non-virile plural.
- */
-const pluraleTantum = (pl: string): Forms => {
-  const [nom, gen, dat, acc, ins, loc] = pl.split(',').map((s) => s.trim());
-  return noun('masc', [nom, gen, dat, acc, ins, loc, nom].join(', '), pl, { plurale_tantum: '1' });
-};
-
-/**
- * A masculine personal noun in *-a* (*tata, twórca*): virile, but its accusative singular is its own
- * (*tatę*, not *taty*), so no `animate_acc`.
- */
-const mpA = (sg: string, pl: string, extra: Forms = {}) => noun('masc', sg, pl, { virile: '1', ...extra });
-
 const AS_NAME = { as_name: '1' };
 
 export const PL_NOUNS_B: LanguageColumn = {
@@ -50,7 +32,7 @@ export const PL_NOUNS_B: LanguageColumn = {
   STEPFATHER: mp('ojczym, ojczyma, ojczymowi, ojczyma, ojczymem, ojczymie, ojczymie', 'ojczymowie, ojczymów, ojczymom, ojczymów, ojczymami, ojczymach'),
   STEPMOTHER: f('macocha, macochy, macosze, macochę, macochą, macosze, macocho', 'macochy, macoch, macochom, macochy, macochami, macochach'),
   MOM: f('mama, mamy, mamie, mamę, mamą, mamie, mamo', 'mamy, mam, mamom, mamy, mamami, mamach', AS_NAME),
-  DAD: mpA('tata, taty, tacie, tatę, tatą, tacie, tato', 'tatowie, tatów, tatom, tatów, tatami, tatach', AS_NAME),
+  DAD: mv('tata, taty, tacie, tatę, tatą, tacie, tato', 'tatowie, tatów, tatom, tatów, tatami, tatach', AS_NAME),
   // Not sexed; Polish pairs *partner/partnerka* as Italian *compagno/compagna* does.
   PARTNER: mp('partner, partnera, partnerowi, partnera, partnerem, partnerze, partnerze', 'partnerzy, partnerów, partnerom, partnerów, partnerami, partnerach', {
     ...paradigm('partnerka, partnerki, partnerce, partnerkę, partnerką, partnerce, partnerko', 'partnerki, partnerek, partnerkom, partnerki, partnerkami, partnerkach', 'fem_'),
@@ -73,7 +55,7 @@ export const PL_NOUNS_B: LanguageColumn = {
   BUILDER: mp('budowniczy, budowniczego, budowniczemu, budowniczego, budowniczym, budowniczym, budowniczy', 'budowniczowie, budowniczych, budowniczym, budowniczych, budowniczymi, budowniczych', {
     ...paradigm('budowniczyni, budowniczyni, budowniczyni, budowniczynię, budowniczynią, budowniczyni, budowniczyni', 'budowniczynie, budowniczyń, budowniczyniom, budowniczynie, budowniczyniami, budowniczyniach', 'fem_'),
   }),
-  CREATOR: mpA('twórca, twórcy, twórcy, twórcę, twórcą, twórcy, twórco', 'twórcy, twórców, twórcom, twórców, twórcami, twórcach', {
+  CREATOR: mv('twórca, twórcy, twórcy, twórcę, twórcą, twórcy, twórco', 'twórcy, twórców, twórcom, twórców, twórcami, twórcach', {
     ...paradigm('twórczyni, twórczyni, twórczyni, twórczynię, twórczynią, twórczyni, twórczyni', 'twórczynie, twórczyń, twórczyniom, twórczynie, twórczyniami, twórczyniach', 'fem_'),
   }),
   PETER: mp('Piotr, Piotra, Piotrowi, Piotra, Piotrem, Piotrze, Piotrze'),
@@ -161,9 +143,9 @@ export const PL_NOUNS_B: LanguageColumn = {
   SWISS_GERMAN: m('szwajcarski niemiecki, szwajcarskiego niemieckiego, szwajcarskiemu niemieckiemu, szwajcarski niemiecki, szwajcarskim niemieckim, szwajcarskim niemieckim, szwajcarski niemiecki'),
   ROMANSH: lang('retoromańsk'),
   // (verify) the three standards' own names, undeclined, as Spanish and Italian keep them.
-  RUMANTSCH_GRISCHUN: indecl('masc', 'rumantsch grischun'),
-  SURSILVAN: indecl('masc', 'sursilvan'),
-  VALLADER: indecl('masc', 'vallader'),
+  RUMANTSCH_GRISCHUN: indeclinable('masc', 'rumantsch grischun'),
+  SURSILVAN: indeclinable('masc', 'sursilvan'),
+  VALLADER: indeclinable('masc', 'vallader'),
   CATALAN: lang('katalońsk'),
   POLISH: lang('polsk'),
   SPELLING: f('pisownia, pisowni, pisowni, pisownię, pisownią, pisowni, pisownio', 'pisownie, pisowni, pisowniom, pisownie, pisowniami, pisowniach'),
