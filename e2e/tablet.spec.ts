@@ -77,3 +77,26 @@ test.describe('a desktop window as narrow, with a mouse (768×1024)', () => {
     await expect(page.getByTestId('quick-bar')).toHaveCount(0);
   });
 });
+
+test.describe('a phone held sideways (874×402)', () => {
+  test.use({ viewport: { width: 874, height: 402 }, hasTouch: true, isMobile: true, deviceScaleFactor: 3 });
+
+  test('is still a phone: the tab bar, the header folded into its menu', async ({ app, page }) => {
+    void app;
+    await expect(page.getByTestId('tab-bar')).toBeVisible();
+    await expect(page.getByTestId('tab-phrase')).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByTestId('app-menu')).toBeVisible();
+    await expect(page.getByTestId('console-toggle')).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(874);
+  });
+});
+
+test.describe('a desktop window as short, with a mouse (874×402)', () => {
+  test.use({ viewport: { width: 874, height: 402 } });
+
+  test('keeps the desktop header and no tab bar', async ({ app, page }) => {
+    void app;
+    await expect(page.getByTestId('tab-bar')).toHaveCount(0);
+    await expect(page.getByTestId('console-toggle')).toBeVisible();
+  });
+});

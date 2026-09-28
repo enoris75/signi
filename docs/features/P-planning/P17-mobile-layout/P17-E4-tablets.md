@@ -109,3 +109,8 @@ Built 2026-09-27: D1 in Playwright, D2 and D3 as recommended.
 - **Owed.** A real iPad, both orientations: whether the full-width canvas at 744–834 px reads well
   with a finger, and whether 1024×768's docked console leaves the canvas enough height (a
   landscape iPad may want the console to start collapsed).
+- **A phone held sideways** (found on a real iPhone, 2026-09-28): at 874×402 it is wider than `sm`, so
+  it got the tablet's one column with the desktop's header, which took half the screen's height.
+  `COMPACT_QUERY` now also matches a touch-only screen under 500 px tall, so a phone is a phone either
+  way round; the smallest iPad is 744 px tall in landscape, so no tablet is caught. e2e: `tablet.spec`
+  › "a phone held sideways (874×402)", and a mouse window as short keeps the desktop header.
