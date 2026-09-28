@@ -102,6 +102,8 @@ describe('buildConceptDefinitions', () => {
       'rm-vallader': 'ün pitschen mammifer',
       // P03: Catalan renders too, as a preview row (verify at P03-E11).
       ca: 'un mamífer petit',
+      // P05: Polish too, as a preview row (verify at P05-E11).
+      pl: 'mały ssak',
     });
   });
 

@@ -42,9 +42,9 @@ describe('translatePossessive', () => {
 
   test('spells the antecedent’s person and number', () => {
     expect(translatePossessive(feats({ person: '1' }), LOOKUP).map((t) => t.text))
-      .toEqual(['my', 'mio', 'mon', 'mein', 'mi', '私の', 'meu', 'mis', 'mes', 'miu', 'meis', 'meu']);
+      .toEqual(['my', 'mio', 'mon', 'mein', 'mi', '私の', 'meu', 'mis', 'mes', 'miu', 'meis', 'meu', 'mój']);
     expect(translatePossessive(feats({ person: '1', number: 'plural' }), LOOKUP).map((t) => t.text))
-      .toEqual(['our', 'nostro', 'notre', 'unser', 'nuestro', '私たちの', 'nosso', 'euses', 'noss', 'nies', 'nos', 'nostre']);
+      .toEqual(['our', 'nostro', 'notre', 'unser', 'nuestro', '私たちの', 'nosso', 'euses', 'noss', 'nies', 'nos', 'nostre', 'nasz']);
   });
 
   test('the antecedent’s gender splits only the languages that spell it', () => {

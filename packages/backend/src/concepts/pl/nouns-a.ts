@@ -138,7 +138,10 @@ export const PL_NOUNS_A: LanguageColumn = {
   AREA: m('obszar, obszaru, obszarowi, obszar, obszarem, obszarze, obszarze', 'obszary, obszarów, obszarom, obszary, obszarami, obszarach'), // (verify) vs *okolica*, *rejon*
   CENTER: m('środek, środka, środkowi, środek, środkiem, środku, środku', 'środki, środków, środkom, środki, środkami, środkach'),
   SIDE: f('strona, strony, stronie, stronę, stroną, stronie, strono', 'strony, stron, stronom, strony, stronami, stronach'),
-  DESTINATION: m('cel, celu, celowi, cel, celem, celu, celu', 'cele, celów, celom, cele, celami, celach'),
+  // *miejsce docelowe*, not *cel*: *cel* is PURPOSE's, and the two definitions would read alike (the
+  // sweep's "no two concepts glossed alike") (verify).
+  DESTINATION: n('miejsce docelowe, miejsca docelowego, miejscu docelowemu, miejsce docelowe, miejscem docelowym, miejscu docelowym, miejsce docelowe',
+    'miejsca docelowe, miejsc docelowych, miejscom docelowym, miejsca docelowe, miejscami docelowymi, miejscach docelowych'),
   // A head with a genitive complement: only *punkt* declines.
   ORIGIN: m('punkt wyjścia, punktu wyjścia, punktowi wyjścia, punkt wyjścia, punktem wyjścia, punkcie wyjścia, punkcie wyjścia', 'punkty wyjścia, punktów wyjścia, punktom wyjścia, punkty wyjścia, punktami wyjścia, punktach wyjścia'),
   // The route a motion takes (es *recorrido*, it *percorso*).
