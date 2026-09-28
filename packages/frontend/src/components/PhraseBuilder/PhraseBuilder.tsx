@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Box } from "@mui/material";
-import { CAUSE_SENTIMENTS, COMPLEMENT_LABELS, OBJECT_PREDICATIONS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept, type PhrasePlan } from "@signi/shared";
+import { CAUSE_SENTIMENTS, COMPLEMENT_LABELS, OBJECT_PREDICATIONS, PATH_SPECIFIERS, ROUTE_SPECIFIERS, TEMPORAL_RELATIONS, type Concept, type PhrasePlan } from "@signi/shared";
 import {
   BoxComplementType,
   adaptPossessorBinding,
@@ -21,7 +21,7 @@ import {
   SlotKey,
   WorkspaceBinding,
 } from "./interfaces.ts";
-import type { SatelliteIcon } from "./Boxes.tsx";
+import { DIRECTION_RELATIONS, type SatelliteIcon } from "./Boxes.tsx";
 import {
   NOUN_KEYS,
   REVEALABLE_SLOT_KEYS,
@@ -870,9 +870,9 @@ export function PhraseBuilder({
       // A relation's toolbar sits on a box that holds a word, or on one a wh-question asks about,
       // which is usually empty: "**under what** does the cat eat?" (P09-E53 D3, see hasRelation).
       toolbars: {
-        ...(hasRelation(selection, "route") && { route: PATH_SPECIFIERS }),
+        ...(hasRelation(selection, "route") && { route: ROUTE_SPECIFIERS }),
         ...(hasRelation(selection, "locative") && { locative: PATH_SPECIFIERS }),
-        ...(hasRelation(selection, "direction") && { direction: ["to", ...PATH_SPECIFIERS] }),
+        ...(hasRelation(selection, "direction") && { direction: DIRECTION_RELATIONS }),
         ...(hasRelation(selection, "temporal") && { temporal: TEMPORAL_RELATIONS }),
         ...(hasRelation(selection, "cause") && { cause: CAUSE_SENTIMENTS }),
         ...(selection.objectPredicative && { objectPredicative: OBJECT_PREDICATIONS }),

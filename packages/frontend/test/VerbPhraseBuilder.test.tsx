@@ -421,6 +421,23 @@ describe('VerbPhraseBuilder', () => {
       expect(ctx.handleSelectSpecifier).not.toHaveBeenCalled();
     });
 
+    // A02: the distance pair is the locative's alone — a route is a traversed path, which "far from
+    // the house" does not describe.
+    it('offer near and far on the locative, and not on the route', () => {
+      const { ctx } = renderVerb({ selection: { locative: noun('BED') }, groupRects: [LOCATIVE], controlPos: CONTROL_POS });
+
+      fireEvent.click(screen.getByRole('button', { name: 'near' }));
+      expect(ctx.handleSelectLocativeSpecifier).toHaveBeenCalledExactlyOnceWith('near');
+      expect(screen.getByRole('button', { name: 'far from' })).toBeInTheDocument();
+    });
+
+    it('leave the distance pair off the route', () => {
+      renderVerb({ selection: { route: noun('PARK') }, groupRects: [ROUTE], controlPos: CONTROL_POS });
+
+      expect(screen.queryByRole('button', { name: 'near' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'far from' })).not.toBeInTheDocument();
+    });
+
     // P09-E12b: the temporal's six relations, `at` until one is chosen.
     it('ride the top of the temporal’s ring, on "at" until one is chosen', () => {
       renderVerb({ selection: { temporal: noun('DAY') }, groupRects: [TEMPORAL], controlPos: CONTROL_POS });

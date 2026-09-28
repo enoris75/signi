@@ -264,6 +264,8 @@ export const PLACE: Record<PathSpecifier, Government> = {
   around: { prep: 'wokół', case: 'gen' }, through: { prep: 'przez', case: 'acc' }, between: { prep: 'między', case: 'ins' },
   // *przy ścianie* (by, touching) for the static contact (verify); *wśród* + genitive for among.
   against: { prep: 'przy', case: 'loc' }, among: { prep: 'wśród', case: 'gen' },
+  // A02: the distance pair, both with the genitive — *blisko domu*, *daleko od domu*.
+  near: { prep: 'blisko', case: 'gen' }, far: { prep: 'daleko od', case: 'gen' },
 };
 
 /**
@@ -275,6 +277,7 @@ export const GOAL: Record<PathSpecifier, Government> = {
   over: { prep: 'nad', case: 'acc' }, behind: { prep: 'za', case: 'acc' }, in_front_of: { prep: 'przed', case: 'acc' },
   around: { prep: 'wokół', case: 'gen' }, through: { prep: 'przez', case: 'acc' }, between: { prep: 'między', case: 'acc' },
   against: { prep: 'o', case: 'acc' }, among: { prep: 'między', case: 'acc' },
+  near: { prep: 'blisko', case: 'gen' }, far: { prep: 'daleko od', case: 'gen' },
 };
 
 /** The plain goal (*do domu*). */
@@ -287,6 +290,7 @@ export const SOURCE: Record<PathSpecifier, Government> = {
   over: { prep: 'znad', case: 'gen' }, behind: { prep: 'zza', case: 'gen' }, in_front_of: { prep: 'sprzed', case: 'gen' },
   around: { prep: 'od', case: 'gen' }, through: { prep: 'przez', case: 'acc' }, between: { prep: 'spomiędzy', case: 'gen' },
   against: { prep: 'od', case: 'gen' }, among: { prep: 'spośród', case: 'gen' },
+  near: { prep: 'od', case: 'gen' }, far: { prep: 'od', case: 'gen' },
 };
 
 /** The cause by sentiment (P05 §2.3): *z powodu* + gen, *dzięki* + dat, *przez* + acc (fault). */

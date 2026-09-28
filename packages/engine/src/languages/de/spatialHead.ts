@@ -8,8 +8,16 @@ import { spatialCase } from './spatialCase.js';
 // complement the relation serves (see `spatialCase`): a route over crosses, "über den Markt".
 // The plain relation is the noun's own: a place one is inside takes "in" ("im Haus"), and one that
 // names another says so with `place_prep` — a place one is AT, "an einem Ort", "am Ende" (A218).
-export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean, type: 'route' | 'locative' | 'direction'): string {
-  const _case = spatialCase(spec, type);
+// A02's `near` is "in der Nähe" + genitive, and "in der Nähe von" + dative where the genitive would
+// not show (`genitive` false, see `spatialCase`); as a goal the Nähe itself is where one goes, "in die
+// Nähe des Hauses". `far` is "weit weg von" + dative, fusing "weit weg vom Haus".
+export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean, type: 'route' | 'locative' | 'direction', genitive = true): string {
+  const _case = spatialCase(spec, type, genitive);
+  if (spec === 'near') {
+    const nearness = type === 'direction' ? 'in die Nähe' : 'in der Nähe';
+    return genitive ? prepDet(nearness, f, _case, plural) : `${nearness} ${prepDet('von', f, _case, plural)}`;
+  }
+  if (spec === 'far') return `weit weg ${prepDet('von', f, _case, plural)}`;
   switch (spec) {
     case 'in':          return prepDet(f['place_prep'] ?? 'in', f, _case, plural);
     case 'under':       return prepDet('unter', f, _case, plural);

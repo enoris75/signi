@@ -281,6 +281,8 @@ const GOLDEN: Record<string, Golden> = {
   against: { line: '/verb run /route house /against', prints: '/verb ( run ) /route ( house /against )', holds: { routeSpecifier: 'against' } },
   // P09-E32.
   among: { line: '/verb run /loc house /pl /among', prints: '/verb ( run ) /loc ( house /pl /among )', holds: { locativeSpecifier: 'among' } },
+  near: { line: '/verb eat /loc house /near', prints: '/verb ( eat ) /loc ( house /near )', holds: { locativeSpecifier: 'near' } },
+  far: { line: '/verb run /loc house /far', prints: '/verb ( run ) /loc ( house /far )', holds: { locativeSpecifier: 'far' } },
   // P09-E12b: the temporal's relations, `at` its default and so never printed.
   at: { line: '/verb run /time day /ago /at', prints: '/verb ( run ) /time ( day )', holds: { temporalRelation: 'at' } },
   ago: { line: '/verb run /time moment /a /ago', prints: '/verb ( run ) /time ( moment /a /ago )', holds: { temporalRelation: 'ago' }, misuse: { line: '/verb run /loc house /ago', says: { code: 'noTarget', args: { command: 'ago' } } } },

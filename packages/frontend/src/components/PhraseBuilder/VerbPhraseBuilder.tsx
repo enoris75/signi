@@ -5,6 +5,8 @@ import {
   DEFAULT_LOCATIVE_SPECIFIER,
   DEFAULT_ROUTE_SPECIFIER,
   DEFAULT_TEMPORAL_RELATION,
+  PATH_SPECIFIERS,
+  ROUTE_SPECIFIERS,
 } from "@signi/shared";
 import {
   AspectToggleBox,
@@ -152,6 +154,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           usually empty: its relation is the question's, "under what" (P09-E53 D3). */}
       {!compact && hasRelation(selection, "route") && (
         <SpecifierSelector
+          options={ROUTE_SPECIFIERS}
           value={selection.routeSpecifier ?? DEFAULT_ROUTE_SPECIFIER}
           armed={toolbarFor === "route"}
           onDisarm={disarm}
@@ -162,9 +165,11 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
 
       {/* The locative takes the same relation toolbar as the route — it is what lets the
           place read "under the bed" or "behind the tree" rather than only "in the bed".
-          Same relations, different default: the locative falls back on containment. */}
+          A different default — the locative falls back on containment — and two more relations,
+          the distance pair "near" / "far from", which a route does not offer (A02). */}
       {!compact && hasRelation(selection, "locative") && (
         <SpecifierSelector
+          options={PATH_SPECIFIERS}
           value={selection.locativeSpecifier ?? DEFAULT_LOCATIVE_SPECIFIER}
           armed={toolbarFor === "locative"}
           onDisarm={disarm}

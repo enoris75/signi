@@ -6,7 +6,7 @@ hand**: a correction is a data edit in `packages/backend/src/concepts/rm-rumgr/`
 review copy, not here. Compared with `it`, the language the column borrows from; a row marked
 **borrowed** is that language's word standing in until the variety is given its own.
 
-**2450 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
+**2475 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
 
 ## 1. Verbs (205)
 
@@ -218,12 +218,13 @@ review copy, not here. Compared with `it`, the language the column borrows from;
 | SHOULD | dovere | stuair | stuess | stuessas | stuess | stuessan | stuessas | stuessan | stueva | stuess | stuì | haver | stoppias |
 | MIGHT | potere | pudair | pudess | pudessas | pudess | pudessan | pudessas | pudessan | pudeva | pudess | pudì | haver | possias |
 
-## 2. Nouns (434)
+## 2. Nouns (445)
 
 | concept | `it` | `rm-rumgr` | plural | gender | other forms |
 |---|---|---|---|---|---|
 | ANIMAL | animale | animal | animals | masc |  |
 | MAMMAL | mammifero | mammifer | mammifers | masc |  |
+| FELINE | felino | felin | felins | masc |  |
 | CAT | gatto | giat | giats | masc | fem: giatta; fem_plural: giattas |
 | DOG | cane | chaun | chauns | masc | fem: chagna; fem_plural: chagnas |
 | BIRD | uccello | utschè | utschels | masc |  |
@@ -239,6 +240,10 @@ review copy, not here. Compared with `it`, the language the column borrows from;
 | BEAR | orso | urs | urs | masc | fem: ursa; fem_plural: ursas |
 | LION | leone | leun | leuns | masc | fem: leuna; fem_plural: leunas |
 | TIGER | tigre | tiger | tigers | masc |  |
+| LEOPARD | leopardo | leopard | leopards | masc |  |
+| PANTHER | pantera | pantera | panteras | fem |  |
+| PUMA | puma | puma | pumas | masc |  |
+| CHEETAH | ghepardo | gepard | gepards | masc |  |
 | ELEPHANT | elefante | elefant | elefants | masc | fem: elefanta; fem_plural: elefantas |
 | MONKEY | scimmia | schimgia | schimgias | fem |  |
 | DEER | cervo | tschierv | tschiervs | masc |  |
@@ -248,6 +253,9 @@ review copy, not here. Compared with `it`, the language the column borrows from;
 | EAGLE | aquila | evla | evlas | fem |  |
 | OWL | gufo | tschuetta | tschuettas | fem |  |
 | PENGUIN | pinguino | pinguin | pinguins | masc |  |
+| SEAGULL | gabbiano | muetta | muettas | fem |  |
+| SWALLOW | rondine | randulina | randulinas | fem |  |
+| PARROT | pappagallo | papagagl | papagagls | masc |  |
 | SHARK | squalo | squal | squals | masc |  |
 | SALMON | salmone | salm | salms | masc |  |
 | SNAKE | serpente | serp | serps | masc |  |
@@ -435,6 +443,9 @@ review copy, not here. Compared with `it`, the language the column borrows from;
 | RUMANTSCH_GRISCHUN | rumantsch grischun | rumantsch grischun |  | masc |  |
 | SURSILVAN | sursilvano | sursilvan |  | masc |  |
 | VALLADER | vallader | vallader |  | masc |  |
+| CATALAN | catalano | catalan |  | masc |  |
+| POLISH | polacco | polac |  | masc |  |
+| LITHUANIAN | lituano | lituan |  | masc |  |
 | SPELLING | ortografia | ortografia | ortografias | fem |  |
 | PERIOD_TIME | periodo | perioda | periodas | fem |  |
 | MOMENT | momento | mument | muments | masc |  |
@@ -1091,7 +1102,7 @@ asked to rule on, not what ships.
 | | memorisar. |
 | | sch'il chaun curriss, mangiass il giat. |
 
-## 8. UI strings (792)
+## 8. UI strings (798)
 
 | key | `en` | `it` | `rm-rumgr` |
 |---|---|---|---|
@@ -1434,6 +1445,8 @@ asked to rule on, not what ships.
 | specifier.value.between | between | tra | tranter |
 | specifier.value.against | against | contro | cunter |
 | specifier.value.among | among | tra | tranter |
+| specifier.value.near | near | vicino a | datiers da |
+| specifier.value.far | far from | lontano da | lunsch da |
 | temporal.value.at | at | a | a |
 | temporal.value.ago | ago | fa | avant |
 | temporal.value.until | until | fino a | fin a |
@@ -1783,6 +1796,7 @@ asked to rule on, not what ships.
 | action.removeComplement | Remove the complement | Rimuovi il complemento | Allontanar il cumplement |
 | action.addComplement | Add a complement | Aggiungi un complemento | Agiuntar in cumplement |
 | action.fitCanvas | Show the whole canvas | Mostra la tela intera | Mussar la taila entira |
+| action.allOptions | All options | Tutte le opzioni | Tuttas las opziuns |
 | action.showWordMap | Show the word map | Mostra la mappa di parole | Mussar la charta da pleds |
 | action.closeWordMap | Close the word map | Chiudi la mappa di parole | Serrar la charta da pleds |
 | action.close | close | chiudi | serrar |
@@ -1880,6 +1894,9 @@ asked to rule on, not what ships.
 | language.rm-rumgr | Romansh | Romancio | Rumantsch |
 | language.rm-sursilv | Romansh | Romancio | Rumantsch |
 | language.rm-vallader | Romansh | Romancio | Rumantsch |
+| language.ca | Catalan | Catalano | Catalan |
+| language.pl | Polish | Polacco | Polac |
+| language.lt | Lithuanian | Lituano | Lituan |
 | language.rm-rumgr.dialect | Rumantsch Grischun | rumantsch grischun | rumantsch grischun |
 | language.rm-sursilv.dialect | Sursilvan | sursilvano | sursilvan |
 | language.rm-vallader.dialect | Vallader | vallader | vallader |
@@ -1888,7 +1905,7 @@ asked to rule on, not what ships.
 | language.gsw.caveat | Swiss German does not have a standard spelling. | Lo svizzero tedesco non ha un'ortografia standard. | Il tudestg svizzer n'ha betg ina ortografia standard. |
 | language.selector | Interface language | Lingua di interfaccia | Lingua da interfatscha |
 
-## 9. Engine-composed definitions (613)
+## 9. Engine-composed definitions (621)
 
 | concept | `en` | `it` | `rm-rumgr` |
 |---|---|---|---|
@@ -1900,6 +1917,7 @@ asked to rule on, not what ships.
 | SOMEONE | an unknown person | una persona sconosciuta | ina persuna nunenconuschenta |
 | ANIMAL | a being that moves | un essere che si muove | in esser che sa mova |
 | MAMMAL | an animal that produces milk | un animale che produce latte | in animal che producescha latg |
+| FELINE | a mammal that eats animals | un mammifero che mangia animali | in mammifer che mangia animals |
 | CAT | a small mammal | un piccolo mammifero | in pitschen mammifer |
 | DOG | a domestic canine mammal | un mammifero domestico e canino | in mammifer dumestg e canin |
 | BIRD | an animal that has wings | un animale che ha ali | in animal che ha alas |
@@ -1913,6 +1931,10 @@ asked to rule on, not what ships.
 | BEAR | a big strong wild mammal | un grande mammifero forte e selvatico | in grond mammifer ferm e selvadi |
 | LION | a big wild mammal that lives in Africa | un grande mammifero selvatico che vive in Africa | in grond mammifer selvadi che viva en Africa |
 | TIGER | a big wild mammal that lives in Asia | un grande mammifero selvatico che vive in Asia | in grond mammifer selvadi che viva en Asia |
+| LEOPARD | a big wild feline that lives in Africa | un grande felino selvatico che vive in Africa | in grond felin selvadi che viva en Africa |
+| PANTHER | a big black feline | un grande felino nero | in grond felin nair |
+| PUMA | a big wild feline that lives in North America | un grande felino selvatico che vive in America del Nord | in grond felin selvadi che viva en America dal Nord |
+| CHEETAH | a wild feline that runs fast | un felino selvatico che corre velocemente | in felin selvadi che curra spert |
 | ELEPHANT | a big mammal that eats grass | un grande mammifero che mangia erba | in grond mammifer che mangia erva |
 | MONKEY | a wild mammal that has hands | un mammifero selvatico che ha mani | in mammifer selvadi che ha mauns |
 | DEER | a wild mammal that eats grass | un mammifero selvatico che mangia erba | in mammifer selvadi che mangia erva |
@@ -1922,6 +1944,9 @@ asked to rule on, not what ships.
 | EAGLE | a big wild bird | un grande uccello selvatico | in grond utschè selvadi |
 | OWL | a wild bird | un uccello selvatico | in utschè selvadi |
 | PENGUIN | a bird that does not fly | un uccello che non vola | in utschè che na sgola betg |
+| SEAGULL | a white bird | un uccello bianco | in utschè alv |
+| SWALLOW | a small bird | un piccolo uccello | in pitschen utschè |
+| PARROT | a bird that says words | un uccello che dice parole | in utschè che di pleds |
 | SHARK | a big fish | un grande pesce | in grond pesch |
 | SALMON | a fish | un pesce | in pesch |
 | SNAKE | a long reptile | un rettile lungo | in reptil lung |

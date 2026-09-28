@@ -262,6 +262,8 @@ export const PLACE: Record<PathSpecifier, Government> = {
   over: { prep: 'virš', case: 'gen' }, behind: { prep: 'už', case: 'gen' }, in_front_of: { prep: 'prieš', case: 'acc' },
   around: { prep: 'aplink', case: 'acc' }, through: { prep: 'per', case: 'acc' }, between: { prep: 'tarp', case: 'gen' },
   against: { prep: 'prie', case: 'gen' }, among: { prep: 'tarp', case: 'gen' },
+  // A02: the distance pair, both with the genitive — *netoli namo*, *toli nuo namo* (verify).
+  near: { prep: 'netoli', case: 'gen' }, far: { prep: 'toli nuo', case: 'gen' },
 };
 
 /**
@@ -274,6 +276,7 @@ export const GOAL: Record<PathSpecifier, Government> = {
   over: { prep: 'virš', case: 'gen' }, behind: { prep: 'už', case: 'gen' }, in_front_of: { prep: 'prieš', case: 'acc' },
   around: { prep: 'aplink', case: 'acc' }, through: { prep: 'per', case: 'acc' }, between: { prep: 'tarp', case: 'gen' },
   against: { prep: 'į', case: 'acc' }, among: { prep: 'tarp', case: 'gen' },
+  near: { prep: 'netoli', case: 'gen' }, far: { prep: 'toli nuo', case: 'gen' },
 };
 
 /** The plain goal (*į namus*), and the goal that is a person (*pas vaiką*, verify). */
@@ -290,6 +293,7 @@ export const SOURCE: Record<PathSpecifier, Government> = {
   over: { prep: 'nuo', case: 'gen' }, behind: { prep: 'iš už', case: 'gen' }, in_front_of: { prep: 'nuo', case: 'gen' },
   around: { prep: 'nuo', case: 'gen' }, through: { prep: 'per', case: 'acc' }, between: { prep: 'iš tarp', case: 'gen' },
   against: { prep: 'nuo', case: 'gen' }, among: { prep: 'iš', case: 'gen' },
+  near: { prep: 'nuo', case: 'gen' }, far: { prep: 'nuo', case: 'gen' },
 };
 
 /**

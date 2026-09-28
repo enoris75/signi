@@ -6,7 +6,7 @@ hand**: a correction is a data edit in `packages/backend/src/concepts/rm-sursilv
 review copy, not here. Compared with `rm-rumgr`, the language the column borrows from; a row marked
 **borrowed** is that language's word standing in until the variety is given its own.
 
-**2490 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
+**2515 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
 
 ## 1. Verbs (205)
 
@@ -218,12 +218,13 @@ review copy, not here. Compared with `rm-rumgr`, the language the column borrows
 | SHOULD | stuair | stuer | stuess | stuesses | stuess | stuessen | stuesses | stuessen | stueva | stuess | stuiu | haver | stoppies |
 | MIGHT | pudair | puder | pudess | pudesses | pudess | pudessen | pudesses | pudessen | pudeva | pudess | pudiu | haver | possies |
 
-## 2. Nouns (434)
+## 2. Nouns (445)
 
 | concept | `rm-rumgr` | `rm-sursilv` | plural | gender | other forms |
 |---|---|---|---|---|---|
 | ANIMAL | animal | animal | animals | masc |  |
 | MAMMAL | mammifer | mamifer | mamifers | masc |  |
+| FELINE | felin | felin | felins | masc |  |
 | CAT | giat | gat | gats | masc | fem: gatta; fem_plural: gattas |
 | DOG | chaun | tgaun | tgauns | masc | fem: tgaunina; fem_plural: tgauninas |
 | BIRD | utschè | utschi | utschals | masc |  |
@@ -239,6 +240,10 @@ review copy, not here. Compared with `rm-rumgr`, the language the column borrows
 | BEAR | urs | urs | urs | masc | fem: ursa; fem_plural: ursas |
 | LION | leun | liun | liuns | masc | fem: liunessa; fem_plural: liunessas |
 | TIGER | tiger | tiger | tigers | masc |  |
+| LEOPARD | leopard | leopard | leopards | masc |  |
+| PANTHER | pantera | pantera | panteras | fem |  |
+| PUMA | puma | puma | pumas | masc |  |
+| CHEETAH | gepard | gepard | gepards | masc |  |
 | ELEPHANT | elefant | elefant | elefants | masc | fem: elefanta; fem_plural: elefantas |
 | MONKEY | schimgia | schimgia | schimgias | fem |  |
 | DEER | tschierv | tschierv | tschiervs | masc |  |
@@ -248,6 +253,9 @@ review copy, not here. Compared with `rm-rumgr`, the language the column borrows
 | EAGLE | evla | evla | evlas | fem |  |
 | OWL | tschuetta | tschuetta | tschuettas | fem |  |
 | PENGUIN | pinguin | pinguin | pinguins | masc |  |
+| SEAGULL | muetta | muetta | muettas | fem |  |
+| SWALLOW | randulina | randulina | randulinas | fem |  |
+| PARROT | papagagl | papagagl | papagagls | masc |  |
 | SHARK | squal | squagl | squagls | masc |  |
 | SALMON | salm | salm | salms | masc |  |
 | SNAKE | serp | siarp | siarps | masc |  |
@@ -435,6 +443,9 @@ review copy, not here. Compared with `rm-rumgr`, the language the column borrows
 | RUMANTSCH_GRISCHUN | rumantsch grischun | rumantsch grischun |  | masc |  |
 | SURSILVAN | sursilvan | sursilvan |  | masc |  |
 | VALLADER | vallader | vallader |  | masc |  |
+| CATALAN | catalan | catalan |  | masc |  |
+| POLISH | polac | polac |  | masc |  |
+| LITHUANIAN | lituan | lituan |  | masc |  |
 | SPELLING | ortografia | ortografia | ortografias | fem |  |
 | PERIOD_TIME | perioda | perioda | periodas | fem |  |
 | MOMENT | mument | mument | muments | masc |  |
@@ -1131,7 +1142,7 @@ asked to rule on, not what ships.
 | | memorisar. |
 | | sch'il tgaun curress, magliass il gat. |
 
-## 8. UI strings (792)
+## 8. UI strings (798)
 
 | key | `en` | `rm-rumgr` | `rm-sursilv` |
 |---|---|---|---|
@@ -1474,6 +1485,8 @@ asked to rule on, not what ships.
 | specifier.value.between | between | tranter | denter |
 | specifier.value.against | against | cunter | encunter |
 | specifier.value.among | among | tranter | denter |
+| specifier.value.near | near | datiers da | datier da |
+| specifier.value.far | far from | lunsch da | lunsch da |
 | temporal.value.at | at | a | a |
 | temporal.value.ago | ago | avant | avon |
 | temporal.value.until | until | fin a | tochen |
@@ -1823,6 +1836,7 @@ asked to rule on, not what ships.
 | action.removeComplement | Remove the complement | Allontanar il cumplement | Allontanar il cumplement |
 | action.addComplement | Add a complement | Agiuntar in cumplement | Agiuntar in cumplement |
 | action.fitCanvas | Show the whole canvas | Mussar la taila entira | Mussar la tela entira |
+| action.allOptions | All options | Tuttas las opziuns | Tuttas las opziuns |
 | action.showWordMap | Show the word map | Mussar la charta da pleds | Mussar la carta da plaids |
 | action.closeWordMap | Close the word map | Serrar la charta da pleds | Serrar la carta da plaids |
 | action.close | close | serrar | serrar |
@@ -1920,6 +1934,9 @@ asked to rule on, not what ships.
 | language.rm-rumgr | Romansh | Rumantsch | Romontsch |
 | language.rm-sursilv | Romansh | Rumantsch | Romontsch |
 | language.rm-vallader | Romansh | Rumantsch | Romontsch |
+| language.ca | Catalan | Catalan | Catalan |
+| language.pl | Polish | Polac | Polac |
+| language.lt | Lithuanian | Lituan | Lituan |
 | language.rm-rumgr.dialect | Rumantsch Grischun | rumantsch grischun | rumantsch grischun |
 | language.rm-sursilv.dialect | Sursilvan | sursilvan | sursilvan |
 | language.rm-vallader.dialect | Vallader | vallader | vallader |
@@ -1928,7 +1945,7 @@ asked to rule on, not what ships.
 | language.gsw.caveat | Swiss German does not have a standard spelling. | Il tudestg svizzer n'ha betg ina ortografia standard. | Il tudestg svizzer ha buca in'ortografia standard. |
 | language.selector | Interface language | Lingua da interfatscha | Lungatg da interfatscha |
 
-## 9. Engine-composed definitions (613)
+## 9. Engine-composed definitions (621)
 
 | concept | `en` | `rm-rumgr` | `rm-sursilv` |
 |---|---|---|---|
@@ -1940,6 +1957,7 @@ asked to rule on, not what ships.
 | SOMEONE | an unknown person | ina persuna nunenconuschenta | ina persuna nunenconuschenta |
 | ANIMAL | a being that moves | in esser che sa mova | in esser che semova |
 | MAMMAL | an animal that produces milk | in animal che producescha latg | in animal che produchescha latg |
+| FELINE | a mammal that eats animals | in mammifer che mangia animals | in mamifer che maglia animals |
 | CAT | a small mammal | in pitschen mammifer | in mamifer pign |
 | DOG | a domestic canine mammal | in mammifer dumestg e canin | in mamifer domestic e canin |
 | BIRD | an animal that has wings | in animal che ha alas | in animal che ha alas |
@@ -1953,6 +1971,10 @@ asked to rule on, not what ships.
 | BEAR | a big strong wild mammal | in grond mammifer ferm e selvadi | in mamifer grond, ferm e selvadi |
 | LION | a big wild mammal that lives in Africa | in grond mammifer selvadi che viva en Africa | in mamifer grond e selvadi che viva en Africa |
 | TIGER | a big wild mammal that lives in Asia | in grond mammifer selvadi che viva en Asia | in mamifer grond e selvadi che viva en Asia |
+| LEOPARD | a big wild feline that lives in Africa | in grond felin selvadi che viva en Africa | in felin grond e selvadi che viva en Africa |
+| PANTHER | a big black feline | in grond felin nair | in felin grond e ner |
+| PUMA | a big wild feline that lives in North America | in grond felin selvadi che viva en America dal Nord | in felin grond e selvadi che viva en America dil Nord |
+| CHEETAH | a wild feline that runs fast | in felin selvadi che curra spert | in felin selvadi che cuora spert |
 | ELEPHANT | a big mammal that eats grass | in grond mammifer che mangia erva | in mamifer grond che maglia jarva |
 | MONKEY | a wild mammal that has hands | in mammifer selvadi che ha mauns | in mamifer selvadi che ha mauns |
 | DEER | a wild mammal that eats grass | in mammifer selvadi che mangia erva | in mamifer selvadi che maglia jarva |
@@ -1962,6 +1984,9 @@ asked to rule on, not what ships.
 | EAGLE | a big wild bird | in grond utschè selvadi | in utschi grond e selvadi |
 | OWL | a wild bird | in utschè selvadi | in utschi selvadi |
 | PENGUIN | a bird that does not fly | in utschè che na sgola betg | in utschi che sgola buca |
+| SEAGULL | a white bird | in utschè alv | in utschi alv |
+| SWALLOW | a small bird | in pitschen utschè | in utschi pign |
+| PARROT | a bird that says words | in utschè che di pleds | in utschi che di plaids |
 | SHARK | a big fish | in grond pesch | in pesch grond |
 | SALMON | a fish | in pesch | in pesch |
 | SNAKE | a long reptile | in reptil lung | in reptil liung |

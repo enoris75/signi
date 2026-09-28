@@ -7,7 +7,7 @@ review copy, not here. Glossed in `en`; a row marked **borrowed** is Polish's wo
 until Lithuanian is given its own. Standard Lithuanian (VLKK); the conventions and the keys are in
 [style-lt.md](style-lt.md).
 
-**2307 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
+**2309 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
 
 ## 1. Verbs (205)
 
@@ -946,7 +946,7 @@ asked to rule on, not what ships.
 | a modal chain | katė nori galėti nueiti. |
 | | valgo pelę. |
 
-## 8. UI strings (796)
+## 8. UI strings (798)
 
 | key | `en` | `lt` |
 |---|---|---|
@@ -1289,6 +1289,8 @@ asked to rule on, not what ships.
 | specifier.value.between | between | tarp |
 | specifier.value.against | against | prie |
 | specifier.value.among | among | tarp |
+| specifier.value.near | near | netoli |
+| specifier.value.far | far from | toli nuo |
 | temporal.value.at | at | — |
 | temporal.value.ago | ago | prieš |
 | temporal.value.until | until | iki |

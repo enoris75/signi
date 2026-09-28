@@ -129,6 +129,9 @@ export const PATH_PREP: Record<PathSpecifier, string> = {
   against: 'against',
   // P09-E32. Said once over a plural or a group, as `between` is.
   among: 'among',
+  // A02. The distance pair; only `far` needs its ablative "from".
+  near: 'near',
+  far: 'far from',
 };
 
 /**

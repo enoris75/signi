@@ -34,6 +34,9 @@ export function spatialHead(spec: PathSpecifier, plural: boolean, f: Record<stri
     case 'between':     return prepDet(BETWEEN_PREP, f, plural);
     case 'among':       return prepDet(BETWEEN_PREP, f, plural);
     case 'against':     return prepDet('contra', f, plural);
+    // A02: the distance pair, both ending in *de*: "a prop de la casa", "lluny del mercat".
+    case 'near':        return `a prop ${deDet(f, plural)}`;
+    case 'far':         return `lluny ${deDet(f, plural)}`;
     case 'through':
     default:            return prepDet('per', f, plural);
   }

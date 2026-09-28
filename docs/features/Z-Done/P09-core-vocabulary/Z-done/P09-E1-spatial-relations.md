@@ -4,7 +4,7 @@
 missing, the last row of [P09 §3](../README.md#3-needs-the-engine-first-11-constructs--5-open) that is
 pure vocabulary.
 **Shape:** two more `PathSpecifier` values (`on`, `against`) built exactly like
-[A02](../../../A-ready/A02-locative-near-far/README.md), plus one — **`between`** — that is a value too
+[A02](../../../Z-Done/A02-locative-near-far/README.md), plus one — **`between`** — that is a value too
 but the **first relation that scopes over a coordinated head instead of distributing across it**.
 **Scope:** all 7 languages. Offered on the locative and route toolbars; the `direction` complement
 reads the same set and needs no new offering.
@@ -102,7 +102,7 @@ Two consequences, and they are the whole of D1:
    collide.** It is the honest rendering; の上 is what a dictionary gives for both, and the
    alternative (〜の表面に for contact) is a paraphrase, not a relation. Pin the collision in a test
    with a comment saying it is deliberate, the way the source-and-`far` overlap is pinned in
-   [A02](../../../A-ready/A02-locative-near-far/README.md).
+   [A02](../../../Z-Done/A02-locative-near-far/README.md).
 
 ### D2. `between` distributes wrongly over a coordinated head — and that is the real work
 

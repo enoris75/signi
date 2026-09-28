@@ -23,6 +23,10 @@ export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plur
     // P09-E32: `among` is `between`'s word here, as in Italian.
     case 'among':       return prep(BETWEEN_PREP);
     case 'against':     return prep('encunter');
+    // A02: the distance pair, adverb + *da*, which contracts ("datier dil tgaun", "lunsch da la
+    // casa") *(verify)*.
+    case 'near':        return `datier ${prep('da')}`;
+    case 'far':         return `lunsch ${prep('da')}`;
     case 'through':
     default:            return prep('tras');
   }

@@ -35,3 +35,11 @@ describe('inHead', () => {
     expect(np(CASA).head.forms['base']).toBe('casa');
   });
 });
+
+// A02: the distance pair, both ending in "de", which contracts with the article.
+describe('spatialHead: near and far', () => {
+  test('a prop de, lluny de', () => {
+    expect(head('near', false, CASA)).toBe('a prop de la');
+    expect(head('far', false, GAT)).toBe('lluny del');
+  });
+});

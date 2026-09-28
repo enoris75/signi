@@ -63,6 +63,15 @@ function isBareNamePlace(f: Record<string, string>): boolean {
   return isNamedLand(f) && f['proper'] === '1' && f['takes_article'] !== '1';
 }
 
+// Whether `near` takes its genitive ("in der Nähe des Hauses", "in der Nähe meines Hauses") or falls
+// back on "von" + dative (A02): where the genitive would not show ("in der Nähe von Häusern", see
+// `genitiveShows`), and on a name without an article, whose "Afrikas" is written but "in der Nähe von
+// Afrika" is what is said.
+function nearGenitive(np: ResolvedNounPhrase, f: Record<string, string>): boolean {
+  if (f['proper'] === '1' && f['takes_article'] !== '1') return false;
+  return genitiveShows(np, f);
+}
+
 // German closes the Mittelfeld with the predicate, against the verb cluster ("wird wegen des Hundes
 // eine Legende", "ist wegen des Hundes müde geworden"), where the shared `COMPLEMENT_RENDER_ORDER`
 // — English and Romance order — leads with it. So the two predicate slots are rendered apart from
@@ -183,8 +192,9 @@ export function complementsParts(
         // Both read their relation off the same specifier set; only the default differs, and the
         // case falls out of the preposition ("im Markt", "unter dem Markt", "um den Markt").
         const spec = pathSpecifier(c, type === 'locative' ? DEFAULT_LOCATIVE_SPECIFIER : DEFAULT_ROUTE_SPECIFIER);
-        _case = spatialCase(spec, type);
-        head = spatialHead(spec, f, plural, type);
+        const genitive = nearGenitive(np, f);
+        _case = spatialCase(spec, type, genitive);
+        head = spatialHead(spec, f, plural, type, genitive);
       } else {
         _case = 'dat';
         // A direction naming a relation is motion into it, which German marks with the accusative
@@ -194,7 +204,11 @@ export function complementsParts(
         // deinem Asien", "zum großen Asien"), as the articled "zur Antarktis" does.
         if (type === 'direction') {
           const goal = directionSpecifier(c);
-          if (goal) { _case = spatialCase(goal, 'direction'); head = spatialHead(goal, f, plural, 'direction'); }
+          if (goal) {
+            const genitive = nearGenitive(np, f);
+            _case = spatialCase(goal, 'direction', genitive);
+            head = spatialHead(goal, f, plural, 'direction', genitive);
+          }
           else if (isBareNamePlace(f)) head = 'nach';
           else head = prepDet('zu', f, 'dat', plural);
         }

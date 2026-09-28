@@ -3,6 +3,35 @@
 **Feature:** two new spatial relations, **`near`** and **`far`**, on the `locative` complement.
 **Shape:** two more values of the existing `PathSpecifier`; no new complement, no new concept.
 **Scope:** all 7 languages; offered on the **locative toolbar only** (the route keeps its seven).
+**Status: shipped, 2026-09-28.** All seven ready languages and the seven preview ones, pinned in
+[`test/complements/distanceRelations.test.ts`](../../../../packages/engine/test/complements/distanceRelations.test.ts)
+(the table below is the engine's output, unchanged), with the accepted source overlap pinned in
+`source.test.ts`. What landed differently from the plan, which was written when there were seven
+languages, seven relations and no direction toolbar:
+
+- **Fourteen languages, not seven.** The preview columns take the pair too, every form *(verify)*
+  like the rest of their columns: gsw *nöch bi* / *wiit wäg vo* + dative ("nöch bim Huus", "wiit wäg
+  vom Huus" — no genitive to write); rm-rumgr *datiers da* / *lunsch da*, rm-sursilv *datier da* /
+  *lunsch da*, rm-vallader *dastrusch da* / *dalöntsch da*, each *da* contracting as it already does;
+  ca *a prop de* / *lluny de*; pl *blisko* / *daleko od* + genitive; lt *netoli* / *toli nuo* +
+  genitive. The seven review sheets are regenerated.
+- **The route keeps eleven, not seven** — P09-E1 and E32 had added `on`, `between`, `against` and
+  `among` to both toolbars since. `ROUTE_SPECIFIERS` is those eleven; `PATH_SPECIFIERS` is thirteen.
+- **The direction toolbar** (P13, which did not exist when this was written) leaves the pair off too,
+  reading `ROUTE_SPECIFIERS`. The engines still render a hand-built goal: de "geht **in die** Nähe
+  des Hauses", ja 家の近くへ.
+- **German's fallback is chosen in the complement, not returned by `spatialHead`.** `spatialCase` and
+  `spatialHead` take a `genitive` flag (default true), which `complementsPhrase` computes with
+  `nearGenitive`: `genitiveShows`, except that a name without an article takes "von" too — "in der
+  Nähe von Afrika", not the written "in der Nähe Afrikas". A pronoun falls back the same way ("in der
+  Nähe von ihm"). The von+dem→vom fusion was already there (A154).
+- **`PATH_SPECIFIER_LABELS` no longer exists**: the tooltips are the `specifier.value.near` /
+  `specifier.value.far` UI strings, localized like the other relations (it "vicino a" / "lontano da",
+  de "in der Nähe" / "weit weg von", ja 〜の近くで / 〜から遠くで), so the last out-of-scope item is done.
+- **Keys and console**: the toolbar answers to n**E**ar and fa**R** (N is `on`'s, F `in front of`'s);
+  the console takes `/near` and `/far` on a locative only.
+- **Verification 3 and 4** were covered by the e2e row in `complements.spec.ts` (BE + HOUSE, near
+  then far, against a booted backend) and a green `tidy` / `compact` run, not by hand.
 
 | lang | "the cat is near the house" | "the cat is far from the house" |
 |---|---|---|

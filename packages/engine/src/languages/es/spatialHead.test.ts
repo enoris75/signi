@@ -66,3 +66,12 @@ describe('spatialHead: among', () => {
     expect(spatialHead('among', true, MERCADO)).toBe('entre los');
   });
 });
+
+// A02: the distance pair, both "de"-locutions: "de" fuses with "el" alone.
+describe('spatialHead: near and far', () => {
+  test('cerca de, lejos de', () => {
+    expect(spatialHead('near', false, CASA)).toBe('cerca de la');
+    expect(spatialHead('far', false, MERCADO)).toBe('lejos del');
+    expect(spatialHead('near', false, { ...CASA, definiteness: 'indefinite' })).toBe('cerca de una');
+  });
+});

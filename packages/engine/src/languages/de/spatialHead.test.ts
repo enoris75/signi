@@ -79,3 +79,20 @@ describe('spatialHead: among', () => {
     expect(spatialHead('among', KATZE, false, 'direction')).toBe('zwischen die');
   });
 });
+
+// A02: `near` is "in der Nähe" + genitive, or "in der Nähe von" + dative where the genitive would
+// not show; a goal goes "in die Nähe". `far` is "weit weg von" + dative, fusing "vom".
+describe('spatialHead: near and far', () => {
+  test('in der Nähe + genitive, von + dative as the fallback', () => {
+    expect(spatialHead('near', HAUS, false, 'locative')).toBe('in der Nähe des');
+    expect(spatialHead('near', KATZE, false, 'locative')).toBe('in der Nähe der');
+    expect(spatialHead('near', HAUS, false, 'locative', false)).toBe('in der Nähe vom');
+    expect(spatialHead('near', HAUS, false, 'direction')).toBe('in die Nähe des');
+  });
+
+  test('weit weg von + dative', () => {
+    expect(spatialHead('far', HAUS, false, 'locative')).toBe('weit weg vom');
+    expect(spatialHead('far', KATZE, false, 'locative')).toBe('weit weg von der');
+    expect(spatialHead('far', { ...HAUS, definiteness: 'indefinite' }, false, 'locative')).toBe('weit weg von einem');
+  });
+});

@@ -30,6 +30,9 @@ export function spatialHead(spec: PathSpecifier, plural: boolean, f: Record<stri
     // them apart); it is lifted off a group's conjuncts the same way.
     case 'among':       return prepDet(BETWEEN_PREP, f, plural);
     case 'against':     return prepDet('contra', f, plural);
+    // A02: the distance pair, both "de"-locutions: "cerca de la casa", "lejos del mercado".
+    case 'near':        return `cerca ${deDet(f, plural)}`;
+    case 'far':         return `lejos ${deDet(f, plural)}`;
     case 'through':
     default:            return prepDet('por', f, plural);
   }

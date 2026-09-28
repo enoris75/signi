@@ -182,6 +182,10 @@ export const REL_NOUN: Record<PathSpecifier, string> = {
   against: '',
   // P09-E32: `among` is `between`'s の間, a deliberate merger — 家の間で is "among the houses".
   among: 'の間',
+  // A02: the distance pair. `near` is 近く after の, as every relational noun here; `far` takes the
+  // ablative から instead (家から遠く), which is part of the value exactly as の is for the others.
+  near: 'の近く',
+  far: 'から遠く',
 };
 
 /**
@@ -225,6 +229,8 @@ export const PATH_CITATION: Record<PathSpecifier, string> = {
   between: 'の間で',
   against: 'に',
   among: 'の間で',
+  near: 'の近くで',
+  far: 'から遠くで',
 };
 
 /** Readings for the relational nouns above (word-level furigana over the の+kanji run). */
@@ -240,6 +246,8 @@ export const REL_NOUN_READING: Record<PathSpecifier, string> = {
   between: 'のあいだ',
   against: '',
   among: 'のあいだ',
+  near: 'のちかく',
+  far: 'からとおく',
 };
 
 // Coordinating conjunctions as Japanese connective adverbs, placed after the first clause's 、.

@@ -33,6 +33,11 @@ export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plur
     // them apart); it is lifted off a group's conjuncts the same way.
     case 'among':       return adv(BETWEEN_PREP);
     case 'against':     return adv('contro');
+    // A02: the distance pair, adverb + preposition as "davanti a" is: "vicino" governs "a" and
+    // "lontano" the ablative "da", each fusing only with the definite ("vicino alla casa", "vicino a
+    // una casa", "lontano dalla casa").
+    case 'near':        return `vicino ${prepDet('a', f, plural, lead)}`;
+    case 'far':         return `lontano ${prepDet('da', f, plural, lead)}`;
     case 'through':
     default:            return adv('attraverso');
   }

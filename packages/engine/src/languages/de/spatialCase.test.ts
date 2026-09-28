@@ -42,3 +42,15 @@ describe('spatialCase: among', () => {
     expect(spatialCase('among', 'direction')).toBe('acc');
   });
 });
+
+// A02: the distance pair governs no two-way preposition, so its case holds whatever the complement:
+// the genitive after "in der Nähe" (the dative after its "von" fallback), the dative after "weit weg von".
+describe('spatialCase: near and far', () => {
+  test('near is genitive, or dative in the fallback; far is dative', () => {
+    for (const type of ['locative', 'route', 'direction'] as const) {
+      expect(spatialCase('near', type)).toBe('gen');
+      expect(spatialCase('near', type, false)).toBe('dat');
+      expect(spatialCase('far', type)).toBe('dat');
+    }
+  });
+});

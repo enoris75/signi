@@ -455,11 +455,32 @@ export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'ob
  *             deliberate, as ja's `on` = `over` is. Meant for a plural noun phrase; over a
  *             coordinated one it scopes whole as `between` does (see `GROUP_SCOPED_SPECIFIERS`).
  *
+ * Two more are a second axis (A02). The others describe a **configuration** — containment, the
+ * vertical and front/back axes, enclosure, support, contact; these two describe **distance** only:
+ *
+ *   near    — "sleeps **near** the house": it *vicino a*, fr *près de*, es *cerca de*, pt *perto de*,
+ *             de *in der Nähe* + genitive (*in der Nähe von* + dative where the genitive would not
+ *             show: "in der Nähe von Häusern", "in der Nähe von Afrika"), ja 〜の近く.
+ *   far     — "sleeps **far from** the house": every language builds it with its ablative — it
+ *             *lontano da*, fr *loin de*, es *lejos de*, pt *longe de*, de *weit weg von*, ja
+ *             〜から遠く.
+ *
+ * They are **locative-only**: a route is a traversed path with a shape, and "goes far from the house"
+ * describes none, so the route toolbar offers `ROUTE_SPECIFIERS` instead. An engine still renders them
+ * on a route or a direction a hand-built plan passes, so nothing is normalised away. Neither combines
+ * with a configuration ("far behind") nor takes a degree ("very near") yet — both are follow-ups.
+ * On a Romance RUN or JUMP, locative `far` reads as the `source` those verbs prefix with the same
+ * adverb (fr *court loin de la maison*); the overlap is accepted and pinned (A02).
+ *
  * `into` is not among them and needs nothing: it is `in` under a `direction` (see above).
  */
-export type PathSpecifier = 'in' | 'through' | 'under' | 'over' | 'around' | 'behind' | 'in_front_of' | 'on' | 'between' | 'against' | 'among';
+export type PathSpecifier = 'in' | 'through' | 'under' | 'over' | 'around' | 'behind' | 'in_front_of' | 'on' | 'between' | 'against' | 'among' | 'near' | 'far';
 
-export const PATH_SPECIFIERS: PathSpecifier[] = ['in', 'through', 'under', 'over', 'around', 'behind', 'in_front_of', 'on', 'between', 'against', 'among'];
+/** Every relation an engine renders, and what the locative offers. */
+export const PATH_SPECIFIERS: PathSpecifier[] = ['in', 'through', 'under', 'over', 'around', 'behind', 'in_front_of', 'on', 'between', 'against', 'among', 'near', 'far'];
+
+/** The relations a route offers: all but the distance pair, which is locative-only (A02). */
+export const ROUTE_SPECIFIERS: PathSpecifier[] = ['in', 'through', 'under', 'over', 'around', 'behind', 'in_front_of', 'on', 'between', 'against', 'among'];
 
 /** The relation each specifier-bearing complement falls back on when none is chosen. */
 export const DEFAULT_ROUTE_SPECIFIER: PathSpecifier = 'through';

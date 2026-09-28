@@ -7,7 +7,7 @@ review copy, not here. Glossed in `en`; a row marked **borrowed** is German's wo
 until Polish is given its own. Standard written Polish; the conventions and the keys are in
 [style-pl.md](style-pl.md).
 
-**2408 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
+**2417 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
 
 ## 1. Verbs (205)
 
@@ -219,7 +219,7 @@ until Polish is given its own. Standard written Polish; the conventions and the 
 | SHOULD | should | powinien | powinienem, powinieneś, powinien, powinniśmy, powinniście, powinni | powinien był, powinna była, powinno było, powinni byli, powinny były | , ,  |  |  |  |  | present_masc: powinien; present_fem: powinna; present_neut: powinno; present_virile: powinni; present_nonvirile: powinny; present_stem_masc: powinien; defective_agreeing: 1 |
 | MIGHT | might | móc | mogę, możesz, może, możemy, możecie, mogą | mógł, mogła, mogło, mogli, mogły | , ,  |  |  |  |  | past_stem_masc: mogł; adverbial: mogąc |
 
-## 2. Nouns (441)
+## 2. Nouns (445)
 
 | concept | `en` | gender | singular (nom, gen, dat, acc, ins, loc, voc) | plural (nom, gen, dat, acc, ins, loc) | other forms |
 |---|---|---|---|---|---|
@@ -254,6 +254,9 @@ until Polish is given its own. Standard written Polish; the conventions and the 
 | EAGLE | eagle | masc | orzeł, orła, orłu, orła, orłem, orle, orle | orły, orłów, orłom, orły, orłami, orłach | animate_acc: 1 |
 | OWL | owl | fem | sowa, sowy, sowie, sowę, sową, sowie, sowo | sowy, sów, sowom, sowy, sowami, sowach |  |
 | PENGUIN | penguin | masc | pingwin, pingwina, pingwinowi, pingwina, pingwinem, pingwinie, pingwinie | pingwiny, pingwinów, pingwinom, pingwiny, pingwinami, pingwinach | animate_acc: 1 |
+| SEAGULL | seagull | fem | mewa, mewy, mewie, mewę, mewą, mewie, mewo | mewy, mew, mewom, mewy, mewami, mewach |  |
+| SWALLOW | swallow | fem | jaskółka, jaskółki, jaskółce, jaskółkę, jaskółką, jaskółce, jaskółko | jaskółki, jaskółek, jaskółkom, jaskółki, jaskółkami, jaskółkach |  |
+| PARROT | parrot | fem | papuga, papugi, papudze, papugę, papugą, papudze, papugo | papugi, papug, papugom, papugi, papugami, papugach |  |
 | SHARK | shark | masc | rekin, rekina, rekinowi, rekina, rekinem, rekinie, rekinie | rekiny, rekinów, rekinom, rekiny, rekinami, rekinach | animate_acc: 1 |
 | SALMON | salmon | masc | łosoś, łososia, łososiowi, łososia, łososiem, łososiu, łososiu | łososie, łososi, łososiom, łososie, łososiami, łososiach | animate_acc: 1 |
 | SNAKE | snake | masc | wąż, węża, wężowi, węża, wężem, wężu, wężu | węże, węży, wężom, węże, wężami, wężach | animate_acc: 1 |
@@ -443,6 +446,7 @@ until Polish is given its own. Standard written Polish; the conventions and the 
 | VALLADER | Vallader | masc | vallader, vallader, vallader, vallader, vallader, vallader, vallader |  |  |
 | CATALAN | Catalan | masc | kataloński, katalońskiego, katalońskiemu, kataloński, katalońskim, katalońskim, kataloński |  |  |
 | POLISH | Polish | masc | polski, polskiego, polskiemu, polski, polskim, polskim, polski |  |  |
+| LITHUANIAN | Lithuanian | masc | litewski, litewskiego, litewskiemu, litewski, litewskim, litewskim, litewski |  |  |
 | SPELLING | spelling | fem | pisownia, pisowni, pisowni, pisownię, pisownią, pisowni, pisownio | pisownie, pisowni, pisowniom, pisownie, pisowniami, pisowniach |  |
 | PERIOD_TIME | period | masc | okres, okresu, okresowi, okres, okresem, okresie, okresie | okresy, okresów, okresom, okresy, okresami, okresach |  |
 | MOMENT | moment | fem | chwila, chwili, chwili, chwilę, chwilą, chwili, chwilo | chwile, chwil, chwilom, chwile, chwilami, chwilach |  |
@@ -886,7 +890,7 @@ until Polish is given its own. Standard written Polish; the conventions and the 
 |---|---|---|---|
 | HEY | hey | hej |  |
 
-## 7. The suite's sentences (148)
+## 7. The suite's sentences (147)
 
 Each row is a pin in `pl.test.ts`; the rows in its `test.fails` blocks are what the review is
 asked to rule on, not what ships.
@@ -1040,9 +1044,8 @@ asked to rule on, not what ships.
 | | koty ją widzą. |
 | | biegnij. |
 | | kot zjadł trochę jedzenia. |
-| | pl |
 
-## 8. UI strings (795)
+## 8. UI strings (798)
 
 | key | `en` | `pl` |
 |---|---|---|
@@ -1385,6 +1388,8 @@ asked to rule on, not what ships.
 | specifier.value.between | between | między |
 | specifier.value.against | against | przy |
 | specifier.value.among | among | wśród |
+| specifier.value.near | near | blisko |
+| specifier.value.far | far from | daleko od |
 | temporal.value.at | at | w |
 | temporal.value.ago | ago | 〜 temu |
 | temporal.value.until | until | do |
@@ -1834,6 +1839,7 @@ asked to rule on, not what ships.
 | language.rm-vallader | Romansh | Retoromański |
 | language.ca | Catalan | Kataloński |
 | language.pl | Polish | Polski |
+| language.lt | Lithuanian | Litewski |
 | language.rm-rumgr.dialect | Rumantsch Grischun | rumantsch grischun |
 | language.rm-sursilv.dialect | Sursilvan | sursilvan |
 | language.rm-vallader.dialect | Vallader | vallader |
@@ -1842,7 +1848,7 @@ asked to rule on, not what ships.
 | language.gsw.caveat | Swiss German does not have a standard spelling. | Szwajcarski niemiecki nie ma pisowni standardowej. |
 | language.selector | Interface language | Język interfejsu |
 
-## 9. Engine-composed definitions (618)
+## 9. Engine-composed definitions (621)
 
 | concept | `en` | `pl` |
 |---|---|---|
@@ -1881,6 +1887,9 @@ asked to rule on, not what ships.
 | EAGLE | a big wild bird | duży dziki ptak |
 | OWL | a wild bird | dziki ptak |
 | PENGUIN | a bird that does not fly | ptak, który nie leci |
+| SEAGULL | a white bird | biały ptak |
+| SWALLOW | a small bird | mały ptak |
+| PARROT | a bird that says words | ptak, który mówi słowa |
 | SHARK | a big fish | duża ryba |
 | SALMON | a fish | ryba |
 | SNAKE | a long reptile | długi gad |

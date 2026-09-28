@@ -25,6 +25,8 @@ import FlipToFrontIcon from "@mui/icons-material/FlipToFront";
 import LayersIcon from "@mui/icons-material/Layers";
 import ViewColumnIcon from "@mui/icons-material/ViewColumn";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
+import CompressIcon from "@mui/icons-material/Compress";
+import ExpandIcon from "@mui/icons-material/Expand";
 import AlignHorizontalLeftIcon from "@mui/icons-material/AlignHorizontalLeft";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import HistoryIcon from "@mui/icons-material/History";
@@ -43,6 +45,7 @@ import {
   CAUSE_SENTIMENTS,
   Concept,
   PATH_SPECIFIERS,
+  ROUTE_SPECIFIERS,
   TEMPORAL_RELATIONS,
   type Aspect,
   type CauseSentiment,
@@ -727,6 +730,9 @@ const SPECIFIER_KEYS: Record<PathSpecifier, string> = {
   against: "G",
   // P09-E32: a**M**ong, whose A is `around`'s.
   among: "M",
+  // A02: n**E**ar, whose N is `on`'s, and fa**R**, whose F is `in front of`'s and A `around`'s.
+  near: "E",
+  far: "R",
 };
 
 const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
@@ -744,6 +750,9 @@ const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
   against: <AlignHorizontalLeftIcon sx={{ fontSize: 15 }} />,
   // A point inside a scattered set (P09-E32).
   among: <ScatterPlotIcon sx={{ fontSize: 15 }} />,
+  // Distance (A02): arrows toward and away from a line, beside the VerticalAlign* of in/under/over.
+  near: <CompressIcon sx={{ fontSize: 15 }} />,
+  far: <ExpandIcon sx={{ fontSize: 15 }} />,
 };
 
 // A toolbar of selectable values for a complement's relation — one icon per value, the active one
@@ -868,9 +877,10 @@ function RelationToolbar<V extends string>({
 // Spatial relations, shared by the route and locative complements, which draw on the same
 // relations; the caller passes the value (and so the default) its own complement carries.
 // The direction's relation (P13): its plain goal, "to the house", then the path relations it may
-// reach its goal by — "into the air" (JUMP), "onto the table". D for the plain direction.
+// reach its goal by — "into the air" (JUMP), "onto the table". D for the plain direction. Not the
+// distance pair, which is the locative's alone (A02), as on the route.
 export type DirectionRelation = PathSpecifier | "to";
-const DIRECTION_RELATIONS: readonly DirectionRelation[] = ["to", ...PATH_SPECIFIERS];
+export const DIRECTION_RELATIONS: readonly DirectionRelation[] = ["to", ...ROUTE_SPECIFIERS];
 
 export function DirectionSelector({
   value,
@@ -906,12 +916,16 @@ export function DirectionSelector({
 }
 
 export function SpecifierSelector({
+  options,
   value,
   armed,
   onDisarm,
   onSelect,
   placeAt,
 }: {
+  // The relations this complement offers: every one on the locative, all but the distance pair on
+  // the route (A02, see ROUTE_SPECIFIERS).
+  options: readonly PathSpecifier[];
   value: PathSpecifier;
   armed?: boolean;
   onDisarm?: () => void;
@@ -923,12 +937,12 @@ export function SpecifierSelector({
   // "unter" / 〜の下で (C13). The catalog cites them on a bare noun, so what comes back is the
   // preposition alone, which is what the icon's tooltip wants.
   const labels = Object.fromEntries(
-    PATH_SPECIFIERS.map((s) => [s, t(`specifier.value.${s}`)]),
+    options.map((s) => [s, t(`specifier.value.${s}`)]),
   ) as Record<PathSpecifier, string>;
   return (
     <RelationToolbar
       testId="specifier-toolbar"
-      values={PATH_SPECIFIERS}
+      values={options}
       value={value}
       labels={labels}
       icons={SPECIFIER_ICONS}

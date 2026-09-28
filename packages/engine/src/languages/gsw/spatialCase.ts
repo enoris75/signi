@@ -11,7 +11,10 @@ import type { PathSpecifier } from '@signi/shared';
 // (in it). So every relation takes the accusative there — the case is the whole of the difference.
 // P09-E1's three are two-way prepositions too — auf, zwischen, an — and follow the rule unchanged:
 // "auf dem Tisch" / "auf den Tisch", "an der Wand" / "an die Wand".
+// A02's distance pair takes the dative whatever the complement: "nöch bim Huus", "wiit wäg vom Huus" —
+// Swiss German has no genitive to give `near` the "in der Nähe des Hauses" German writes.
 export function spatialCase(spec: PathSpecifier, type: 'route' | 'locative' | 'direction'): 'acc' | 'dat' {
+  if (spec === 'near' || spec === 'far') return 'dat';
   if (type === 'direction') return 'acc';
   if (spec === 'through' || spec === 'around') return 'acc';
   return spec === 'over' && type === 'route' ? 'acc' : 'dat';

@@ -5,7 +5,7 @@ correction is a data edit in `packages/backend/src/concepts/gsw/` or a pin in
 `packages/engine/test/languages/gsw.test.ts`, and the sheet is regenerated. Mark each row in the
 review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](dieth-style-sheet.md)).
 
-**2370 rows** in nine sections, re-measured at generation (E14 D1: P10 §4's 630 is stale).
+**2402 rows** in nine sections, re-measured at generation (E14 D1: P10 §4's 630 is stale).
 
 ## 1. Verbs (205)
 
@@ -217,12 +217,13 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | SHOULD | sollen | söle | sött | söttsch | sött | sötted | söle | haa |  |
 | MIGHT | können | chöne | chönnt | chönntsch | chönnt | chönnted | chöne | haa |  |
 
-## 2. Nouns (434)
+## 2. Nouns (445)
 
 | concept | `de` | `gsw` | plural | gender | other forms |
 |---|---|---|---|---|---|
 | ANIMAL | Tier | Tier | Tier | neut |  |
 | MAMMAL | Säugetier | Süügetier | Süügetier | neut |  |
+| FELINE | Katze | Chatz | Chatze | fem |  |
 | CAT | Kater | Chater | Chater | masc | fem: Chatz; fem_plural: Chatze |
 | DOG | Hund | Hund | Hünd | masc | fem: Hündin; fem_plural: Hündine; compound: Hunde |
 | BIRD | Vogel | Vogel | Vögel | masc |  |
@@ -238,6 +239,10 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | BEAR | Bär | Bär | Bäre | masc | fem: Bärin; fem_plural: Bärine |
 | LION | Löwe | Löi | Löie | masc |  |
 | TIGER | Tiger | Tiger | Tiger | masc |  |
+| LEOPARD | Leopard | Leopard | Leoparde | masc |  |
+| PANTHER | Panther | Panther | Panther | masc |  |
+| PUMA | Puma | Puma | Puma | masc |  |
+| CHEETAH | Gepard | Gepard | Geparde | masc |  |
 | ELEPHANT | Elefant | Elefant | Elefante | masc |  |
 | MONKEY | Affe | Aff | Affe | masc |  |
 | DEER | Hirsch | Hirsch | Hirsche | masc |  |
@@ -247,6 +252,9 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | EAGLE | Adler | Adler | Adler | masc |  |
 | OWL | Eule | Üüle | Üüle | fem |  |
 | PENGUIN | Pinguin | Pinguin | Pinguin | masc |  |
+| SEAGULL | Möwe | Möwe | Möwe | fem |  |
+| SWALLOW | Schwalbe | Schwalbe | Schwalbe | fem |  |
+| PARROT | Papagei | Papagei | Papageie | masc |  |
 | SHARK | Hai | Hai | Hai | masc |  |
 | SALMON | Lachs |  |  |  |  |
 | SNAKE | Schlange | Schlange | Schlange | fem |  |
@@ -434,6 +442,9 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 | RUMANTSCH_GRISCHUN | Rumantsch Grischun | Rumantsch Grischun |  | neut |  |
 | SURSILVAN | Surselvisch | Surselvisch |  | neut |  |
 | VALLADER | Vallader | Vallader |  | neut |  |
+| CATALAN | Katalanisch | Katalanisch |  | neut |  |
+| POLISH | Polnisch | Polnisch |  | neut |  |
+| LITHUANIAN | Litauisch | Litauisch |  | neut |  |
 | SPELLING | Rechtschreibung | Rächtschriibig | Rächtschriibige | fem |  |
 | PERIOD_TIME | Zeitraum | Ziitruum | Ziitrüüm | masc |  |
 | MOMENT | Augenblick | Augeblick | Augeblick | masc |  |
@@ -877,7 +888,7 @@ review copy, not here. Zürichdeutsch (P10 D1), Dieth spelling ([style sheet](di
 |---|---|---|---|
 | HEY | hey | he |  |
 
-## 7. The suite's sentences (125)
+## 7. The suite's sentences (132)
 
 Each row is a pin in `gsw.test.ts`; the rows in its `test.fails` blocks are the order the review is
 asked to rule on (P10 D11), not what ships.
@@ -974,6 +985,10 @@ asked to rule on (P10 D11), not what ships.
 | BEAR | d Bäre. |
 | LION | d Löie. |
 | TIGER | d Tiger. |
+| LEOPARD | d Leoparde. |
+| PANTHER | d Panther. |
+| PUMA | d Puma. |
+| CHEETAH | d Geparde. |
 | ELEPHANT | d Elefante. |
 | MONKEY | d Affe. |
 | DEER | d Hirsche. |
@@ -983,6 +998,9 @@ asked to rule on (P10 D11), not what ships.
 | EAGLE | d Adler. |
 | OWL | d Üüle. |
 | PENGUIN | d Pinguin. |
+| SEAGULL | d Möwe. |
+| SWALLOW | d Schwalbe. |
+| PARROT | d Papageie. |
 | SHARK | d Hai. |
 | SNAKE | d Schlange. |
 | TURTLE | d Schildchrotte. |
@@ -1010,7 +1028,7 @@ asked to rule on (P10 D11), not what ships.
 | | de Chater redt, indem er es Wort oft langsam wäält. |
 | | de Chater redt, indem er es Wort langsam wäält. |
 
-## 8. UI strings (792)
+## 8. UI strings (798)
 
 | key | `en` | `de` | `gsw` |
 |---|---|---|---|
@@ -1353,6 +1371,8 @@ asked to rule on (P10 D11), not what ships.
 | specifier.value.between | between | zwischen | zwüsche |
 | specifier.value.against | against | an | a |
 | specifier.value.among | among | zwischen | zwüsche |
+| specifier.value.near | near | in der Nähe | nöch bi |
+| specifier.value.far | far from | weit weg von | wiit wäg vo |
 | temporal.value.at | at | zu | zu |
 | temporal.value.ago | ago | vor | vor |
 | temporal.value.until | until | bis zu | bis zu |
@@ -1702,6 +1722,7 @@ asked to rule on (P10 D11), not what ships.
 | action.removeComplement | Remove the complement | Die Ergänzung entfernen | D Ergänzig entferne |
 | action.addComplement | Add a complement | Eine Ergänzung hinzufügen | E Ergänzig dezuefüege |
 | action.fitCanvas | Show the whole canvas | Die ganze Arbeitsfläche zeigen | D ganz Arbetsflächi zeige |
+| action.allOptions | All options | Alle Optionen | Alli Optione |
 | action.showWordMap | Show the word map | Die Wortkarte zeigen | D Wortcharte zeige |
 | action.closeWordMap | Close the word map | Die Wortkarte schließen | D Wortcharte zuemache |
 | action.close | close | schließen | zuemache |
@@ -1799,6 +1820,9 @@ asked to rule on (P10 D11), not what ships.
 | language.rm-rumgr | Romansh | Rätoromanisch | Rätoromanisch |
 | language.rm-sursilv | Romansh | Rätoromanisch | Rätoromanisch |
 | language.rm-vallader | Romansh | Rätoromanisch | Rätoromanisch |
+| language.ca | Catalan | Katalanisch | Katalanisch |
+| language.pl | Polish | Polnisch | Polnisch |
+| language.lt | Lithuanian | Litauisch | Litauisch |
 | language.rm-rumgr.dialect | Rumantsch Grischun | Rumantsch Grischun | Rumantsch Grischun |
 | language.rm-sursilv.dialect | Sursilvan | Surselvisch | Surselvisch |
 | language.rm-vallader.dialect | Vallader | Vallader | Vallader |
@@ -1807,7 +1831,7 @@ asked to rule on (P10 D11), not what ships.
 | language.gsw.caveat | Swiss German does not have a standard spelling. | Schweizerdeutsch hat keine normierte Rechtschreibung. | Schwiizerdütsch hät kei normierti Rächtschriibig. |
 | language.selector | Interface language | Interfacesprache | Interfacespraach |
 
-## 9. Engine-composed definitions (613)
+## 9. Engine-composed definitions (621)
 
 | concept | `en` | `de` | `gsw` |
 |---|---|---|---|
@@ -1819,6 +1843,7 @@ asked to rule on (P10 D11), not what ships.
 | SOMEONE | an unknown person | eine unbekannte Person | e unbekannti Person |
 | ANIMAL | a being that moves | ein Wesen, das sich bewegt | es Wääse, wo sich bewegt |
 | MAMMAL | an animal that produces milk | ein Tier, das Milch erzeugt | es Tier, wo Milch erzüügt |
+| FELINE | a mammal that eats animals | ein Säugetier, das Tiere frisst | es Süügetier, wo Tier frisst |
 | CAT | a small mammal | ein kleines Säugetier | es chliines Süügetier |
 | DOG | a domestic canine mammal | ein zahmes hundeartiges Säugetier | es zahmes hundeartiges Süügetier |
 | BIRD | an animal that has wings | ein Tier, das Flügel hat | es Tier, wo Flügel hät |
@@ -1832,6 +1857,10 @@ asked to rule on (P10 D11), not what ships.
 | BEAR | a big strong wild mammal | ein großes starkes wildes Säugetier | es grosses starches wildes Süügetier |
 | LION | a big wild mammal that lives in Africa | ein großes wildes Säugetier, das in Afrika lebt | es grosses wildes Süügetier, wo i Afrika läbt |
 | TIGER | a big wild mammal that lives in Asia | ein großes wildes Säugetier, das in Asien lebt | es grosses wildes Süügetier, wo i Asie läbt |
+| LEOPARD | a big wild feline that lives in Africa | eine große wilde Katze, die in Afrika lebt | e grossi wildi Chatz, wo i Afrika läbt |
+| PANTHER | a big black feline | eine große schwarze Katze | e grossi schwarzi Chatz |
+| PUMA | a big wild feline that lives in North America | eine große wilde Katze, die in Nordamerika lebt | e grossi wildi Chatz, wo i Nordamerika läbt |
+| CHEETAH | a wild feline that runs fast | eine wilde Katze, die schnell läuft | e wildi Chatz, wo schnäll springt |
 | ELEPHANT | a big mammal that eats grass | ein großes Säugetier, das Gras frisst | es grosses Süügetier, wo Gras frisst |
 | MONKEY | a wild mammal that has hands | ein wildes Säugetier, das Hände hat | es wildes Süügetier, wo Händ hät |
 | DEER | a wild mammal that eats grass | ein wildes Säugetier, das Gras frisst | es wildes Süügetier, wo Gras frisst |
@@ -1841,6 +1870,9 @@ asked to rule on (P10 D11), not what ships.
 | EAGLE | a big wild bird | ein großer wilder Vogel | en grosse wilde Vogel |
 | OWL | a wild bird | ein wilder Vogel | en wilde Vogel |
 | PENGUIN | a bird that does not fly | ein Vogel, der nicht fliegt | en Vogel, wo nöd flüügt |
+| SEAGULL | a white bird | ein weißer Vogel | en wiisse Vogel |
+| SWALLOW | a small bird | ein kleiner Vogel | en chliine Vogel |
+| PARROT | a bird that says words | ein Vogel, der Wörter sagt | en Vogel, wo Wörter seit |
 | SHARK | a big fish | ein großer Fisch | en grosse Fisch |
 | SALMON | a fish | ein Fisch | en Fisch |
 | SNAKE | a long reptile | ein langes Reptil | es langes Reptil |

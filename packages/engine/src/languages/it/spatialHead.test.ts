@@ -57,3 +57,14 @@ describe('spatialHead: among', () => {
     expect(spatialHead('among', CASA, false, 'casa')).toBe('tra la');
   });
 });
+
+// A02: the distance pair, adverb + preposition as "davanti a": "a" for near, the ablative "da" for
+// far, each fusing only with the definite.
+describe('spatialHead: near and far', () => {
+  test('vicino a, lontano da', () => {
+    expect(spatialHead('near', CASA, false, 'casa')).toBe('vicino alla');
+    expect(spatialHead('far', MERCATO, false, 'mercato')).toBe('lontano dal');
+    expect(spatialHead('near', { ...CASA, definiteness: 'indefinite' }, false, 'casa')).toBe('vicino a una');
+    expect(spatialHead('far', { ...CASA, definiteness: 'indefinite' }, false, 'casa')).toBe('lontano da una');
+  });
+});

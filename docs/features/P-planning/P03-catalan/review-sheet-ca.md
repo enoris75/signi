@@ -7,7 +7,7 @@ review copy, not here. Compared with `es`, the language the column borrows from;
 **borrowed** is that language's word standing in until Catalan is given its own. Central Catalan,
 IEC standard; the conventions are in [style-ca.md](style-ca.md).
 
-**2449 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
+**2461 rows** in nine sections, 0 of the words borrowed, re-measured at generation.
 
 ## 1. Verbs (205)
 
@@ -219,7 +219,7 @@ IEC standard; the conventions are in [style-ca.md](style-ca.md).
 | SHOULD | deber | haver | hauria, hauries, hauria, hauríem, hauríeu, haurien | havia | haurà | hauria | hagi | hagués | havent | hagut, haguda, haguts, hagudes | hagues, haguem, hagueu |
 | MIGHT | poder | poder | podria, podries, podria, podríem, podríeu, podrien | podia | podrà | podria | pugui | pogués | podent | pogut, poguda, poguts, pogudes | pugues, puguem, pugueu |
 
-## 2. Nouns (440)
+## 2. Nouns (445)
 
 | concept | `es` | `ca` | plural | gender | other forms |
 |---|---|---|---|---|---|
@@ -254,6 +254,9 @@ IEC standard; the conventions are in [style-ca.md](style-ca.md).
 | EAGLE | águila | àguila | àguiles | fem |  |
 | OWL | búho | mussol | mussols | masc |  |
 | PENGUIN | pingüino | pingüí | pingüins | masc |  |
+| SEAGULL | gaviota | gavina | gavines | fem |  |
+| SWALLOW | golondrina | oreneta | orenetes | fem |  |
+| PARROT | loro | lloro | lloros | masc |  |
 | SHARK | tiburón | tauró | taurons | masc |  |
 | SALMON | salmón | salmó | salmons | masc |  |
 | SNAKE | serpiente | serp | serps | fem |  |
@@ -442,6 +445,8 @@ IEC standard; the conventions are in [style-ca.md](style-ca.md).
 | SURSILVAN | sursilvano | sursilvà |  | masc | takes_article: 1 |
 | VALLADER | vallader | vallader |  | masc | takes_article: 1 |
 | CATALAN | catalán | català |  | masc | takes_article: 1 |
+| POLISH | polaco | polonès |  | masc | takes_article: 1 |
+| LITHUANIAN | lituano | lituà |  | masc | takes_article: 1 |
 | SPELLING | ortografía | ortografia | ortografies | fem |  |
 | PERIOD_TIME | período | període | períodes | masc |  |
 | MOMENT | momento | moment | moments | masc |  |
@@ -1084,7 +1089,7 @@ asked to rule on, not what ships.
 | the cat talks about it — en | el gat en parla. |
 | | desar. |
 
-## 8. UI strings (794)
+## 8. UI strings (798)
 
 | key | `en` | `es` | `ca` |
 |---|---|---|---|
@@ -1427,6 +1432,8 @@ asked to rule on, not what ships.
 | specifier.value.between | between | entre | entre |
 | specifier.value.against | against | contra | contra |
 | specifier.value.among | among | entre | entre |
+| specifier.value.near | near | cerca de | a prop de |
+| specifier.value.far | far from | lejos de | lluny de |
 | temporal.value.at | at | en | en |
 | temporal.value.ago | ago | hace | fa |
 | temporal.value.until | until | hasta | fins a |
@@ -1875,6 +1882,8 @@ asked to rule on, not what ships.
 | language.rm-sursilv | Romansh | Romanche | Romanx |
 | language.rm-vallader | Romansh | Romanche | Romanx |
 | language.ca | Catalan | Catalán | Català |
+| language.pl | Polish | Polaco | Polonès |
+| language.lt | Lithuanian | Lituano | Lituà |
 | language.rm-rumgr.dialect | Rumantsch Grischun | rumantsch grischun | rumantsch grischun |
 | language.rm-sursilv.dialect | Sursilvan | sursilvano | sursilvà |
 | language.rm-vallader.dialect | Vallader | vallader | vallader |
@@ -1883,7 +1892,7 @@ asked to rule on, not what ships.
 | language.gsw.caveat | Swiss German does not have a standard spelling. | El alemán suizo no tiene una ortografía estándar. | L'alemany suís no té una ortografia estàndard. |
 | language.selector | Interface language | Idioma de interfaz | Llengua d'interfície |
 
-## 9. Engine-composed definitions (618)
+## 9. Engine-composed definitions (621)
 
 | concept | `en` | `es` | `ca` |
 |---|---|---|---|
@@ -1922,6 +1931,9 @@ asked to rule on, not what ships.
 | EAGLE | a big wild bird | un ave grande y salvaje | un ocell gran i salvatge |
 | OWL | a wild bird | un ave salvaje | un ocell salvatge |
 | PENGUIN | a bird that does not fly | un ave que no vuela | un ocell que no vola |
+| SEAGULL | a white bird | un ave blanca | un ocell blanc |
+| SWALLOW | a small bird | un ave pequeña | un ocell petit |
+| PARROT | a bird that says words | un ave que dice palabras | un ocell que diu paraules |
 | SHARK | a big fish | un pez grande | un peix gran |
 | SALMON | a fish | un pez | un peix |
 | SNAKE | a long reptile | un reptil largo | un rèptil llarg |

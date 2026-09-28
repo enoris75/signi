@@ -63,3 +63,12 @@ describe('spatialHead: among', () => {
     expect(spatialHead('among', CASA, true)).toBe('entre as');
   });
 });
+
+// A02: the distance pair, both "de"-locutions: "de" fuses with the definite alone.
+describe('spatialHead: near and far', () => {
+  test('perto de, longe de', () => {
+    expect(spatialHead('near', CASA, false)).toBe('perto da');
+    expect(spatialHead('far', LIVRO, false)).toBe('longe do');
+    expect(spatialHead('near', { ...CASA, definiteness: 'indefinite' }, false)).toBe('perto de uma');
+  });
+});

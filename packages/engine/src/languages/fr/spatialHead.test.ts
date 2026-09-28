@@ -68,3 +68,13 @@ describe('spatialHead: among', () => {
     expect(spatialHead('among', ANGE, false, 'ange', 'route')).toBe("parmi l'");
   });
 });
+
+// A02: the distance pair, both "de"-locutions that fuse with the definite as "autour de" does.
+describe('spatialHead: near and far', () => {
+  test('près de, loin de', () => {
+    expect(spatialHead('near', MAISON, false, 'maison', 'locative')).toBe('près de la');
+    expect(spatialHead('near', MARCHE, false, 'marché', 'locative')).toBe('près du');
+    expect(spatialHead('far', MARCHE, true, 'marchés', 'locative')).toBe('loin des');
+    expect(spatialHead('far', { ...MAISON, definiteness: 'indefinite' }, false, 'maison', 'locative')).toBe("loin d'une");
+  });
+});

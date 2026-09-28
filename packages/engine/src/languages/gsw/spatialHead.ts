@@ -27,6 +27,10 @@ export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plur
     // them apart); it is lifted off a group's conjuncts the same way.
     case 'among':       return prepDet(BETWEEN_PREP, f, _case, plural);
     case 'against':     return prepDet('a', f, _case, plural);
+    // A02: the distance pair, an adverb before "bi" / "vo", which fuse with the dative "em": "nöch bim
+    // Huus", "wiit wäg vom Huus" (verify).
+    case 'near':        return `nöch ${prepDet('bi', f, _case, plural)}`;
+    case 'far':         return `wiit wäg ${prepDet('vo', f, _case, plural)}`;
     case 'through':
     default:            return prepDet('dur', f, _case, plural);
   }

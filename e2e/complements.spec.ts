@@ -136,6 +136,30 @@ test.describe('complements', () => {
     });
   });
 
+  // A02: the distance pair, offered on the locative's toolbar and not the route's.
+  test('the locative is near or far from its place', async ({ app, page }) => {
+    await app.buildClause('CAT', 'BE');
+    await app.revealAndPick('locative', 'HOUSE');
+
+    await page.getByRole('button', { name: 'near', exact: true }).click();
+    await app.expectSentences({
+      en: 'the cat is near the house.',
+      it: 'il gatto è vicino alla casa.',
+      fr: 'le chat est près de la maison.',
+      de: 'der Kater ist in der Nähe des Hauses.',
+      es: 'el gato está cerca de la casa.',
+      pt: 'o gato está perto da casa.',
+      ja: '猫は家の近くにいます。',
+    });
+
+    await page.getByRole('button', { name: 'far from', exact: true }).click();
+    await app.expectSentences({
+      en: 'the cat is far from the house.',
+      de: 'der Kater ist weit weg vom Haus.',
+      ja: '猫は家から遠くにいます。',
+    });
+  });
+
   test('the cause takes its stance from the sentiment toolbar', async ({ app, page }) => {
     await app.buildClause('CAT', 'RUN');
     await app.revealAndPick('cause', 'DOG');

@@ -1,5 +1,6 @@
 import {
   MODIFIER_RELATIONS,
+  ROUTE_SPECIFIERS,
   TEMPORAL_RELATIONS,
   type AbstractionLevel,
   type Aspect,
@@ -365,6 +366,9 @@ const PATH_RELATION_NAMES = [
   ["against", [], "against"],
   // P09-E32, on a plural or a group: "/loc ( house /pl /among )".
   ["among", [], "among"],
+  // A02, the distance pair, on a place alone: "/loc ( house /near )", "/loc ( house /far )".
+  ["near", [], "near"],
+  ["far", [], "far"],
 ] as const;
 
 const SENTIMENT_NAMES = [
@@ -748,7 +752,8 @@ export const COMMANDS: readonly CommandDef[] = [
       value.replace(/_/g, " "),
       // The adposition the relation is spoken with, as the canvas's toolbar names it (C13).
       `specifier.value.${value}`,
-      /^(locative|route|direction)$/,
+      // The distance pair is the locative's alone, as on the canvas (A02, see ROUTE_SPECIFIERS).
+      ROUTE_SPECIFIERS.includes(value) ? /^(locative|route|direction)$/ : /^locative$/,
       ["setSpecifier"],
     ),
   ),

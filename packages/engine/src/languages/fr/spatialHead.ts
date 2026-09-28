@@ -37,6 +37,10 @@ export function spatialHead(
     // nothing ("parmi les maisons") and is lifted off a group's conjuncts as "entre" is.
     case 'among':       return prepDet(AMONG_PREP, f, plural, lead);
     case 'against':     return prepDet('contre', f, plural, lead);
+    // A02: the distance pair, both "de"-locutions like "autour de": "près de la maison", "près du
+    // marché", "loin d'une maison".
+    case 'near':        return `près ${deDet(f, plural, lead)}`;
+    case 'far':         return `loin ${deDet(f, plural, lead)}`;
     case 'through':
     default:            return prepDet('à travers', f, plural, lead);
   }

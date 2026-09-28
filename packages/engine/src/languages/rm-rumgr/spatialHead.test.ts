@@ -18,3 +18,11 @@ describe('spatialHead', () => {
     expect(spatialHead('in', { ...CHASA, definiteness: 'indefinite' }, false, 'chasa')).toBe('en ina');
   });
 });
+
+// A02: the distance pair, adverb + "da", which contracts with the masculine article (verify).
+describe('spatialHead: near and far', () => {
+  test('datiers da, lunsch da', () => {
+    expect(spatialHead('near', CHAUN, false, 'chaun')).toBe('datiers dal');
+    expect(spatialHead('far', CHASA, false, 'chasa')).toBe('lunsch da la');
+  });
+});

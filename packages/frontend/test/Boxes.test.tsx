@@ -5,6 +5,7 @@ import {
   ASPECTS,
   CAUSE_SENTIMENTS,
   PATH_SPECIFIERS,
+  ROUTE_SPECIFIERS,
   TEMPORAL_RELATIONS,
   TENSES,
   type CauseSentiment,
@@ -531,6 +532,8 @@ const SPECIFIER_LABEL: Record<PathSpecifier, string> = {
   between: 'between',
   against: 'against',
   among: 'among',
+  near: 'near',
+  far: 'far from',
 };
 const SENTIMENT_LABEL: Record<CauseSentiment, string> = {
   neutral: 'Neutral — because of',
@@ -543,33 +546,52 @@ const hasTransparentBackground = (el: Element) =>
   getComputedStyle(el).backgroundColor === 'rgba(0, 0, 0, 0)';
 
 describe('SpecifierSelector', () => {
-  it('offers every spatial relation, in order', () => {
-    renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} />);
+  it('offers every spatial relation it is given, in order', () => {
+    renderWithProviders(<SpecifierSelector options={PATH_SPECIFIERS} value="in" onSelect={() => {}} />);
 
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(
       PATH_SPECIFIERS.map((s) => SPECIFIER_LABEL[s]),
     );
   });
 
-  // P09-E1: support, a landmark on each side, and contact join the seven; P09-E32's among follows.
-  it('offers eleven relations, the last four on, between, against and among', () => {
-    renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} />);
+  // P09-E1: support, a landmark on each side, and contact join the seven; P09-E32's among follows,
+  // and A02's distance pair closes the locative's thirteen.
+  it('offers the locative thirteen relations, the last six on, between, against, among, near and far', () => {
+    renderWithProviders(<SpecifierSelector options={PATH_SPECIFIERS} value="in" onSelect={() => {}} />);
+
+    const labels = screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'));
+    expect(labels).toHaveLength(13);
+    expect(labels.slice(-6)).toEqual(['on', 'between', 'against', 'among', 'near', 'far from']);
+  });
+
+  // A02: a route is a traversed path, which "far from the house" does not describe.
+  it('offers the route eleven, without the distance pair', () => {
+    renderWithProviders(<SpecifierSelector options={ROUTE_SPECIFIERS} value="through" onSelect={() => {}} />);
 
     const labels = screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'));
     expect(labels).toHaveLength(11);
-    expect(labels.slice(-4)).toEqual(['on', 'between', 'against', 'among']);
+    expect(labels).not.toContain('near');
+    expect(labels).not.toContain('far from');
+  });
+
+  // A02: n**E**ar and fa**R**, their initials being on's and in front of's.
+  it("answers to near's E and far's R", () => {
+    renderWithProviders(<SpecifierSelector options={PATH_SPECIFIERS} value="in" onSelect={() => {}} />);
+
+    expect(screen.getByRole('button', { name: 'near' }).getAttribute('aria-keyshortcuts')).toBe('E');
+    expect(screen.getByRole('button', { name: 'far from' }).getAttribute('aria-keyshortcuts')).toBe('R');
   });
 
   // P09-E32: among answers to its M, since A is around's.
   it("answers to among's M", () => {
-    renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} />);
+    renderWithProviders(<SpecifierSelector options={PATH_SPECIFIERS} value="in" onSelect={() => {}} />);
 
     expect(screen.getByRole('button', { name: 'among' }).getAttribute('aria-keyshortcuts')).toBe('M');
   });
 
   it('selects the relation clicked', () => {
     const onSelect = vi.fn();
-    renderWithProviders(<SpecifierSelector value="in" onSelect={onSelect} />);
+    renderWithProviders(<SpecifierSelector options={PATH_SPECIFIERS} value="in" onSelect={onSelect} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'in front of' }));
 
@@ -577,7 +599,7 @@ describe('SpecifierSelector', () => {
   });
 
   it('highlights only the current relation', () => {
-    renderWithProviders(<SpecifierSelector value="under" onSelect={() => {}} />);
+    renderWithProviders(<SpecifierSelector options={PATH_SPECIFIERS} value="under" onSelect={() => {}} />);
 
     const highlighted = screen
       .getAllByRole('button')
@@ -590,7 +612,7 @@ describe('SpecifierSelector', () => {
     const onCanvasPointerDown = vi.fn();
     renderWithProviders(
       <div onPointerDown={onCanvasPointerDown}>
-        <SpecifierSelector value="in" onSelect={() => {}} />
+        <SpecifierSelector options={PATH_SPECIFIERS} value="in" onSelect={() => {}} />
       </div>,
     );
 
@@ -604,7 +626,7 @@ describe('SpecifierSelector', () => {
       in: { x: 120, y: 30 },
       over: { x: 150, y: 24 },
     };
-    renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} placeAt={(s) => seats[s]} />);
+    renderWithProviders(<SpecifierSelector options={PATH_SPECIFIERS} value="in" onSelect={() => {}} placeAt={(s) => seats[s]} />);
 
     const buttons = screen.getAllByRole('button');
     expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['in', 'over']);

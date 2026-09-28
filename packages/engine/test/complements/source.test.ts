@@ -230,6 +230,18 @@ describe('source: the ablative adverb is gated on the verb', () => {
       pt: 'o gato pula longe do mercado.',
     });
   });
+
+  // A02, accepted: running *away from* the house takes you *far from* it, and the French, Spanish and
+  // Portuguese adverb above is the locative `far`'s own word, so the two plans say the same sentence.
+  // Italian keeps them apart ("via dalla" against "lontano dalla"). Pinned so the overlap stays a
+  // known equivalence; if it ever needs breaking, the fix belongs on the source side.
+  test('RUN from a place reads as RUN far from it, except in Italian', () => {
+    const far = sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE'), specifiers: [{ kind: 'path', value: 'far' }] } } }));
+    const source = from('RUN');
+    for (const language of ['fr', 'es', 'pt'] as const) expect(far[language]).toBe(source[language]);
+    expect(source.it).toBe('il gatto corre via dalla casa.');
+    expect(far.it).toBe('il gatto corre lontano dalla casa.');
+  });
 });
 
 describe('known bugs: source', () => {

@@ -2979,6 +2979,10 @@ export const UI_STRINGS = defineUiStrings({
   'specifier.value.against': { specifier: { kind: 'path', value: 'against' }, fallback: 'against' },
   // P09-E32: fr "parmi"; the other five merge it with `between` — "tra", "zwischen", "entre", 〜の間で.
   'specifier.value.among': { specifier: { kind: 'path', value: 'among' }, fallback: 'among' },
+  // A02: the distance pair, locative-only — it "vicino a" / "lontano da", de "in der Nähe" / "weit
+  // weg von", ja 〜の近くで / 〜から遠くで.
+  'specifier.value.near': { specifier: { kind: 'path', value: 'near' }, fallback: 'near' },
+  'specifier.value.far': { specifier: { kind: 'path', value: 'far' }, fallback: 'far from' },
 
   // The temporal complement's toolbar (P09-E12b), cited on a bare noun as the spatial relations are,
   // so each comes back as the word its language says the relation with: en "ago", it "fa", fr "il y
