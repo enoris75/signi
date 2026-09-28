@@ -110,12 +110,19 @@ One lexeme holds both aspects (P05 D1), written with `verb(imperfective, perfect
     (*szukać* + gen, *pomagać* + dat, *rządzić* + ins).
   - `object_prep` + `object_prep_case` — an object with a preposition (*czekać na* + acc, *myśleć o*
     + loc, *bać się* has `object_case: 'gen'`).
+  - `terminus_case: 'dat' | 'acc'` — the terminus's bare case when it is written out (GIVE *dać* +
+    dat; ASK *pytać* + acc).
+  - `topic_prep` + `topic_prep_case` — the topic's preposition (THINK, SPEAK *o* + loc).
   - `terminus_prep` + `terminus_prep_case` — a terminus that takes a preposition instead of the bare
     dative (ADD *dodać do* + gen, LINK *połączyć z* + ins).
   - `object_predicative_link` — the preposition before an object predicate (TRANSFORM *przekształcić
     w* + acc); its case is the accusative.
   - `infinitive_link` only where Polish needs a word before an infinitive; most verbs take it bare
     (*chce jeść*, *zaczyna jeść*).
+- **SHOULD** (*powinien*) is an agreeing defective verb: `defective_agreeing: '1'`, its present by
+  gender under `present_masc, present_fem, present_neut, present_virile, present_nonvirile`
+  (+ `present_stem_masc`, *powinien → powinn-*: *powinienem, powinnaś*), and the past cells hold
+  the periphrasis *powinien był*.
 - **Stative concepts stay unpaired** even where a dictionary lists a perfective (*kochać*, *wiedzieć*,
   *pamiętać*, *mieć*, *trzymać*): the prefixed verb means something else (*zapamiętać* = memorise).
 - A verb is **one word** (the engine appends person endings to `past_masc`); a multiword verb needs a
@@ -149,6 +156,10 @@ One lexeme holds both aspects (P05 D1), written with `verb(imperfective, perfect
 - **Adverbs** mirror the Spanish entry's keys one for one: *nigdy* keeps `polarity: 'negative'` (it
   triggers *nie* on the verb, negative concord), `comparative`/`superlative` where synthetic
   (*szybciej, najszybciej*).
+- **Adjectives with a full table** (not -y/-i: *ten sam*): `base, fem, neut, virile, nonvirile`
+  (nominatives), `gen, dat, acc, ins, loc` (masc), the same under `fem_`, `neut_`, `virile_`,
+  `nonvirile_`, and `acc_animate`. An invariable phrase (*w porządku*, *bez tytułu*) takes
+  `invariable: '1'` and repeats in every cell.
 - **Pronouns** (`pronouns.ts`) keep es/de's `person`, `number`, `gender`, `generic`, `thing` flags. The
   cases are keyed as nouns are, with variant prefixes:
 
