@@ -110,8 +110,16 @@ One lexeme holds both aspects (P05 D1), written with `verb(imperfective, perfect
     (*szukać* + gen, *pomagać* + dat, *rządzić* + ins).
   - `object_prep` + `object_prep_case` — an object with a preposition (*czekać na* + acc, *myśleć o*
     + loc, *bać się* has `object_case: 'gen'`).
+  - `terminus_prep` + `terminus_prep_case` — a terminus that takes a preposition instead of the bare
+    dative (ADD *dodać do* + gen, LINK *połączyć z* + ins).
+  - `object_predicative_link` — the preposition before an object predicate (TRANSFORM *przekształcić
+    w* + acc); its case is the accusative.
   - `infinitive_link` only where Polish needs a word before an infinitive; most verbs take it bare
     (*chce jeść*, *zaczyna jeść*).
+- **Stative concepts stay unpaired** even where a dictionary lists a perfective (*kochać*, *wiedzieć*,
+  *pamiętać*, *mieć*, *trzymać*): the prefixed verb means something else (*zapamiętać* = memorise).
+- A verb is **one word** (the engine appends person endings to `past_masc`); a multiword verb needs a
+  new key first.
 - **Modals:** MUST *musieć*, CAN *móc*, WILL (want) *chcieć* — no `pf_` keys.
 
 ### Adjectives — `adjectives.ts`
