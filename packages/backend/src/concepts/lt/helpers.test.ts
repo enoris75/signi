@@ -164,6 +164,7 @@ describe('adjectives (P18 §2.1)', () => {
     ['žalias', { fem: 'žalia', neuter: 'žalia', comparative: 'žalesnis', superlative: 'žaliausias' }],
     ['gražus', { fem: 'graži', neuter: 'gražu', comparative: 'gražesnis', superlative: 'gražiausias' }],
     ['saldus', { fem: 'saldi', neuter: 'saldu', comparative: 'saldesnis', superlative: 'saldžiausias' }],
+    ['tuščias', { fem: 'tuščia', neuter: 'tuščia', comparative: 'tuštesnis', superlative: 'tuščiausias' }],
   ])('%s', (base, expected) => {
     expect(adj(base)).toMatchObject({ base, ...expected });
   });

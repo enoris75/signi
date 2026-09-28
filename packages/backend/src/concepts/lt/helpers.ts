@@ -267,7 +267,7 @@ export function verb(ipf: Aspect | string, pf?: Aspect | string, extra: Forms = 
 /**
  * An adjective from its masculine nominative (P18 §2.1): the feminine, the neuter (*gera, gražu*) and
  * the synthetic degrees (*geresnis, geriausias*), by class — *-as* (*geras*), *-ias* (*žalias*), *-us*
- * (*gražus*), *-is* (*didelis*). The engine declines every case from `base`, `fem` and the class.
+ * (*gražus*), *-is* (*didelis*); a soft stem hardens before *-esnis* (*tuščias → tuštesnis*). The engine declines every case from `base`, `fem` and the class.
  * `extra` overrides a derived form (*didelis → didesnis*).
  */
 export function adj(base: string, extra: Forms = {}): Forms {
@@ -276,6 +276,6 @@ export function adj(base: string, extra: Forms = {}): Forms {
   const [, s, end] = m as unknown as [string, string, 'ias' | 'as' | 'us' | 'is'];
   const [femForm, neuter] = { ias: [`${s}ia`, `${s}ia`], as: [`${s}a`, `${s}a`], us: [`${s}i`, `${s}u`], is: [`${s}ė`, `${s}i`] }[end];
   return {
-    base, fem: femForm, neuter, comparative: `${s}esnis`, superlative: `${soften(s)}iausias`, ...extra,
+    base, fem: femForm, neuter, comparative: `${harden(s)}esnis`, superlative: `${soften(harden(s))}iausias`, ...extra,
   };
 }
