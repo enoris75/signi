@@ -50,6 +50,9 @@ dzieci*, *przyjaciel → przyjaciele, przyjaciół*) are too many to derive.
 | `animate_acc: '1'` | masculine whose accusative singular is its genitive: animals, people, and the few inanimate nouns that behave so (*grzyb → grzyba*) | ✓ | |
 | `virile: '1'` | masculine personal: the plural is virile (*chłopcy*, accusative = genitive *chłopców*), and adjectives and past verbs take the virile plural (*dobrzy chłopcy zjedli*) | | |
 
+- A masculine personal noun in *-a* (*tata, twórca, mężczyzna*) is `virile` **without** `animate_acc`:
+  its own accusative is *tatę*, not the genitive. Its adjective still agrees as an animate masculine
+  (*dobrego tatę*), so **the engine reads `animate_acc || virile`** for the adjective's accusative.
 - Written with `m`, `ma` (adds `animate_acc`), `mp` (adds `animate_acc` and `virile`), `f`, `n`:
   `CAT: ma('kot, kota, kotu, kota, kotem, kocie, kocie', 'koty, kotów, kotom, koty, kotami, kotach')`.
 - **A person or animal with a feminine** (*kot/kotka*, *nauczyciel/nauczycielka*) carries the feminine's
