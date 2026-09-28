@@ -135,6 +135,7 @@ export const LEGENDA: Forms = aN('legend');
 export const MOKYKLA: Forms = aN('mokykl');
 export const SIENA: Forms = aN('sien');
 export const STALAS: Forms = asN('stal');
+export const DAIKTAS: Forms = asN('daikt');
 export const DZIAUGSMAS: Forms = asN('džiaugsm', { mannerRelation: 'mode' }, true);
 export const FRAZE: Forms = eN('fraz');
 export const KURĖJAS: Forms = asN('kūrėj', { animate: '1', human: '1' });
@@ -241,7 +242,7 @@ export const KAZKAS_PERSON: Forms = {
 export const LT_FIXTURES: Readonly<Record<string, Forms>> = {
   CAT: KATE, DOG: SUO, MOUSE: PELE, MAN: VYRAS, WOMAN: MOTERIS, CHILD: VAIKAS, BOY: BERNIUKAS, GIRL: MERGAITE,
   TEACHER: MOKYTOJAS, FRIEND: DRAUGAS, BROTHER: BROLIS, HOUSE: NAMAS, BOOK: KNYGA, FOOD: MAISTAS, WATER: VANDUO,
-  KNIFE: PEILIS, STICK: LAZDA, LEGEND: LEGENDA, SCHOOL: MOKYKLA, WALL: SIENA, TABLE: STALAS, JOY: DZIAUGSMAS,
+  KNIFE: PEILIS, STICK: LAZDA, LEGEND: LEGENDA, SCHOOL: MOKYKLA, WALL: SIENA, TABLE: STALAS, THING: DAIKTAS, JOY: DZIAUGSMAS,
   PHRASE: FRAZE, CREATOR: KURĖJAS, MONEY: PINIGAI,
   EAT: VALGYTI, SEE: MATYTI, RUN: BEGTI, GO: EITI, GIVE: DUOTI, BE: BUTI_VERB, BECOME: TAPTI, HAVE: TURETI, LOVE: MYLETI,
   MUST: PRIVALETI, CAN: GALETI, WILL: NORETI, HELP_VERB: PADETI, WAIT: LAUKTI, THINK: GALVOTI, WASH: PRAUSTIS, LAUGH: JUOKTIS,

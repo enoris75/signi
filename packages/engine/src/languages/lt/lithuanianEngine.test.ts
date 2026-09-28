@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { NounPhrase, PhrasePlan } from '@signi/shared';
 import { translate } from '../../translator/functions/translate.js';
 import { lexicon } from '../../translator/translator.fixtures.js';
+import { lithuanianEngine } from './lithuanianEngine.js';
 import { LT_FIXTURES } from './lt.fixtures.js';
 
 // The engine end to end over the fixture lexicon (P18-E8–E10): the P18 README's opening table and a
@@ -243,7 +244,39 @@ describe('P18-E10: relatives, coordination, moods', () => {
     ['the infinitive', { ...eats(), infinitive: true } as PhrasePlan, 'valgyti pelę.'],
     ['a negative instruction: the imperfective infinitive', { ...clause(YOU, 'RUN', { vp: { negative: true } }), imperative: true, imperativeRegister: 'instruction' } as PhrasePlan,
       'nebėgti.'],
+    ['a clause subject: the neuter predicate, kad + the conditional (verify)', {
+      subject: np('THING'), contentSubject: { subject: CAT, verbPhrase: { verb: 'RUN' } }, verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: np('GOOD') } } } as PhrasePlan, 'yra gera, kad katė bėgtų.'],
+    ['never in the past keeps the simple past', eats({ tense: 'past', modifier: 'NEVER' }), 'katė niekada nevalgė pelės.'],
   ])('%s', (_label, plan, expected) => {
     expect(lt(plan)).toBe(expected);
+  });
+});
+
+describe('P18: the menu words', () => {
+  const lookup = (id: string) => ({ conceptId: id, forms: { ...LT_FIXTURES[id]! } });
+  test('degree: synthetic where stored, the adverb otherwise', () => {
+    expect(lithuanianEngine.renderDegree!(lookup('BIG'), 'more')).toBe('didesnis');
+    expect(lithuanianEngine.renderDegree!(lookup('BIG'), 'most')).toBe('didžiausias');
+    expect(lithuanianEngine.renderDegree!(lookup('SEMANTIC'), 'more')).toBe('labiau');
+  });
+
+  test('specifier: the bare locative has no word; dėka is cited after its noun', () => {
+    expect(lithuanianEngine.renderSpecifier!(lookup('HOUSE'), { kind: 'path', value: 'in' })).toBe('');
+    expect(lithuanianEngine.renderSpecifier!(lookup('HOUSE'), { kind: 'path', value: 'under' })).toBe('po');
+    expect(lithuanianEngine.renderSpecifier!(lookup('HOUSE'), { kind: 'sentiment', value: 'positive' })).toBe('〜 dėka');
+  });
+
+  test('determiner: the nominative agreeing with the noun, the quantity word', () => {
+    expect(lithuanianEngine.renderDeterminer!({ conceptId: 'CAT', forms: { ...LT_FIXTURES['CAT']!, definiteness: 'this' } })).toBe('ši');
+    expect(lithuanianEngine.renderDeterminer!({ conceptId: 'CAT', forms: { ...LT_FIXTURES['CAT']!, definiteness: 'many', number: 'plural' } })).toBe('daug');
+    expect(lithuanianEngine.renderDeterminer!({ conceptId: 'CAT', forms: { ...LT_FIXTURES['CAT']!, definiteness: 'definite' } })).toBe('');
+  });
+
+  test('possessive, subordinator, conjunction', () => {
+    expect(lithuanianEngine.renderPossessive!(lookup('CAT'), { kind: 'pronominal', person: '1', number: 'plural' })).toBe('mūsų');
+    expect(lithuanianEngine.renderSubordinator!('that')).toBe('kad');
+    expect(lithuanianEngine.renderSubordinator!('because')).toBe('nes');
+    expect(lithuanianEngine.renderConjunction!('but')).toBe('bet');
   });
 });
