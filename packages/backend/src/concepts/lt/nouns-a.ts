@@ -183,9 +183,9 @@ export const LT_NOUNS_A: LanguageColumn = {
   // *žmogus* is irregular: its plural is *žmonės*.
   PERSON: noun('masc', 'žmogus, žmogaus, žmogui, žmogų, žmogumi, žmoguje, žmogau', 'žmonės, žmonių, žmonėms, žmones, žmonėmis, žmonėse'),
   // The one speaking (linguistics' *kalbėtojas*); *oratorius* is an orator.
-  SPEAKER: as('kalbėtoj', { extra: fem(a('kalbėtoj')) }), // (verify) loc sg *kalbėtojyje*
+  SPEAKER: as('kalbėtoj', { extra: fem(a('kalbėtoj')) }),
   COMPANION: as('palydov', { extra: fem(e('palydov')) }), // (verify) vs *bendrakeleivis*, *bendražygis*
-  RECIPIENT: as('gavėj', { extra: fem(a('gavėj')) }), // (verify) loc sg *gavėjyje*
+  RECIPIENT: as('gavėj', { extra: fem(a('gavėj')) }),
   // A young male child, as *mergaitė* is a young female one; *vaikinas* is the young man.
   BOY: as('berniuk'),
   GIRL: e('mergait'), // (verify) vs *mergina*, the young woman

@@ -63,7 +63,6 @@ export const LT_NOUNS_B: LanguageColumn = {
   // (verify) the phrase, as Polish's *młoda kobieta*; *mergina* is GIRLFRIEND's, *jaunuolė* is rare.
   YOUNG_WOMAN: zip(a('jaun'), noun('fem', 'moteris, moters, moteriai, moterį, moterimi, moteryje, moterie', 'moterys, moterų, moterims, moteris, moterimis, moteryse')),
   BUILDER: as('statybinink', { extra: fem(e('statybinink')) }),
-  // (verify) loc *kūrėjyje*, as the helper gives every *-jas* noun (*vėjyje*); some grammars give *-juje*.
   CREATOR: as('kūrėj', { extra: fem(a('kūrėj')) }),
   // A person's name takes the vocative *-ai* (style-lt.md § Nouns).
   PETER: as('Petr', { sgOnly: true, extra: { voc_sg: 'Petrai' } }),

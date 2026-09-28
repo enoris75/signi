@@ -40,6 +40,19 @@ describe('the noun classes (P18 D3)', () => {
     expect(e('dėd', undefined, 'masc')['gender']).toBe('masc');
   });
 
+  test('the agent nouns in -ojas / -ėjas take the locative -juje; vėjas keeps -yje', () => {
+    expect([as('mokytoj')['loc_sg'], as('kūrėj')['loc_sg'], as('vėj')['loc_sg']]).toEqual(['mokytojuje', 'kūrėjuje', 'vėjyje']);
+  });
+
+  test('an io-stem in j takes no i before the back vowel', () => {
+    expect(row(is('atvej'), SG)).toBe('atvejis, atvejo, atvejui, atvejį, atveju, atvejyje, atveji');
+    expect(row(is('atvej'), PL)).toBe('atvejai, atvejų, atvejams, atvejus, atvejais, atvejuose');
+  });
+
+  test('a masculine i-stem takes the dative -iui', () => {
+    expect(i('dant', { genPl: 'dantų' }, 'masc')).toMatchObject({ dat_sg: 'dančiui', gen_sg: 'danties', gen_pl: 'dantų', gender: 'masc' });
+  });
+
   test('an i-stem that takes -ų in the genitive plural says so', () => {
     expect(i('nakt', { genPl: 'naktų' })['gen_pl']).toBe('naktų');
   });

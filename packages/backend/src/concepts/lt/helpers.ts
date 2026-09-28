@@ -67,20 +67,25 @@ interface Decl { sg: string; pl: string }
 
 /**
  * Masculine *-as* (*namas*), with its soft variants: *-ias* (*kelias, svečias*: pass the stem with its
- * *i*, `keli`, `sveči`) and *-jas* (*vėjas*: `vėj`).
+ * *i*, `keli`, `sveči`) and *-jas* (*vėjas*: `vėj`). The agent nouns in *-ojas / -ėjas* take the
+ * locative *-juje* (*mokytojuje, kūrėjuje*); the one-syllable *vėjas* keeps *vėjyje*.
  */
 function asDecl(s: string): Decl {
   if (s.endsWith('i')) {
     const y = harden(s.slice(0, -1));
     return { sg: `${s}as, ${s}o, ${s}ui, ${s}ą, ${s}u, ${y}yje, ${y}y`, pl: `${s}ai, ${s}ų, ${s}ams, ${s}us, ${s}ais, ${s}uose` };
   }
-  const [loc, voc] = s.endsWith('j') ? [`${s}yje`, `${s}au`] : [`${s}e`, `${s}e`];
+  const agent = /[oė]j$/.test(s) && (s.match(/[aeiouyąęėįųū]+/g) ?? []).length >= 2;
+  const [loc, voc] = agent ? [`${s}uje`, `${s}au`] : s.endsWith('j') ? [`${s}yje`, `${s}au`] : [`${s}e`, `${s}e`];
   return { sg: `${s}as, ${s}o, ${s}ui, ${s}ą, ${s}u, ${loc}, ${voc}`, pl: `${s}ai, ${s}ų, ${s}ams, ${s}us, ${s}ais, ${s}uose` };
 }
 
-/** Masculine *-is* (*brolis, medis → medžio*) and *-ys* (*arklys*): the *io*-stems. */
+/**
+ * Masculine *-is* (*brolis, medis → medžio*) and *-ys* (*arklys*): the *io*-stems. A stem in *j* takes
+ * no *i* before the back vowel (*atvejis → atvejo, atvejai*).
+ */
 function ioDecl(s: string, nom: 'is' | 'ys'): Decl {
-  const g = `${soften(s)}i`;
+  const g = s.endsWith('j') ? s : `${soften(s)}i`;
   return {
     sg: `${s}${nom}, ${g}o, ${g}ui, ${s}į, ${g}u, ${s}yje, ${s}${nom === 'is' ? 'i' : 'y'}`,
     pl: `${g}ai, ${g}ų, ${g}ams, ${g}us, ${g}ais, ${g}uose`,
@@ -106,10 +111,11 @@ function eDecl(s: string): Decl {
 
 /**
  * The *i*-stems, feminine by default (*pilis, širdis → širdžių*). `genPl` overrides the genitive
- * plural for the nouns that take *-ų* (*naktų, ausų, dantų*).
+ * plural for the nouns that take *-ų* (*naktų, ausų, dantų*). A masculine one takes the dative *-iui*
+ * (*dantis → dančiui*).
  */
-function iDecl(s: string, genPl = `${soften(s)}ių`): Decl {
-  return { sg: `${s}is, ${s}ies, ${soften(s)}iai, ${s}į, ${s}imi, ${s}yje, ${s}ie`, pl: `${s}ys, ${genPl}, ${s}ims, ${s}is, ${s}imis, ${s}yse` };
+function iDecl(s: string, genPl = `${soften(s)}ių`, gender: Gender = 'fem'): Decl {
+  return { sg: `${s}is, ${s}ies, ${soften(s)}${gender === 'masc' ? 'iui' : 'iai'}, ${s}į, ${s}imi, ${s}yje, ${s}ie`, pl: `${s}ys, ${genPl}, ${s}ims, ${s}is, ${s}imis, ${s}yse` };
 }
 
 /** Options every class helper takes. */
@@ -137,7 +143,7 @@ export const a = (stem: string, o?: NounOptions, gender: Gender = 'fem') => entr
 /** Feminine *-ė*: `e('kat')` → *katė, katės, …*. A masculine *-ė* (*dėdė*) passes `gender`. */
 export const e = (stem: string, o?: NounOptions, gender: Gender = 'fem') => entry(gender, eDecl(stem), o);
 /** Feminine *i*-stem: `i('pil')` → *pilis, pilies, …*; `genPl` for the *-ų* nouns. A masculine one (*dantis*) passes `gender`. */
-export const i = (stem: string, o?: NounOptions & { genPl?: string }, gender: Gender = 'fem') => entry(gender, iDecl(stem, o?.genPl), o);
+export const i = (stem: string, o?: NounOptions & { genPl?: string }, gender: Gender = 'fem') => entry(gender, iDecl(stem, o?.genPl, gender), o);
 
 /**
  * A person or animal noun's feminine, under `fem_` keys: `as('katin', { extra: fem(e('kat')) })` →
