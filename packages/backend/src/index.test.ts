@@ -679,7 +679,10 @@ describe('known bugs: translating a plan that names an unseeded concept', () => 
       if (res.status !== 200) rejected.push(`${res.status} ${JSON.stringify(plan)}`);
     }
     expect(rejected).toEqual([]);
-  });
+    // A round trip per definition and UI string, each rendered in every language: under a second here, past the
+    // 5s default on a loaded CI runner — and a timed-out test's loop keeps posting, eating the
+    // next describe's mockImplementationOnce.
+  }, 30_000);
 });
 
 describe('known bugs: a request field of the wrong JSON type', () => {
