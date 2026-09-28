@@ -1,3 +1,5 @@
 import type { LanguageColumn } from '../types.js';
 
-export const LT_INTERJECTIONS: LanguageColumn = {};
+export const LT_INTERJECTIONS: LanguageColumn = {
+  HEY: { base: 'ei' },
+};
