@@ -8,7 +8,8 @@ panel and, once complete, as an interface language.
 - **Slavic groundwork (§0):** shared with [P06 Russian](../P06-russian/README.md) and
   [P07 Ukrainian](../P07-ukrainian/README.md) — aspect pairs in the lexicon, case paradigms, one
   aspect-selection table, quantifier government, reflexive possessives. Whichever of the three ships
-  first carries it.
+  first carries it. [P18 Lithuanian](../P18-lithuanian/README.md) uses the case and aspect keys,
+  `subjectAntecedent` and the declined relatives too, so it may be the one that ships it.
 - **Engine:** a new folder `packages/engine/src/languages/pl/`.
 
 **Status:** **E1–E10 shipped, 2026-09-28** — Polish renders as a `preview` row: its own column (all
