@@ -12,6 +12,7 @@ import type {
   SavedPhrasesResponse,
   SerializedWorkspace,
   TranslateResponse,
+  Translation,
   UiStringDef,
 } from '@signi/shared';
 import { concepts } from './concepts/index.js';
@@ -315,6 +316,24 @@ describe('POST /api/translate', () => {
     expect(translations).toEqual(translate(plan, lookupLexicalEntry, { phrase: 'directObject' }));
     expect(translations.find((t) => t.language === 'de')?.text).toBe('ihr Buch');
     expect(translations.find((t) => t.language === 'ja')?.text).toBe('自分の本');
+  });
+
+  // P17-E2: each role's place in the text, for the Phrase view's rows — only where asked.
+  test('says where each role stands, in the languages asked', async () => {
+    const plan: PhrasePlan = { subject: { concept: 'CAT', number: 'plural' }, verbPhrase: { verb: 'EAT', tense: 'past' } };
+    const res = await post('/api/translate', { plan, withSpans: ['en'] });
+    expect(res.status).toBe(200);
+    const { translations } = (await res.json()) as { translations: Translation[] };
+    expect(translations).toEqual(translate(plan, lookupLexicalEntry, { withSpans: ['en'] }));
+    const en = translations.find((t) => t.language === 'en')!;
+    expect(en.spans?.map((s) => en.text.slice(s.start, s.end))).toEqual(['cats', 'ate']);
+    expect(translations.filter((t) => t.spans).map((t) => t.language)).toEqual(['en']);
+  });
+
+  test('rejects spans asked for a language it does not have', async () => {
+    const res = await post('/api/translate', { plan: PLAN, withSpans: ['xx'] });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: 'Unknown withSpans: ["xx"]' });
   });
 
   test('rejects a phrase it does not render', async () => {

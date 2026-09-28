@@ -10,9 +10,10 @@ import { SavedPhrasesToolbar, isEmpty } from "./components/SavedPhrasesToolbar.t
 import { AppMenu } from "./components/AppMenu.tsx";
 import { MobileTabBar, TAB_BAR_HEIGHT, type MobileView } from "./components/MobileTabBar.tsx";
 import { ResultStrip } from "./components/ResultStrip.tsx";
-import { TOUCH_ONLY_QUERY, isTouchOnly, useCompactLayout } from "./hooks/useCompactLayout.ts";
-import { QuickBarProvider } from "./components/PhraseBuilder/quickBar.tsx";
+import { TOUCH_ONLY_QUERY, isTouchOnly, useCompactLayout, useStackedLayout } from "./hooks/useCompactLayout.ts";
+import { QUICK_BAR_HEIGHT, QuickBarProvider } from "./components/PhraseBuilder/quickBar.tsx";
 import { useHeaderOffset } from "./hooks/useHeaderOffset.ts";
+import { useKeyboardInset } from "./hooks/useKeyboardInset.ts";
 import { useTouchSnap } from "./hooks/useTouchSnap.ts";
 import UndoIcon from "@mui/icons-material/Undo";
 import { LanguageSelector } from "./components/LanguageSelector.tsx";
@@ -91,6 +92,12 @@ export default function App() {
   useTouchSnap();
   // …and a tapped box raises a bar of its most-used controls, named and finger-sized.
   const touchOnly = useMediaQuery(TOUCH_ONLY_QUERY, { noSsr: true });
+  // A tablet (P17-E4): one column, the canvas the whole width and the translations under it, the
+  // console still docked and no tab bar.
+  const stacked = useStackedLayout();
+  const oneColumn = compact || stacked;
+  // Whether a tapped box.s bar is up, which the help button steps above.
+  const [quickBarUp, setQuickBarUp] = useState(false);
   // The Phrase view is the phone's default: it exists because a finger can't work the canvas's
   // rings, so a narrowed *desktop* window (still driven by a mouse) starts on the canvas instead,
   // which the compact layout already lays out in one column.
@@ -105,6 +112,10 @@ export default function App() {
     // Only on the way in: afterwards the console tab is the user's to open.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [compact]);
+  // The soft keyboard (P17-E1): a phone's browser lays it over the page, so the console tab ends
+  // where the keyboard starts rather than at the tab bar, which is under the keyboard anyway.
+  const keyboardInset = useKeyboardInset(compact);
+  const keyboardUp = compact && keyboardInset > 0;
   function showView(view: MobileView) {
     if (view === "console") {
       phraseConsole.setOpen(true);
@@ -305,7 +316,7 @@ export default function App() {
           sx={compact ? { pb: `${TAB_BAR_HEIGHT + 16}px`, position: "relative" } : undefined}
         >
           {compact && (mobileView === "phrase" || mobileView === "canvas") && (
-            <ResultStrip sentences={results} onOpen={() => showView("translations")} />
+            <ResultStrip sentences={results} preview={previewingTranslations} onOpen={() => showView("translations")} />
           )}
           <Box
             ref={splitContainerRef}
@@ -324,16 +335,22 @@ export default function App() {
             <Box
               data-kb-region="periods"
               sx={{
-                width: compact ? "100%" : `${leftWidthPct}%`,
+                width: oneColumn ? "100%" : `${leftWidthPct}%`,
                 flexShrink: 0,
                 minWidth: 0,
-                pr: compact ? 0 : 1.5,
+                pr: oneColumn ? 0 : 1.5,
               }}
             >
               {/* The canvas shows the console's preview while a line is typed, and its edits go
                   into that line — clicking and typing are one (see usePhraseConsole). */}
               <ConsoleMarksProvider marks={phraseConsole.marks}>
-                <QuickBarProvider enabled={compact && touchOnly && mobileView === "canvas"} bottom={TAB_BAR_HEIGHT}>
+                {/* Keyed to the finger, not the width (P17-E4): on a phone it sits on the tab bar, on
+                    a tablet on the docked console or the foot of the page. */}
+                <QuickBarProvider
+                  enabled={touchOnly && (compact ? mobileView === "canvas" : true)}
+                  bottom={compact ? TAB_BAR_HEIGHT : phraseConsole.open ? phraseConsole.height : 0}
+                  onShown={setQuickBarUp}
+                >
                   <PhraseWorkspace
                     containers={shown.containers}
                     links={shown.links}
@@ -350,7 +367,7 @@ export default function App() {
             </Box>
 
             {/* Horizontal resize handle */}
-            {!compact && <Box
+            {!oneColumn && <Box
               onPointerDown={(e) => {
                 e.preventDefault();
                 const startX = e.clientX;
@@ -391,7 +408,7 @@ export default function App() {
             />}
 
             {/* Right: empty space for balance */}
-            {!compact && <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }} />}
+            {!oneColumn && <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }} />}
           </Box>
 
           {/* Translations: one card, each language listing every root sentence in order */}
@@ -416,14 +433,40 @@ export default function App() {
         {compact ? (
           // The console tab fills what the header and the tab bar leave.
           phraseConsole.open && (
-            <Box sx={{ position: "fixed", left: 0, right: 0, top: headerOffset, bottom: TAB_BAR_HEIGHT }}>
-              <PhraseConsole model={phraseConsole} wordsPanelOpen={wordsPanelOpen} docked={false} />
+            <Box
+              data-testid="console-tab"
+              sx={{
+                position: "fixed",
+                left: 0,
+                right: 0,
+                top: headerOffset,
+                bottom: keyboardUp ? keyboardInset : TAB_BAR_HEIGHT,
+                display: "flex",
+                flexDirection: "column",
+                bgcolor: "background.default",
+              }}
+            >
+              {/* What the line will build, without leaving the tab (P17-E3): the phrase in the UI
+                  language, the line's preview while one is typed. A tap opens the translations. */}
+              <Box sx={{ flexShrink: 0, px: 2, pt: 1 }}>
+                <ResultStrip
+                  sentences={results}
+                  preview={previewingTranslations}
+                  onOpen={() => showView("translations")}
+                  sx={{ mb: 1 }}
+                />
+              </Box>
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                <PhraseConsole model={phraseConsole} wordsPanelOpen={wordsPanelOpen} docked={false} />
+              </Box>
             </Box>
           )
         ) : (
           <PhraseConsole model={phraseConsole} wordsPanelOpen={wordsPanelOpen} />
         )}
-        {compact && <MobileTabBar view={mobileView} onChange={showView} />}
+        {/* Out of the way while the soft keyboard is up: it is behind the keyboard, or on Android
+            would ride up on it. */}
+        {compact && !keyboardUp && <MobileTabBar view={mobileView} onChange={showView} />}
         {/* What scrolls a control into view — a tap on a half-hidden one, the cursor, focus — stops
             clear of the sticky header and the tab bar rather than under them. */}
         {compact && (
@@ -446,7 +489,7 @@ export default function App() {
         {!compact && (
           <HelpButton
             onClick={() => setHelpOpen(true)}
-            bottom={phraseConsole.open ? phraseConsole.height + 16 : undefined}
+            bottom={(phraseConsole.open ? phraseConsole.height : 0) + 16 + (quickBarUp ? QUICK_BAR_HEIGHT : 0)}
           />
         )}
 

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import {
   TAP_OWNER_ATTR,
   TOUCH_SNAP_ATTR,
@@ -41,14 +41,14 @@ describe('installTouchSnap', () => {
   let uninstall: () => void;
   let control: HTMLButtonElement;
   let paper: HTMLDivElement;
-  let pressed: ReturnType<typeof vi.fn>;
+  let pressed: Mock<(event: MouseEvent) => void>;
 
   beforeEach(() => {
     document.body.innerHTML = '';
     paper = document.createElement('div');
     control = document.createElement('button');
     control.setAttribute(TOUCH_SNAP_ATTR, '');
-    pressed = vi.fn();
+    pressed = vi.fn<(event: MouseEvent) => void>();
     control.addEventListener('click', pressed);
     document.body.append(paper, control);
     control.getBoundingClientRect = () => ({ ...rect(100, 100), right: 120, bottom: 120, x: 100, y: 100, toJSON: () => ({}) });

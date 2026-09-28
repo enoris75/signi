@@ -23,7 +23,7 @@ import type {
   SavedPhraseSummary,
   SavedPhrasesResponse,
 } from '@signi/shared';
-import { SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from '@signi/shared';
+import { LANGUAGE_CODES, SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from '@signi/shared';
 
 const app = express();
 app.use(cors());
@@ -64,8 +64,15 @@ app.post('/api/translate', (req, res) => {
     res.status(400).json({ error: `Unknown phrase: ${String(body.phrase)}` });
     return;
   }
+  // Each role's place in the text (P17-E2), for every language or the ones named.
+  const withSpans = body.withSpans;
+  if (withSpans !== undefined && typeof withSpans !== 'boolean'
+    && !(Array.isArray(withSpans) && withSpans.every((l) => (LANGUAGE_CODES as string[]).includes(l)))) {
+    res.status(400).json({ error: `Unknown withSpans: ${JSON.stringify(withSpans)}` });
+    return;
+  }
   const { lookup, unknown } = notingLookup();
-  const translations = translate(body.plan, lookup, body.phrase ? { phrase: body.phrase } : {});
+  const translations = translate(body.plan, lookup, body.phrase ? { phrase: body.phrase } : withSpans ? { withSpans } : {});
   if (unknown.size > 0) {
     const ids = [...unknown];
     res.status(400).json({ error: `Unknown concept${ids.length > 1 ? 's' : ''}: ${ids.join(', ')}` });

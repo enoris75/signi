@@ -3,11 +3,15 @@ import { Box, ButtonBase, Drawer, IconButton, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
+import type { PhrasePlan } from "@signi/shared";
 import type { NounKey, PhraseSelection, SlotConfig, SlotKey } from "./interfaces.ts";
 import type { SatelliteIcon } from "./Boxes.tsx";
 import type { PerimeterEntry } from "./satellites/satellites.types.tsx";
 import { MUI_COLOR_HEX } from "./slots.ts";
 import { ConceptWord } from "../../i18n/ConceptWord.tsx";
+import { conceptWord } from "../../i18n/conceptWord.ts";
+import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
+import { useRoleWords } from "../../i18n/useRoleWords.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { PickerSheetProvider } from "./hooks/usePickerSheet.tsx";
 import { RoleSheet } from "./RoleSheet.tsx";
@@ -19,10 +23,15 @@ import { RING_CONTROL, adjectiveHead, isAdjectiveSlot, roleControlsOf } from "./
  * controls — the very icons the canvas draws round it, each running the handler its click runs — so
  * nothing here is phone-only grammar. The canvas stays mounted behind it (stowed), and a control
  * whose work is drawn on the canvas — a link to another period, a ring of its own — hands over to it.
+ *
+ * A row's word is the one the period says, in the UI language — "cats", "ate" — with the lemma under
+ * it where the two differ (P17-E2); the chips stay, as they are the controls' state.
  */
 
 export interface RoleListProps {
   selection: PhraseSelection;
+  /** The period's plan, whose words the rows show as the sentence says them (see useRoleWords). */
+  plan?: Partial<PhrasePlan>;
   /** The boxes the canvas draws, in reading order. */
   slots: SlotConfig[];
   activeSlot: SlotKey | null;
@@ -52,6 +61,7 @@ export interface RoleListProps {
 
 export function RoleList({
   selection,
+  plan,
   slots,
   activeSlot,
   controlsByParent,
@@ -64,6 +74,8 @@ export function RoleList({
   onShowCanvas,
 }: RoleListProps) {
   const t = useUiString();
+  const { uiLanguage } = useUiLanguage();
+  const said = useRoleWords(plan, selection);
   const [sheetFor, setSheetFor] = useState<SlotKey | null>(null);
   const [pickerFor, setPickerFor] = useState<{ slot: SlotKey; editing: boolean } | null>(null);
   // The word the picker's box held when it opened: once that changes, the pick is made.
@@ -135,6 +147,9 @@ export function RoleList({
       {rows.map((slot) => {
         const concept = selection[slot.key];
         const color = MUI_COLOR_HEX[slot.color];
+        // The word as the sentence says it; the lemma goes under it only where the two differ.
+        const surface = concept ? said(slot.key) : undefined;
+        const lemma = concept && surface && surface !== conceptWord(concept, uiLanguage, t) ? concept : undefined;
         // The adjective satellites (whose control opens their own box) carry the current word as
         // their own valueLabel too — already shown as its own chip, so it is left out here.
         const values = (controlsByParent[slot.key] ?? []).filter(
@@ -173,13 +188,18 @@ export function RoleList({
                     {selection[adj.key] ? <ConceptWord concept={selection[adj.key]!} /> : `${label(adj)}…`}
                   </Chip>
                 ))}
-                <Box component="span" sx={{ fontFamily: '"Lora", Georgia, serif', fontStyle: "italic", fontSize: "1.15rem", color: concept ? "text.primary" : "text.secondary" }}>
-                  {concept ? <ConceptWord concept={concept} /> : t("slot.choose")}
+                <Box component="span" data-testid={`role-word-${slot.key}`} sx={{ fontFamily: '"Lora", Georgia, serif', fontStyle: "italic", fontSize: "1.15rem", color: concept ? "text.primary" : "text.secondary" }}>
+                  {surface ?? (concept ? <ConceptWord concept={concept} /> : t("slot.choose"))}
                 </Box>
                 {values.map((v) => (
                   <Chip key={v.key} color={color}>{v.valueLabel}</Chip>
                 ))}
               </Box>
+              {lemma && (
+                <Box component="span" data-testid={`role-lemma-${slot.key}`} sx={{ fontFamily: '"Lora", Georgia, serif', fontStyle: "italic", fontSize: "0.8rem", color: "text.secondary" }}>
+                  <ConceptWord concept={lemma} />
+                </Box>
+              )}
             </Box>
             <ChevronRightIcon sx={{ color: "text.secondary", flexShrink: 0 }} />
           </ButtonBase>

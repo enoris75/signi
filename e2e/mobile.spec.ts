@@ -174,6 +174,23 @@ test.describe('the Phrase view', () => {
     await expect(page.getByTestId('result-strip')).toHaveText('the cats eat the food.');
   });
 
+  // P17-E2: a row reads its word as the sentence says it, the lemma under it.
+  test('a row shows its word as the sentence says it: "cats", not "cat" and a chip', async ({ app, page }) => {
+    void app;
+    await fillRole(page, 'subject', 'cat', 'CAT');
+    await fillRole(page, 'verb', 'eat', 'EAT');
+    await fillRole(page, 'directObject', 'food', 'FOOD');
+    await expect(page.getByTestId('role-word-subject')).toHaveText('cat');
+    await expect(page.getByTestId('role-lemma-subject')).toHaveCount(0);
+
+    await page.getByTestId('role-subject').tap();
+    await page.getByTestId('role-control-subjectNumber').tap();
+    await expect(page.getByTestId('result-strip')).toHaveText('the cats eat the food.');
+    await expect(page.getByTestId('role-word-subject')).toHaveText('cats');
+    await expect(page.getByTestId('role-lemma-subject')).toHaveText('cat');
+    await expect(page.getByTestId('role-word-verb')).toHaveText('eat');
+  });
+
   test('a value-cycling control (tense) runs the same command its canvas key does', async ({ app, page }) => {
     void app;
     await fillRole(page, 'subject', 'cat', 'CAT');
@@ -439,6 +456,68 @@ test.describe('the console command bar (P17 phase 4)', () => {
     await page.getByTestId('command-bar-tab').tap();
     await expect(prompt(page)).toHaveValue('/subj (  )');
     await expect(prompt(page)).toBeFocused();
+  });
+
+  test('rides the soft keyboard: the console tab ends where the keyboard starts, and the tab bar steps aside (P17-E1)', async ({ page }) => {
+    // Playwright has no soft keyboard, so the visual viewport is stood in for, as a phone's browser
+    // reports it with a keyboard laid over the page: shorter, and panned down to the field.
+    await page.addInitScript(() => {
+      const vv = new EventTarget() as EventTarget & Record<string, number>;
+      Object.assign(vv, { height: window.innerHeight, width: window.innerWidth, offsetTop: 0, offsetLeft: 0, pageTop: 0, pageLeft: 0, scale: 1 });
+      Object.defineProperty(window, 'visualViewport', { configurable: true, get: () => vv });
+      (window as unknown as { setViewport: (h: number, top: number) => void }).setViewport = (h, top) => {
+        vv['height'] = h;
+        vv['offsetTop'] = top;
+        vv.dispatchEvent(new Event('resize'));
+      };
+    });
+    await page.goto('/');
+    await page.getByTestId('tab-console').tap();
+    await prompt(page).tap();
+    const setViewport = (h: number, top: number) =>
+      page.evaluate(([h, top]) => (window as unknown as { setViewport: (h: number, top: number) => void }).setViewport(h, top), [h, top]);
+    const tabBottom = async () => {
+      const box = (await page.getByTestId('console-tab').boundingBox())!;
+      return box.y + box.height;
+    };
+    // Closed: the console tab ends on the tab bar (64 px).
+    expect(await tabBottom()).toBeCloseTo(844 - 64, 0);
+
+    // Open: 336 px of keyboard, the page panned 100 px to the field.
+    await setViewport(844 - 336 - 100, 100);
+    await expect(page.getByTestId('tab-bar')).toHaveCount(0);
+    await expect.poll(tabBottom).toBeCloseTo(844 - 336, 0);
+    // The command bar is the console's last row, so it sits on the keyboard.
+    const bar = (await page.getByTestId('console-command-bar').boundingBox())!;
+    expect(bar.y + bar.height).toBeLessThanOrEqual(844 - 336 + 1);
+    await expect(prompt(page)).toBeFocused();
+
+    // Closed again: the tab bar is back, and the console tab ends on it.
+    await setViewport(844, 0);
+    await expect(page.getByTestId('tab-bar')).toBeVisible();
+    await expect.poll(tabBottom).toBeCloseTo(844 - 64, 0);
+  });
+
+  test('shows what the line will build above it, marked as a preview until ↵ (P17-E3)', async ({ app, page }) => {
+    void app;
+    await page.getByTestId('tab-console').tap();
+    await prompt(page).tap();
+    await page.keyboard.type('/subj cat');
+    const strip = page.getByTestId('result-strip');
+    await expect(strip).toContainText('the cat.');
+    await expect(strip.getByTestId('result-strip-preview')).toBeVisible();
+    // Nothing is committed yet: the line is still there, unrun.
+    await expect(prompt(page)).toHaveValue(/^\/subj \(? ?cat/);
+
+    if (await page.getByTestId('console-list').isVisible()) await page.keyboard.press('Escape');
+    await page.keyboard.press('Enter');
+    await expect(prompt(page)).toHaveValue('');
+    await expect(strip).toHaveText('the cat.');
+    await expect(strip.getByTestId('result-strip-preview')).toHaveCount(0);
+
+    // A tap opens the translations, as the strip above the canvas does.
+    await strip.tap();
+    await expect(page.getByTestId('tab-translations')).toHaveAttribute('aria-current', 'page');
   });
 
   test('run commits the line, as ↵ does', async ({ app, page }) => {

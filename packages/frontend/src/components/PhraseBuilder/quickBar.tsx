@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Box } from "@mui/material";
 
 /**
@@ -30,12 +30,15 @@ export const QUICK_BAR_HEIGHT = 64;
 export function QuickBarProvider({
   enabled,
   bottom,
+  onShown,
   children,
 }: {
-  /** A phone with a finger, on the canvas view. */
+  /** A finger: a phone on its canvas view, or a tablet (P17-E4). */
   enabled: boolean;
-  /** What the bar sits on: the tab bar's height. */
+  /** What the bar sits on: the tab bar on a phone; the docked console, or the foot of the page, on a tablet. */
   bottom: number;
+  /** Told whether a bar is up, for what else sits at the foot of the page (the help button). */
+  onShown?: (shown: boolean) => void;
   children: ReactNode;
 }) {
   const [host, setHost] = useState<HTMLElement | null>(null);
@@ -46,11 +49,14 @@ export function QuickBarProvider({
     () => ({ host: enabled ? host : null, owner, claim, release }),
     [enabled, host, owner, claim, release],
   );
+  const shown = enabled && owner !== null;
+  // A plain boolean, reported only when it flips: the parent re-rendering must not report again.
+  useEffect(() => onShown?.(shown), [onShown, shown]);
   return (
     <QuickBarContext.Provider value={value}>
       {children}
       {/* Room under the page's last line, which the bar would otherwise sit over. */}
-      {enabled && owner !== null && <Box aria-hidden sx={{ height: QUICK_BAR_HEIGHT }} />}
+      {shown && <Box aria-hidden sx={{ height: QUICK_BAR_HEIGHT }} />}
       {enabled && (
         <Box
           ref={setHost}
