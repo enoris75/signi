@@ -62,6 +62,9 @@ export const APPROXIMATOR_WORDS: Readonly<Record<string, { about: (fem: boolean)
   // Polish (P05): *około* (about), which governs the genitive the engine puts its numeral in (*około
   // pięciu kotów*), and *prawie* (almost), verify.
   pl: { about: () => 'około ', almost: 'prawie ' },
+  // Lithuanian (P18): *apie* (about), which governs the accusative its engine puts the numeral in
+  // (*apie penkias kates*), and *beveik* (almost), verify.
+  lt: { about: () => 'apie ', almost: 'beveik ' },
 };
 
 // The determiners `almost` modifies (P09-E38 D1) live in shared (the builder gates its approximator
@@ -88,6 +91,8 @@ export const MASS_DETERMINER: Readonly<Record<string, string>> = { several: 'som
 // Catalan is left out (P03, verify): "la majoria dels gats corren", the verb agreeing with the plural
 // noun, is the usage the IEC grammar describes as the usual one.
 // Polish (P05 §0.4): *większość kotów je*, the verb agreeing with *większość* (verify).
+// Not Lithuanian (P18): the verb's 3rd person has one form for both numbers, and a predicate agrees
+// with the genitive plural (*dauguma žmonių yra laimingi*, verify).
 export const MOST_AGREES_SINGULAR: ReadonlySet<string> = new Set(['it', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'pl']);
 
 /**
@@ -110,7 +115,8 @@ export { STANDARD_DEGREES, SUPERLATIVE_DEGREES } from '@signi/shared';
 // Romansh: "nagina frasa" (P04 §2.1, verify).
 // Catalan: "cap frase" (P03 §2.1, verify).
 // Polish: *żaden kot* (P05 §0.4; *żadne koty* exists but is marked, verify).
-export const NO_TAKES_SINGULAR: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
+// Lithuanian: *jokia katė* (P18 §2.1, verify).
+export const NO_TAKES_SINGULAR: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl', 'lt']);
 
 /** The agreement keys a group carries — see ResolvedNounElement.agreement. Nothing renderable. */
 export const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
@@ -127,7 +133,8 @@ export const OR_RESOLVES_MIXED_PERSONS: ReadonlySet<string> = new Set(['fr']);
  * "otro gato" and Portuguese "outro gato", never "*un otro gato". Their indefinite phrase with OTHER
  * resolves bare. (English fuses the two into "another" instead, see en/nounPhrase.)
  */
-// Not Catalan (P03): "un altre gat" keeps its article. Not Polish (P05): it has no articles to replace.
+// Not Catalan (P03): "un altre gat" keeps its article. Not Polish (P05) nor Lithuanian (P18): they have
+// no articles to replace.
 export const OTHER_REPLACES_INDEFINITE: ReadonlySet<string> = new Set(['es', 'pt']);
 
 /**
@@ -147,6 +154,10 @@ export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
   // Catalan's present subjunctive, stored per verb: "és correcte que s'actuï" (P03 §2.4, verify).
   ca: 'presentSubjunctive',
   // Not Polish (P05): it has no subjunctive; a content clause is *że* + the indicative.
+  // Lithuanian (P18 §2.4): no subjunctive either, but a verb of wanting takes *kad* + the conditional
+  // (*nori, kad katė valgytų*), which its engine says for this mood (verify: a subject clause falls back
+  // on it too, *svarbu, kad katė valgytų*, where a factive *gerai, kad* would take the indicative).
+  lt: 'presentSubjunctive',
 };
 
 /**
@@ -160,6 +171,7 @@ export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
 // ("el ha ditg ch'il giat è currì"), a state verb's the imperfect.
 // Catalan too (P03, verify): "l'home va dir que el gat va córrer", a state's past the imperfect.
 // Not Polish (P05): its reported clause keeps the tense of the original (*powiedział, że kot biegnie*).
+// Not Lithuanian (P18) either: *pasakė, kad katė bėga* (verify).
 export const SEQUENCE_OF_TENSES_LANGUAGES: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /**
@@ -197,6 +209,9 @@ export const PASSIVE_AUXILIARY: Record<string, string> = {
   // Polish: resolved as BE, and the engine conjugates *być* + the imperfective participle, or *zostać* +
   // the perfective one where the aspect table picks the perfective (*mysz została zjedzona*, verify).
   pl: 'BE',
+  // Lithuanian: *būti* + the passive past participle, which its engine conjugates itself (*pelė buvo
+  // suvalgyta katės*, P18 §2.2, verify).
+  lt: 'BE',
 };
 
 /**
@@ -210,7 +225,8 @@ export const PASSIVE_AUXILIARY: Record<string, string> = {
  */
 // Catalan: "el nen per qui el llibre és escrit" (P03, verify).
 // Polish: *dziecko, przez które książka jest pisana* (P05, verify).
-export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
+// Lithuanian: the agent's bare genitive, *vaikas, kurio knyga yra rašyta* (P18, verify).
+export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl', 'lt']);
 
 /** Verb transitivities that have a patient to promote, and can therefore be passivized. */
 export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditransitive']);
@@ -233,6 +249,7 @@ export const SUBJUNCTIVE_CONJUNCTIONS: Readonly<Partial<Record<SubordinatingConj
   // Catalan (P03, verify): *abans que* and *fins que* take the subjunctive ("abans que el gat mengi",
   // "fins que el gat mengi"); *tot i que* asserts a fact and keeps the indicative, as Spanish *aunque*.
   // Not Polish (P05): no subjunctive; *zanim, aż, chociaż* take the indicative.
+  // Not Lithuanian (P18): *prieš tai, kai*, *kol*, *nors* take the indicative.
   before: new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']),
   until: new Set(['fr', 'es', 'pt', 'ca']),
   though: new Set(['it', 'fr', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']),
@@ -256,7 +273,8 @@ export const IMPERFECTIVE_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = 
 // Catalan stores the imperfect too: "mentre el gat menjava" (P03, verify).
 // Polish (P05 §0.3): the clause is marked stative, which its engine reads as the imperfective (*podczas
 // gdy kot jadł*), where the neutral past is the perfective (verify).
-export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
+// Lithuanian as Polish (P18 §0.3): *kol katė valgė* (verify).
+export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl', 'lt']);
 
 /**
  * The **temporal** subordinating conjunctions — *when, while, before, after* — which place the main
@@ -279,6 +297,7 @@ export const TEMPORAL_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new 
 // temporal conjunction is the present, as German's — "il giat vegn a mangiar cura ch'il chaun
 // curra" (verify).
 // Not Polish (P05): it keeps the future, perfective, as Italian does (*kiedy kot zje*).
+// Not Lithuanian (P18): *kai katė suvalgys* (verify).
 export const FUTURE_AS_PRESENT_LANGUAGES: ReadonlySet<string> = new Set(['en', 'de', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader']);
 
 /**
@@ -313,7 +332,7 @@ export const FUTURE_TEMPORAL_MOOD: Readonly<Record<string, 'presentSubjunctive' 
  */
 // Romansh's past subjunctive is its conditional series (P04-E16 D1): "avant ch'il giat mangiass".
 // Catalan's imperfect subjunctive is living and stored: "abans que el gat mengés" (P03, verify).
-// Not Polish (P05): no subjunctive.
+// Not Polish (P05) nor Lithuanian (P18): no subjunctive.
 export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /**
@@ -335,6 +354,9 @@ export const EXISTENTIAL_VERBS: Readonly<Record<string, string>> = {
   // Polish *jest / są* (P05, verify), negated *nie ma / nie było* + the genitive, which its engine
   // writes (`NIE_MA`) for the BE it resolves.
   pl: 'BE',
+  // Lithuanian *yra* (P18 §2.2, verify), negated *nėra / nebuvo / nebus* + the genitive, which its
+  // engine writes for the BE it resolves.
+  lt: 'BE',
 };
 
 /**
@@ -342,7 +364,8 @@ export const EXISTENTIAL_VERBS: Readonly<Record<string, string>> = {
  * gatti" — where the other five are impersonal and stay in the third singular whatever the pivot is
  * (*il y a des chats*, *es gibt Kater*, *hay gatos*, *há gatos*; Japanese does not agree at all).
  */
-// Polish agrees too: *jest kot*, *są koty* (P05, verify).
+// Polish agrees too: *jest kot*, *są koty* (P05, verify). Not Lithuanian (P18): *yra* is one form
+// for both numbers (*yra katė*, *yra katės*).
 export const EXISTENTIAL_AGREEING_LANGUAGES: ReadonlySet<string> = new Set(['en', 'it', 'pl']);
 
 /**

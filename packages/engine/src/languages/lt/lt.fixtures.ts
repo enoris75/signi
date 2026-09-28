@@ -166,6 +166,10 @@ export const LAUKTI: Forms = verb('laukti, laukia, laukė', 'palaukti, palaukia,
 export const GALVOTI: Forms = verb('galvoti, galvoja, galvojo', undefined, { object_prep: 'apie', object_prep_case: 'acc' });
 /** A suffix reflexive paired with a prefix reflexive (style-lt.md): *praustis / nusiprausti*. */
 export const PRAUSTIS: Forms = verb('praustis, prausia, prausė', 'nusiprausti, nusiprausia, nusiprausė', { reflexive: '1', transitivity: 'intransitive' });
+export const SAKYTI: Forms = verb('sakyti, sako, sakė', 'pasakyti, pasako, pasakė', { transitivity: 'transitive' });
+export const ZINOTI: Forms = verb('žinoti, žino, žinojo', undefined, { stative: '1', transitivity: 'transitive', content_clause_force: 'either' });
+/** NEED, *reikėti*: the experiencer in the dative, the thing needed in the genitive (*katei reikia pelės*). */
+export const REIKETI: Forms = verb('reikėti, reikia, reikėjo', undefined, { experiencer: '1', object_case: 'gen', stative: '1' });
 /** An unpaired suffix reflexive: *juoktis*. */
 export const JUOKTIS: Forms = verb('juoktis, juokia, juokė', undefined, { reflexive: '1', transitivity: 'intransitive' });
 
@@ -181,13 +185,24 @@ export const SALDUS: Forms = adj('saldus');
 export const ZALIAS: Forms = adj('žalias');
 export const SEMANTINIS: Forms = adj('semantinis', { comparative: '', superlative: '' });
 export const PASKUTINIS: Forms = adj('paskutinis', { comparative: '', superlative: '' });
+export const KITAS: Forms = adj('kitas', { comparative: '', superlative: '', after_pronoun: 'kita' });
+/** An invariable phrase after its noun (the column's UNTITLED). */
+export const BE_PAVADINIMO: Forms = { role: 'adjective', base: 'be pavadinimo', invariable: '1', position: 'post' };
+/** A stored table (the column's SAME). */
+export const TAS_PATS: Forms = {
+  role: 'adjective', base: 'tas pats', fem: 'ta pati', plural: 'tie patys', plural_fem: 'tos pačios', neuter: 'tas pats',
+  gen: 'to paties', dat: 'tam pačiam', acc: 'tą patį', ins: 'tuo pačiu', loc: 'tame pačiame',
+  fem_gen: 'tos pačios', fem_dat: 'tai pačiai', fem_acc: 'tą pačią', fem_ins: 'ta pačia', fem_loc: 'toje pačioje',
+};
 
 // ── Adverbs ─────────────────────────────────────────────────────────────────
 
 export const NIEKADA: Forms = { role: 'adverb', base: 'niekada', subtype: 'frequency', polarity: 'negative', interrogative: 'kada nors' };
 export const VISADA: Forms = { role: 'adverb', base: 'visada', subtype: 'frequency' };
 export const DAZNAI: Forms = { role: 'adverb', base: 'dažnai', subtype: 'frequency' };
-export const GREITAI: Forms = { role: 'adverb', base: 'greitai', comparative: 'greičiau', superlative: 'greičiausiai' };
+export const JAU: Forms = { role: 'adverb', base: 'jau', subtype: 'frequency', negative: 'dar', negative_slot: 'pre-negator' };
+export const JAU_NE: Forms = { role: 'adverb', base: 'jau ne', subtype: 'frequency', polarity: 'negative', negator_lead: 'jau' };
+export const GREITAI: Forms ={ role: 'adverb', base: 'greitai', comparative: 'greičiau', superlative: 'greičiausiai' };
 
 // ── Pronouns ────────────────────────────────────────────────────────────────
 
@@ -214,6 +229,8 @@ export const GENERIC: Forms = { role: 'pronoun', base: 'žmogus', person: '3', n
 export const KAZKAS: Forms = {
   role: 'pronoun', base: 'kažkas', person: '3', number: 'singular', gender: 'masc', thing: '1', indefinite: '1',
   ...cases('', 'kažko, kažkam, kažką, kažkuo, kažkame'), negative: 'niekas', ...cases('negative_', 'nieko, niekam, nieką, niekuo, niekame'),
+  with_other: 'kažkas kita', ...cases('with_other_', 'kažko kito, kažkam kitam, kažką kita, kažkuo kitu, kažkame kitame'),
+  negative_with_other: 'niekas kita', ...cases('negative_with_other_', 'nieko kito, niekam kitam, nieko kito, niekuo kitu, niekame kitame'),
 };
 export const KAZKAS_PERSON: Forms = {
   role: 'pronoun', base: 'kažkas', person: '3', number: 'singular', gender: 'masc', indefinite: '1', human: '1',
@@ -228,9 +245,10 @@ export const LT_FIXTURES: Readonly<Record<string, Forms>> = {
   PHRASE: FRAZE, CREATOR: KURĖJAS, MONEY: PINIGAI,
   EAT: VALGYTI, SEE: MATYTI, RUN: BEGTI, GO: EITI, GIVE: DUOTI, BE: BUTI_VERB, BECOME: TAPTI, HAVE: TURETI, LOVE: MYLETI,
   MUST: PRIVALETI, CAN: GALETI, WILL: NORETI, HELP_VERB: PADETI, WAIT: LAUKTI, THINK: GALVOTI, WASH: PRAUSTIS, LAUGH: JUOKTIS,
+  SAY: SAKYTI, KNOW: ZINOTI, NEED: REIKETI,
   BIG: DIDELIS, SMALL: MAZAS, GOOD: GERAS, HAPPY: LAIMINGAS, WHITE: BALTAS, BEAUTIFUL: GRAZUS, SWEET: SALDUS, GREEN: ZALIAS,
-  SEMANTIC: SEMANTINIS, LAST_FINAL: PASKUTINIS,
-  NEVER: NIEKADA, ALWAYS: VISADA, OFTEN: DAZNAI, FAST: GREITAI,
+  SEMANTIC: SEMANTINIS, LAST_FINAL: PASKUTINIS, OTHER: KITAS, UNTITLED: BE_PAVADINIMO, SAME: TAS_PATS,
+  NEVER: NIEKADA, ALWAYS: VISADA, OFTEN: DAZNAI, FAST: GREITAI, ALREADY: JAU, NO_LONGER: JAU_NE,
   FIRST_PERSON: AS, SECOND_PERSON: TU, THIRD_PERSON: JIS, GENERIC_PERSON: GENERIC, SOMETHING: KAZKAS, SOMEONE: KAZKAS_PERSON,
 };
 

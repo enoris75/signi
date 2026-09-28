@@ -35,6 +35,7 @@ const SPELLERS: Partial<Record<string, IndefiniteSpeller>> = {
   ca: indefiniteModifierCa,
   // Not Polish (P05): its pronoun declines, and the adjective with it (*coś dużego, czymś dużym*), which
   // one folded surface per slot cannot say; the engine declines the adjective itself (`pronounPhrase`).
+  // Not Lithuanian (P18) for the same reason (*kažkas didelio, kažkuo dideliu*).
 };
 
 const KEYS: readonly IndefiniteKey[] = ['base', 'object', 'disjunctive'];

@@ -49,7 +49,7 @@ export function renderClause(phrase: ResolvedPhrase): string {
   }
   const subjectless = vp.mood === 'imperative' || vp.mood === 'infinitive';
   const person = subject.agreement['person'];
-  const dropped = subject.agreement['generic'] === '1' || (isPronounElement(subject) && (person === '1' || person === '2'));
+  const dropped = subject.agreement['generic'] === '1' || vp.existential === true || (isPronounElement(subject) && (person === '1' || person === '2'));
   const inverts = experiencerInverts(phrase);
   const subjectCase = (inverts ? vp.verb.forms['object_case'] as Case | undefined : undefined) ?? 'nom';
   const spoken = phrase.contentSubject || subjectless || dropped ? '' : elementText(subject, subjectCase);

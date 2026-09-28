@@ -23,10 +23,11 @@ import type { Case, NpContext } from './lt.types.js';
  * determiner (*šis, tas, visi, joks, keli, kiekvienas*) or a quantity word over the genitive (*daug /
  * mažai kačių*, `quantifierWord`), the possessive (*mano, tavo, jo*, or *savo* for the clause's own
  * subject, P18 §0.4) or the possessor itself in the genitive — **before** the head (*katės maistas*),
- * a numeral (*dvi katės*), the adjectives (always prenominal), the attributive nouns in the genitive
- * (*frazių kūrėjas*), then the noun, in the case its governor left it in. After the noun: an adjective
- * carrying a standard of comparison (*katė, didesnė nei šuo*: verify), the relative clause (*katė,
- * kuri valgo*) and the examples.
+ * a numeral (*dvi katės*), the adjectives (prenominal), the attributive nouns in the genitive
+ * (*frazių kūrėjas*), then the noun, in the case its governor left it in. After the noun: an invariable
+ * phrase the lexeme places there (`position: 'post'`: *frazė be pavadinimo*), an adjective carrying a
+ * standard of comparison (*katė didesnė nei šuo*: verify), the relative clause (*katė, kuri valgo*)
+ * and the examples.
  *
  * A pronoun head is `pronounPhrase`'s. Two stand-ins the shared helpers build are spelled here: the
  * relativizer of a complement gap (`relativizer`, *kuriame*) and a question's gap (`question`: *kas*,
@@ -62,7 +63,7 @@ export function nounPhrase(np: ResolvedNounPhrase, kase: Case, ctx: NpContext = 
   const adjectives = np.adjectives.map((a, i) => {
     const text = adjForm(a, nounCase, agr);
     if (i === compared && np.adjectiveStandard) return { text: `${text} ${standardText(a.forms, np.adjectiveStandard.standard)}`, post: true };
-    return { text, post: false };
+    return { text, post: a.forms['position'] === 'post' };
   });
   return [
     (f['approximator_det'] ?? '').trim(),
