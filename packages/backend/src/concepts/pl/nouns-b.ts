@@ -148,6 +148,7 @@ export const PL_NOUNS_B: LanguageColumn = {
   VALLADER: indeclinable('masc', 'vallader'),
   CATALAN: lang('katalońsk'),
   POLISH: lang('polsk'),
+  LITHUANIAN: lang('litewsk'),
   SPELLING: f('pisownia, pisowni, pisowni, pisownię, pisownią, pisowni, pisownio', 'pisownie, pisowni, pisowniom, pisownie, pisowniami, pisowniach'),
 
   // Time.

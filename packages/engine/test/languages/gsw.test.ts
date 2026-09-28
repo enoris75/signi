@@ -26,7 +26,7 @@ const subject = (element: NounElement): PhrasePlan => ({ subject: element });
 
 describe('P10-E1: a preview row', () => {
   test('renders in the translation list after the seven, before the Romansh rows', () => {
-    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
+    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl', 'lt']);
   });
 
   // E1 D1: a word the column has not got empties the row — no sentence with a hole in it, and never

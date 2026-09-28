@@ -252,6 +252,7 @@ export const RM_SURSILV_NOUNS: LanguageColumn = {
   ROMANSH: { base: 'romontsch', gender: 'masc', count: 'singular' },
   CATALAN: { base: 'catalan', gender: 'masc', count: 'singular' },
   POLISH: { base: 'polac', gender: 'masc', count: 'singular' }, // (verify)
+  LITHUANIAN: { base: 'lituan', gender: 'masc', count: 'singular' }, // (verify)
   RUMANTSCH_GRISCHUN: { base: 'rumantsch grischun', gender: 'masc', count: 'singular' },
   SURSILVAN: { base: 'sursilvan', gender: 'masc', count: 'singular' },
   VALLADER: { base: 'vallader', gender: 'masc', count: 'singular' },

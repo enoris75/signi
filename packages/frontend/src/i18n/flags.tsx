@@ -33,6 +33,7 @@ export const FLAG: Record<LanguageCode, FlagDef> = {
   // is drawn inline (P03 D3).
   ca: { svg: 'senyera' },
   pl: '🇵🇱',
+  lt: '🇱🇹',
 };
 
 const SVG_STYLE = { display: 'inline-block', verticalAlign: '-0.125em' } as const;

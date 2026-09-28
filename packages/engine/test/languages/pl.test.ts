@@ -242,7 +242,7 @@ describe('P05: the rest', () => {
 });
 
 describe('P05: a preview row', () => {
-  test('renders last, after Catalan', () => {
-    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language).at(-1)).toBe('pl');
+  test('renders after Catalan, before Lithuanian (P18)', () => {
+    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language).slice(-3)).toEqual(['ca', 'pl', 'lt']);
   });
 });

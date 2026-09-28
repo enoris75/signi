@@ -28,7 +28,7 @@ const text = (translations: Translation[], language: LanguageCode) => translatio
 
 describe('translatePossessive', () => {
   test('names the possessive in every language, in engine order', () => {
-    expect(translatePossessive(feats(), LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
+    expect(translatePossessive(feats(), LOOKUP).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl', 'lt']);
   });
 
   test('cites the possessive with the noun NOUN unless given another', () => {

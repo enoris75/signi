@@ -19,4 +19,10 @@ describe('fold', () => {
     expect(fold('Łódź')).toBe('lodz');
     expect(fold('źdźbło')).toBe('zdzblo');
   });
+
+  test('folds Lithuanian, so zuvis finds žuvis (P18 §3)', () => {
+    expect(fold('žuvis')).toBe('zuvis');
+    expect(fold('ąčęėįšųūž')).toBe('aceeisuuz');
+    expect(fold('Lietuvių')).toBe('lietuviu');
+  });
 });

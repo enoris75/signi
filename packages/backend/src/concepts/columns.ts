@@ -5,6 +5,7 @@ import { RM_SURSILV } from './rm-sursilv/index.js';
 import { RM_VALLADER } from './rm-vallader/index.js';
 import { CA } from './ca/index.js';
 import { PL } from './pl/index.js';
+import { LT } from './lt/index.js';
 import type { LanguageColumn } from './types.js';
 
 /**
@@ -24,4 +25,7 @@ export const COLUMNS: Partial<Record<LanguageCode, { forms: LanguageColumn; clos
   // Polish (P05) has no Slavic neighbour among the ready languages; German, the one other language
   // here with cases and three genders, is its closest. The target is nothing borrowed.
   pl: { forms: PL, closest: 'de' },
+  // Lithuanian (P18) has no relative here; Polish is keyed as it is, case for case, so a borrowed Polish
+  // noun still declines (P18 D10). The target is nothing borrowed.
+  lt: { forms: LT, closest: 'pl' },
 };

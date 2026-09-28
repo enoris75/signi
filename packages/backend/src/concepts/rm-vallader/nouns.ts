@@ -280,6 +280,7 @@ export const RM_VALLADER_NOUNS: LanguageColumn = {
   ROMANSH: mu('rumantsch'),
   CATALAN: mu('catalan'),
   POLISH: mu('polac'), // (verify)
+  LITHUANIAN: mu('lituan'), // (verify)
   RUMANTSCH_GRISCHUN: mu('rumantsch grischun'),
   SURSILVAN: mu('sursilvan'),
   VALLADER: mu('vallader'),

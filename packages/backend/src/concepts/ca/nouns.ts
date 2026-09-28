@@ -273,6 +273,7 @@ export const CA_NOUNS: LanguageColumn = {
   VALLADER: m('vallader', undefined, ART),
   CATALAN: m('català', undefined, ART),
   POLISH: m('polonès', undefined, ART),
+  LITHUANIAN: m('lituà', undefined, ART),
   SPELLING: f('ortografia', 'ortografies'),
 
   // Time.

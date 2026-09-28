@@ -61,7 +61,7 @@ describe('P03: the opening table', () => {
 
 describe('P03: a preview row', () => {
   test('renders last, after the three Romansh rows (D7)', () => {
-    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl']);
+    expect(translateAll(clause(CAT, 'RUN')).map((t) => t.language)).toEqual(['en', 'it', 'fr', 'de', 'es', 'ja', 'pt', 'gsw', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca', 'pl', 'lt']);
   });
 
   test('says no word that is Spanish only', () => {

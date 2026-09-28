@@ -77,5 +77,6 @@ export { RM_SURSILV } from './rm-sursilv/index.js';
 export { RM_VALLADER } from './rm-vallader/index.js';
 export { CA } from './ca/index.js';
 export { PL } from './pl/index.js';
+export { LT } from './lt/index.js';
 export { COLUMNS } from './columns.js';
 export type { DefinedConceptSeed } from './definitionText.js';

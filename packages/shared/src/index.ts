@@ -5,7 +5,7 @@
  */
 export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb' | 'interjection';
 
-export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt' | 'gsw' | 'rm-rumgr' | 'rm-sursilv' | 'rm-vallader' | 'ca' | 'pl';
+export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt' | 'gsw' | 'rm-rumgr' | 'rm-sursilv' | 'rm-vallader' | 'ca' | 'pl' | 'lt';
 
 export type Transitivity = 'intransitive' | 'transitive' | 'ditransitive';
 
@@ -676,6 +676,8 @@ export const LANGUAGES: Record<LanguageCode, string> = {
   ca: 'Catalan',
   // Polish (P05): standard written Polish. Appended, as Catalan was.
   pl: 'Polish',
+  // Lithuanian (P18): standard Lithuanian in the VLKK norms (P18 D1). Appended after Polish (D2).
+  lt: 'Lithuanian',
 };
 
 /** Every language code, in row order — the one list the rest of the code derives from (P10-E1). */
@@ -713,6 +715,7 @@ export const LANGUAGE_STATUS = {
   'rm-vallader': 'preview',
   ca: 'preview',
   pl: 'preview',
+  lt: 'preview',
 } as const satisfies Record<LanguageCode, LanguageStatus>;
 
 /**

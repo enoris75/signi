@@ -4811,6 +4811,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P18: the language of the Lithuanian row. No definition, as POLISH: LITHUANIA is not seeded.
+    id: 'LITHUANIAN',
+    role: 'noun',
+    description: 'the Baltic language of Lithuania',
+    emoji: '🗣️',
+    proper: true,
+    countable: false,
+    isA: 'LANGUAGE',
+    forms: {
+      en: { base: 'Lithuanian', count: 'singular' },
+      it: { base: 'lituano', gender: 'masc', count: 'singular' },
+      fr: { base: 'lituanien', gender: 'masc', count: 'singular' },
+      de: { base: 'Litauisch', gender: 'neut', count: 'singular', genitive: 'Litauisch' },
+      es: { base: 'lituano', gender: 'masc', takes_article: '1', count: 'singular' },
+      ja: { base: 'リトアニア語', count: 'singular', reading: 'りとあにあご' },
+      pt: { base: 'lituano', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The conventional way a language writes its words (P10-E2: "Dieth's spelling", "no standard
     // spelling"). Countable: a language may have several.
     id: 'SPELLING',
