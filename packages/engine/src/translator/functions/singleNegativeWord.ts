@@ -11,6 +11,7 @@ import { tonicPronoun } from '../../functions/tonicPronoun.js';
  */
 // Romansh is not among them (P04-E11 D3): RG concords, *na* staying beside the negative word — "el na
 // vesa nagin chaun", "nagin na sa" (verify); the idioms follow RG until their reviewers rule.
+// Not Polish (P05 §2.2): full negative concord, *nikt nie je*, *nigdy nie je*.
 export const NO_NEGATIVE_CONCORD: ReadonlySet<string> = new Set(['de', 'gsw']);
 
 /** The clause's slots as they were before `negativePolarity` swapped them. */

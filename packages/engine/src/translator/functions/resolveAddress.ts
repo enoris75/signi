@@ -11,6 +11,7 @@ import { resolveNounPhrase } from './resolveNounPhrase.js';
  * (A335). The others call the hearer with the nominative (it *Tu*, es *Tú*, de *Du*, pt *Você*); the
  * German `disjunctive` is the dative (*dir*), which would be wrong here.
  */
+// Not Polish (P05): a noun's address is its stored vocative (`voc_sg`: *Kocie*), a pronoun's the nominative.
 const TONIC_ADDRESS = new Set(['fr']);
 
 /**

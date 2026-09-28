@@ -33,6 +33,8 @@ const SPELLERS: Partial<Record<string, IndefiniteSpeller>> = {
   'rm-vallader': indefiniteModifierVallader,
   // Catalan (P03): *alguna cosa gran*, *algú més*, *res de nou*.
   ca: indefiniteModifierCa,
+  // Not Polish (P05): its pronoun declines, and the adjective with it (*coś dużego, czymś dużym*), which
+  // one folded surface per slot cannot say; the engine declines the adjective itself (`pronounPhrase`).
 };
 
 const KEYS: readonly IndefiniteKey[] = ['base', 'object', 'disjunctive'];

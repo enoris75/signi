@@ -8,6 +8,7 @@ import { OTHER_REPLACES_INDEFINITE } from '../translator.consts.js';
  */
 // Romansh too (P04 E1 D1): "ils giats curran", "l'aua cula" (verify).
 // Catalan too (P03): "els gats corren", "l'aigua flueix" (verify).
+// Not Polish (P05): it has no articles, and a generic subject is bare (*koty biegają*).
 export const GENERIC_DEFINITE_SUBJECT: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt', 'rm-rumgr', 'rm-sursilv', 'rm-vallader', 'ca']);
 
 /**
