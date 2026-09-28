@@ -2089,11 +2089,31 @@ export interface RubySegment {
   r?: string;
 }
 
+/**
+ * Where one role of the plan stands in a rendered `text` (P17-E2): `text.slice(start, end)` is the
+ * role's own word as the sentence says it — "cats", "ate", "mange". `slot` names the role by its place
+ * in the plan: `subject`, `verb`, `directObject`, a complement's type, `address` (the vocative),
+ * `interjection`, and `modifier.<i>` / `modal.<i>` for the i-th of the verb's adverbs
+ * (`[modifier, ...modifiers]`) and modals. A word the sentence splits (German "fängt … an") is
+ * several spans of one slot, in reading order.
+ */
+export interface RoleSpan {
+  slot: string;
+  start: number;
+  end: number;
+}
+
 export interface Translation {
   language: LanguageCode;
   text: string;
   /** Present only for languages with furigana (Japanese); `text` is the plain fallback. */
   ruby?: RubySegment[];
+  /**
+   * Each role's word in `text`, when the request asked for them (`TranslateRequest.withSpans`) and the
+   * language kept track of them; absent otherwise, and a role the sentence does not say (a dropped
+   * pronoun) has none.
+   */
+  spans?: RoleSpan[];
 }
 
 export interface TranslateRequest {
@@ -2104,6 +2124,12 @@ export interface TranslateRequest {
    * noun phrase with no full stop. The canvas's link chip reads it (P11-E7 D5).
    */
   phrase?: 'directObject';
+  /**
+   * Also say where each role stands in the text (`Translation.spans`, P17-E2): `true` for every
+   * language, or the languages named — the Phrase view asks for the UI language alone. It costs a
+   * second render per language, so it is off unless asked. Ignored with `phrase`.
+   */
+  withSpans?: boolean | LanguageCode[];
 }
 
 export interface TranslateResponse {

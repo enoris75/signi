@@ -20,6 +20,19 @@ export function useCompactLayout(): boolean {
   return useMediaQuery(COMPACT_QUERY, { noSsr: true });
 }
 
+/**
+ * A tablet (P17-E4): touch-only and below MUI's `md` (900 px), but wider than a phone. The canvas
+ * takes the whole width there, the translations under it, and the console stays docked — no tab bar.
+ * A desktop window as narrow, driven by a mouse, keeps its two columns.
+ */
+export const STACKED_QUERY = `${TOUCH_ONLY_QUERY} and (max-width: 899.95px)`;
+
+export function useStackedLayout(): boolean {
+  const stacked = useMediaQuery(STACKED_QUERY, { noSsr: true });
+  const compact = useCompactLayout();
+  return stacked && !compact;
+}
+
 export function isTouchOnly(): boolean {
   return typeof window !== "undefined" && window.matchMedia?.(TOUCH_ONLY_QUERY).matches === true;
 }

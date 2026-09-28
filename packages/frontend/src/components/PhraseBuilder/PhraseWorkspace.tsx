@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
@@ -18,6 +18,7 @@ import {
 } from "./interfaces.ts";
 import { MUI_COLOR_HEX } from "./slots.ts";
 import { hostedInstrumentIds } from "@signi/phrase/model/linkRules.ts";
+import { workspaceToPlans } from "./workspacePlan/index.ts";
 import { boxKey, useConnectors } from "./hooks/useConnectors.ts";
 import { uid, useWorkspaceLinks } from "./hooks/useWorkspaceLinks.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
@@ -118,6 +119,12 @@ export function PhraseWorkspace({
   // except in the Phrase view, which lists every period's roles and has no canvas to draw it on.
   const hosted = listView ? new Set<string>() : hostedInstrumentIds(links);
   const cards = containers.filter((c) => !hosted.has(c.id));
+  // The Phrase view shows each period's words as its sentence says them (P17-E2), so it reads the
+  // plan a root period translates as; a linked period has none of its own and keeps its lemmas.
+  const plans = useMemo(
+    () => (listView ? new Map(workspaceToPlans(containers, links).map((s) => [s.containerId, s.plan])) : undefined),
+    [listView, containers, links],
+  );
 
   // Swap a card with its neighbour on the stack. Links are keyed by container id, so they follow
   // their containers; the connector overlay re-measures on the resulting render.
@@ -358,6 +365,7 @@ export function PhraseWorkspace({
               wordsPanelOpen={i === 0 ? wordsPanelOpen : false}
               onWordsPanelClose={onWordsPanelClose}
               listView={listView}
+              listPlan={plans?.get(c.id)}
               onShowCanvas={onShowCanvas}
             />
           );

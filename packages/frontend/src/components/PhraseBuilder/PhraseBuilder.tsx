@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Box } from "@mui/material";
-import { CAUSE_SENTIMENTS, COMPLEMENT_LABELS, OBJECT_PREDICATIONS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept } from "@signi/shared";
+import { CAUSE_SENTIMENTS, COMPLEMENT_LABELS, OBJECT_PREDICATIONS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept, type PhrasePlan } from "@signi/shared";
 import {
   BoxComplementType,
   adaptPossessorBinding,
@@ -192,6 +192,8 @@ export interface PhraseBuilderProps {
   listView?: boolean;
   /** Top-level only, with `listView`: show the canvas, where a control's work is drawn (a ring). */
   onShowCanvas?: () => void;
+  /** With `listView`: the period's plan, whose words the list shows as the sentence says them (P17-E2). */
+  listPlan?: Partial<PhrasePlan>;
 }
 
 export function PhraseBuilder({
@@ -211,6 +213,7 @@ export function PhraseBuilder({
   nounPhraseOnly = false,
   ringHost,
   listView = false,
+  listPlan,
   onShowCanvas,
 }: PhraseBuilderProps) {
   const { uiLanguage } = useUiLanguage();
@@ -1630,6 +1633,7 @@ export function PhraseBuilder({
         <>
           <RoleList
             selection={selection}
+            plan={listPlan}
             slots={renderedSlots}
             activeSlot={activeSlot}
             controlsByParent={satelliteIconsByParent}

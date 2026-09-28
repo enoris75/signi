@@ -1,10 +1,11 @@
-import type { PhrasePlan, RubySegment, Translation } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, RubySegment, Translation } from '@signi/shared';
 import { isPreviewLanguage } from '@signi/shared';
-import type { Mood } from '../../types.js';
+import type { LanguageEngine, Mood } from '../../types.js';
 import { engines } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolveAddress } from './resolveAddress.js';
 import { resolvePhrase } from './resolvePhrase.js';
+import { roleSpans } from './roleSpans.js';
 import { liftSentenceAdverb } from './sentenceAdverb.js';
 import { tidyCommas } from './tidyCommas.js';
 
@@ -42,6 +43,11 @@ export interface TranslateOptions {
    * the chip on the canvas's link line shows the possessed phrase the sentence will say (P11-E7 D5).
    */
   phrase?: 'directObject';
+  /**
+   * Where each role of the period stands in its text (`Translation.spans`, P17-E2): `true` for every
+   * language, or the languages named. Off by default, since it says each period twice.
+   */
+  withSpans?: boolean | LanguageCode[];
 }
 
 export function translate(plan: PhrasePlan, lexicon: LexiconLookup, options: TranslateOptions = {}): Translation[] {
@@ -53,57 +59,72 @@ export function translate(plan: PhrasePlan, lexicon: LexiconLookup, options: Tra
     throw new Error('an instruction addresses nobody, so it takes no address: plan.address must be left out (A338)');
   }
   return engines.map((engine) => {
-    // A preview language (P10-E1 D1) says nothing at all for a plan naming a word it has no lexeme
-    // for, rather than a sentence with a hole in it — and never borrows another language's word to
-    // fill it. A word is missing when English has it and this language does not.
-    let missing = false;
-    const lookup: LexiconLookup = isPreviewLanguage(engine.language)
-      ? (id, language) => {
-        const entry = lexicon(id, language);
-        if (!entry && language === engine.language && lexicon(id, 'en')) missing = true;
-        return entry;
-      }
-      : lexicon;
-    // The top clause's mood: 'conditional' when a hypothetical condition is attached,
-    // 'imperative' for a command, 'infinitive' for a bare citation phrase (a verb definition),
-    // else plain indicative (undefined). These are mutually exclusive (the UI never sets more
-    // than one). A command hands its mood on to a coordinated second clause (see resolvePhrase)
-    // but never to a relative clause.
-    const topMood = topMoodOf(plan);
-    // A sentence adverb opens a main statement (P09-E39, see `liftSentenceAdverb`).
-    const resolved = liftSentenceAdverb(resolvePhrase(plan, engine.language, lookup, topMood, undefined, !!plan.infinitive), topMood);
-    // Every rendered period closes with its language's full stop, appended here rather
-    // than by each engine — the ruby segments must carry the same one, unread. A question closes
-    // on its question mark instead, and opens on one where the language writes it (es "¿").
-    const question = !!resolved.verbPhrase?.interrogative;
-    const open = question ? (engine.questionOpener ?? '') : '';
-    const stop = question ? (engine.questionMark ?? '?') : (engine.terminator ?? '.');
-    // The vocative opens the sentence, set off by the language's separator and capitalized as its
-    // first word (P11-E3): "Mom, run.", お母さん、…. It stands **outside** Spanish's opening mark, which
-    // encloses only the question itself: "Mamá, ¿el gato corre?" (RAE, *Ortografía* 3.4.2.1).
-    const separator = engine.addressSeparator ?? ', ';
-    // An interjection comes before even the vocative (P09-E30): "Hey, Mom, run.", ねえ、お母さん、…. It
-    // is a word outside the clause, set off by the vocative's separator, and it stands outside the
-    // Spanish ¿ too ("Oye, ¿el gato corre?"). As the sentence's first word it takes the capital, and a
-    // vocative behind it is no longer first: "Hey, cat, run." (a name keeps the capital it is seeded
-    // with, "Hey, Mom, run.").
-    const interjection = plan.interjection ? lookup(plan.interjection, engine.language)?.forms : undefined;
-    const exclaimed = interjection?.['base'] ? capitalized(interjection['base']) + separator : '';
-    const address = plan.address ? resolveAddress(plan.address, engine.language, lookup) : undefined;
-    const addressed = address ? engine.render(address) : '';
-    const called = address ? (exclaimed ? addressed : capitalized(addressed)) + separator : '';
-    const body = tidyCommas(engine.render(resolved));
-    // A language that renders nothing — a preview language with no forms for the plan's words
-    // (P10-E1) — says nothing at all, not a bare full stop or a vocative with no clause behind it.
-    if ((!body || missing) && isPreviewLanguage(engine.language)) return { language: engine.language, text: '' };
-    const ruby = engine.renderRuby?.(resolved);
-    const exclaimedRuby = exclaimed && ruby ? [interjectionSeg(interjection!), { t: separator }] : [];
-    const calledRuby = address && ruby ? [...engine.renderRuby!(address), { t: separator }] : [];
-    return {
-      language: engine.language,
-      // A parenthetical's closing comma (P09-E33) gives way to the stop, or to a comma it meets.
-      text: exclaimed + called + open + body + stop,
-      ...(ruby ? { ruby: [...exclaimedRuby, ...calledRuby, ...(open ? [{ t: open }] : []), ...ruby, { t: stop }] } : {}),
-    };
+    const translation = periodIn(engine, plan, lexicon);
+    if (!spansWanted(options.withSpans, engine.language)) return translation;
+    // The role spans (P17-E2): the period said again with each role's words marked. A language
+    // that writes no spaces between words (ja) cannot find the end of a word an inflection cut
+    // its mark from, so it keeps only the spans whose marks survive whole.
+    const spans = roleSpans(plan, lexicon, (lookup) => periodIn(engine, plan, lookup).text, translation.text, (engine.wordJoiner ?? ' ') !== '');
+    return spans ? { ...translation, spans } : translation;
   });
+}
+
+/** Whether `withSpans` asks for `language`'s spans (see TranslateOptions.withSpans). */
+const spansWanted = (withSpans: TranslateOptions['withSpans'], language: LanguageCode): boolean =>
+  withSpans === true || (Array.isArray(withSpans) && withSpans.includes(language));
+
+/** The whole period in `engine`'s language, rendered from `lexicon` (see `translate`). */
+function periodIn(engine: LanguageEngine, plan: PhrasePlan, lexicon: LexiconLookup): Translation {
+  // A preview language (P10-E1 D1) says nothing at all for a plan naming a word it has no lexeme
+  // for, rather than a sentence with a hole in it — and never borrows another language's word to
+  // fill it. A word is missing when English has it and this language does not.
+  let missing = false;
+  const lookup: LexiconLookup = isPreviewLanguage(engine.language)
+    ? (id, language) => {
+      const entry = lexicon(id, language);
+      if (!entry && language === engine.language && lexicon(id, 'en')) missing = true;
+      return entry;
+    }
+    : lexicon;
+  // The top clause's mood: 'conditional' when a hypothetical condition is attached,
+  // 'imperative' for a command, 'infinitive' for a bare citation phrase (a verb definition),
+  // else plain indicative (undefined). These are mutually exclusive (the UI never sets more
+  // than one). A command hands its mood on to a coordinated second clause (see resolvePhrase)
+  // but never to a relative clause.
+  const topMood = topMoodOf(plan);
+  // A sentence adverb opens a main statement (P09-E39, see `liftSentenceAdverb`).
+  const resolved = liftSentenceAdverb(resolvePhrase(plan, engine.language, lookup, topMood, undefined, !!plan.infinitive), topMood);
+  // Every rendered period closes with its language's full stop, appended here rather
+  // than by each engine — the ruby segments must carry the same one, unread. A question closes
+  // on its question mark instead, and opens on one where the language writes it (es "¿").
+  const question = !!resolved.verbPhrase?.interrogative;
+  const open = question ? (engine.questionOpener ?? '') : '';
+  const stop = question ? (engine.questionMark ?? '?') : (engine.terminator ?? '.');
+  // The vocative opens the sentence, set off by the language's separator and capitalized as its
+  // first word (P11-E3): "Mom, run.", お母さん、…. It stands **outside** Spanish's opening mark, which
+  // encloses only the question itself: "Mamá, ¿el gato corre?" (RAE, *Ortografía* 3.4.2.1).
+  const separator = engine.addressSeparator ?? ', ';
+  // An interjection comes before even the vocative (P09-E30): "Hey, Mom, run.", ねえ、お母さん、…. It
+  // is a word outside the clause, set off by the vocative's separator, and it stands outside the
+  // Spanish ¿ too ("Oye, ¿el gato corre?"). As the sentence's first word it takes the capital, and a
+  // vocative behind it is no longer first: "Hey, cat, run." (a name keeps the capital it is seeded
+  // with, "Hey, Mom, run.").
+  const interjection = plan.interjection ? lookup(plan.interjection, engine.language)?.forms : undefined;
+  const exclaimed = interjection?.['base'] ? capitalized(interjection['base']) + separator : '';
+  const address = plan.address ? resolveAddress(plan.address, engine.language, lookup) : undefined;
+  const addressed = address ? engine.render(address) : '';
+  const called = address ? (exclaimed ? addressed : capitalized(addressed)) + separator : '';
+  const body = tidyCommas(engine.render(resolved));
+  // A language that renders nothing — a preview language with no forms for the plan's words
+  // (P10-E1) — says nothing at all, not a bare full stop or a vocative with no clause behind it.
+  if ((!body || missing) && isPreviewLanguage(engine.language)) return { language: engine.language, text: '' };
+  const ruby = engine.renderRuby?.(resolved);
+  const exclaimedRuby = exclaimed && ruby ? [interjectionSeg(interjection!), { t: separator }] : [];
+  const calledRuby = address && ruby ? [...engine.renderRuby!(address), { t: separator }] : [];
+  return {
+    language: engine.language,
+    // A parenthetical's closing comma (P09-E33) gives way to the stop, or to a comma it meets.
+    text: exclaimed + called + open + body + stop,
+    ...(ruby ? { ruby: [...exclaimedRuby, ...calledRuby, ...(open ? [{ t: open }] : []), ...ruby, { t: stop }] } : {}),
+  };
 }

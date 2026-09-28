@@ -11,6 +11,7 @@ keys nor the width are there. This plan keeps their handlers and their command t
 view's role sheet is P01's keymap listed as buttons, and the console tab is P02's console,
 undocked.
 **Status:** phases 1–4 built and merged into `main`; touch targets and a tapped box's bar built after.
+E1–E4 built 2026-09-28; each still owes a check on a real device (see [Remaining tasks](#remaining-tasks)).
 **Drawings:** the [design canvas](https://claude.ai/artifact/RYyD3YwGnpDfCkJkYKHQva), with six
 phone screens and a note on what breaks today.
 
@@ -261,10 +262,13 @@ its 44 px target. Moving them into a menu would buy their names at the cost of t
 multi-step pick anchored to the button itself (conditional, coordinative, subordinate), and of the
 connectors that run from the column's anchor. Reopen only if someone on a phone misses them.
 
-## Open questions
+## Remaining tasks
 
-- **Tablets.** At 600–1024 px the desktop layout applies unchanged. Should the canvas take the full
-  width there too, with the translations below?
-- **Where the console's preview shows.** On a phone the canvas is a tab away from the prompt. The
-  prompt's preview line (the sentence under the line being typed) may be enough, or the result strip
-  could follow the preview.
+| Id | Task | Built | Still owed |
+|---|---|---|---|
+| [E1](P17-E1-soft-keyboard-on-a-real-phone.md) | The soft keyboard on a real phone | `useKeyboardInset`: the console tab's bottom follows the visual viewport, the tab bar hides while the keyboard is up | the check on a real iPhone and Android phone |
+| [E2](P17-E2-surface-forms-in-the-phrase-view.md) | Surface forms in the Phrase view | opt-in `Translation.spans`; rows read *cats*, lemma under it; ja verbs fall back to the lemma when tense or polarity rewrites them | a real phone; preview languages as UI language |
+| [E3](P17-E3-console-preview-on-a-phone.md) | The console's preview on a phone | the result strip at the top of the console tab, following the preview, marked as one | deciding on a real phone whether to keep it |
+| [E4](P17-E4-tablets.md) | Tablets, 600–1024 px | ruling: one column below `md` (900 px) on a touch-only device, console docked, no tab bar; the tapped box's bar on any touch-only device | a real iPad, both orientations |
+
+Not a task: the border controls' menu (above) — reopen only if someone on a phone misses them.
