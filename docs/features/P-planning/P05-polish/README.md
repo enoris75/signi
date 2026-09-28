@@ -11,10 +11,11 @@ panel and, once complete, as an interface language.
   first carries it.
 - **Engine:** a new folder `packages/engine/src/languages/pl/`.
 
-**Status:** **in progress, 2026-09-28** — D1–D8 taken as recommended (D7: forms drafted from model
-knowledge, SGJP/PoliMorf consulted only, as P03/P04 did). Tasks in [§7](#7-tasks-e1e12). The counts in
-§1 and §2 are stale: the corpus has 846 concepts (440 nouns, 205 verbs, 153 adjectives, 40 adverbs,
-7 pronouns, 1 interjection), and P03 §0's groundwork had already shipped with P10/P04.
+**Status:** **E1–E10 shipped, 2026-09-28** — Polish renders as a `preview` row: its own column (all
+846 concepts in every case and both aspects, none borrowed), its own engine, every UI string and
+definition. E11 (native review) and E12 (promotion) are open — see [§7](#7-tasks-e1e12). D1–D8 were
+taken as recommended (D7: forms drafted from model knowledge, SGJP/PoliMorf consulted only, as P03/P04
+did); §0's general groundwork had already shipped with P10/P04, so the counts in §1 and §2 are stale.
 
 | construction | Polish |
 |---|---|
@@ -297,15 +298,44 @@ drafted from model knowledge and is *(verify)* until E11.** The conventions and 
 | E1 | `pl` registered after `ca`: `LanguageCode`, `LANGUAGES`, `LANGUAGE_STATUS` (`preview`), an engine slot, `COLUMNS` (borrows from `de`, the closest language with cases and three genders) | **Shipped** |
 | E2 | Row identity: the POLISH concept (in every column), `language.pl`, 🇵🇱 (D8); search folds *ł* (*zolw* finds *żółw*, §3) | **Shipped** |
 | E3 | [style-pl.md](style-pl.md) and `concepts/pl/helpers.ts`: the column's keys — 13 case forms per noun (D3, plus the vocative for address), both aspects per verb (D1), `base` + `virile` + comparative per adjective (D4) | **Shipped** |
-| E4 | The noun column, 440 nouns in three files, every case | |
-| E5 | The verb column, 205 verbs in two files, both aspects | |
-| E6 | Adjectives, adverbs (*nigdy* negative), pronouns in every case (*się* generic, D5), interjection | |
-| E7 | The engine's noun phrase: case by slot, adjective declension, demonstratives and quantifier government (§0.4), possessives with *swój* (§0.5), degree | |
-| E8 | The clause and the verb group: pro-drop, the aspect table (§0.3), past and conditional from the *l*-participle, *będzie* + participle, negation with the genitive, modals, *być* + instrumental, *stać się*, *się* impersonal | |
-| E9 | Complements with case government (§2.3), relatives (*który*), coordination, *gdyby*, the imperative (D6), the translator's language tables | |
-| E10 | Every UI string and definition renders in Polish, pinned at 0 missing | |
-| E11 | The native review of the generated sheet | Open — needs a reviewer |
-| E12 | `ready` | Blocked on E11 |
+| E4 | The noun column, 441 nouns in three files (`nouns-a/b/c.ts`), every case and the vocative; plural-only nouns (*pieniądze, drzwi, Niemcy*), virile nouns in *-a* (*tata*) | **Shipped**, `concepts/pl/nouns-*.test.ts` |
+| E5 | The verb column, 205 verbs in two files, both aspects (162 paired; statives and modals unpaired), the government keys (`object_case`, `object_prep`, `terminus_*`, `topic_prep`), *powinien* | **Shipped**, `concepts/pl/verbs-*.test.ts` |
+| E6 | Adjectives, adverbs (*nigdy* negative), pronouns in every case (*się* generic, D5), interjection | **Shipped**, `concepts/pl/lexicon.test.ts` |
+| E7 | The engine's noun phrase: case by slot, adjective declension, demonstratives and quantifier government (§0.4), possessives with *swój* (§0.5), degree | **Shipped** |
+| E8 | The clause and the verb group: pro-drop, the aspect table (§0.3), past and conditional from the *l*-participle, *będzie* + participle, negation with the genitive, modals, *być* + instrumental, *stać się*, *się* impersonal | **Shipped** |
+| E9 | Complements with case government (§2.3), relatives (*który*), coordination, *gdyby*, the imperative (D6), the translator's language tables | **Shipped**, `test/languages/pl.test.ts` |
+| E10 | Every UI string (795) and definition (618) renders in Polish — pinned at 0 missing in `uiStrings.test.ts` / `definitions.test.ts`; e2e checks the row | **Shipped** |
+| [E11](P05-E11-review.md) | The native review of the generated [review-sheet-pl.md](review-sheet-pl.md) (2,408 rows) | Open — needs a reviewer |
+| [E12](P05-E12-promotion.md) | `ready` | Blocked on E11 |
+
+The engine (`languages/pl/`, 51 source files and 33 colocated tests) is Polish's own: it forks no other
+language folder. **Where it departs from this plan**, each `(verify)` in the code and a ruling owed in E11:
+
+- The *gdyby* clause is imperfective (*gdyby pies biegł, kot zjadłby mysz*), as the opening table has
+  it; §0.3's "both clauses perfective" is not followed. The citation infinitive, a stative verb's past
+  and a *while* clause's past are imperfective too.
+- A resultative under a modal is the modal's past (*musiał zjeść*). Only *zawsze, często, nigdy, wciąż,
+  wielokrotnie, już nie* force the imperfective; *już* and *właśnie* keep the perfective (*już zjadł*).
+- The passive is *być* + the imperfective participle, *zostać* + the perfective one where the table
+  picks the perfective (*mysz została zjedzona przez kota*).
+- `subjectAntecedent` (§0.5) was not needed: the plan's P11-E2 coreferent possessor already reaches the
+  engine as `coreferent: 'subject'`, and the engine says *swój* for it.
+- The UI instruction register is the infinitive (*nie biec*), as on Polish signs.
+- A generic subject with a reflexive verb or the passive is *człowiek*; a masculine plural pronoun is
+  always virile (*oni*); comparison is *niż* + nominative; a noun modifier is always the genitive.
+- Pinned `test.fails`: the clitic object before the verb (*koty ją widzą*), the imperfective imperative
+  of a motion verb (*biegnij*), the partitive genitive of a mass object (*zjadł trochę jedzenia*).
+
+**Translator tables:** Polish is in `APPROXIMATOR_WORDS` (*około, prawie*), `NO_TAKES_SINGULAR`,
+`MOST_AGREES_SINGULAR`, `RELATIVIZES_AGENT`, `IMPERFECT_PAST_LANGUAGES`,
+`EXISTENTIAL_AGREEING_LANGUAGES`, `PASSIVE_AUXILIARY` (BE), `EXISTENTIAL_VERBS` (BE, *nie ma* + genitive);
+it is left out of every mood and subjunctive table (Polish has no subjunctive), `NO_NEGATIVE_CONCORD`,
+`GENERIC_DEFINITE_SUBJECT`, `SHARED_CLITIC_LANGUAGES`, `OTHER_REPLACES_INDEFINITE`, `TONIC_ADDRESS`.
+
+Tests: `packages/engine/test/languages/pl.test.ts` (146 rows: the opening table, §0.3, §2.1, §2.3, the
+noun phrase, clause, relatives and moods); the column tests above. Regenerate the sheet after any change:
+`npx tsx packages/engine/test/tools/polishReviewSheet.ts > docs/features/P-planning/P05-polish/review-sheet-pl.md`
+(build `shared` and `engine` first).
 
 ## Out of scope
 

@@ -66,6 +66,12 @@ describe('buildConceptDefinitions', () => {
     expect([...definitions].filter(([, byLanguage]) => !byLanguage['ca']).map(([id]) => id)).toEqual([]);
   });
 
+  // P05-E10: Polish renders every definition, pinned at 0.
+  test('leaves no definition unrendered in Polish', () => {
+    const definitions = buildConceptDefinitions();
+    expect([...definitions].filter(([, byLanguage]) => !byLanguage['pl']).map(([id]) => id)).toEqual([]);
+  });
+
   // P04-E17: Sursilvan likewise, pinned at its Done value, 0 (all 613 before its engine, P04-E8).
   test('leaves no definition unrendered in Sursilvan', () => {
     const definitions = buildConceptDefinitions();

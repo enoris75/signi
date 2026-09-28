@@ -181,7 +181,7 @@ test.describe('translation', () => {
   });
 });
 
-// Catalan (P03) is a preview row: the last one, under the Senyera, in Central Catalan.
+// Catalan (P03) is a preview row, under the Senyera, in Central Catalan.
 test.describe('the Catalan row', () => {
   test('renders the sentence, flagged with the Senyera', async ({ app, page }) => {
     await app.setSubject('CAT');
@@ -189,6 +189,16 @@ test.describe('the Catalan row', () => {
     await app.setDirectObject('MOUSE');
     await app.expectSentences({ en: 'the cat eats the mouse.', ca: 'el gat menja el ratolí.' });
     await expect(page.getByTestId('translation-ca').getByTestId('flag-senyera')).toBeVisible();
+  });
+});
+
+// Polish (P05) is a preview row, the last one: no articles, the object in its case, the perfective past.
+test.describe('the Polish row', () => {
+  test('renders the sentence with its cases and aspect', async ({ app }) => {
+    await app.setSubject('CAT');
+    await app.setVerb('SEE');
+    await app.setDirectObject('DOG');
+    await app.expectSentences({ en: 'the cat sees the dog.', pl: 'kot widzi psa.' });
   });
 });
 
@@ -205,7 +215,7 @@ test.describe('translation language order', () => {
 
     // The first row cannot go up, the last cannot go down.
     await expect(page.getByTestId('translation-en').getByTestId('move-language-up')).toBeDisabled();
-    await expect(page.getByTestId('translation-ca').getByTestId('move-language-down')).toBeDisabled();
+    await expect(page.getByTestId('translation-pl').getByTestId('move-language-down')).toBeDisabled();
 
     const ja = page.getByTestId('translation-ja');
     await ja.hover();

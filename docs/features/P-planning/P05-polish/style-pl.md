@@ -178,6 +178,9 @@ One lexeme holds both aspects (P05 D1), written with `verb(imperfective, perfect
   SOMETHING *coś*, SOMEONE *ktoś*, EVERYTHING *wszystko*: every case, and `negative` (*nic, nikt*) with
   its cases under `negative_` (*niczego/nic, nikogo, …*).
 - **Interjection:** HEY *hej*.
+- **Optional keys the engine also reads**, each with a fallback: `place_prep` on a place noun (its
+  locative preposition, *na* for an island or a square), `temporal_prep` + `temporal_prep_case` on a
+  time noun (the `at` relation), `opponent_prep_case` beside the shared `opponent_prep`.
 
 ## The engine, for reference
 
