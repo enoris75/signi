@@ -1,10 +1,13 @@
 import type { LanguageColumn } from '../types.js';
 import { LT_PRONOUNS } from './pronouns.js';
 import { LT_INTERJECTIONS } from './interjections.js';
-import { LT_NOUNS } from './nouns.js';
+import { LT_NOUNS_A } from './nouns-a.js';
+import { LT_NOUNS_B } from './nouns-b.js';
+import { LT_NOUNS_C } from './nouns-c.js';
 import { LT_ADJECTIVES } from './adjectives.js';
 import { LT_ADVERBS } from './adverbs.js';
-import { LT_VERBS } from './verbs.js';
+import { LT_VERBS_A } from './verbs-a.js';
+import { LT_VERBS_B } from './verbs-b.js';
 
 /**
  * The Lithuanian column (`lt`, P18), standard Lithuanian in the VLKK norms (P18 D1), keyed by concept
@@ -16,8 +19,11 @@ import { LT_VERBS } from './verbs.js';
 export const LT: LanguageColumn = {
   ...LT_PRONOUNS,
   ...LT_INTERJECTIONS,
-  ...LT_NOUNS,
+  ...LT_NOUNS_A,
+  ...LT_NOUNS_B,
+  ...LT_NOUNS_C,
   ...LT_ADJECTIVES,
   ...LT_ADVERBS,
-  ...LT_VERBS,
+  ...LT_VERBS_A,
+  ...LT_VERBS_B,
 };
