@@ -59,7 +59,7 @@ fails, fix that first; a plan built on an invalid literal makes a working featur
 
 ### 3. Fix the engine
 The engine is [packages/engine/src/](../../packages/engine/src/): one folder per language
-(`languages/{en,it,fr,es,pt,de,ja,gsw,rm-rumgr,rm-sursilv,rm-vallader,ca,pl}/`, one file per function plus `<lang>.consts.ts` /
+(`languages/{en,it,fr,es,pt,de,ja,gsw,rm-rumgr,rm-sursilv,rm-vallader,ca,pl,lt}/`, one file per function plus `<lang>.consts.ts` /
 `<lang>.types.ts`), with shared plumbing in `translator.ts` (resolves a `PhrasePlan` into
 per-language `ConceptForms`) and `mood.ts`; the plan model is typed in
 [packages/shared/src/index.ts](../../packages/shared/src/index.ts). Edit the language folder named by
@@ -72,7 +72,8 @@ tests of its own. Likewise **`rm-rumgr/` is a fork of `it/`, and `rm-sursilv/` /
 of `rm-rumgr/`** (P04-E7, E8): after a Romance fix, grep the three and pin any shared defect in
 `test/languages/rm-*.test.ts`. **`ca/` is a fork of `es/`** (P03): after a Spanish fix, grep `ca/`
 and pin a shared defect in `test/languages/ca.test.ts`. `pl/` (P05) is its own engine, forked from
-none: pin a Polish defect in `test/languages/pl.test.ts`. A few defects (A7, A8,
+none: pin a Polish defect in `test/languages/pl.test.ts`. **`lt/` (P18) is a fork of `pl/`**: after a
+Polish fix, grep `lt/` and pin a shared defect in `test/languages/lt.test.ts`. A few defects (A7, A8,
 A21) need a corpus/schema change, not just an engine edit — the bug file says so; follow it.
 
 ### 4. Verify, then flip the marker

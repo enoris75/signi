@@ -27,14 +27,14 @@ Add the preview languages' forms too — Swiss German and the three Romansh vari
 | The loader (wipes + reinserts everything) | [packages/backend/src/seed.ts](packages/backend/src/seed.ts) |
 | Engine tests (one file per role/feature) | [packages/engine/test/](packages/engine/test/) — `adjectives.test.ts`, `verb.test.ts`, `subject.test.ts`, `nounPhrase.test.ts`, `coordination.test.ts`, … |
 | Test harness (seeds the real corpus, renders every language) | [packages/engine/test/harness.ts](packages/engine/test/harness.ts) |
-| The preview columns | [packages/backend/src/concepts/gsw/](packages/backend/src/concepts/gsw/), [rm-rumgr/](packages/backend/src/concepts/rm-rumgr/), [rm-sursilv/](packages/backend/src/concepts/rm-sursilv/), [rm-vallader/](packages/backend/src/concepts/rm-vallader/), [ca/](packages/backend/src/concepts/ca/), [pl/](packages/backend/src/concepts/pl/) — one file per role, keyed by concept id, merged into `forms[code]` by `concepts/index.ts` (`columns.ts`) |
+| The preview columns | [packages/backend/src/concepts/gsw/](packages/backend/src/concepts/gsw/), [rm-rumgr/](packages/backend/src/concepts/rm-rumgr/), [rm-sursilv/](packages/backend/src/concepts/rm-sursilv/), [rm-vallader/](packages/backend/src/concepts/rm-vallader/), [ca/](packages/backend/src/concepts/ca/), [pl/](packages/backend/src/concepts/pl/), [lt/](packages/backend/src/concepts/lt/) — one file per role, keyed by concept id, merged into `forms[code]` by `concepts/index.ts` (`columns.ts`) |
 
 Languages: the **ready** ones, `en`, `it`, `fr`, `de`, `es`, `ja`, `pt` — every one mandatory — and the
-**preview** ones, `gsw` (Swiss German, P10) and `rm-rumgr`, `rm-sursilv`, `rm-vallader` (Romansh, P04), `ca` (Catalan, P03), `pl` (Polish, P05;
+**preview** ones, `gsw` (Swiss German, P10) and `rm-rumgr`, `rm-sursilv`, `rm-vallader` (Romansh, P04), `ca` (Catalan, P03), `pl` (Polish, P05), `lt` (Lithuanian, P18;
 `LANGUAGE_STATUS` in `@signi/shared`). **A word is never missing.** Give each preview column its own form
 when you can; if you cannot, leave the concept out of the column and it **borrows the closest
 language's forms** when the seeds are assembled — `gsw` from `de`, `rm-rumgr` from `it`, `rm-sursilv`
-and `rm-vallader` from `rm-rumgr`, `ca` from `es`, `pl` from `de` (`COLUMNS` in `concepts/columns.ts`) — and is listed in `BORROWED`
+and `rm-vallader` from `rm-rumgr`, `ca` from `es`, `pl` from `de`, `lt` from `pl` (`COLUMNS` in `concepts/columns.ts`) — and is listed in `BORROWED`
 to be given its own word later. Do not copy the borrowed forms into the column by hand: the column
 holds only the language's own words, so `BORROWED` stays the true list.
 
@@ -62,6 +62,13 @@ singular nom…voc and the plural nom…loc, comma-separated); a verb stores **b
 (the imperfective's present, the perfective's `pf_` future, each *l*-participle and imperative); an
 adjective `adj(base, virile, comparative?)`. New nouns go in `nouns-c.ts`, verbs in `verbs-b.ts`.
 Sentences are pinned in `packages/engine/test/languages/pl.test.ts`.
+
+**Lithuanian** is standard Lithuanian (P18): follow
+[the style sheet](../../../docs/features/P-planning/P18-lithuanian/style-lt.md) and write the entry with
+the builders in `concepts/lt/helpers.ts`. A noun takes its declension-class helper and stem
+(`as('nam')`, `e('kat')`, …; `paradigm` for an irregular); a verb its three principal parts, with the
+perfective's where Lithuanian pairs one (`verb('valgyti, valgo, valgė', 'suvalgyti, suvalgo, suvalgė')`);
+an adjective `adj(base)`. A language name is `language('<people, gen. pl.>')`.
 
 **Swiss German** is Zürichdeutsch in Dieth spelling: follow
 [the style sheet](../../../docs/features/P-planning/P10-swiss-german/dieth-style-sheet.md). Its forms go in

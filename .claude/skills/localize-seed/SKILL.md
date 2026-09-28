@@ -22,7 +22,7 @@ it is the index and explains the encoding. The essentials:
   not compile stops the boot, naming the concept and the line. The renderer
   [buildConceptDefinitions()](../../packages/backend/src/definitions.ts) renders every plan into all
   languages **at backend startup and throws if a ready language is missing** — that boot check is the
-  pinning test. A preview language (Swiss German `gsw`, the Romansh `rm-*`, Catalan `ca`, Polish `pl`) is rendered too but only warned about: check
+  pinning test. A preview language (Swiss German `gsw`, the Romansh `rm-*`, Catalan `ca`, Polish `pl`, Lithuanian `lt`) is rendered too but only warned about: check
   its line reads right, and if a word it needs has no form in it, see [seed](../seed/SKILL.md). The API merges composed definitions over the stored literal in
   [index.ts](../../packages/backend/src/index.ts); the frontend already prefers them
   (`useConceptDefinition`, falling back to English).
