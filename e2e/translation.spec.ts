@@ -192,13 +192,24 @@ test.describe('the Catalan row', () => {
   });
 });
 
-// Polish (P05) is a preview row, the last one: no articles, the object in its case, the perfective past.
+// Polish (P05) is a preview row: no articles, the object in its case, the perfective past.
 test.describe('the Polish row', () => {
   test('renders the sentence with its cases and aspect', async ({ app }) => {
     await app.setSubject('CAT');
     await app.setVerb('SEE');
     await app.setDirectObject('DOG');
     await app.expectSentences({ en: 'the cat sees the dog.', pl: 'kot widzi psa.' });
+  });
+});
+
+// Lithuanian (P18) is a preview row, the last one, flagged 🇱🇹: no articles, the object in its case.
+test.describe('the Lithuanian row', () => {
+  test('renders the sentence, flagged 🇱🇹, with its cases', async ({ app, page }) => {
+    await app.setSubject('CAT');
+    await app.setVerb('EAT');
+    await app.setDirectObject('MOUSE');
+    await app.expectSentences({ en: 'the cat eats the mouse.', lt: 'katė valgo pelę.' });
+    await expect(page.getByTestId('translation-lt')).toContainText('🇱🇹');
   });
 });
 
@@ -215,7 +226,7 @@ test.describe('translation language order', () => {
 
     // The first row cannot go up, the last cannot go down.
     await expect(page.getByTestId('translation-en').getByTestId('move-language-up')).toBeDisabled();
-    await expect(page.getByTestId('translation-pl').getByTestId('move-language-down')).toBeDisabled();
+    await expect(page.getByTestId('translation-lt').getByTestId('move-language-down')).toBeDisabled();
 
     const ja = page.getByTestId('translation-ja');
     await ja.hover();

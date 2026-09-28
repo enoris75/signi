@@ -72,6 +72,12 @@ describe('buildConceptDefinitions', () => {
     expect([...definitions].filter(([, byLanguage]) => !byLanguage['pl']).map(([id]) => id)).toEqual([]);
   });
 
+  // P18-E11: Lithuanian renders every definition, pinned at 0.
+  test('leaves no definition unrendered in Lithuanian', () => {
+    const definitions = buildConceptDefinitions();
+    expect([...definitions].filter(([, byLanguage]) => !byLanguage['lt']).map(([id]) => id)).toEqual([]);
+  });
+
   // P04-E17: Sursilvan likewise, pinned at its Done value, 0 (all 613 before its engine, P04-E8).
   test('leaves no definition unrendered in Sursilvan', () => {
     const definitions = buildConceptDefinitions();
@@ -110,6 +116,7 @@ describe('buildConceptDefinitions', () => {
       ca: 'un mamífer petit',
       // P05: Polish too, as a preview row (verify at P05-E11).
       pl: 'mały ssak',
+      lt: 'mažas žinduolis',
     });
   });
 

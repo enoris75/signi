@@ -154,6 +154,12 @@ describe('buildUiStrings', () => {
     expect(Object.entries(strings).filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['pl']).map(([key]) => key)).toEqual([]);
   });
 
+  // P18-E11: Lithuanian renders every entry too, pinned at 0.
+  test('leaves no entry unrendered in Lithuanian', () => {
+    const strings = buildUiStrings();
+    expect(Object.entries(strings).filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['lt']).map(([key]) => key)).toEqual([]);
+  });
+
   // P04-E17: Sursilvan likewise, pinned at its Done value, 0 (all 792 before its engine, P04-E8).
   test('leaves no entry unrendered in Sursilvan', () => {
     const strings = buildUiStrings();

@@ -13,11 +13,11 @@ translations panel and, once reviewed, as an interface language.
 - **Column:** `packages/backend/src/concepts/lt/`, every concept, nothing borrowed.
 - **Engine:** a new folder `packages/engine/src/languages/lt/`, forked from `pl` (D9).
 
-**Status:** **E1–E4 shipped, 2026-09-28** — `lt` is registered as a `preview` row (rendering nothing
-yet), the LITHUANIAN concept is in every column, and [style-lt.md](style-lt.md) with
-`concepts/lt/helpers.ts` fixes the column's keys. D1–D12 were taken as recommended; D9 and D10 were
-revised after P05 shipped (fork and borrow from `pl`). E5–E13 are open — see [§6](#6-tasks-e1e13).
-Work happens on branch `p18-lithuanian`, merged into main once the row renders (as P03 and P05 were).
+**Status:** **E1–E11 shipped, 2026-09-28** — Lithuanian renders as a `preview` row: its own column
+(all 846 concepts in every case and both aspects, none borrowed), an engine forked from `pl`, every UI
+string (796) and definition (621). E12 (native review) and E13 (promotion) are open — see
+[§6](#6-tasks-e1e13). D1–D12 were taken as recommended; D9 and D10 were revised after P05 shipped (fork
+and borrow from `pl`).
 
 | construction | Lithuanian (standard, VLKK norms) |
 |---|---|
@@ -298,24 +298,40 @@ Built as P03 and P04 were: the columns and the engine in parallel worktrees, the
 | E2 | `lt` registered after `pl`: `LanguageCode`, `LANGUAGES`, `LANGUAGE_STATUS` (`preview`), an engine slot, `COLUMNS` (`closest: 'pl'`, D10) | **Shipped** |
 | E3 | Row identity: the LITHUANIAN concept in every column (*lietuvių kalba*), `language.lt`, 🇱🇹; search folds *ą č ę ė į š ų ū ž* | **Shipped** |
 | E4 | [style-lt.md](style-lt.md) and `concepts/lt/helpers.ts`: the standard (D1), the column's keys, the declension-class and principal-part helpers (D3, D4), with their tests | **Shipped**, `concepts/lt/helpers.test.ts` |
-| E5 | The noun column, 440 nouns, by declension-class helpers (D3) | E1, E4 |
-| E6 | The verb column, 205 verbs, from principal parts, `pf_` where a perfective is common (D4, D5) | E1, E4 |
-| E7 | Adjectives (`base, fem, neuter`), adverbs, pronouns in six cases, interjection | E4 |
-| E8 | The engine, forked from `pl` (D9): case by slot with the genitive before its head, adjective declension, determiners, possessives with *savo*, degree | E4 |
-| E9 | The clause and verb group: pro-drop (D6), aspect table, *ne-* and *nėra*, *-si-* under negation, modals, copula, *tapti*, resultative, passive | E8 |
-| E10 | Complements (bare locative, prepositions by case, postposition *dėka*), relatives, coordination, moods, the translator tables | E9 |
-| E11 | Every UI string and definition renders in Lithuanian, pinned at 0 missing; e2e row and flag; the review sheet | E5–E10 |
-| E12 | The native review of the sheet | E11; needs a reviewer |
-| E13 | Promotion to `ready` | E12 |
+| E5 | The noun column, 445 nouns in three files (`nouns-a/b/c.ts`), every case and the vocative; plural-only nouns (*pinigai, durys, metai, namai*), multiword nouns declining their head | **Shipped**, `concepts/lt/nouns-*.test.ts` |
+| E6 | The verb column, 205 verbs in two files from their principal parts, 85 paired with a `pf_` perfective, statives and modals unpaired; the government keys | **Shipped**, `concepts/lt/verbs-*.test.ts` |
+| E7 | Adjectives (144 by `adj`, 9 full tables: participles, *tas pats*, invariable phrases), adverbs (*niekada* negative), pronouns in every case (GENERIC_PERSON labelled *žmogus*, never said, D7), interjection *ei* | **Shipped**, `concepts/lt/lexicon.test.ts` |
+| E8–E10 | The engine, forked from `pl` (48 source files, 31 colocated tests, 143 fixture sentences in `lithuanianEngine.test.ts`): case by slot with the genitive before its head, adjective declension, *ne-* written on, the *-si* table, the aspect table with the frequentative, the resultative, the bare locative, *dėka*, *kuris*, *jei*, the translator tables | **Shipped**, `test/languages/lt.test.ts` |
+| E11 | Every UI string (796) and definition (621) renders in Lithuanian — pinned at 0 missing in `uiStrings.test.ts` / `definitions.test.ts`; e2e checks the row and its flag; the generated [review-sheet-lt.md](review-sheet-lt.md) (2,307 rows) | **Shipped** |
+| [E12](P18-E12-review.md) | The native review of the sheet | Open — needs a reviewer |
+| [E13](P18-E13-promotion.md) | `ready` | Blocked on E12 |
 
-E5, E6, E7 and E8 run in parallel now that E1–E4 are in.
+Built by seven worktree agents (three noun slices, two verb slices, adjectives/adverbs/pronouns, the
+engine), merged into `p18-lithuanian`. The helper defects the column lanes met were fixed in
+`helpers.ts` once every lane had landed (the *-tojas* locative *-juje*, *atvejo*, *dančiui*, *tuštesnis*,
+the hard feminine participle *nešusi*, the 2sg *keiti*, the prefixed future *įgis*).
 
-**Red on the branch until E5–E8** (7 tests, each asking every registered language for a word the empty
-`lt` engine does not give yet): `translate.test.ts` (every sentence ends in a full stop),
-`translatePossessive.test.ts` (*mano, mūsų*), `translateSubordinator.test.ts` (a word for every
-conjunction), `sweep-definitions.test.ts` (`lt` definitions render), `definitions.test.ts` (A253: no
-blank language), and `index.test.ts`'s two label rows (CAT and BEGIN carry an `lt` label — borrowed
-Polish until E5/E6, so pin them only once the column has its own).
+**Where the engine departs from this plan**, each `(verify)` in the code and a ruling owed in E12:
+
+- The *jei* clause is imperfective (*jei šuo bėgtų*), as the opening table has it; §0.3's "conditional:
+  perfective" holds for the main clause only.
+- A content clause without a mood of its own is *kad* + conditional (`CONTENT_CLAUSE_MOOD`); a factive
+  *gerai, kad* would want the indicative, and a wanting verb needs `content_clause_mood` in the column.
+- The present passive is *yra valgyta* (the past participle): the present passive participle *valgoma*
+  is not stored.
+- The prospective past is *ruošėsi suvalgyti*; the frequentative is used only with ALWAYS, OFTEN,
+  REPEATEDLY, SOMETIMES, USUALLY (NEVER keeps the simple past, *niekada nevalgė*).
+- Direction to a person is *pas* + accusative; temporal *at* the bare accusative unless the noun names
+  its preposition; the comparative standard *nei* + nominative; the existential puts the place first
+  (*namuose yra katė*); a 3rd-person imperative is *tegul* + present.
+- The negated *eiti* contracts (*neina, nėjo*).
+- A generic subject is never said (D7): *valgo pelę*, *yra laimingas*.
+
+Tests: `packages/engine/test/languages/lt.test.ts` (the opening table, §0.3, the clause) over the real
+column; `languages/lt/lithuanianEngine.test.ts` (143 sentences over fixtures) and the colocated unit
+tests; the column tests above. Regenerate the sheet after any change:
+`npx tsx packages/engine/test/tools/lithuanianReviewSheet.ts > docs/features/P-planning/P18-lithuanian/review-sheet-lt.md`
+(build `shared` and `engine` first).
 
 ## 7. Risks
 
