@@ -40,7 +40,7 @@ holds only the language's own words, so `BORROWED` stays the true list.
 
 **Romansh** is three peer languages (P04 D1), each its own column and its own engine: Rumantsch
 Grischun, Sursilvan, Vallader. Follow each variety's style sheet in
-[docs/features/P-planning/P04-romansh/](../../../docs/features/P-planning/P04-romansh/); never derive a
+[docs/features/O-open/P04-romansh/](../../../docs/features/O-open/P04-romansh/); never derive a
 Sursilvan or Vallader form from the Rumantsch Grischun one. The keys are `it`'s **minus** every
 `*_past`, `*_future` and `gerund` (the past and future are periphrastic, P04 D5, D7), plus the six
 conditional cells; every verb takes `participle`, and `aux: 'be'` where the variety selects *esser*;
@@ -48,7 +48,7 @@ every Sursilvan adjective takes `predicative_masc_sg` (P04-E9). Sentences are pi
 `packages/engine/test/languages/rm-*.test.ts`.
 
 **Catalan** is Central Catalan in the IEC standard (P03 D1): follow
-[the style sheet](../../../docs/features/P-planning/P03-catalan/style-ca.md), which lists the column's keys.
+[the style sheet](../../../docs/features/O-open/P03-catalan/style-ca.md), which lists the column's keys.
 Nouns and adjectives take `es`'s keys (every adjective all four of `base, fem, plural, fem_plural`; a
 feminine noun in unstressed *i-/u-/hi-/hu-* takes `no_elision`); a verb stores its whole paradigm —
 present, imperfect, future, conditional, both subjunctives, `gerund`, the four participle forms and three
@@ -56,7 +56,7 @@ imperatives — and **no** `*_past` (the past is *va* + infinitive, P03 D2). Sen
 `packages/engine/test/languages/ca.test.ts`.
 
 **Polish** is standard written Polish (P05): follow
-[the style sheet](../../../docs/features/P-planning/P05-polish/style-pl.md) and write the entry with the
+[the style sheet](../../../docs/features/O-open/P05-polish/style-pl.md) and write the entry with the
 builders in `concepts/pl/helpers.ts`. A noun stores **every case** (`m`/`ma`/`mp`/`f`/`n` with the
 singular nom…voc and the plural nom…loc, comma-separated); a verb stores **both aspects** with `verb(…)`
 (the imperfective's present, the perfective's `pf_` future, each *l*-participle and imperative); an
@@ -64,14 +64,14 @@ adjective `adj(base, virile, comparative?)`. New nouns go in `nouns-c.ts`, verbs
 Sentences are pinned in `packages/engine/test/languages/pl.test.ts`.
 
 **Lithuanian** is standard Lithuanian (P18): follow
-[the style sheet](../../../docs/features/P-planning/P18-lithuanian/style-lt.md) and write the entry with
+[the style sheet](../../../docs/features/O-open/P18-lithuanian/style-lt.md) and write the entry with
 the builders in `concepts/lt/helpers.ts`. A noun takes its declension-class helper and stem
 (`as('nam')`, `e('kat')`, …; `paradigm` for an irregular); a verb its three principal parts, with the
 perfective's where Lithuanian pairs one (`verb('valgyti, valgo, valgė', 'suvalgyti, suvalgo, suvalgė')`);
 an adjective `adj(base)`. A language name is `language('<people, gen. pl.>')`.
 
 **Swiss German** is Zürichdeutsch in Dieth spelling: follow
-[the style sheet](../../../docs/features/P-planning/P10-swiss-german/dieth-style-sheet.md). Its forms go in
+[the style sheet](../../../docs/features/O-open/P10-swiss-german/dieth-style-sheet.md). Its forms go in
 `concepts/gsw/<role file>.ts`, not inline, with `de`'s keys **minus** every `*_past` (there is no
 preterite), `genitive` and `weak` (no genitive, no case ending on a noun); a verb always takes
 `participle`, `2sg_imperative`, one plural form for all three persons, and `aux: 'be'` where Zürich

@@ -4,7 +4,7 @@ import type { LanguageColumn } from '../types.js';
  * Rumantsch Grischun verbs (P04-E4). Every form is *(verify)* until P04-E19; `// (verify)` marks the
  * choices the author is specifically unsure of. The irregular core (esser … vesair, plus avair, star,
  * dar, tegnair) and the class models were spot-checked against the Pledari Grond conjugations —
- * see `docs/features/P-planning/P04-romansh/conjugation-rm-rumgr.md`.
+ * see `docs/features/O-open/P04-romansh/conjugation-rm-rumgr.md`.
  *
  * Stored: base, present, imperfect, conditional, present subjunctive (*conjunctiv*), participle,
  * `aux: 'be'` where RG selects *esser*, and the 2sg / 1pl / 2pl imperatives. Never a simple past,

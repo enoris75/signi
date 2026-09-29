@@ -4,7 +4,7 @@
  * reviewer reads one class helper's output at a time (P18 §4, §7):
  *
  *   npm run build --workspace=packages/shared && npm run build --workspace=packages/engine
- *   npx tsx packages/engine/test/tools/lithuanianReviewSheet.ts > docs/features/P-planning/P18-lithuanian/review-sheet-lt.md
+ *   npx tsx packages/engine/test/tools/lithuanianReviewSheet.ts > docs/features/O-open/P18-lithuanian/review-sheet-lt.md
  *
  * Every string the Lithuanian row can say, beside English (Polish, the language the column borrows
  * from, is not the reader's gloss): the lexicon, every sentence the suite pins, every UI string and every engine-composed

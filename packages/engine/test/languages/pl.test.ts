@@ -4,7 +4,7 @@ import { clause, np, say, translateAll } from '../harness.js';
 
 // Polish (P05): the language's own suite while it is a preview language (P05 §4). Every line is the
 // engine's output over the real `pl` column (packages/backend/src/concepts/pl), checked against
-// docs/features/P-planning/P05-polish/style-pl.md and standard written Polish; every row is *(verify)*
+// docs/features/O-open/P05-polish/style-pl.md and standard written Polish; every row is *(verify)*
 // until the native review (P05-E11). A known gap is a `test.fails('known bugs: …')` row stating what
 // Polish writes.
 

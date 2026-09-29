@@ -330,7 +330,7 @@ the hard feminine participle *nešusi*, the 2sg *keiti*, the prefixed future *į
 Tests: `packages/engine/test/languages/lt.test.ts` (the opening table, §0.3, the clause) over the real
 column; `languages/lt/lithuanianEngine.test.ts` (143 sentences over fixtures) and the colocated unit
 tests; the column tests above. Regenerate the sheet after any change:
-`npx tsx packages/engine/test/tools/lithuanianReviewSheet.ts > docs/features/P-planning/P18-lithuanian/review-sheet-lt.md`
+`npx tsx packages/engine/test/tools/lithuanianReviewSheet.ts > docs/features/O-open/P18-lithuanian/review-sheet-lt.md`
 (build `shared` and `engine` first).
 
 ## 7. Risks

@@ -5,7 +5,7 @@ import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Sursilvan (P04-E8, forked from the Rumantsch Grischun engine). Every word in this file is *(verify)*
 // until the variety's review (P04-E19); the spellings follow
-// `docs/features/P-planning/P04-romansh/style-rm-sursilv.md`, and where the style sheet is silent the
+// `docs/features/O-open/P04-romansh/style-rm-sursilv.md`, and where the style sheet is silent the
 // word is the implementer's, marked so in the ticket's Done section.
 
 /**

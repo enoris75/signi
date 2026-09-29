@@ -690,7 +690,7 @@ SPOUSE ↔ MARRY (a verb and its typical object, as EAT ↔ FOOD).
    Italian, Spanish and Portuguese word is genuinely ambiguous (*figlio* is both the son and the
    offspring), and records the swap for whoever prefers it the other way round.
 3. **FAMILY is not seeded.** D10 marks it ✓ ("FAMILY under GROUP ✓"), and the corpus has no such
-   concept — it is listed in [P08](../features/P-planning/P08-collective-nouns/README.md) as well,
+   concept — it is listed in [P08](../features/O-open/P08-collective-nouns/README.md) as well,
    and B68 seeds it.
 4. **Re-pointing PARENT changes three languages, not seven.** English, French, German and Japanese
    have one word for a child of either sense, so only Italian, Spanish and Portuguese move (*figli*,

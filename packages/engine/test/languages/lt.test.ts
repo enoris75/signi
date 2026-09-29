@@ -4,7 +4,7 @@ import { clause, np, say, translateAll } from '../harness.js';
 
 // Lithuanian (P18): the language's own suite while it is a preview language (P18 §4). Every line is the
 // engine's output over the real `lt` column (packages/backend/src/concepts/lt), checked against
-// docs/features/P-planning/P18-lithuanian/style-lt.md and standard Lithuanian; every row is *(verify)*
+// docs/features/O-open/P18-lithuanian/style-lt.md and standard Lithuanian; every row is *(verify)*
 // until the native review (P18-E12). A known gap is a `test.fails('known bugs: …')` row stating what
 // Lithuanian writes.
 

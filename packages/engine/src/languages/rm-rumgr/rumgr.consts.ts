@@ -4,7 +4,7 @@ import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Rumantsch Grischun (P04-E7). Every word in this file is *(verify)* until the variety's review
-// (P04-E19); the spellings follow `docs/features/P-planning/P04-romansh/style-rm-rumgr.md`.
+// (P04-E19); the spellings follow `docs/features/O-open/P04-romansh/style-rm-rumgr.md`.
 
 /**
  * The preposition each manner relation takes: similative *sco* ("sco il vent"), means *cun*, measure

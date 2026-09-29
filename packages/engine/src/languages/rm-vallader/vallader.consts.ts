@@ -4,7 +4,7 @@ import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Vallader (P04-E8). Every word in this file is *(verify)* until the variety's review (P04-E19); the
-// spellings follow `docs/features/P-planning/P04-romansh/style-rm-vallader.md`. Where the style sheet
+// spellings follow `docs/features/O-open/P04-romansh/style-rm-vallader.md`. Where the style sheet
 // is silent the word is the author's draft, and says so.
 
 /**

@@ -3,7 +3,7 @@
  * (`catalanReviewSheet.ts`) with Polish's case and aspect columns:
  *
  *   npm run build --workspace=packages/shared && npm run build --workspace=packages/engine
- *   npx tsx packages/engine/test/tools/polishReviewSheet.ts > docs/features/P-planning/P05-polish/review-sheet-pl.md
+ *   npx tsx packages/engine/test/tools/polishReviewSheet.ts > docs/features/O-open/P05-polish/review-sheet-pl.md
  *
  * Every string the Polish row can say, beside English (German, the language the column borrows from,
  * shares no words with it, so English is the gloss): the lexicon, every sentence the suite pins, every UI string and every engine-composed

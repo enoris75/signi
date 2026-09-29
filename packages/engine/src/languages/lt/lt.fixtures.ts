@@ -1,7 +1,7 @@
 import type { ConceptForms } from '../../types.js';
 
 // A fixture lexicon for the Lithuanian function-level unit tests (P18-E8): about fifty core words in
-// exactly the keys of docs/features/P-planning/P18-lithuanian/style-lt.md, as the column
+// exactly the keys of docs/features/O-open/P18-lithuanian/style-lt.md, as the column
 // (packages/backend/src/concepts/lt/) writes them through `concepts/lt/helpers.ts` — whose builders
 // are copied below in brief, because the engine never imports the backend. The concept-level flags the
 // lexicon adds (`role`, `animate`, `human`, `uncountable`, `stative`, `transitivity`) are written in

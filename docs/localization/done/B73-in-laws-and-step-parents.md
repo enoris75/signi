@@ -99,7 +99,7 @@ Four readings to judge on authoring:
 
 2. **Which spouse the in-law belongs to.** Russian and Ukrainian split the words by it (свекровь
    against тёща), and P11's *Later languages* section holds the question until
-   [P06](../../features/P-planning/P06-russian/README.md) lands. The gloss above cannot say it
+   [P06](../../features/O-open/P06-russian/README.md) lands. The gloss above cannot say it
    either, and will not have to: it is the lexeme that would split, not the definition.
 3. **Step-children and half-siblings** are out of P11's scope. Italian *fratellastro* is both the
    half- and the step-brother, so whoever seeds them should settle that first.

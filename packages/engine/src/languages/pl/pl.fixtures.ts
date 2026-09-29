@@ -1,7 +1,7 @@
 import type { ConceptForms } from '../../types.js';
 
 // A fixture lexicon for the Polish function-level unit tests (P05-E7): about forty core words in
-// exactly the keys of docs/features/P-planning/P05-polish/style-pl.md, as the column
+// exactly the keys of docs/features/O-open/P05-polish/style-pl.md, as the column
 // (packages/backend/src/concepts/pl/) writes them through `concepts/pl/helpers.ts` — whose builders
 // are copied below, because the engine never imports the backend. The concept-level flags the
 // lexicon adds (`role`, `animate`, `human`, `uncountable`, `stative`, `transitivity`) are written in

@@ -5,7 +5,7 @@ import { lookupLexicalEntry } from '../../../backend/src/lexicon.js';
 
 // Sursilvan (P04): the language's own suite while it is a preview language (P04 §4). The exhaustive
 // tables elsewhere render the ready languages only; every line here is the engine's output, pinned
-// after checking it against `docs/features/P-planning/P04-romansh/style-rm-sursilv.md`, and every row
+// after checking it against `docs/features/O-open/P04-romansh/style-rm-sursilv.md`, and every row
 // is *(verify)* until the review (P04-E19). A known gap is a `test.fails` row that states what
 // Sursilvan is expected to write — where the style sheet is silent, the RG behaviour the fork kept
 // (P04-E8 D2); a question no source here settles is a `test.todo` naming it.

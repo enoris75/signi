@@ -6,7 +6,7 @@ import type { LanguageColumn } from '../types.js';
 // non-conjugation key of the Italian entry with its prepositions answered in Sursilvan. No *_past, no
 // *_future (both periphrastic, P04 D5 and D7), no gerund. A reflexive verb carries its fused se- in
 // every person (jeu sefermel). Every cell is (verify) until the review (P04-E19); the conjugation
-// classes are in docs/features/P-planning/P04-romansh/style-rm-sursilv.md.
+// classes are in docs/features/O-open/P04-romansh/style-rm-sursilv.md.
 export const RM_SURSILV_VERBS: LanguageColumn = {
   CUT: {
     base: 'tagliar',

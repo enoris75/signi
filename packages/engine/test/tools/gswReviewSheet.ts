@@ -2,7 +2,7 @@
  * The Swiss German review sheet (P10-E14 D1) — generated, never hand-written.
  *
  *   npm run build --workspace=packages/shared && npm run build --workspace=packages/engine
- *   npx tsx packages/engine/test/tools/gswReviewSheet.ts > docs/features/P-planning/P10-swiss-german/review-sheet.md
+ *   npx tsx packages/engine/test/tools/gswReviewSheet.ts > docs/features/O-open/P10-swiss-german/review-sheet.md
  *
  * Every string the `gsw` row can say, beside the Standard German (and English) it was written against:
  * the lexicon (every verb's cells, every noun's plural and gender, every adjective, adverb, pronoun),

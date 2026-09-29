@@ -335,7 +335,7 @@ it is left out of every mood and subjunctive table (Polish has no subjunctive), 
 
 Tests: `packages/engine/test/languages/pl.test.ts` (146 rows: the opening table, §0.3, §2.1, §2.3, the
 noun phrase, clause, relatives and moods); the column tests above. Regenerate the sheet after any change:
-`npx tsx packages/engine/test/tools/polishReviewSheet.ts > docs/features/P-planning/P05-polish/review-sheet-pl.md`
+`npx tsx packages/engine/test/tools/polishReviewSheet.ts > docs/features/O-open/P05-polish/review-sheet-pl.md`
 (build `shared` and `engine` first).
 
 ## Out of scope

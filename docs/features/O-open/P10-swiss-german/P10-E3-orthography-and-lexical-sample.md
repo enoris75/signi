@@ -3,7 +3,7 @@
 **Feature:** two measurements P10 says must happen **before** any bulk seeding: how much of the
 vocabulary is a different word rather than a respelling (§1, §6), and whether one reviewer can spell
 consistently in Dieth (§4, D2).
-**Shape:** no code. A style sheet (`docs/features/P-planning/P10-swiss-german/dieth-style-sheet.md`),
+**Shape:** no code. A style sheet (`docs/features/O-open/P10-swiss-german/dieth-style-sheet.md`),
 a 50-concept sample sheet, and a reviewer's calibration pass over it. The result either confirms
 the plan's cost estimate or reopens D1/D2.
 **Scope:** docs and one reviewer. Nothing in the corpus.

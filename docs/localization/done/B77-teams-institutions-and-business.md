@@ -3,7 +3,7 @@
 _(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *business* (rank 254), *team* (282), *service* (295), *community* (342)
 and *university* (359). None is a concept at 1229928. TEAM and COMMUNITY are rows of
-[P08](../../features/P-planning/P08-collective-nouns/README.md), still planning, and the forms here
+[P08](../../features/O-open/P08-collective-nouns/README.md), still planning, and the forms here
 are P08's. Five words, five glosses. None goes to a C ticket. OFFICE, the sixth institution word,
 is [B78](B78-places-and-things.md)'s, because its gloss stands on B78's ROOM.)_
 

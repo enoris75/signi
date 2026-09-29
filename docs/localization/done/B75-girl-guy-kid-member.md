@@ -30,7 +30,7 @@ Proposed forms, for the seed author to check. Every noun row was **seeded in mem
 - **Japanese やつ is pejorative in some contexts.** 男の人 (おとこのひと) is the neutral alternative, and
   it is what the author should pick if the picker ever shows the word unglossed next to MAN.
 - **MEMBER** is the word P08 asked for alongside GROUP ("Seed first: `GROUP` … and `MEMBER`",
-  [P08](../../features/P-planning/P08-collective-nouns/README.md)). GROUP is seeded and MEMBER is not.
+  [P08](../../features/O-open/P08-collective-nouns/README.md)). GROUP is seeded and MEMBER is not.
   It is not `human`: a state can be a member of a union.
 
 ## Unlocks

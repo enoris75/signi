@@ -3,7 +3,7 @@
  * (`romanshReviewSheet.ts`) with Catalan's verb columns:
  *
  *   npm run build --workspace=packages/shared && npm run build --workspace=packages/engine
- *   npx tsx packages/engine/test/tools/catalanReviewSheet.ts > docs/features/P-planning/P03-catalan/review-sheet-ca.md
+ *   npx tsx packages/engine/test/tools/catalanReviewSheet.ts > docs/features/O-open/P03-catalan/review-sheet-ca.md
  *
  * Every string the Catalan row can say, beside Spanish (the language the column borrows from) and
  * English: the lexicon, every sentence the suite pins, every UI string and every engine-composed

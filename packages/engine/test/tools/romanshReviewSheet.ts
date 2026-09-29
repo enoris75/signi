@@ -3,7 +3,7 @@
  * three varieties, after the Swiss German one (`gswReviewSheet.ts`):
  *
  *   npm run build --workspace=packages/shared && npm run build --workspace=packages/engine
- *   npx tsx packages/engine/test/tools/romanshReviewSheet.ts rm-sursilv > docs/features/P-planning/P04-romansh/review-sheet-rm-sursilv.md
+ *   npx tsx packages/engine/test/tools/romanshReviewSheet.ts rm-sursilv > docs/features/O-open/P04-romansh/review-sheet-rm-sursilv.md
  *
  * Every string the variety's row can say, beside its closest language (Italian for Rumantsch
  * Grischun, Rumantsch Grischun for the two idioms) and English: the lexicon, every sentence its

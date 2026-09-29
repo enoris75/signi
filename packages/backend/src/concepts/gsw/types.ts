@@ -8,7 +8,7 @@
  * The keys are `de`'s (the `gsw` engine is a fork of it, P10-E5), minus the cells Swiss German does
  * not have: no `*_past` (there is no preterite, P10 D5), no `genitive` and no `weak` (no genitive,
  * and no case ending on a noun, P10 D7). The spelling is the Dieth style sheet's
- * (docs/features/P-planning/P10-swiss-german/dieth-style-sheet.md).
+ * (docs/features/O-open/P10-swiss-german/dieth-style-sheet.md).
  */
 export type GswForms = Record<string, string>;
 

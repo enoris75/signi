@@ -5,7 +5,7 @@ import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Catalan (P03): Central Catalan in the IEC standard (P03 D1). Every word here is *(verify)* until the
-// native review (P03-E11); `docs/features/P-planning/P03-catalan/style-ca.md` is the style sheet.
+// native review (P03-E11); `docs/features/O-open/P03-catalan/style-ca.md` is the style sheet.
 
 /** The person-number keys the column stores every finite cell under. */
 export type PN = '1sg' | '2sg' | '3sg' | '1pl' | '2pl' | '3pl';

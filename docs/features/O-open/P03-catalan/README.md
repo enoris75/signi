@@ -341,7 +341,7 @@ BE, `EXISTENTIAL_VERBS` HAVE (*haver-hi*), dative *a*; left out of `MOST_AGREES_
 
 Tests: `packages/engine/test/languages/ca.test.ts` (the opening table, each area, a Spanish leak guard);
 56 colocated unit tests in `languages/ca/` on Catalan fixtures; the column tests above. Regenerate the
-sheet after any change: `npx tsx packages/engine/test/tools/catalanReviewSheet.ts > docs/features/P-planning/P03-catalan/review-sheet-ca.md`
+sheet after any change: `npx tsx packages/engine/test/tools/catalanReviewSheet.ts > docs/features/O-open/P03-catalan/review-sheet-ca.md`
 (build `shared` and `engine` first).
 
 ## Out of scope

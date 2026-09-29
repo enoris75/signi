@@ -8,7 +8,7 @@ type Six = [string, string, string, string, string, string];
  * conditional, present subjunctive), the participle and the three imperatives (2sg, 1pl, 2pl).
  * Past and future are periphrastic (avair/esser + participle, gnir a + infinitive) and are never
  * stored — no `*_past`, `*_future` or `gerund`. Every cell (verify); the rules and the irregular
- * core are in docs/features/P-planning/P04-romansh/style-rm-vallader.md.
+ * core are in docs/features/O-open/P04-romansh/style-rm-vallader.md.
  */
 interface Paradigm {
   base: string;

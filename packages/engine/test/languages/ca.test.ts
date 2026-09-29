@@ -4,7 +4,7 @@ import { clause, np, say, translateAll } from '../harness.js';
 
 // Catalan (P03): the language's own suite while it is a preview language (P03 §4). The exhaustive
 // tables elsewhere render the ready languages only; every line here is the engine's output over the
-// real `ca` column, pinned after checking it against `docs/features/P-planning/P03-catalan/style-ca.md`
+// real `ca` column, pinned after checking it against `docs/features/O-open/P03-catalan/style-ca.md`
 // and Central Catalan (IEC), and every row is *(verify)* until the native review (P03-E11). A known gap
 // is a `test.fails` row that states what Catalan writes.
 
