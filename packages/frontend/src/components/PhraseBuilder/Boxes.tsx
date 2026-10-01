@@ -44,7 +44,6 @@ import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDiss
 import {
   CAUSE_SENTIMENTS,
   Concept,
-  PATH_SPECIFIERS,
   ROUTE_SPECIFIERS,
   TEMPORAL_RELATIONS,
   type Aspect,
