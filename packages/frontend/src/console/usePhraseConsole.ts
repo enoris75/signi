@@ -489,7 +489,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
    * for a bracket, the pair with the caret inside. A command chosen is finished as a space would
    * finish it: its bracket opens, or it moves out of one it does not belong in.
    */
-  const choose = (c: Candidate) => {
+  const choose = (c: Candidate, keepTrailingSpace = true) => {
     if (!completion) return;
     const before = text.slice(0, completion.from);
     const rawAfter = text.slice(completion.to);
@@ -507,7 +507,8 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     const after = rawAfter.replace(/^ /, "");
     const next = /^[)\]}）］｝]/.test(rawAfter) ? `${head} ${after}` : `${head}${after}`;
     const fixed = /^\s*[)\]}）］｝]/.test(rawAfter) && !/\s$/.test(rawAfter) ? `${next} ` : next;
-    const trimmed = /^[)\]}）］｝]/.test(rawAfter) && /^\s*$/.test(rawAfter.slice(1)) ? fixed.replace(/\s+$/, "") : fixed;
+    const closerOnly = /^\s*[)\]}）］｝]\s*$/.test(rawAfter);
+    const trimmed = keepTrailingSpace ? fixed : closerOnly ? next.replace(/\s+$/, "") : next;
     const edit = c.kind === "history" ? undefined : safely(() => finished(trimmed, head.length, editContext()), undefined);
     setLine(edit?.text ?? trimmed, edit?.caret ?? head.length);
     setListMode("auto");
@@ -860,7 +861,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
         if (ghost) {
           event.preventDefault();
           if (candidates[0] && completion?.ghost && candidates[0].insert.toLowerCase().startsWith(text.slice(completion.from, caret).toLowerCase()))
-            choose(candidates[0]);
+            choose(candidates[0], false);
           else setLine(text.slice(0, caret) + ghost + text.slice(caret), caret + ghost.length);
         }
         return;

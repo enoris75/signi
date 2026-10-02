@@ -34,7 +34,7 @@ test.describe('the phrase console', () => {
     await expect(prompt(page)).toHaveValue('/subj ( cat ) ');
     await page.keyboard.type('/adj br');
     await page.keyboard.press('Tab');
-    await expect(prompt(page)).toHaveValue('/subj ( cat /adj brown  )');
+    await expect(prompt(page)).toHaveValue('/subj ( cat /adj brown  ) ');
     await page.keyboard.type('/pl');
 
     // Before ↵ the canvas previews the boxes the line fills, dashed, and the translations say so.
