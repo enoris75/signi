@@ -31,7 +31,7 @@ test.describe('the phrase console', () => {
     await page.keyboard.type('cat');
     await expect(page.getByTestId('console-ghost')).toHaveCount(0);
     await page.keyboard.press('Tab');
-    await expect(prompt(page)).toHaveValue('/subj ( cat  )');
+    await expect(prompt(page)).toHaveValue('/subj ( cat ) ');
     await page.keyboard.type('/adj br');
     await page.keyboard.press('Tab');
     await expect(prompt(page)).toHaveValue('/subj ( cat /adj brown  )');

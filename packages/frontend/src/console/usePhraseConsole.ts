@@ -492,19 +492,24 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
   const choose = (c: Candidate) => {
     if (!completion) return;
     const before = text.slice(0, completion.from);
-    const after = text.slice(completion.to).replace(/^ /, "");
+    const rawAfter = text.slice(completion.to);
     if (c.close) {
       const head = `${before}${c.insert} `;
+      const after = rawAfter.replace(/^ /, "");
       const tail = after && !/^\s/.test(after) ? ` ${after}` : after;
-      setLine(`${head} ${c.close}${tail}`, head.length);
+      const next = `${head}${c.close}${tail}`;
+      const edit = safely(() => finished(next, head.length, editContext()), undefined);
+      setLine(edit?.text ?? next, edit?.caret ?? head.length);
       setListMode("auto");
       return;
     }
     const head = `${before}${c.insert} `;
-    // In front of a closer, a space either side of the caret: `cat | )`.
-    const next = /^\s*[)\]}）］｝]/.test(after) ? `${head} ${after.trimStart()}` : `${head}${after}`;
-    const edit = c.kind === "history" ? undefined : safely(() => finished(next, head.length, editContext()), undefined);
-    setLine(edit?.text ?? next, edit?.caret ?? head.length);
+    const after = rawAfter.replace(/^ /, "");
+    const next = /^[)\]}）］｝]/.test(rawAfter) ? `${head} ${after}` : `${head}${after}`;
+    const fixed = /^\s*[)\]}）］｝]/.test(rawAfter) && !/\s$/.test(rawAfter) ? `${next} ` : next;
+    const trimmed = /^[)\]}）］｝]/.test(rawAfter) && /^\s*$/.test(rawAfter.slice(1)) ? fixed.replace(/\s+$/, "") : fixed;
+    const edit = c.kind === "history" ? undefined : safely(() => finished(trimmed, head.length, editContext()), undefined);
+    setLine(edit?.text ?? trimmed, edit?.caret ?? head.length);
     setListMode("auto");
   };
 

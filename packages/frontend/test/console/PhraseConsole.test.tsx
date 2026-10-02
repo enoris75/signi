@@ -352,7 +352,7 @@ describe('the console', () => {
       key(prompt, 'Escape');
       key(prompt, 'ArrowRight');
       // The word taken, and the caret after it, ready for what describes it: `cat | )`.
-      expect(prompt.value).toBe('/subj ( cat  )');
+      expect(prompt.value).toBe('/subj ( cat )');
       expect(prompt.selectionStart).toBe(12);
       // The word being typed is not a mistake yet.
       expect(screen.queryByTestId('console-diagnostic')).not.toBeInTheDocument();
