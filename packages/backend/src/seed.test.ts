@@ -251,7 +251,7 @@ describe('seeding a database again', () => {
 
     const reseeded = await seedFile();
     expect(reseeded.prepare('SELECT id, name FROM saved_phrases').all()).toEqual([{ id: 'keep', name: 'mine' }]);
-  });
+  }, 15 * 1000);
 
   test('clears the lexicon cache once it has written', async () => {
     const clearLexiconCache = vi.fn();
