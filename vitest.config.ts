@@ -79,5 +79,6 @@ export default defineConfig({
         },
       },
     ],
+    execArgv: ['--no-webstorage'],
   },
 });
